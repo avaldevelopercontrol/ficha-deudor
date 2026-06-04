@@ -2,7 +2,7 @@
 import React from 'react';
 import Table from '../table/Table';
 import Paginacion from '../ui/Paginacion';
-import type { Column } from '../../shared/types';
+import type { Column } from '../../types';
 
 interface TableSectionProps<T> {
   columns: Column[];

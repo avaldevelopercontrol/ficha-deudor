@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ModalFormLayout } from '../../ui/ModalFormLayout';
-import { FormGrid } from '../../ui/FormGrid';
-import { InputField, SelectField, TextAreaField } from '../../ui';
-import { useModalForm } from '../../../shared/hooks/ui/useModalForm';
-import type { DireccionReferenciada, DireccionEditFormData } from '../../../shared/types';
+import { ModalFormLayout } from '../../../../../shared/components/ui/ModalFormLayout';
+import { FormGrid } from '../../../../../shared/components/ui/FormGrid';
+import { InputField, SelectField, TextAreaField } from '../../../../../shared/components/ui';
+import { useModalForm } from '../../../../../shared/hooks/ui/useModalForm';
+import type { DireccionReferenciada, DireccionEditFormData } from '../../../../../shared/types';
 import {
   refUbicacionDirOptions,
   llegoDeBaseOptions,
@@ -12,8 +12,8 @@ import {
   getDepartamentos,
   getProvinciasByDepartamento,
   getDistritosByProvincia,
-} from '../../../data/catalogosDireccion';
-import { validateDireccionEditForm } from '../../../features/ficha-deudor/validations/direccionValidations';
+} from '../../../mocks/catalogosDireccion';
+import { validateDireccionEditForm } from '../../../validations/direccionValidations';
 
 interface Props {
   isOpen: boolean;

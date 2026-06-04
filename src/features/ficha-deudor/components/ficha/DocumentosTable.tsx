@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Table from '../table/Table';
-import Modal from '../modals/Modal';
-import Paginacion from '../ui/Paginacion';
-import { useDocumentos } from '../../features/ficha-deudor/hooks/useDocumentos';
-import type { DocumentoApi, ColumnApi } from '../../shared/types/indexApi';
+import Table from '../../../../shared/components/table/Table';
+import Modal from '../../../../shared/components/modals/Modal';
+import Paginacion from '../../../../shared/components/ui/Paginacion';
+import { useDocumentos } from '../../hooks/useDocumentos';
+import type { DocumentoApi, ColumnApi } from '../../../../shared/types/indexApi';
 
 interface Props {
   id_cliente: string;

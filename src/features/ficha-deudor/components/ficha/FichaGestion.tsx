@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { SelectField, TextAreaField, CheckboxField, SectionHeader } from '../ui';
-import { opcionesNP0, opcionesNP1, opcionesNP2, estadosGestion, tiposGestion } from '../../data/mockData';
-import type { GestionForm } from '../../shared/types';
-import Modal from '../modals/Modal';
+import { SelectField, TextAreaField, CheckboxField, SectionHeader } from '../../../../shared/components/ui';
+import { opcionesNP0, opcionesNP1, opcionesNP2, estadosGestion, tiposGestion } from '../../mocks/mockData';
+import type { GestionForm } from '../../../../shared/types';
+import Modal from '../../../../shared/components/modals/Modal';
 
 interface Props { onSubmit?: (data: GestionForm) => void; }
 

@@ -1,9 +1,9 @@
 import React from 'react';
-import { ModalFormLayout } from '../../ui/ModalFormLayout';
-import { FormGrid } from '../../ui/FormGrid';
-import { InputField, SelectField, TextAreaField } from '../../ui';
-import { useModalForm } from '../../../shared/hooks/ui/useModalForm';
-import type { TelefonoFormData } from '../../../shared/types';
+import { ModalFormLayout } from '../../../../../shared/components/ui/ModalFormLayout';
+import { FormGrid } from '../../../../../shared/components/ui/FormGrid';
+import { InputField, SelectField, TextAreaField } from '../../../../../shared/components/ui';
+import { useModalForm } from '../../../../../shared/hooks/ui/useModalForm';
+import type { TelefonoFormData } from '../../../../../shared/types';
 import {
   resultadosOptions,
   operadoresOptions,
@@ -13,8 +13,8 @@ import {
   fuentesBusquedaOptions,
   referenciasOptions,
   reclamoIndecopiOptions,
-} from '../../../data/catalogosTelefono';
-import { validateTelefonoForm } from '../../../features/ficha-deudor/validations/telefonoValidations';
+} from '../../../mocks/catalogosTelefono';
+import { validateTelefonoForm } from '../../../validations/telefonoValidations';
 
 interface Props {
   isOpen: boolean;

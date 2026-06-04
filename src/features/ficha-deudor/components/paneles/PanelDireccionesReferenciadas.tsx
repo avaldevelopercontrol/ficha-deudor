@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import Table from '../table/Table';
+import Table from '../../../../shared/components/table/Table';
 import ModalRegistrarDireccion from '../modals/accionesRapidas/ModalRegistrarDireccion';
 import ModalEditarDireccion from '../modals/accionesRapidas/ModalEditarDireccion';
-import { ActionButton } from '../ui';
-import Paginacion from '../ui/Paginacion';
-import { WrapCell } from '../ui/WrapCell';
+import { ActionButton } from '../../../../shared/components/ui';
+import Paginacion from '../../../../shared/components/ui/Paginacion';
+import { WrapCell } from '../../../../shared/components/ui/WrapCell';
 import { PanelLayout } from './PanelLayout';
-import { usePaginatedTable } from '../../shared/hooks/ui/usePaginatedTable';
-import { useDireccionesReferenciadas } from '../../features/ficha-deudor/hooks/useDireccionesReferenciadas';
-import type { Column, DireccionReferenciada, DireccionEditFormData, DireccionFormData } from '../../shared/types';
+import { usePaginatedTable } from '../../../../shared/hooks/ui/usePaginatedTable';
+import { useDireccionesReferenciadas } from '../../hooks/useDireccionesReferenciadas';
+import type { Column, DireccionReferenciada, DireccionEditFormData, DireccionFormData } from '../../../../shared/types';
 
 interface Props {
   isActive: boolean;

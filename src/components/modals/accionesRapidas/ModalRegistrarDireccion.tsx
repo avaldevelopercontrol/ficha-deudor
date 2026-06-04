@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ModalFormLayout } from '../../ui/ModalFormLayout';
 import { FormGrid } from '../../ui/FormGrid';
 import { InputField, SelectField, TextAreaField } from '../../ui';
-import { useModalForm } from '../../../hooks/ui/useModalForm';
-import type { DireccionFormData } from '../../../types';
+import { useModalForm } from '../../../shared/hooks/ui/useModalForm';
+import type { DireccionFormData } from '../../../shared/types';
 import {
   refUbicacionDirOptions,
   llegoDeBaseOptions,
@@ -12,7 +12,7 @@ import {
   getProvinciasByDepartamento,
   getDistritosByProvincia,
 } from '../../../data/catalogosDireccion';
-import { validateDireccionForm } from '../../../utils/validations/direccionValidations';
+import { validateDireccionForm } from '../../../features/ficha-deudor/validations/direccionValidations';
 
 interface Props {
   isOpen: boolean;

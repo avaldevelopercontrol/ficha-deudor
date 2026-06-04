@@ -1,13 +1,12 @@
-// src/components/paneles/PanelGestionRealizada.tsx
 import React, { useMemo } from 'react';
-import Table from '../table/Table';
-import { ActionButton } from '../ui';
-import Paginacion from '../ui/Paginacion';
-import { WrapCell } from '../ui/WrapCell';
+import Table from '../../../../shared/components/table/Table';
+import { ActionButton } from '../../../../shared/components/ui';
+import Paginacion from '../../../../shared/components/ui/Paginacion';
+import { WrapCell } from '../../../../shared/components/ui/WrapCell';
 import { PanelLayout } from './PanelLayout';
-import { useDualViewTable } from '../../shared/hooks/ui/useDualViewTable';
-import { useGestionesRealizadas } from '../../features/ficha-deudor/hooks/useGestionesRealizadas';
-import type { Column, GestionRealizada, GestionCompleta } from '../../shared/types';
+import { useDualViewTable } from '../../../../shared/hooks/ui/useDualViewTable';
+import { useEstadosGestion } from '../../hooks/useEstadosGestion';
+import type { Column, EstadoGestion, EstadoGestionCompleta } from '../../../../shared/types';
 
 interface Props {
   isActive: boolean;
@@ -15,8 +14,8 @@ interface Props {
   id_cartera: string;
 }
 
-const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_deudor, id_cartera }) => {
-  const { resumido: dataResumido, completo: dataExpandido, isLoading, error, setResumido } = useGestionesRealizadas(id_deudor, id_cartera);
+const PanelEstadoGestionRealizada: React.FC<Props> = ({ isActive, id_deudor, id_cartera }) => {
+  const { resumido: dataResumido, completo: dataExpandido, isLoading, error } = useEstadosGestion(id_deudor, id_cartera);
 
   const {
     vistaExpandida,
@@ -24,48 +23,33 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_deudor, id_carter
     handleVolver,
     resumido,
     expandido,
-  } = useDualViewTable<GestionRealizada, GestionCompleta>({
+  } = useDualViewTable<EstadoGestion, EstadoGestionCompleta>({
     dataResumido,
     dataExpandido,
     resetDeps: [isActive, id_deudor, id_cartera],
   });
 
-  const handleEliminar = (row: GestionRealizada) => {
-    if (window.confirm(`¿Eliminar gestión N° ${row.nro}?`)) {
-      setResumido(prev => prev.filter(g => g.id !== row.id));
-    }
-  };
-
   const columnsResumidas: Column[] = useMemo(() => [
-    { key: 'nro', label: 'Nro', render: (row: GestionRealizada) => <span style={{ fontWeight: 700, color: '#1a2540' }}>{row.nro}</span> },
+    { key: 'nro', label: 'Nro', render: (row: EstadoGestion) => <span style={{ fontWeight: 700, color: '#1a2540' }}>{row.nro}</span> },
     { key: 'fecha', label: 'Fecha' },
-    { key: 'gestor', label: 'Gestor', render: (row: GestionRealizada) => <WrapCell>{row.gestor}</WrapCell> },
+    { key: 'operador', label: 'Operador', render: (row: EstadoGestion) => <WrapCell>{row.operador}</WrapCell> },
     { key: 'documento', label: 'Documento' },
-    { key: 'operacion', label: 'Operación', render: (row: GestionRealizada) => <span className="badge badge-info" style={{ fontSize: '10px', textTransform: 'uppercase' }}>{row.operacion}</span> },
-    { key: 'respuesta', label: 'Respuesta', render: (row: GestionRealizada) => <WrapCell color={row.respuesta.includes('Contactado') ? '#166534' : '#991b1b'} weight={500}>{row.respuesta}</WrapCell> },
-    { key: 'comentario', label: 'Comentario', render: (row: GestionRealizada) => <WrapCell>{row.comentario}</WrapCell> },
-    { 
-      key: 'acciones', 
-      label: 'Borrar', 
-      width: '55px',
-      filterable: false, 
-      render: (row: GestionRealizada) => (
-        <ActionButton label="" variant="danger" size="sm" icon="🗑" onClick={() => handleEliminar(row)} />
-      ), 
-    },
+    { key: 'operacion', label: 'Operación', render: (row: EstadoGestion) => <span className="badge badge-info" style={{ fontSize: '10px', textTransform: 'uppercase' }}>{row.operacion}</span> },
+    { key: 'resultado', label: 'Resultado', render: (row: EstadoGestion) => <WrapCell color={row.resultado.includes('Contactado') ? '#166534' : '#991b1b'} weight={500}>{row.resultado}</WrapCell> },
+    { key: 'comentario', label: 'Comentario', render: (row: EstadoGestion) => <WrapCell>{row.comentario}</WrapCell> },
   ], []);
 
   const columnsExpandidas: Column[] = useMemo(() => [
-    { key: 'nro', label: 'Nro', render: (row: GestionCompleta) => <span style={{ fontWeight: 700, color: '#1a2540' }}>{row.nro}</span> },
-    { key: 'cliente', label: 'Cliente', render: (row: GestionCompleta) => <WrapCell>{row.cliente}</WrapCell> },
-    { key: 'cartera', label: 'Cartera', render: (row: GestionCompleta) => <WrapCell>{row.cartera}</WrapCell> },
+    { key: 'nro', label: 'Nro', render: (row: EstadoGestionCompleta) => <span style={{ fontWeight: 700, color: '#1a2540' }}>{row.nro}</span> },
+    { key: 'cliente', label: 'Cliente', render: (row: EstadoGestionCompleta) => <WrapCell>{row.cliente}</WrapCell> },
+    { key: 'cartera', label: 'Cartera', render: (row: EstadoGestionCompleta) => <WrapCell>{row.cartera}</WrapCell> },
     { key: 'campana', label: 'Campaña' },
     { key: 'fecha', label: 'Fecha' },
-    { key: 'gestor', label: 'Gestor', render: (row: GestionCompleta) => <WrapCell>{row.gestor}</WrapCell> },
+    { key: 'gestor', label: 'Gestor', render: (row: EstadoGestionCompleta) => <WrapCell>{row.gestor}</WrapCell> },
     { key: 'documento', label: 'Documento' },
-    { key: 'operacion', label: 'Operación', render: (row: GestionCompleta) => <span className="badge badge-info" style={{ fontSize: '10px', textTransform: 'uppercase' }}>{row.operacion}</span> },
-    { key: 'resultado', label: 'Resultado', render: (row: GestionCompleta) => <WrapCell color={row.resultado.includes('Contactado') ? '#166534' : '#991b1b'} weight={500}>{row.resultado}</WrapCell> },
-    { key: 'comentario', label: 'Comentario', render: (row: GestionCompleta) => <WrapCell>{row.comentario}</WrapCell> },
+    { key: 'operacion', label: 'Operación', render: (row: EstadoGestionCompleta) => <span className="badge badge-info" style={{ fontSize: '10px', textTransform: 'uppercase' }}>{row.operacion}</span> },
+    { key: 'resultado', label: 'Resultado', render: (row: EstadoGestionCompleta) => <WrapCell color={row.resultado.includes('Contactado') ? '#166534' : '#991b1b'} weight={500}>{row.resultado}</WrapCell> },
+    { key: 'comentario', label: 'Comentario', render: (row: EstadoGestionCompleta) => <WrapCell>{row.comentario}</WrapCell> },
   ], []);
 
   // ─── ESTADOS DE CARGA/ERROR ───
@@ -73,9 +57,9 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_deudor, id_carter
 
   if (isLoading) {
     return (
-      <PanelLayout title="GESTIONES REALIZADAS" isActive={isActive}>
+      <PanelLayout title="ESTADO DE GESTIÓN REALIZADA" isActive={isActive}>
         <div style={{ padding: '2rem', textAlign: 'center' }}>
-          <span>Cargando gestiones...</span>
+          <span>Cargando estados de gestión...</span>
         </div>
       </PanelLayout>
     );
@@ -83,7 +67,7 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_deudor, id_carter
 
   if (error) {
     return (
-      <PanelLayout title="GESTIONES REALIZADAS" isActive={isActive}>
+      <PanelLayout title="ESTADO DE GESTIÓN REALIZADA" isActive={isActive}>
         <div style={{ padding: '2rem', color: '#c00' }}>
           <p>Error al cargar: {error}</p>
         </div>
@@ -93,22 +77,22 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_deudor, id_carter
 
   return (
     <PanelLayout 
-      title={vistaExpandida ? 'TODAS LAS GESTIONES' : 'GESTIONES REALIZADAS'} 
+      title={vistaExpandida ? 'TODOS LOS ESTADOS DE GESTIÓN' : 'ESTADO DE GESTIÓN REALIZADA'} 
       isActive={isActive}
     >
       {!vistaExpandida ? (
         // ─── VISTA RESUMIDA ───
         <div style={{ padding: '16px 0' }}>
-          <div style={{ marginBottom: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>
-              {resumido.datosFiltrados.length} gestión(es) filtrada(s)
+              {resumido.datosFiltrados.length} estado(s) de gestión filtrado(s)
             </span>
           </div>
 
           <Table
             columns={columnsResumidas}
             data={resumido.datosPaginados}
-            emptyMessage="No se encontraron gestiones realizadas"
+            emptyMessage="No se encontraron estados de gestión"
             enableColumnFilters={true}
             allData={dataResumido}
             textFilters={resumido.textFilters}
@@ -133,7 +117,13 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_deudor, id_carter
           />
 
           <div style={{ textAlign: 'center', marginTop: '16px' }}>
-            <ActionButton label="Ver más gestiones" variant="info" size="md" icon="▼" onClick={handleVerMas} />
+            <ActionButton
+              label="Ver más estados de gestiones"
+              variant="info"
+              size="md"
+              icon="▼"
+              onClick={handleVerMas}
+            />
           </div>
         </div>
       ) : (
@@ -142,7 +132,7 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_deudor, id_carter
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>
-                {expandido.datosFiltrados.length} gestión(es) en total (filtradas)
+                {expandido.datosFiltrados.length} estado(s) de gestión en total (filtrados)
               </span>
               <ActionButton label="Volver" variant="secondary" size="sm" icon="◀" onClick={handleVolver} />
             </div>
@@ -150,7 +140,7 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_deudor, id_carter
             <Table
               columns={columnsExpandidas}
               data={expandido.datosPaginados}
-              emptyMessage="No se encontraron gestiones"
+              emptyMessage="No se encontraron estados de gestión"
               enableColumnFilters={true}
               allData={dataExpandido}
               textFilters={expandido.textFilters}
@@ -180,4 +170,4 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_deudor, id_carter
   );
 };
 
-export default PanelGestionRealizada;
+export default PanelEstadoGestionRealizada;

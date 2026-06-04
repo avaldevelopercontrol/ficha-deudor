@@ -2,8 +2,8 @@ import React from 'react';
 import { ModalFormLayout } from '../../ui/ModalFormLayout';
 import { FormGrid } from '../../ui/FormGrid';
 import { InputField, SelectField, TextAreaField } from '../../ui';
-import { useModalForm } from '../../../hooks/ui/useModalForm';
-import type { TelefonoReferenciado, TelefonoFormData } from '../../../types';
+import { useModalForm } from '../../../shared/hooks/ui/useModalForm';
+import type { TelefonoReferenciado, TelefonoFormData } from '../../../shared/types';
 import {
   resultadosOptions,
   operadoresOptions,
@@ -14,7 +14,7 @@ import {
   referenciasOptions,
   reclamoIndecopiOptions,
 } from '../../../data/catalogosTelefono';
-import { validateTelefonoForm } from '../../../utils/validations/telefonoValidations';
+import { validateTelefonoForm } from '../../../features/ficha-deudor/validations/telefonoValidations';
 
 interface Props {
   isOpen: boolean;

@@ -4,9 +4,9 @@ import { ActionButton } from '../ui';
 import Paginacion from '../ui/Paginacion';
 import { WrapCell } from '../ui/WrapCell';
 import { PanelLayout } from './PanelLayout';
-import { useDualViewTable } from '../../hooks/ui/useDualViewTable';
-import { useEstadosGestion } from '../../hooks/useEstadosGestion';
-import type { Column, EstadoGestion, EstadoGestionCompleta } from '../../types';
+import { useDualViewTable } from '../../shared/hooks/ui/useDualViewTable';
+import { useEstadosGestion } from '../../features/ficha-deudor/hooks/useEstadosGestion';
+import type { Column, EstadoGestion, EstadoGestionCompleta } from '../../shared/types';
 
 interface Props {
   isActive: boolean;

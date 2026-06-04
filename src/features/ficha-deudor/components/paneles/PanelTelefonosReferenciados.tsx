@@ -1,14 +1,14 @@
 // src/components/paneles/PanelTelefonosReferenciados.tsx
 import React, { useMemo, useState } from 'react';
-import Table from '../table/Table';
-import { ActionButton } from '../ui';
-import Paginacion from '../ui/Paginacion';
-import { WrapCell } from '../ui/WrapCell';
-import { Badge } from '../ui/Badge';
+import Table from '../../../../shared/components/table/Table';
+import { ActionButton } from '../../../../shared/components/ui';
+import Paginacion from '../../../../shared/components/ui/Paginacion';
+import { WrapCell } from '../../../../shared/components/ui/WrapCell';
+import { Badge } from '../../../../shared/components/ui/Badge';
 import { PanelLayout } from './PanelLayout';
-import { usePaginatedTable } from '../../shared/hooks/ui/usePaginatedTable';
-import { useTelefonosReferenciados } from '../../features/ficha-deudor/hooks/useTelefonosReferenciados';
-import type { Column, TelefonoReferenciado, TelefonoFormData } from '../../shared/types';
+import { usePaginatedTable } from '../../../../shared/hooks/ui/usePaginatedTable';
+import { useTelefonosReferenciados } from '../../hooks/useTelefonosReferenciados';
+import type { Column, TelefonoReferenciado, TelefonoFormData } from '../../../../shared/types';
 import ModalRegistrarTelefono from '../modals/accionesRapidas/ModalRegistrarTelefono';
 import ModalEditarTelefono from '../modals/accionesRapidas/ModalEditarTelefono';
 

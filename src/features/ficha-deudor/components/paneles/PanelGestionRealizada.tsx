@@ -1,13 +1,13 @@
 // src/components/paneles/PanelGestionRealizada.tsx
 import React, { useMemo } from 'react';
-import Table from '../table/Table';
-import { ActionButton } from '../ui';
-import Paginacion from '../ui/Paginacion';
-import { WrapCell } from '../ui/WrapCell';
+import Table from '../../../../shared/components/table/Table';
+import { ActionButton } from '../../../../shared/components/ui';
+import Paginacion from '../../../../shared/components/ui/Paginacion';
+import { WrapCell } from '../../../../shared/components/ui/WrapCell';
 import { PanelLayout } from './PanelLayout';
-import { useDualViewTable } from '../../shared/hooks/ui/useDualViewTable';
-import { useGestionesRealizadas } from '../../features/ficha-deudor/hooks/useGestionesRealizadas';
-import type { Column, GestionRealizada, GestionCompleta } from '../../shared/types';
+import { useDualViewTable } from '../../../../shared/hooks/ui/useDualViewTable';
+import { useGestionesRealizadas } from '../../hooks/useGestionesRealizadas';
+import type { Column, GestionRealizada, GestionCompleta } from '../../../../shared/types';
 
 interface Props {
   isActive: boolean;

@@ -1,11 +1,11 @@
 import React from 'react';
-import Table from '../table/Table';
-import Paginacion from '../ui/Paginacion';
-import { WrapCell } from '../ui/WrapCell';
-import { Badge } from '../ui/Badge';
+import Table from '../../../../shared/components/table/Table';
+import Paginacion from '../../../../shared/components/ui/Paginacion';
+import { WrapCell } from '../../../../shared/components/ui/WrapCell';
+import { Badge } from '../../../../shared/components/ui/Badge';
 import { PanelLayout } from './PanelLayout';
-import { useDatosAdicionales } from '../../features/ficha-deudor/hooks/useDatosAdicionales';
-import type { ColumnApi, DatoAdicionalApi } from '../../shared/types/indexApi';
+import { useDatosAdicionales } from '../../hooks/useDatosAdicionales';
+import type { ColumnApi, DatoAdicionalApi } from '../../../../shared/types/indexApi';
 
 interface Props {
   isActive: boolean;

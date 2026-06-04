@@ -1,9 +1,9 @@
 import React from 'react';
-import { ModalFormLayout } from '../../ui/ModalFormLayout';
-import { FormGrid } from '../../ui/FormGrid';
-import { InputField, SelectField, TextAreaField } from '../../ui';
-import { useModalForm } from '../../../shared/hooks/ui/useModalForm';
-import type { TelefonoFormData } from '../../../shared/types';
+import { ModalFormLayout } from '../../../../../shared/components/ui/ModalFormLayout';
+import { FormGrid } from '../../../../../shared/components/ui/FormGrid';
+import { InputField, SelectField, TextAreaField } from '../../../../../shared/components/ui';
+import { useModalForm } from '../../../../../shared/hooks/ui/useModalForm';
+import type { TelefonoReferenciado, TelefonoFormData } from '../../../../../shared/types';
 import {
   resultadosOptions,
   operadoresOptions,
@@ -13,13 +13,14 @@ import {
   fuentesBusquedaOptions,
   referenciasOptions,
   reclamoIndecopiOptions,
-} from '../../../data/catalogosTelefono';
-import { validateTelefonoForm } from '../../../features/ficha-deudor/validations/telefonoValidations';
+} from '../../../mocks/catalogosTelefono';
+import { validateTelefonoForm } from '../../../validations/telefonoValidations';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onRegistrar?: (data: TelefonoFormData) => void;
+  telefono: TelefonoReferenciado | null;
+  onGuardar?: (data: TelefonoFormData & { id: string }) => void;
 }
 
 const initialForm: TelefonoFormData = {
@@ -36,32 +37,53 @@ const initialForm: TelefonoFormData = {
   reclamoIndecopi: 'NO',
 };
 
-const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar }) => {
+const mapToFormData = (entity: object): TelefonoFormData => {
+  const t = entity as TelefonoReferenciado;
+  return {
+    numero: String(t.numero),
+    anexo: String(t.anexo || ''),
+    resultado: String(t.estado),
+    operadorTelefonico: String(t.operadorTelefonico),
+    ubicacion: String(t.refUbicacion),
+    prioridad: String(t.prioridad),
+    horarioGestion: String(t.horario),
+    comentario: '',
+    fuenteBusqueda: String(t.fuente),
+    referencia: String(t.referencia),
+    reclamoIndecopi: String(t.reclamoIndecopi),
+  };
+};
+
+const ModalEditarTelefono: React.FC<Props> = ({ isOpen, onClose, telefono, onGuardar }) => {
   const { form, errors, handleChange, handleSubmit, handleCancel } = useModalForm<TelefonoFormData>({
     initialForm,
+    entity: telefono,
+    mapEntityToForm: mapToFormData,
     onClose,
     onSubmit: (data) => {
-      onRegistrar?.(data);
+      if (telefono) {
+        onGuardar?.({ ...data, id: telefono.id });
+      }
     },
     validate: validateTelefonoForm,
     resetOnClose: true,
   });
 
-  if (!isOpen) return null;
+  if (!telefono) return null;
 
   return (
     <ModalFormLayout
       isOpen={isOpen}
-      title="REGISTRAR REFERENCIA TELEFÓNICA"
+      title="EDITAR REFERENCIA TELEFÓNICA"
       onClose={handleCancel}
-      submitLabel="Registrar"
+      submitLabel="Guardar Cambios"
       onSubmit={handleSubmit}
       minHeight="auto"
     >
       <FormGrid columns={2}>
         <InputField
           label="Número *"
-          layout="inline"
+          layout="inline"  // ← NUEVO
           placeholder="Ingrese número telefónico"
           value={form.numero}
           onChange={(e) => handleChange('numero', e.target.value)}
@@ -71,7 +93,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
         />
         <InputField
           label="Anexo (opcional)"
-          layout="inline"
+          layout="inline"  // ← NUEVO
           placeholder="Anexo"
           value={form.anexo}
           onChange={(e) => handleChange('anexo', e.target.value)}
@@ -83,7 +105,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
       <FormGrid columns={3}>
         <SelectField
           label="Resultado *"
-          layout="inline"
+          layout="inline"  // ← NUEVO
           options={resultadosOptions}
           value={form.resultado}
           onChange={(v) => handleChange('resultado', v)}
@@ -93,7 +115,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
         />
         <SelectField
           label="Operador (opcional)"
-          layout="inline"
+          layout="inline"  // ← NUEVO
           options={operadoresOptions}
           value={form.operadorTelefonico}
           onChange={(v) => handleChange('operadorTelefonico', v)}
@@ -102,7 +124,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
         />
         <SelectField
           label="Ubicación *"
-          layout="inline"
+          layout="inline"  // ← NUEVO
           options={ubicacionesOptions}
           value={form.ubicacion}
           onChange={(v) => handleChange('ubicacion', v)}
@@ -115,7 +137,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
       <FormGrid columns={2}>
         <SelectField
           label="Prioridad *"
-          layout="inline"
+          layout="inline"  // ← NUEVO
           options={prioridadesOptions}
           value={form.prioridad}
           onChange={(v) => handleChange('prioridad', v)}
@@ -125,7 +147,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
         />
         <SelectField
           label="Horario Gestión *"
-          layout="inline"
+          layout="inline"  // ← NUEVO
           options={horariosGestionOptions}
           value={form.horarioGestion}
           onChange={(v) => handleChange('horarioGestion', v)}
@@ -137,7 +159,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
 
       <TextAreaField
         label="Comentario (opcional)"
-        layout="inline"
+        layout="inline"  // ← NUEVO
         placeholder="Ingrese comentario..."
         value={form.comentario}
         onChange={(e) => handleChange('comentario', e.target.value)}
@@ -148,7 +170,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
       <FormGrid columns={2}>
         <SelectField
           label="Fuente Búsqueda *"
-          layout="inline"
+          layout="inline"  // ← NUEVO
           options={fuentesBusquedaOptions}
           value={form.fuenteBusqueda}
           onChange={(v) => handleChange('fuenteBusqueda', v)}
@@ -158,7 +180,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
         />
         <SelectField
           label="Referencia (opcional)"
-          layout="inline"
+          layout="inline"  // ← NUEVO
           options={referenciasOptions}
           value={form.referencia}
           onChange={(v) => handleChange('referencia', v)}
@@ -169,14 +191,14 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
 
       <SelectField
         label="Reclamo Indecopi *"
-        layout="inline"
+        layout="inline"  // ← NUEVO
         options={reclamoIndecopiOptions}
         value={form.reclamoIndecopi}
         onChange={(v) => handleChange('reclamoIndecopi', v)}
         error={errors.reclamoIndecopi}
         required
       />
-      
+
       {Object.keys(errors).length > 0 && (
         <div className="error-summary">
           <strong>Por favor, corrija los siguientes errores:</strong>
@@ -191,4 +213,4 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
   );
 };
 
-export default ModalRegistrarTelefono;
+export default ModalEditarTelefono;
