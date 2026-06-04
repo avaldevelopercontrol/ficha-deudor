@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ModalFormLayout } from '../../../../../shared/components/ui/ModalFormLayout';
+import { ModalFormLayout } from '../../layout/ModalFormLayout';
 import { FormGrid } from '../../../../../shared/components/ui/FormGrid';
 import { InputField, SelectField, TextAreaField } from '../../../../../shared/components/ui';
 import { useModalForm } from '../../../../../shared/hooks/ui/useModalForm';

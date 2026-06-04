@@ -1,9 +1,9 @@
 // src/components/modals/ModalFormLayout.tsx
 import React from 'react';
-import Modal from '../modals/Modal';
-import DeudorHeaderBlock from '../../../features/ficha-deudor/components/ficha/DeudorHeaderBlock';
-import { ActionButton } from '../ui';
-import { useDeudor } from '../../../features/ficha-deudor/contexts/DeudorContext';
+import Modal from '../../../../shared/components/modals/Modal';
+import DeudorHeaderBlock from '../ficha/DeudorHeaderBlock';
+import { ActionButton } from '../../../../shared/components/ui';
+import { useDeudor } from '../../contexts/DeudorContext';
 
 interface ModalFormLayoutProps {
   isOpen: boolean;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useUrlParams } from '../../../shared/hooks/useUrlParams';
+import { useUrlParams } from '../hooks/useFichaDeudorParams';
 
 interface ParamGuardProps {
   children: (params: { id_cliente: string; id_cartera: string; id_deudor: string; id_contrato: string; id_usuario: string }) => React.ReactNode;

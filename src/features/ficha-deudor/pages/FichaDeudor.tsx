@@ -12,8 +12,6 @@ import PanelGestionRealizada from '../components/paneles/PanelGestionRealizada';
 import { DeudorProvider } from '../contexts/DeudorContext';
 import { useDeudorHeader } from '../hooks/useDeudorHeader';
 import type { GestionForm } from '../../../shared/types';
-import '../../../shared/styles/main.css';
-import '../../../shared/styles/styles.css';
 
 interface FichaContentProps {
   id_cliente: string;
