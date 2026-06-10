@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCabeceraHeader, useDeudorHeader } from '../../hooks/useDeudorHeader';
+import { useCabeceraHeader, useDeudorHeader, useMejorRHeader } from '../../hooks/useDeudorHeader';
 import { CompactInfoSection, InfoRow } from '../../../../shared/components/ui/CompactInfoSection';
 
 interface Props {
@@ -26,17 +26,20 @@ const DeudorHeader: React.FC<Props> = ({
   const { data: cabeceraData, isLoading: isLoadingCabecera, error: cabeceraError } = 
     useCabeceraHeader(id_cliente, id_cartera, id_deudor);
   
-  if (isLoadingDeudor || isLoadingCabecera) {
+  const { data: mejorRData, isLoading: isLoadingMejorR, error: mejorRError } = 
+    useMejorRHeader(id_cliente, id_cartera, id_deudor);
+  
+  if (isLoadingDeudor || isLoadingCabecera || isLoadingMejorR) {
     return <div className="ficha-card">Cargando...</div>;
   }
   
   // Manejo de errores
-  if (deudorError || cabeceraError) {
+  if (deudorError || cabeceraError || mejorRError) {
     return <div className="ficha-card">Error: {deudorError || cabeceraError}</div>;
   }
   
   // Verificar que ambos datos existen
-  if (!deudorData || !cabeceraData) return null;
+  if (!deudorData || !cabeceraData || !mejorRData) return null;
   
   return (
     <div className={`ficha-card ${compact ? 'deudor-header--compact' : ''}`}>
@@ -74,6 +77,14 @@ const DeudorHeader: React.FC<Props> = ({
                 label="DNI / RUC:" 
                 value={deudorData.dniRuc} 
               />
+              <InfoRow 
+                label="Grado Inst.:" 
+                value={deudorData.gradoInstruccion} 
+              />
+              <InfoRow
+                label="Edad:"
+                value={deudorData.edad ? `${deudorData.edad} años` : ""}
+              />
               <div className="compact-row compact-row--center" style={{ marginTop: 2 }}>
                 <span className="compact-label">Contacto:</span>
                 <input
@@ -106,7 +117,7 @@ const DeudorHeader: React.FC<Props> = ({
             <CompactInfoSection title="Mejor Resultado">
               <InfoRow 
                 label="Resultado:" 
-                value={deudorData.mejorResultado} 
+                value={mejorRData.mejorResultado} 
                 highlight 
               />
             </CompactInfoSection>

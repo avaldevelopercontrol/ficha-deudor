@@ -1,0 +1,203 @@
+/* ── Header Meta Strip ────────────────────────────── */
+.header-meta-strip {
+  background: var(--ap-navy);
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  gap: 0;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.meta-item:first-child { padding-left: 0; }
+
+.meta-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.meta-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.meta-separator {
+  width: 1px;
+  height: 28px;
+  background: rgba(255,255,255,0.2);
+}
+
+/* ── Deudor Info ──────────────────────────────────── */
+.deudor-header { }
+
+.deudor-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+/* Estilos compactos para el sidebar - VERSIÓN MEJORADA */
+.deudor-header--compact .deudor-info-grid {
+  grid-template-columns: 1fr;
+}
+
+.deudor-header--compact .deudor-info-col {
+  padding: 10px 12px !important;
+}
+
+.deudor-header--compact .deudor-info-col--full {
+  padding: 10px 12px;
+}
+
+.deudor-header--compact .deudor-info-col + .deudor-info-col {
+  border-left: none;
+  border-top: 1px solid var(--ap-gray-200);
+}
+
+.deudor-header--compact .field-label {
+  min-width: 85px;
+  font-size: 9px;
+}
+
+.deudor-header--compact .field-value {
+  font-size: 10px;
+}
+
+.deudor-header--compact .meta-item {
+  padding: 0 4px;
+}
+
+.deudor-header--compact .meta-label {
+  font-size: 8px;
+}
+
+.deudor-header--compact .meta-value {
+  font-size: 10px;
+}
+
+.deudor-header--compact .header-meta-strip {
+  flex-direction: column;  /* Cambia de horizontal a vertical */
+  align-items: stretch;    /* Estira los items */
+  gap: 6px;               /* Espacio entre elementos */
+  padding: 8px 12px;      /* Padding reducido */
+}
+
+.deudor-header--compact .section-title {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+}
+
+.deudor-header--compact .form-input--inline {
+  height: 24px;
+  font-size: 10px;
+  padding: 0 6px;
+}
+
+.deudor-header--compact .field-row {
+  padding: 2px 0;
+}
+
+.deudor-header--compact .info-rows {
+  gap: 0;
+}
+
+.deudor-header--compact .section-header {
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+.deudor-header--compact .field-row--highlight .field-value {
+  font-size: 11px;
+}
+
+.deudor-info-col {
+  padding: 16px 20px;
+}
+
+.deudor-info-col + .deudor-info-col {
+  border-left: 1px solid var(--ap-gray-200);
+}
+
+.info-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Section Header ───────────────────────────────── */
+.section-header {
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid var(--ap-gray-100);
+}
+
+.section-header--accent .section-title {
+  color: var(--ap-red);
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ap-navy);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+/* ── Field Row ────────────────────────────────────── */
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--ap-gray-100);
+}
+
+.field-row:last-child { border-bottom: none; }
+
+.field-row--highlight .field-value {
+  font-weight: 600;
+  color: var(--ap-navy);
+  font-size: 13px;
+}
+
+.field-label {
+  font-size: 11px;
+  color: var(--ap-text-muted);
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.field-value {
+  font-size: 12px;
+  color: var(--ap-text);
+  font-weight: 500;
+}
+
+.form-input--inline {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: var(--radius);
+  font-size: 12px;
+  flex: 1;
+  background: var(--ap-gray-50);
+  color: var(--ap-text);
+  outline: none;
+}
+
+.form-input--inline:focus {
+  border-color: var(--ap-red);
+  background: #fff;
+}
+

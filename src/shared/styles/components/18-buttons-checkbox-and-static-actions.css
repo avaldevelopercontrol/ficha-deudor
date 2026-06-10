@@ -1,0 +1,92 @@
+/* ── Buttons ──────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn--sm { height: 32px; padding: 0 12px; font-size: 11px; }
+.btn--md { height: 36px; padding: 0 16px; font-size: 12px; }
+
+.btn--primary { background: var(--ap-navy); color: #fff; }
+.btn--primary:hover { background: var(--ap-navy-light); }
+
+.btn--secondary { background: var(--ap-gray-100); color: var(--ap-text); border: 1px solid var(--ap-gray-200); }
+.btn--secondary:hover { background: var(--ap-gray-200); }
+
+.btn--danger { background: var(--ap-red); color: #fff; }
+.btn--danger:hover { background: var(--ap-red-dark); }
+
+.btn--success { background: var(--ap-success); color: #fff; }
+.btn--success:hover { opacity: 0.9; }
+
+.btn--info { background: var(--ap-info-bg); color: var(--ap-info); border: 1px solid #b3cef0; }
+.btn--info:hover { background: #d0e5f9; }
+
+/* ── Checkbox ─────────────────────────────────────── */
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.checkbox-input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ap-red);
+  cursor: pointer;
+}
+
+.checkbox-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ap-text);
+}
+
+/* ── Botones Estáticos ────────────────────────────── */
+.botones-estaticos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-estatico {
+  padding: 7px 14px;
+  border: 1.5px solid var(--ap-red);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ap-red);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+}
+
+.btn-estatico:hover {
+  background: var(--ap-red);
+  color: #fff;
+}
+
+/* ── Submit ───────────────────────────────────────── */
+.ficha-submit {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px;
+  background: var(--ap-gray-50);
+  border-top: 2px solid var(--ap-gray-200);
+}
+

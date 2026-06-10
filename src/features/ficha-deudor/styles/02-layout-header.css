@@ -1,0 +1,98 @@
+/* NUEVO: Layout de dos columnas */
+.ficha-main--two-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Sidebar compacto */
+.ficha-sidebar {
+  flex: 0 0 320px;
+  position: sticky;
+  top: 68px;
+}
+
+/* Contenido principal */
+.ficha-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.ficha-card { background: #fff; border-radius: var(--radius-lg); border: 1px solid var(--ap-gray-200); box-shadow: 0 1px 4px rgba(26, 37, 64, .06), 0 4px 16px rgba(26, 37, 64, .06); overflow: hidden; }
+
+/* Meta strip */
+.header-meta-strip { background: var(--ap-navy); display: flex; align-items: center; padding: 10px 20px; gap: 0; }
+.meta-item { display: flex; align-items: center; gap: 8px; padding: 0 16px; }
+.meta-item:first-child { padding-left: 0; }
+.meta-label { font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, .5); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+.meta-value { font-size: 12px; font-weight: 500; color: #fff; white-space: nowrap; }
+.meta-sep { width: 1px; height: 28px; background: rgba(255, 255, 255, .2); }
+
+/* Deudor info */
+.deudor-info-grid { display: grid; grid-template-columns: 1fr 1fr; }
+.deudor-info-col { padding: 16px 20px; }
+.deudor-info-col + .deudor-info-col { border-left: 1px solid var(--ap-gray-200); }
+.info-rows { display: flex; flex-direction: column; gap: 2px; }
+.section-header { padding-bottom: 4px; margin-bottom: 6px; border-bottom: 2px solid var(--ap-gray-100); }
+.section-header--accent .section-title { color: var(--ap-red); }
+.section-title { font-size: 10px; font-weight: 600; color: var(--ap-navy); letter-spacing: .8px; text-transform: uppercase; }
+.field-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--ap-gray-100); width: 100%; min-height: 28px; }
+.field-row:last-child { border-bottom: none; }
+.field-highlight .field-value { font-weight: 600; color: var(--ap-navy); font-size: 13px; }
+.field-label { font-size: 11px; color: var(--ap-text-muted); min-width: 150px; flex-shrink: 0; }
+.field-value { font-size: 12px; color: var(--ap-text); font-weight: 500; }
+.fi { height: 28px; padding: 0 8px; border: 1px solid var(--ap-gray-200); border-radius: var(--radius); font-size: 12px; flex: 1; background: var(--ap-gray-50); font-family: inherit; outline: none; }
+.fi:focus { border-color: var(--ap-red); background: #fff; }
+
+/* NUEVO: Estilos compactos para sidebar */
+.deudor-header--compact .deudor-info-grid {
+  grid-template-columns: 1fr;
+}
+
+.deudor-header--compact .deudor-info-col + .deudor-info-col {
+  border-left: none;
+  border-top: 1px solid var(--ap-gray-200);
+}
+
+.deudor-header--compact .field-label {
+  min-width: 100px;
+  font-size: 10px;
+}
+
+.deudor-header--compact .field-value {
+  font-size: 11px;
+}
+
+.deudor-header--compact .meta-item {
+  padding: 0 8px;
+}
+
+.deudor-header--compact .meta-label {
+  font-size: 9px;
+}
+
+.deudor-header--compact .meta-value {
+  font-size: 11px;
+}
+
+.deudor-header--compact .header-meta-strip {
+  padding: 8px 16px;
+}
+
+.deudor-header--compact .deudor-info-col {
+  padding: 12px 16px;
+}
+
+.deudor-header--compact .section-title {
+  font-size: 10px;
+}
+
+.deudor-header--compact .form-input--inline {
+  height: 26px;
+  font-size: 11px;
+}
+

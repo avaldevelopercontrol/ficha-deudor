@@ -1,0 +1,31 @@
+/*
+  PUNTO ÚNICO DE ENTRADA DE ESTILOS
+
+  Los imports se mantienen en este orden para preservar exactamente
+  la cascada visual que existía cuando se cargaban styles.css y main.css.
+
+  No cambies el orden sin validar visualmente todas las pantallas.
+*/
+
+@import './foundation/00-tokens-reset-base.css';
+@import './layout/01-app-shell.css';
+@import '../../features/ficha-deudor/styles/02-layout-header.css';
+@import './components/03-tables.css';
+@import './components/04-badges.css';
+@import '../../features/ficha-deudor/styles/05-gestion-forms.css';
+@import './components/06-buttons.css';
+@import './components/07-modals.css';
+@import '../../features/ficha-deudor/styles/08-compact-responsive-and-helpers.css';
+@import './foundation/10-fonts-tokens-reset-base.css';
+@import './layout/11-app-shell.css';
+@import '../../features/ficha-deudor/styles/12-layout.css';
+@import '../../features/ficha-deudor/styles/13-header-fields-and-documents.css';
+@import './components/14-tables.css';
+@import './components/15-badges.css';
+@import '../../features/ficha-deudor/styles/16-actions-and-gestion.css';
+@import './components/17-forms.css';
+@import './components/18-buttons-checkbox-and-static-actions.css';
+@import './components/19-modals-and-divider.css';
+@import '../../features/ficha-deudor/styles/20-responsive-panels-and-actions.css';
+@import '../../features/auth/styles/21-auth.css';
+@import '../../features/dashboard/styles/22-dashboard.css';

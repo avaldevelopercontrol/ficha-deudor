@@ -1,0 +1,15 @@
+/* Tablas y Documentos */
+.documentos-header { background: var(--ap-gray-50); padding: 12px 20px; border-bottom: 1px solid var(--ap-gray-200); display: flex; align-items: center; justify-content: space-between; }
+.table-scroll { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: auto; min-width: 900px; }
+.data-table thead tr { background: var(--ap-navy); }
+.data-table th { padding: 8px 10px; text-align: left; font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, .85); letter-spacing: .5px; white-space: nowrap; border-right: 1px solid rgba(255, 255, 255, .1); }
+.data-table th:last-child { border-right: none; }
+.data-table tbody tr { border-bottom: 1px solid var(--ap-gray-100); transition: background .12s; }
+.data-table tbody tr:nth-child(even) { background: var(--ap-gray-50); }
+.data-table tbody tr:hover { background: var(--ap-info-bg); }
+.data-table tbody tr.row--danger { background: #fff5f6; }
+.data-table tbody tr.row--warning { background: #fffbf0; }
+.data-table td { padding: 7px 10px; white-space: nowrap; border-right: 1px solid var(--ap-gray-100); }
+.data-table td:last-child { border-right: none; }
+

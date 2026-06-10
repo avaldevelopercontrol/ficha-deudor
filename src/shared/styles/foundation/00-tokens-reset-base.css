@@ -1,0 +1,36 @@
+:root {
+    --ap-red: #c0001e;
+    --ap-red-dark: #8a0015;
+    --ap-red-light: #f5e0e3;
+    --ap-navy: #1a2540;
+    --ap-navy-light: #253357;
+    --ap-gray-50: #f7f8fa;
+    --ap-gray-100: #edf0f5;
+    --ap-gray-200: #d8dde8;
+    --ap-gray-300: #b8c0d0;
+    --ap-gray-500: #6b7a99;
+    --ap-gray-700: #3d4a66;
+    --ap-text: #1a2540;
+    --ap-text-muted: #5a6680;
+    --ap-success: #1a7a45;
+    --ap-success-bg: #e6f5ec;
+    --ap-warning: #855c00;
+    --ap-warning-bg: #fff4d6;
+    --ap-danger: #c0001e;
+    --ap-danger-bg: #fbe8eb;
+    --ap-info: #1a5fa8;
+    --ap-info-bg: #e6f0fb;
+    --radius: 6px;
+    --radius-lg: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    background: var(--ap-gray-50);
+    color: var(--ap-text);
+    font-size: 13px;
+    line-height: 1.5;
+}
+

@@ -1,0 +1,8 @@
+/* Badges y estados */
+.badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 10px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; }
+.badge-d { background: var(--ap-danger-bg); color: var(--ap-danger); }
+.badge-s { background: var(--ap-success-bg); color: var(--ap-success); }
+.badge-w { background: var(--ap-warning-bg); color: var(--ap-warning); }
+.badge-n { background: var(--ap-gray-100); color: var(--ap-gray-700); }
+.atraso { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: var(--ap-danger); }
+

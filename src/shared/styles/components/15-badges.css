@@ -1,0 +1,17 @@
+/* ── Status Badge ─────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status-badge--danger { background: var(--ap-danger-bg); color: var(--ap-danger); }
+.status-badge--success { background: var(--ap-success-bg); color: var(--ap-success); }
+.status-badge--warning { background: var(--ap-warning-bg); color: var(--ap-warning); }
+.status-badge--neutral { background: var(--ap-gray-100); color: var(--ap-gray-700); }
+

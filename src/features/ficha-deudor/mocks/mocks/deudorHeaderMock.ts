@@ -1,4 +1,4 @@
-import type { DeudorInfo, CabeceraInfo} from '../../../../shared/types';
+import type { DeudorInfo, CabeceraInfo, MejorRInfo} from '../../../../shared/types';
 
 const cabeceraDefault: CabeceraInfo = {
   zona: 'LIMA',
@@ -10,14 +10,23 @@ const deudorDefault: DeudorInfo = {
   nombreRazonSocial: 'S.A.A. INVERSIONES CENTENARIO',
   dniRuc: '20101045995',
   gradoInstruccion: 'Superior',
-  edad: 45,
+  edad: '45',
   contacto: '', // o lo que corresponda
-  asesorAsignado: 'Juan Pérez',
+  //asesorAsignado: 'Juan Pérez',
   asesorPostVenta: 'María López',
   asesorComercial: 'Carlos Ruiz',
   correoApv: 'apv@ejemplo.com',
   correoAc: 'ac@ejemplo.com',
-  mejorResultado: 'Ayala',
+};
+
+const mejorResultadoDefault: MejorRInfo = {
+  mejorResultado: 'Ayala'
+};
+
+export const mockMejorRHeader: Record<string, MejorRInfo> = {
+  '178': mejorResultadoDefault,
+  '201': { ...mejorResultadoDefault, mejorResultado: 'Juan' },
+  default: mejorResultadoDefault,
 };
 
 export const mockCabeceraHeader: Record<string, CabeceraInfo> = {

@@ -1,0 +1,250 @@
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 900px) {
+  .deudor-info-grid { grid-template-columns: 1fr; }
+  .deudor-info-col + .deudor-info-col { border-left: none; border-top: 1px solid var(--ap-gray-200); }
+  .form-grid--3 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .ficha-main--two-columns {
+    flex-direction: column;
+  }
+  
+  .ficha-sidebar {
+    flex: auto;
+    width: 100%;
+    position: static;
+  }
+  
+  .ficha-content {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-grid--2,
+  .form-grid--3 { grid-template-columns: 1fr; }
+  .header-meta-strip { flex-wrap: wrap; gap: 8px; }
+  .meta-separator { display: none; }
+  .ficha-main { padding: 12px; }
+}
+
+/* Ajustes para pantallas grandes - sidebar se mantiene compacto */
+@media (min-width: 1400px) {
+  .ficha-sidebar {
+    flex: 0 0 280px; /* Se mantiene en 280px */
+  }
+  
+  .ficha-content {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (min-width: 1600px) {
+  .ficha-main--two-columns {
+    width: 100%;
+  }
+  
+  .ficha-sidebar {
+    flex: 0 0 280px; /* Se mantiene compacto incluso en pantallas grandes */
+  }
+}
+
+/* Acciones Rápidas en el sidebar - Versión vertical */
+.acciones-rapidas {
+  margin-top: 16px;
+}
+
+.acciones-rapidas-header {
+  background: var(--ap-navy);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ap-gray-200);
+}
+
+.acciones-rapidas-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.acciones-rapidas .botones-estaticos {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;  /* ← Cambiado de 'row' a 'column' */
+  gap: 8px;               /* Espacio entre botones */
+  background: #fff;
+}
+
+.acciones-rapidas .btn-est {
+  width: 100%;            /* Ocupa todo el ancho disponible */
+  text-align: center;     /* Texto centrado */
+  padding: 8px 12px;      /* Padding más cómodo para vertical */
+  font-size: 11px;        /* Texto ligeramente más grande */
+  border: 1.5px solid var(--ap-red);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ap-red);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+}
+
+.acciones-rapidas .btn-est:hover {
+  background: var(--ap-red);
+  color: #fff;
+}
+
+/* Estilos para la sección de Agendar Gestión */
+.agendar-gestion-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--ap-gray-50);
+  padding: 12px;
+  border-radius: var(--radius);
+  margin-top: 16px;
+}
+
+.agendar-gestion-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.agendar-gestion-group .form-label {
+  font-size: 10px;
+  margin-bottom: 0;
+}
+
+.agendar-date,
+.agendar-time {
+  min-width: 130px;
+}
+
+.agendar-usuario {
+  background: var(--ap-gray-100);
+  cursor: not-allowed;
+}
+
+.agendar-btn {
+  height: 32px;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.agendar-placeholder {
+  flex: 1.5;
+}
+
+.agendar-estado {
+  background: var(--ap-gray-100);
+  color: var(--ap-text-muted);
+  font-style: italic;
+}
+
+/* Estilos para Fecha de Gestión */
+.fecha-gestion-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px;
+  background: var(--ap-info-bg);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--ap-info);
+}
+
+.fecha-gestion-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.fecha-gestion-group .form-label {
+  font-size: 10px;
+  margin-bottom: 0;
+}
+
+.fecha-gestion-date,
+.fecha-gestion-time {
+  background: #fff;
+}
+
+/* Responsive para móvil */
+@media (max-width: 768px) {
+  .agendar-gestion-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .agendar-btn {
+    margin-top: 8px;
+  }
+  
+  .fecha-gestion-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.panel-colapsable {
+  animation: panelSlideDown 0.2s ease-out;
+}
+
+@keyframes panelSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panel-colapsable-header {
+  background: var(--ap-navy);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-colapsable-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.panel-colapsable-body {
+  padding: 16px 20px;
+}
+
+/* Botón activo en Acciones Rápidas */
+.btn-est--active {
+  background: var(--ap-red) !important;
+  color: #fff !important;
+}
+
+/* Solo esto, sin porcentajes ni nth-child */
+.panel-colapsable .data-table {
+  width: 100%;
+  table-layout: auto;  /* Auto-ajuste según contenido */
+}
+
+.panel-colapsable .data-table th,
+.panel-colapsable .data-table td {
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+

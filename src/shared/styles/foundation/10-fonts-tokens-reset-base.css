@@ -1,0 +1,48 @@
+/* ═══════════════════════════════════════════════════
+   AVAL PERÚ — FICHA DEUDOR — MAIN STYLES
+   ═══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* ── Variables ────────────────────────────────────── */
+:root {
+  --ap-red: #c0001e;
+  --ap-red-dark: #8a0015;
+  --ap-red-light: #f5e0e3;
+  --ap-navy: #1a2540;
+  --ap-navy-light: #253357;
+  --ap-blue-mid: #2c5282;
+  --ap-gray-50: #f7f8fa;
+  --ap-gray-100: #edf0f5;
+  --ap-gray-200: #d8dde8;
+  --ap-gray-300: #b8c0d0;
+  --ap-gray-500: #6b7a99;
+  --ap-gray-700: #3d4a66;
+  --ap-text: #1a2540;
+  --ap-text-muted: #5a6680;
+  --ap-success: #1a7a45;
+  --ap-success-bg: #e6f5ec;
+  --ap-warning: #855c00;
+  --ap-warning-bg: #fff4d6;
+  --ap-danger: #c0001e;
+  --ap-danger-bg: #fbe8eb;
+  --ap-info: #1a5fa8;
+  --ap-info-bg: #e6f0fb;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --shadow: 0 2px 8px rgba(26, 37, 64, 0.08);
+  --shadow-card: 0 1px 4px rgba(26, 37, 64, 0.06), 0 4px 16px rgba(26, 37, 64, 0.06);
+}
+
+/* ── Reset ────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  background: var(--ap-gray-50);
+  color: var(--ap-text);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
