@@ -1,8 +1,13 @@
 import { apiClient } from '../../../shared/api/apiClient';
 import { mockTelefonosReferenciados } from '../mocks/mocks/telefonosReferenciados';
-import type { TelefonoReferenciado, TelefonoFormData, ApiResponse, TelefonoReferenciadoApi } from '../../../shared/types/indexApi';
+import type { TelefonoReferenciado, TelefonoFormData, ApiResponse, 
+              TelefonoReferenciadoApi, ApiResponseSimple, TelefonoList, 
+              TelefonoResultadoApi, TelefonoOperadorApi,
+              TelefonoUbicacionApi, TelefonoHorarioGestionApi,
+              TelefonoFuenteBusquedaApi} from '../../../shared/types/indexApi';
 
 const BASE_GESTION = '/v1/Gestion';
+const BASE_TELEFONO = '/v1/Telefono';
 
 // ─── GET: Todos los registros (carga masiva para filtros client-side) ───
 export async function fetchTelefonosReferenciados(
@@ -95,46 +100,126 @@ export async function createTelefono(
 
 // ─── PUT: Actualizar teléfono existente ───
 export async function updateTelefono(
-  id_cliente: string,
-  id_deudor: string,
-  id_telefono: string,
-  data: TelefonoFormData
-): Promise<TelefonoReferenciado> {
-  return apiClient<TelefonoReferenciado>(
-    `${BASE_GESTION}/UpdateTelefono/${id_telefono}`,
-    {
-      method: 'PUT',
-      body: {
-        nId_Cliente: id_cliente,
-        nId_Persdeudor: id_deudor,
-        idTelefono: id_telefono,
-        ...data,
-      },
-      mock: () => {
-        const lista = mockTelefonosReferenciados[id_deudor] || [];
-        const index = lista.findIndex((t) => t.id === id_telefono);
+    id_cliente: string,
+    id_deudor: string,
+    id_telefono: string,
+    data: TelefonoFormData
+  ): Promise<TelefonoReferenciado> {
+    return apiClient<TelefonoReferenciado>(
+      `${BASE_GESTION}/UpdateTelefono/${id_telefono}`,
+      {
+        method: 'PUT',
+        body: {
+          nId_Cliente: id_cliente,
+          nId_Persdeudor: id_deudor,
+          idTelefono: id_telefono,
+          ...data,
+        },
+        mock: () => {
+          const lista = mockTelefonosReferenciados[id_deudor] || [];
+          const index = lista.findIndex((t) => t.id === id_telefono);
 
-        if (index === -1) {
-          throw new Error(`Teléfono ${id_telefono} no encontrado`);
-        }
+          if (index === -1) {
+            throw new Error(`Teléfono ${id_telefono} no encontrado`);
+          }
 
-        const actualizado: TelefonoReferenciado = {
-          ...lista[index],
-          numero: data.numero,
-          anexo: data.anexo,
-          estado: data.resultado,
-          operadorTelefonico: data.operadorTelefonico,
-          refUbicacion: data.ubicacion,
-          prioridad: parseInt(data.prioridad, 10) || 0,
-          horario: data.horarioGestion,
-          fuente: data.fuenteBusqueda,
-          referencia: data.referencia,
-          reclamoIndecopi: data.reclamoIndecopi,
-        };
+          const actualizado: TelefonoReferenciado = {
+            ...lista[index],
+            numero: data.numero,
+            anexo: data.anexo,
+            estado: data.resultado,
+            operadorTelefonico: data.operadorTelefonico,
+            refUbicacion: data.ubicacion,
+            prioridad: parseInt(data.prioridad, 10) || 0,
+            horario: data.horarioGestion,
+            fuente: data.fuenteBusqueda,
+            referencia: data.referencia,
+            reclamoIndecopi: data.reclamoIndecopi,
+          };
 
-        lista[index] = actualizado;
-        return actualizado;
-      },
+          lista[index] = actualizado;
+          return actualizado;
+        },
+      }
+    );
+  }
+
+  export async function fetchTelefonoResultados(signal?: AbortSignal): Promise<TelefonoList[]> {
+    const result = await apiClient<ApiResponseSimple<TelefonoResultadoApi[]>>(
+      `${BASE_TELEFONO}/GetTelefonoResultados`,
+      { signal }
+    );
+
+    if (result.statusCode !== 200) {
+      throw new Error(result.message || 'Error cargando resultados telefónicos');
     }
-  );
-}
+
+    return result.response.map(item => ({
+      id: String(item.nId_PersTelefOpe),
+      nombre: item.cNombre_PersTelefOpe,
+    }));
+  };
+
+  export async function fetchTelefonoOperadores(signal?: AbortSignal): Promise<TelefonoList[]> {
+    const result = await apiClient<ApiResponseSimple<TelefonoOperadorApi[]>>(
+      `${BASE_TELEFONO}/GetTelefonoOperadores`,
+      { signal }
+    );
+
+    if (result.statusCode !== 200) {
+      throw new Error(result.message || 'Error cargando operadores telefónicos');
+    }
+
+    return result.response.map(item => ({
+      id: String(item.nId_OperadorTelefonico),
+      nombre: item.cAbrevOperadorTelef,
+    }));
+  }
+
+  export async function fetchTelefonoUbicaciones(signal?: AbortSignal): Promise<TelefonoList[]> {
+    const result = await apiClient<ApiResponseSimple<TelefonoUbicacionApi[]>>(
+      `${BASE_TELEFONO}/GetTelefonoUbicaciones`,
+      { signal }
+    );
+
+    if (result.statusCode !== 200) {
+      throw new Error(result.message || 'Error cargando ubicaciones telefónicas');
+    }
+
+    return result.response.map(item => ({
+      id: String(item.nId_PersRefUbi),
+      nombre: item.cNombre_PersRefUbi,
+    }));
+  }
+
+  export async function fetchTelefonoHorarioGestion(signal?: AbortSignal): Promise<TelefonoList[]> {
+    const result = await apiClient<ApiResponseSimple<TelefonoHorarioGestionApi[]>>(
+      `${BASE_TELEFONO}/GetTelefonoHorarioGestion`,
+      { signal }
+    );
+
+    if (result.statusCode !== 200) {
+      throw new Error(result.message || 'Error cargando horarios de gestión');
+    }
+
+    return result.response.map(item => ({
+      id: String(item.nId_PersDeudorGestionHrs),
+      nombre: item.cNombren_PersDeudorGestionHrs,
+    }));
+  }
+
+  export async function fetchTelefonoFuenteBusqueda(signal?: AbortSignal): Promise<TelefonoList[]> {
+    const result = await apiClient<ApiResponseSimple<TelefonoFuenteBusquedaApi[]>>(
+      `${BASE_TELEFONO}/GetTelefonoFuenteBusqueda`,
+      { signal }
+    );
+
+    if (result.statusCode !== 200) {
+      throw new Error(result.message || 'Error cargando fuentes de búsqueda');
+    }
+
+    return result.response.map(item => ({
+      id: String(item.nId_Fuente),
+      nombre: item.cDescripcion,
+    }));
+  }

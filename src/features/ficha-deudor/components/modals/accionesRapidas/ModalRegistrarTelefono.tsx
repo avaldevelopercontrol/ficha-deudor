@@ -3,14 +3,11 @@ import { ModalFormLayout } from '../../layout/ModalFormLayout';
 import { FormGrid } from '../../../../../shared/components/ui/FormGrid';
 import { InputField, SelectField, TextAreaField } from '../../../../../shared/components/ui';
 import { useModalForm } from '../../../../../shared/hooks/ui/useModalForm';
+import { useTelefonoResultados, useTelefonoOperadores, useTelefonoUbicaciones, 
+         useTelefonoHorarioGestion, useTelefonoFuenteBusqueda } from '../../../hooks/useTelefonosReferenciados';
 import type { TelefonoFormData } from '../../../../../shared/types';
 import {
-  resultadosOptions,
-  operadoresOptions,
-  ubicacionesOptions,
   prioridadesOptions,
-  horariosGestionOptions,
-  fuentesBusquedaOptions,
   referenciasOptions,
   reclamoIndecopiOptions,
 } from '../../../mocks/catalogosTelefono';
@@ -37,6 +34,62 @@ const initialForm: TelefonoFormData = {
 };
 
 const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar }) => {
+  // ─── API: Resultados ───
+  const {
+    data: resultadosData,
+    isLoading: isLoadingResultados,
+    error: errorResultados,
+  } = useTelefonoResultados();
+
+  const {
+    data: operadoresData,
+    isLoading: isLoadingOperadores,
+    error: errorOperadores,
+  } = useTelefonoOperadores();
+
+  const {
+    data: ubicacionesData,
+    isLoading: isLoadingUbicaciones,
+    error: errorUbicaciones,
+  } = useTelefonoUbicaciones();
+
+  const {
+    data: horariosData,
+    isLoading: isLoadingHorarios,
+    error: errorHorarios,
+  } = useTelefonoHorarioGestion();
+
+  const {
+    data: fuentesBusquedaData,
+    isLoading: isLoadingFuentes,
+    error: errorFuentes,
+  } = useTelefonoFuenteBusqueda();
+
+  const resultadosOptions = resultadosData?.map(r => ({
+    id: r.id,
+    label: r.nombre,
+  })) ?? [];
+
+  const operadoresOptions = operadoresData?.map(o => ({
+    id: o.id,
+    label: o.nombre,
+  })) ?? [];
+
+  const ubicacionesOptions = ubicacionesData?.map(u => ({
+    id: u.id,
+    label: u.nombre,
+  })) ?? [];
+
+  const horariosGestionOptions = horariosData?.map(h => ({
+    id: h.id,
+    label: h.nombre,
+  })) ?? [];
+
+  const fuentesBusquedaOptions = fuentesBusquedaData?.map(f => ({
+    id: f.id,
+    label: f.nombre,
+  })) ?? [];
+
   const { form, errors, handleChange, handleSubmit, handleCancel } = useModalForm<TelefonoFormData>({
     initialForm,
     onClose,
@@ -60,7 +113,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
     >
       <FormGrid columns={2}>
         <InputField
-          label="Número *"
+          label="Número"
           layout="inline"
           placeholder="Ingrese número telefónico"
           value={form.numero}
@@ -70,7 +123,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
           required
         />
         <InputField
-          label="Anexo (opcional)"
+          label="Anexo"
           layout="inline"
           placeholder="Anexo"
           value={form.anexo}
@@ -82,61 +135,64 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
 
       <FormGrid columns={3}>
         <SelectField
-          label="Resultado *"
+          label="Resultado"
           layout="inline"
           options={resultadosOptions}
           value={form.resultado}
           onChange={(v) => handleChange('resultado', v)}
-          placeholder="-- Seleccione --"
-          error={errors.resultado}
+          placeholder={isLoadingResultados ? 'Cargando...' : '-- Seleccione --'}
+          error={errors.resultado || errorResultados || ''}
           required
+          disabled={isLoadingResultados}
         />
         <SelectField
-          label="Operador (opcional)"
+          label="Operador Telf."
           layout="inline"
           options={operadoresOptions}
           value={form.operadorTelefonico}
           onChange={(v) => handleChange('operadorTelefonico', v)}
-          placeholder="-- Seleccione --"
-          error={errors.operadorTelefonico}
+          placeholder={isLoadingOperadores ? 'Cargando...' : '-- Seleccione --'}
+          error={errors.operadorTelefonico || errorOperadores || ''}
+          required
+          disabled={isLoadingOperadores}
         />
         <SelectField
-          label="Ubicación *"
+          label="Ubicación"
           layout="inline"
           options={ubicacionesOptions}
           value={form.ubicacion}
           onChange={(v) => handleChange('ubicacion', v)}
-          placeholder="-- Seleccione --"
-          error={errors.ubicacion}
+          placeholder={isLoadingUbicaciones ? 'Cargando...' : '-- Seleccione --'}
+          error={errors.ubicacion || errorUbicaciones || ''}
           required
+          disabled={isLoadingUbicaciones}
         />
       </FormGrid>
 
       <FormGrid columns={2}>
         <SelectField
-          label="Prioridad *"
+          label="Prioridad"
           layout="inline"
           options={prioridadesOptions}
           value={form.prioridad}
           onChange={(v) => handleChange('prioridad', v)}
           placeholder="-- Seleccione --"
           error={errors.prioridad}
-          required
         />
         <SelectField
-          label="Horario Gestión *"
+          label="Horario Gestión"
           layout="inline"
           options={horariosGestionOptions}
           value={form.horarioGestion}
           onChange={(v) => handleChange('horarioGestion', v)}
-          placeholder="-- Seleccione --"
-          error={errors.horarioGestion}
-          required
+          placeholder={isLoadingHorarios ? 'Cargando...' : '-- Seleccione --'}
+          error={errors.horarioGestion || errorHorarios || ''}
+          disabled={isLoadingHorarios}
         />
       </FormGrid>
 
       <TextAreaField
-        label="Comentario (opcional)"
+        label="Comentario"
         layout="inline"
         placeholder="Ingrese comentario..."
         value={form.comentario}
@@ -147,17 +203,17 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
 
       <FormGrid columns={2}>
         <SelectField
-          label="Fuente Búsqueda *"
+          label="Fuente Búsqueda"
           layout="inline"
           options={fuentesBusquedaOptions}
           value={form.fuenteBusqueda}
           onChange={(v) => handleChange('fuenteBusqueda', v)}
-          placeholder="-- Seleccione --"
-          error={errors.fuenteBusqueda}
-          required
+          placeholder={isLoadingFuentes ? 'Cargando...' : '-- Seleccione --'}
+          error={errors.fuenteBusqueda || errorFuentes || ''}
+          disabled={isLoadingFuentes}
         />
         <SelectField
-          label="Referencia (opcional)"
+          label="Referencia"
           layout="inline"
           options={referenciasOptions}
           value={form.referencia}
@@ -168,15 +224,14 @@ const ModalRegistrarTelefono: React.FC<Props> = ({ isOpen, onClose, onRegistrar 
       </FormGrid>
 
       <SelectField
-        label="Reclamo Indecopi *"
+        label="Reclamo Indecopi"
         layout="inline"
         options={reclamoIndecopiOptions}
         value={form.reclamoIndecopi}
         onChange={(v) => handleChange('reclamoIndecopi', v)}
         error={errors.reclamoIndecopi}
-        required
       />
-      
+
       {Object.keys(errors).length > 0 && (
         <div className="error-summary">
           <strong>Por favor, corrija los siguientes errores:</strong>

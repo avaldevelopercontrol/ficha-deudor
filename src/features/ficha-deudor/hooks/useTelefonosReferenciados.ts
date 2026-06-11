@@ -1,10 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   fetchTelefonosReferenciados,
+  fetchTelefonoResultados,
   createTelefono,
   updateTelefono,
+  fetchTelefonoOperadores,
+  fetchTelefonoUbicaciones,
+  fetchTelefonoHorarioGestion,
+  fetchTelefonoFuenteBusqueda,
 } from '../api/telefonosReferenciadosApi';
-import type { TelefonoReferenciado, TelefonoFormData } from '../../../shared/types';
+import type { TelefonoReferenciado, TelefonoFormData, TelefonoList } from '../../../shared/types';
+import { useApiResource } from '../../../shared/hooks/useApiResource';
 
 export interface TextFilters {
   [columnKey: string]: string;
@@ -201,4 +207,49 @@ export function useTelefonosReferenciados(
     create,
     update,
   };
+}
+
+export function useTelefonoResultados() {
+  const fetcher = useCallback(
+    (signal: AbortSignal) => fetchTelefonoResultados(signal),
+    []
+  );
+
+  return useApiResource<TelefonoList[]>(fetcher, []);
+}
+
+export function useTelefonoOperadores() {
+  const fetcher = useCallback(
+    (signal: AbortSignal) => fetchTelefonoOperadores(signal),
+    []
+  );
+
+  return useApiResource<TelefonoList[]>(fetcher, []);
+}
+
+export function useTelefonoUbicaciones() {
+  const fetcher = useCallback(
+    (signal: AbortSignal) => fetchTelefonoUbicaciones(signal),
+    []
+  );
+
+  return useApiResource<TelefonoList[]>(fetcher, []);
+}
+
+export function useTelefonoHorarioGestion() {
+  const fetcher = useCallback(
+    (signal: AbortSignal) => fetchTelefonoHorarioGestion(signal),
+    []
+  );
+
+  return useApiResource<TelefonoList[]>(fetcher, []);
+}
+
+export function useTelefonoFuenteBusqueda() {
+  const fetcher = useCallback(
+    (signal: AbortSignal) => fetchTelefonoFuenteBusqueda(signal),
+    []
+  );
+
+  return useApiResource<TelefonoList[]>(fetcher, []);
 }
