@@ -1,14 +1,10 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchCabeceraDatosAdicionales, fetchAllDatosAdicionales } from '../api/datosAdicionalesApi';
+import { useClientSideTable, type TextFilters, type SelectedFilters } from '../../../shared/hooks/useClientSideTable';
 import type { ColumnApi, DatoAdicionalApi } from '../../../shared/types/indexApi';
 
-export interface TextFilters {
-  [columnKey: string]: string;
-}
-
-export interface SelectedFilters {
-  [columnKey: string]: string[];
-}
+// Re-exportar tipos para compatibilidad con los paneles
+export type { TextFilters, SelectedFilters };
 
 interface UseDatosAdicionalesReturn {
   columns: ColumnApi[];
@@ -24,7 +20,6 @@ interface UseDatosAdicionalesReturn {
   setPageNumber: (page: number) => void;
   setPageSize: (size: number) => void;
   refetch: () => void;
-  // Filtros
   textFilters: TextFilters;
   selectedFilters: SelectedFilters;
   onTextFilterChange: (columnKey: string, value: string) => void;
@@ -46,12 +41,12 @@ export function useDatosAdicionales(
   const [dataLoading, setDataLoading] = useState(false);
   const [dataError, setDataError] = useState<string | null>(null);
 
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  // Filtros
-  const [textFilters, setTextFilters] = useState<TextFilters>({});
-  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
+  // ─── Hook genérico: filtros + paginación ───
+  const table = useClientSideTable<DatoAdicionalApi>(
+    allData,
+    [id_cliente, id_cartera, id_deudor],
+    { initialPageSize: 10 }
+  );
 
   // ─── Efecto 1: Cargar cabeceras ───
   useEffect(() => {
@@ -63,9 +58,7 @@ export function useDatosAdicionales(
       setMetaError(null);
       try {
         const cols = await fetchCabeceraDatosAdicionales(id_cliente, pantalla);
-        if (!cancelled) {
-          setColumns(cols);
-        }
+        if (!cancelled) setColumns(cols);
       } catch (err) {
         if (!cancelled) {
           setMetaError(err instanceof Error ? err.message : 'Error cargando cabeceras');
@@ -79,7 +72,7 @@ export function useDatosAdicionales(
     return () => { cancelled = true; };
   }, [id_cliente, pantalla]);
 
-  // ─── Efecto 2: Cargar TODOS los registros de una vez ───
+  // ─── Efecto 2: Cargar datos ───
   useEffect(() => {
     if (!id_cliente || !id_cartera || !id_deudor) return;
     let cancelled = false;
@@ -105,50 +98,7 @@ export function useDatosAdicionales(
     return () => { cancelled = true; };
   }, [id_cliente, id_cartera, id_deudor]);
 
-  // ─── Resetear pagina y filtros cuando cambian IDs ───
-  useEffect(() => {
-    setPageNumber(1);
-    setTextFilters({});
-    setSelectedFilters({});
-  }, [id_cliente, id_cartera, id_deudor]);
-
-  // Resetear pagina cuando cambia pageSize
-  useEffect(() => {
-    setPageNumber(1);
-  }, [pageSize]);
-
-  // ─── Aplicar filtros sobre TODOS los datos ───
-  const filteredData = useMemo(() => {
-    return allData.filter((row) => {
-      // Filtro de texto (contiene)
-      for (const [columnKey, filterText] of Object.entries(textFilters)) {
-        if (!filterText) continue;
-        const cellValue = String(row[columnKey] ?? '').toLowerCase();
-        if (!cellValue.includes(filterText.toLowerCase())) {
-          return false;
-        }
-      }
-
-      // Filtro de seleccion (exacto)
-      for (const [columnKey, selectedValues] of Object.entries(selectedFilters)) {
-        if (!selectedValues || selectedValues.length === 0) continue;
-        const cellValue = String(row[columnKey] ?? '');
-        if (!selectedValues.includes(cellValue)) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [allData, textFilters, selectedFilters]);
-
-  // ─── Paginacion client-side sobre datos filtrados ───
-  const totalRecords = filteredData.length;
-  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
-  const indiceInicio = (pageNumber - 1) * pageSize;
-  const indiceFin = Math.min(indiceInicio + pageSize, totalRecords);
-  const paginatedData = filteredData.slice(indiceInicio, indiceFin);
-
+  // ─── Refetch ───
   const refetch = useCallback(() => {
     if (!id_cliente || !id_cartera || !id_deudor) return;
     let cancelled = false;
@@ -173,36 +123,26 @@ export function useDatosAdicionales(
     return () => { cancelled = true; };
   }, [id_cliente, id_cartera, id_deudor]);
 
-  const onTextFilterChange = useCallback((columnKey: string, value: string) => {
-    setTextFilters((prev) => ({ ...prev, [columnKey]: value }));
-    setPageNumber(1);
-  }, []);
-
-  const onSelectedFilterChange = useCallback((columnKey: string, values: string[]) => {
-    setSelectedFilters((prev) => ({ ...prev, [columnKey]: values }));
-    setPageNumber(1);
-  }, []);
-
   const isLoading = metaLoading || dataLoading;
   const error = metaError || dataError;
 
   return {
     columns,
     allData,
-    filteredData,
-    paginatedData,
+    filteredData: table.filteredData,
+    paginatedData: table.paginatedData,
     isLoading,
     error,
-    pageNumber,
-    pageSize,
-    totalRecords,
-    totalPages,
-    setPageNumber,
-    setPageSize,
+    pageNumber: table.pageNumber,
+    pageSize: table.pageSize,
+    totalRecords: table.totalRecords,
+    totalPages: table.totalPages,
+    setPageNumber: table.setPageNumber,
+    setPageSize: table.setPageSize,
     refetch,
-    textFilters,
-    selectedFilters,
-    onTextFilterChange,
-    onSelectedFilterChange,
+    textFilters: table.textFilters,
+    selectedFilters: table.selectedFilters,
+    onTextFilterChange: table.onTextFilterChange,
+    onSelectedFilterChange: table.onSelectedFilterChange,
   };
 }

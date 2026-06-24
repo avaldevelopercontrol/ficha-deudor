@@ -23,7 +23,7 @@ const ESTADOS_BADGE: Record<string, string> = {
 
 const PanelDireccionesReferenciadas: React.FC<Props> = ({ isActive, id_cliente, id_deudor, id_usuario }) => {
   const {
-    filteredData,
+    allData,
     paginatedData,
     isLoading,
     error,
@@ -185,7 +185,7 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({ isActive, id_cliente, 
             data={paginatedData}
             emptyMessage="No se encontraron direcciones referenciadas"
             enableColumnFilters={true}
-            allData={filteredData} // <-- Todos los filtrados para opciones de filtro
+            allData={allData} // <-- Todos los filtrados para opciones de filtro
             textFilters={textFilters}
             selectedFilters={selectedFilters}
             onTextFilterChange={onTextFilterChange}

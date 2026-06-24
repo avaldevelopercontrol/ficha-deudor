@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   fetchTelefonosReferenciados,
   fetchTelefonoResultados,
@@ -10,18 +10,14 @@ import {
   fetchTelefonoFuenteBusqueda,
   fetchTelefonoById,
 } from '../api/telefonosReferenciadosApi';
+import { useClientSideTable, type TextFilters, type SelectedFilters } from '../../../shared/hooks/useClientSideTable';
 import type { TelefonoReferenciado, TelefonoFormData, TelefonoList, TelefonoEditarApi } from '../../../shared/types';
 import { useApiResource } from '../../../shared/hooks/useApiResource';
 
-export interface TextFilters {
-  [columnKey: string]: string;
-}
+// Re-exportar tipos para compatibilidad con los paneles
+export type { TextFilters, SelectedFilters };
 
-export interface SelectedFilters {
-  [columnKey: string]: string[];
-}
-
-interface UseTelefonosReferenciadosReturn {
+export interface UseTelefonosReferenciadosReturn {
   allData: TelefonoReferenciado[];
   filteredData: TelefonoReferenciado[];
   paginatedData: TelefonoReferenciado[];
@@ -51,11 +47,12 @@ export function useTelefonosReferenciados(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  const [textFilters, setTextFilters] = useState<TextFilters>({});
-  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
+  // ─── Hook genérico: filtros + paginación ───
+  const table = useClientSideTable<TelefonoReferenciado>(
+    allData,
+    [id_cliente, id_deudor],
+    { initialPageSize: 10 }
+  );
 
   // ─── Efecto: Cargar todos los registros ───
   useEffect(() => {
@@ -67,7 +64,6 @@ export function useTelefonosReferenciados(
       setIsLoading(true);
       setError(null);
       try {
-        // El service ya devuelve TelefonoReferenciado[] mapeado
         const result = await fetchTelefonosReferenciados(id_cliente, id_deudor);
         if (controller.signal.aborted) return;
         setAllData(result);
@@ -85,47 +81,10 @@ export function useTelefonosReferenciados(
     return () => controller.abort();
   }, [id_cliente, id_deudor]);
 
-  // ─── Resetear página y filtros cuando cambian IDs ───
-  useEffect(() => {
-    setPageNumber(1);
-    setTextFilters({});
-    setSelectedFilters({});
-  }, [id_cliente, id_deudor]);
-
-  // Resetear página cuando cambia pageSize
-  useEffect(() => {
-    setPageNumber(1);
-  }, [pageSize]);
-
-  // ─── Filtros client-side ───
-  const filteredData = useMemo(() => {
-    return allData.filter((row) => {
-      for (const [columnKey, filterText] of Object.entries(textFilters)) {
-        if (!filterText) continue;
-        const cellValue = String(row[columnKey as keyof TelefonoReferenciado] ?? '').toLowerCase();
-        if (!cellValue.includes(filterText.toLowerCase())) return false;
-      }
-
-      for (const [columnKey, selectedValues] of Object.entries(selectedFilters)) {
-        if (!selectedValues || selectedValues.length === 0) continue;
-        const cellValue = String(row[columnKey as keyof TelefonoReferenciado] ?? '');
-        if (!selectedValues.includes(cellValue)) return false;
-      }
-
-      return true;
-    });
-  }, [allData, textFilters, selectedFilters]);
-
-  // ─── Paginación client-side ───
-  const totalRecords = filteredData.length;
-  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
-  const indiceInicio = (pageNumber - 1) * pageSize;
-  const indiceFin = Math.min(indiceInicio + pageSize, totalRecords);
-  const paginatedData = filteredData.slice(indiceInicio, indiceFin);
-
   // ─── Refetch ───
   const refetch = useCallback(() => {
     if (!id_cliente || !id_deudor) return;
+
     const controller = new AbortController();
     setIsLoading(true);
     setError(null);
@@ -148,17 +107,6 @@ export function useTelefonosReferenciados(
     return () => controller.abort();
   }, [id_cliente, id_deudor]);
 
-  // ─── Handlers de filtros ───
-  const onTextFilterChange = useCallback((columnKey: string, value: string) => {
-    setTextFilters((prev) => ({ ...prev, [columnKey]: value }));
-    setPageNumber(1);
-  }, []);
-
-  const onSelectedFilterChange = useCallback((columnKey: string, values: string[]) => {
-    setSelectedFilters((prev) => ({ ...prev, [columnKey]: values }));
-    setPageNumber(1);
-  }, []);
-
   // ─── CREATE ───
   const create = useCallback(
     async (formData: TelefonoFormData) => {
@@ -179,7 +127,7 @@ export function useTelefonosReferenciados(
     async (id: number, formData: TelefonoFormData) => {
       try {
         await updateTelefono(id_cliente, id_deudor, id_usuario, id, formData);
-        await refetch(); // ← Esto trae los datos actualizados del listado
+        await refetch();
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Error al actualizar teléfono';
         setError(msg);
@@ -191,37 +139,33 @@ export function useTelefonosReferenciados(
 
   return {
     allData,
-    filteredData,
-    paginatedData,
+    filteredData: table.filteredData,
+    paginatedData: table.paginatedData,
     isLoading,
     error,
-    pageNumber,
-    pageSize,
-    totalRecords,
-    totalPages,
-    setPageNumber,
-    setPageSize,
+    pageNumber: table.pageNumber,
+    pageSize: table.pageSize,
+    totalRecords: table.totalRecords,
+    totalPages: table.totalPages,
+    setPageNumber: table.setPageNumber,
+    setPageSize: table.setPageSize,
     refetch,
-    textFilters,
-    selectedFilters,
-    onTextFilterChange,
-    onSelectedFilterChange,
+    textFilters: table.textFilters,
+    selectedFilters: table.selectedFilters,
+    onTextFilterChange: table.onTextFilterChange,
+    onSelectedFilterChange: table.onSelectedFilterChange,
     create,
     update,
   };
 }
 
+// ─── Funciones auxiliares (sin cambios) ───
+
 export function parseApiDate(dateStr: string): string {
   if (!dateStr) return new Date().toISOString();
-  
-  // Si ya es ISO, devolverlo
   if (dateStr.includes('T')) return dateStr;
-  
-  // Convertir "29 May 2017" → Date → ISO
   const parsed = new Date(dateStr);
-  if (isNaN(parsed.getTime())) {
-    return new Date().toISOString(); // fallback
-  }
+  if (isNaN(parsed.getTime())) return new Date().toISOString();
   return parsed.toISOString();
 }
 

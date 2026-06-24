@@ -13,16 +13,29 @@ interface Props {
   onDocumentoClick?: (doc: DocumentoApi) => void;
 }
 
+// ─── Anchos mínimos por columna (basado en contenido real) ───
+const COLUMN_WIDTHS: Record<string, string> = {
+  dyn_0: '120px',   // Tramo
+  dyn_1: '80px',   // Id
+  dyn_2: '160px',  // Documento
+  dyn_3: '120px',   // Estado
+  dyn_4: '158px',  // Vencimiento
+  dyn_5: '75px',   // Mon.
+  dyn_6: '150px',   // Importe
+  dyn_7: '150px',   // Deuda
+};
+
 const DocumentosTable: React.FC<Props> = ({
   id_cliente,
   id_cartera,
-  id_deudor,
+  id_deudor,  
   id_contrato,
   onDocumentoClick,
 }) => {
   const {
     columns,
-    data,
+    allData,
+    paginatedData,
     botones,
     isLoading,
     error,
@@ -33,6 +46,10 @@ const DocumentosTable: React.FC<Props> = ({
     setPageNumber,
     setPageSize,
     refetch,
+    textFilters,
+    selectedFilters,
+    onTextFilterChange,
+    onSelectedFilterChange,
   } = useDocumentos(id_cliente, id_cartera, id_deudor, id_contrato);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -80,10 +97,8 @@ const DocumentosTable: React.FC<Props> = ({
     ];
     const dynamicKeys = allKeys.filter((k) => !staticKeys.includes(k));
 
-    // Extraer el indice de dyn_N
     const match = column.key.match(/dyn_(\d+)/);
     if (!match) {
-      // Fallback: buscar por nombre exacto
       const value = row[column.key];
       return value === null || value === undefined ? '-' : String(value);
     }
@@ -180,17 +195,71 @@ const DocumentosTable: React.FC<Props> = ({
         </span>
       </div>
 
-      <Table
-        columns={columns.map((col) => ({
-          key: col.key,
-          label: col.label,
-          render: (row: DocumentoApi) => renderCell(row, col),
-        }))}
-        data={data}
-        onRowClick={onDocumentoClick}
-        emptyMessage="No se encontraron documentos para este deudor."
-        fitToPanel={false}
-      />
+      <div className="documentos-table-compact">
+        <style>{`
+          .documentos-table-compact table {
+            table-layout: fixed !important;
+            width: auto !important;
+            min-width: 100% !important;
+          }
+          .documentos-table-compact th,
+          .documentos-table-compact td {
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            padding: 6px 4px !important;
+            font-size: 0.85em !important;
+          }
+          .documentos-table-compact th input[type="text"],
+          .documentos-table-compact th input[type="search"],
+          .documentos-table-compact th select {
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            font-size: 1.5em !important;
+            padding: 3px 4px !important;
+            height: 26px !important;
+          }
+          .documentos-table-compact th input::placeholder {
+            font-size: 0.85em !important;
+          }
+          .documentos-table-compact th > div:first-child {
+            font-size: 0.8em !important;
+            font-weight: 600 !important;
+            margin-bottom: 2px !important;
+          }
+          ${columns.map((col, index) => {
+            const width = COLUMN_WIDTHS[col.key] || '90px';
+            return `
+              .documentos-table-compact th:nth-child(${index + 1}),
+              .documentos-table-compact td:nth-child(${index + 1}) {
+                width: ${width} !important;
+                min-width: ${width} !important;
+                max-width: ${width} !important;
+              }
+            `;
+          }).join('\n')}
+        `}</style>
+
+        <Table
+          columns={columns.map((col) => ({
+            key: col.key,
+            label: col.label,
+            render: (row: DocumentoApi) => renderCell(row, col),
+          }))}
+          data={paginatedData}
+          onRowClick={onDocumentoClick}
+          emptyMessage="No se encontraron documentos para este deudor."
+          fitToPanel={false}
+          enableColumnFilters={true}
+          allData={allData}
+          textFilters={textFilters}
+          selectedFilters={selectedFilters}
+          onTextFilterChange={onTextFilterChange}
+          onSelectedFilterChange={onSelectedFilterChange}
+        />
+      </div>
 
       {totalPages > 0 && (
         <Paginacion
@@ -209,7 +278,7 @@ const DocumentosTable: React.FC<Props> = ({
         />
       )}
 
-      <div className="ficha-block botones-carrusel-wrapper" style={{ marginTop: 12, paddingBottom: 12,}}>
+      <div className="ficha-block botones-carrusel-wrapper" style={{ marginTop: 12, paddingBottom: 12 }}>
         {puedeScrollIzq && (
           <button
             type="button"

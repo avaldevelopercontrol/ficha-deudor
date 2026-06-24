@@ -1,16 +1,12 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchGestionesRealizadas, fetchGestionesHistoricas } from '../api/gestionesRealizadasApi';
+import { useClientSideTable, type TextFilters, type SelectedFilters } from '../../../shared/hooks/useClientSideTable';
 import type { GestionRealizada, GestionCompleta } from '../../../shared/types';
 
-export interface TextFilters {
-  [columnKey: string]: string;
-}
+// Re-exportar tipos para compatibilidad con los paneles
+export type { TextFilters, SelectedFilters };
 
-export interface SelectedFilters {
-  [columnKey: string]: string[];
-}
-
-interface UseGestionesRealizadasReturn {
+export interface UseGestionesRealizadasReturn {
   // ─── Resumido ───
   allData: GestionRealizada[];
   filteredData: GestionRealizada[];
@@ -50,20 +46,20 @@ export function useGestionesRealizadas(
   id_usuario: string
 ): UseGestionesRealizadasReturn {
   // ═══════════════════════════════════════
-  // ESTADO: Resumido
+  // ESTADO: Resumido (ahora con hook genérico)
   // ═══════════════════════════════════════
   const [allData, setAllData] = useState<GestionRealizada[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  const [textFilters, setTextFilters] = useState<TextFilters>({});
-  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
+  const table = useClientSideTable<GestionRealizada>(
+    allData,
+    [id_cliente, id_cartera, id_deudor, id_usuario],
+    { initialPageSize: 10 }
+  );
 
   // ═══════════════════════════════════════
-  // ESTADO: Expandido / Completo
+  // ESTADO: Expandido / Completo (server-side, sin cambios)
   // ═══════════════════════════════════════
   const [completo, setCompleto] = useState<GestionCompleta[]>([]);
   const [completoLoading, setCompletoLoading] = useState(false);
@@ -136,53 +132,11 @@ export function useGestionesRealizadas(
   }, [id_cliente, id_cartera, id_deudor, completoPageNumber, completoPageSize]);
 
   // ═══════════════════════════════════════
-  // Resetear página y filtros cuando cambian IDs
+  // Resetear página completa cuando cambia su pageSize
   // ═══════════════════════════════════════
-  useEffect(() => {
-    setPageNumber(1);
-    setCompletoPageNumber(1);
-    setTextFilters({});
-    setSelectedFilters({});
-  }, [id_cliente, id_cartera, id_deudor, id_usuario]);
-
-  // Resetear página cuando cambia pageSize
-  useEffect(() => {
-    setPageNumber(1);
-  }, [pageSize]);
-
   useEffect(() => {
     setCompletoPageNumber(1);
   }, [completoPageSize]);
-
-  // ═══════════════════════════════════════
-  // Filtros client-side (solo resumido)
-  // ═══════════════════════════════════════
-  const filteredData = useMemo(() => {
-    return allData.filter((row) => {
-      for (const [columnKey, filterText] of Object.entries(textFilters)) {
-        if (!filterText) continue;
-        const cellValue = String(row[columnKey as keyof GestionRealizada] ?? '').toLowerCase();
-        if (!cellValue.includes(filterText.toLowerCase())) return false;
-      }
-
-      for (const [columnKey, selectedValues] of Object.entries(selectedFilters)) {
-        if (!selectedValues || selectedValues.length === 0) continue;
-        const cellValue = String(row[columnKey as keyof GestionRealizada] ?? '');
-        if (!selectedValues.includes(cellValue)) return false;
-      }
-
-      return true;
-    });
-  }, [allData, textFilters, selectedFilters]);
-
-  // ═══════════════════════════════════════
-  // Paginación client-side (solo resumido)
-  // ═══════════════════════════════════════
-  const totalRecords = filteredData.length;
-  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
-  const indiceInicio = (pageNumber - 1) * pageSize;
-  const indiceFin = Math.min(indiceInicio + pageSize, totalRecords);
-  const paginatedData = filteredData.slice(indiceInicio, indiceFin);
 
   // ═══════════════════════════════════════
   // Refetch Resumido
@@ -239,49 +193,39 @@ export function useGestionesRealizadas(
   }, [id_cliente, id_cartera, id_deudor, completoPageNumber, completoPageSize]);
 
   // ═══════════════════════════════════════
-  // Handlers de filtros (solo resumido)
+  // Setter expuesto para actualizar resumido desde fuera
   // ═══════════════════════════════════════
-  const onTextFilterChange = useCallback((columnKey: string, value: string) => {
-    setTextFilters((prev) => ({ ...prev, [columnKey]: value }));
-    setPageNumber(1);
-  }, []);
-
-  const onSelectedFilterChange = useCallback((columnKey: string, values: string[]) => {
-    setSelectedFilters((prev) => ({ ...prev, [columnKey]: values }));
-    setPageNumber(1);
-  }, []);
-
   const setResumido = useCallback((updater: React.SetStateAction<GestionRealizada[]>) => {
     setAllData(updater);
   }, []);
 
   return {
-    // Resumido
+    // Resumido (desde useClientSideTable)
     allData,
-    filteredData,
-    paginatedData,
+    filteredData: table.filteredData,
+    paginatedData: table.paginatedData,
     isLoading,
     error,
-    pageNumber,
-    pageSize,
-    totalRecords,
-    totalPages,
-    setPageNumber,
-    setPageSize,
+    pageNumber: table.pageNumber,
+    pageSize: table.pageSize,
+    totalRecords: table.totalRecords,
+    totalPages: table.totalPages,
+    setPageNumber: table.setPageNumber,
+    setPageSize: table.setPageSize,
     refetch,
-    textFilters,
-    selectedFilters,
-    onTextFilterChange,
-    onSelectedFilterChange,
+    textFilters: table.textFilters,
+    selectedFilters: table.selectedFilters,
+    onTextFilterChange: table.onTextFilterChange,
+    onSelectedFilterChange: table.onSelectedFilterChange,
     setResumido,
 
-    // Expandido / Completo
+    // Expandido / Completo (sin cambios)
     completo,
     completoLoading,
     completoError,
     completoPageNumber,
     completoPageSize,
-    completoTotalRecords: completo.length, // La API ya pagina, usamos el total de la respuesta si lo expones
+    completoTotalRecords: completo.length,
     completoTotalPages: Math.max(1, Math.ceil(completo.length / completoPageSize)),
     setCompletoPageNumber,
     setCompletoPageSize,

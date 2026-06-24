@@ -23,8 +23,8 @@
   const PanelDatosAdicionales: React.FC<Props> = ({ isActive, id_cliente, id_cartera, id_deudor }) => {
     const {
       columns,
-      filteredData,    // Todos los datos filtrados (para opciones de filtro)
-      paginatedData,   // Solo la pagina actual (para la tabla)
+      allData,
+      paginatedData,
       isLoading,
       error,
       pageNumber,
@@ -122,7 +122,7 @@
             emptyMessage="No se encontraron datos adicionales"
             fitToPanel={false}
             enableColumnFilters={true}
-            allData={filteredData}   // <-- CAMBIO: filteredData en vez de paginatedData
+            allData={allData}   // <-- CAMBIO: filteredData en vez de paginatedData
             textFilters={textFilters}
             selectedFilters={selectedFilters}
             onTextFilterChange={onTextFilterChange}

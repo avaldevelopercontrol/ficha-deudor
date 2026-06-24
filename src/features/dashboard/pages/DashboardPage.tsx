@@ -14,7 +14,7 @@ export const DashboardPage: React.FC = () => {
   const handleGoToFichaDeudor = () => {
 
     const idCartera = '34048';
-    const idDeudor = '4650189';
+    const idDeudor = '17107600';
     const idContrato = '182';
 
     navigate(`/ficha-deudor?id_cliente=${idCliente}&id_cartera=${idCartera}&id_deudor=${idDeudor}&id_contrato=${idContrato}&id_usuario=${idUsuario || usuario?.id_usuario}`);

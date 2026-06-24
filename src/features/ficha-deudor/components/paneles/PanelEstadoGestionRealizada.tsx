@@ -6,6 +6,7 @@ import { WrapCell } from '../../../../shared/components/ui/WrapCell';
 import { PanelLayout } from './PanelLayout';
 import { useEstadosGestion } from '../../hooks/useEstadosGestion';
 import type { Column, EstadoGestion, EstadoGestionCompleta } from '../../../../shared/types';
+import ExpandableCell from '../../../../shared/components/ui/ExpandableCell';
 
 interface Props {
   isActive: boolean;
@@ -18,7 +19,6 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({ isActive, id_cliente, id
   const {
     // Resumido
     allData,
-    filteredData,
     paginatedData,
     isLoading,
     error,
@@ -91,7 +91,9 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({ isActive, id_cliente, id
       {
         key: 'comentario',
         label: 'Comentario',
-        render: (row: EstadoGestion) => <WrapCell>{row.comentario}</WrapCell>,
+        render: (row: EstadoGestion) => (
+        <ExpandableCell text={row.comentario} maxLines={2} lineHeight={18} />
+        ),
       },
     ],
     []
@@ -146,7 +148,9 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({ isActive, id_cliente, id
       {
         key: 'comentario',
         label: 'Comentario',
-        render: (row: EstadoGestionCompleta) => <WrapCell>{row.comentario}</WrapCell>,
+        render: (row: EstadoGestionCompleta) => (
+        <ExpandableCell text={row.comentario} maxLines={2} lineHeight={18} />
+        ),
       },
     ],
     []
@@ -206,11 +210,12 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({ isActive, id_cliente, id
             data={paginatedData}
             emptyMessage="No se encontraron estados de gestión"
             enableColumnFilters={true}
-            allData={filteredData}
+            allData={allData}
             textFilters={textFilters}
             selectedFilters={selectedFilters}
             onTextFilterChange={onTextFilterChange}
             onSelectedFilterChange={onSelectedFilterChange}
+            fitToPanel={false}
           />
 
           {totalPages > 0 && (
@@ -277,6 +282,7 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({ isActive, id_cliente, id
                 data={completo}
                 emptyMessage="No se encontraron estados de gestión históricos"
                 enableColumnFilters={false}
+                fitToPanel={false}
               />
 
               {completoTotalPages > 1 && (

@@ -19,7 +19,7 @@ interface Props {
 
 const PanelTelefonosReferenciados: React.FC<Props> = ({ isActive, id_cliente, id_deudor, id_usuario}) => {
   const {
-    filteredData,
+    allData,
     paginatedData,
     isLoading,
     error,
@@ -191,7 +191,7 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({ isActive, id_cliente, id
             data={paginatedData}
             emptyMessage="No se encontraron teléfonos referenciados"
             enableColumnFilters={true}
-            allData={filteredData} // <-- Todos los filtrados para opciones de filtro
+            allData={allData} // <-- Todos los filtrados para opciones de filtro
             textFilters={textFilters}
             selectedFilters={selectedFilters}
             onTextFilterChange={onTextFilterChange}

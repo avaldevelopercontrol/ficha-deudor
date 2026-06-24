@@ -6,6 +6,7 @@ import { WrapCell } from '../../../../shared/components/ui/WrapCell';
 import { PanelLayout } from './PanelLayout';
 import { useGestionesRealizadas } from '../../hooks/useGestionesRealizadas';
 import type { Column, GestionRealizada, GestionCompleta } from '../../../../shared/types';
+import ExpandableCell from '../../../../shared/components/ui/ExpandableCell';
 
 interface Props {
   isActive: boolean;
@@ -19,7 +20,6 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_cliente, id_carte
   const {
     // Resumido
     allData,
-    filteredData,
     paginatedData,
     isLoading,
     error,
@@ -99,7 +99,9 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_cliente, id_carte
       {
         key: 'comentario',
         label: 'Comentario',
-        render: (row: GestionRealizada) => <WrapCell>{row.comentario}</WrapCell>,
+        render: (row: GestionRealizada) => (
+        <ExpandableCell text={row.comentario} maxLines={2} lineHeight={18} />
+        ),
       },
       {
         key: 'acciones',
@@ -173,7 +175,9 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_cliente, id_carte
       {
         key: 'comentario',
         label: 'Comentario',
-        render: (row: GestionCompleta) => <WrapCell>{row.comentario}</WrapCell>,
+        render: (row: GestionCompleta) => (
+        <ExpandableCell text={row.comentario} maxLines={2} lineHeight={18} />
+        ),
       },
     ],
     []
@@ -233,11 +237,12 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_cliente, id_carte
             data={paginatedData}
             emptyMessage="No se encontraron gestiones realizadas"
             enableColumnFilters={true}
-            allData={filteredData}
+            allData={allData}
             textFilters={textFilters}
             selectedFilters={selectedFilters}
             onTextFilterChange={onTextFilterChange}
             onSelectedFilterChange={onSelectedFilterChange}
+            fitToPanel={false}
           />
 
           {totalPages > 0 && (
@@ -304,6 +309,7 @@ const PanelGestionRealizada: React.FC<Props> = ({ isActive, id_cliente, id_carte
                 data={completo}
                 emptyMessage="No se encontraron gestiones históricas"
                 enableColumnFilters={false}
+                fitToPanel={false}
               />
 
               {completoTotalPages > 1 && (

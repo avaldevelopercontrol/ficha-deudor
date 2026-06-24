@@ -11,7 +11,6 @@ import type {
 const BASE_GESTION = '/v1/Gestion';
 const BASE_DOCUMENTOS = '/v1/documentos';
 
-// Campos estaticos que siempre vienen al inicio del response
 const CAMPOS_ESTATICOS = [
   'nId_DocxCobrar',
   'mejorStatus',
@@ -23,7 +22,7 @@ const CAMPOS_ESTATICOS = [
   'nId_Cartera',
 ];
 
-// ✅ Backend real existe → va directo al backend
+// ─── 1. CABECERAS ───
 export async function fetchColumnas(
   id_cliente: string,
   id_contrato: string
@@ -44,7 +43,7 @@ export async function fetchColumnas(
   return mapCabecerasToColumns(result.response);
 }
 
-// ❌ NO hay backend real → usa mock siempre
+// ─── 2. BOTONES (mock) ───
 export async function fetchBotones(
   id_cliente: string,
   id_cartera: string
@@ -57,7 +56,35 @@ export async function fetchBotones(
   );
 }
 
-// ✅ Backend real existe → va directo al backend
+// ─── 3. TODOS LOS REGISTROS (sin paginación server-side) ───
+// NUEVO: Trae todo de una vez para filtros client-side
+export async function fetchAllGestiones(
+  id_cliente: string,
+  id_cartera: string,
+  id_deudor: string
+): Promise<DocumentoApi[]> {
+  const params = new URLSearchParams({
+    nId_Cliente: id_cliente,
+    nId_Cartera: id_cartera,
+    nId_Persdeudor: id_deudor,
+    PageNumber: '1',
+    PageSize: '2000', // Cargamos todo de una vez
+  });
+
+  const result = await apiClient<ApiResponse<DocumentoApi[]>>(
+    `${BASE_GESTION}/GetGestionDocumentos?${params.toString()}`
+  );
+
+  if (result.statusCode !== 200) {
+    throw new Error(result.message || 'Error cargando documentos');
+  }
+
+  // Si el backend devuelve array plano, usalo directo
+  // Si devuelve ApiResponse con response[], mapeamos
+  return Array.isArray(result.response) ? result.response : [];
+}
+
+// ─── 4. PAGINACIÓN SERVER-SIDE (mantenido por si lo necesitas luego) ───
 export async function fetchGestiones(
   id_cliente: string,
   id_cartera: string,
@@ -79,7 +106,7 @@ export async function fetchGestiones(
 }
 
 // ═══════════════════════════════════════════
-// MAPEO: CabeceraPantallaApi → ColumnApi
+// MAPEO
 // ═══════════════════════════════════════════
 function mapCabecerasToColumns(cabeceras: CabeceraPantallaApi[]): ColumnApi[] {
   const ordenadas = [...cabeceras].sort((a, b) => a.orden - b.orden);
@@ -132,7 +159,6 @@ export function mapResponseToDocumento(raw: Record<string, unknown>): DocumentoA
 // ═══════════════════════════════════════════
 // MOCKS
 // ═══════════════════════════════════════════
-
 function mockBotones(id_cliente: string, id_cartera: string): BotonApi[] {
   if (id_cliente === '95') {
     return [
