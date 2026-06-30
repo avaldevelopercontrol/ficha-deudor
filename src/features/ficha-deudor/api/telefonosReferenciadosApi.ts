@@ -9,7 +9,6 @@ import type { TelefonoReferenciado, TelefonoFormData, ApiResponse,
               CreateTelefonoRequest} from '../../../shared/types/indexApi';
 import { parseApiDate } from '../hooks/useTelefonosReferenciados';
 
-const BASE_GESTION = '/v1/Gestion';
 const BASE_TELEFONO = '/v1/Telefono';
 
 // ─── GET: Todos los registros (carga masiva para filtros client-side) ───
@@ -25,7 +24,7 @@ export async function fetchTelefonosReferenciados(
   });
 
   const result = await apiClient<ApiResponse<TelefonoReferenciadoApi[]>>(
-    `${BASE_GESTION}/GetGestionTelefonos?${params.toString()}`,
+    `${BASE_TELEFONO}/GetTelefonos?${params.toString()}`,
   );
 
   if (result.statusCode !== 200) {

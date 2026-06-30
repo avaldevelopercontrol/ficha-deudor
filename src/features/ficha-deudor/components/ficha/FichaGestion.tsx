@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { SelectField, TextAreaField, CheckboxField } from '../../../../shared/components/ui';
-import { opcionesNP0, opcionesNP1, opcionesNP2, estadosGestion, tiposGestion } from '../../mocks/mockData';
-import type { GestionForm } from '../../../../shared/types';
+import { opcionesNP0, opcionesNP1, opcionesNP2 } from '../../mocks/mockData';
+import { useGestionEstados, useGestionTipos } from '../../hooks/useFichaGestion';
+import type { GestionForm } from '../../../../shared/types/indexApi';
 import Modal from '../../../../shared/components/modals/Modal';
 
-interface Props { onSubmit?: (data: GestionForm) => void; }
+interface Props { idCliente: string; onSubmit?: (data: GestionForm) => void; }
 
 const initialForm: GestionForm = {
   nombreContacto: '', cargo: '', np0: '', np1: '', np2: '', estadoGestion: '', telefono: '', tipoGestion: '', gestorId: '', gestorNombre: '', fechaCompromisoPago: '', compromisoSoles: '', compromisoUSD: '', fechaNuevaGestion: '', horaNuevaGestion: '', fechaGestion: '', horaGestion: '', gestionTerminada: false, observaciones: '',
 };
 
-const FichaGestion: React.FC<Props> = ({ onSubmit }) => {
+const FichaGestion: React.FC<Props> = ({ idCliente, onSubmit }) => {
   const [form, setForm] = useState<GestionForm>(initialForm);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle] = useState('');
@@ -36,6 +37,28 @@ const FichaGestion: React.FC<Props> = ({ onSubmit }) => {
 
   const np1Options = form.np0 ? opcionesNP1[form.np0] ?? [] : [];
   const np2Options = form.np1 ? opcionesNP2[form.np1] ?? [] : [];
+
+  const {
+    data: estadosData,
+    isLoading: isLoadingEstados,
+    error: errorEstados,
+  } = useGestionEstados(idCliente);
+
+  const estadosOptions = estadosData?.map((e) => ({
+    id: e.id,
+    label: e.nombre,
+  })) ?? [];
+
+  const {
+    data: tiposData,
+    isLoading: isLoadingTipos,
+    error: errorTipos,
+  } = useGestionTipos();
+
+  const tiposOptions = tiposData?.map((t) => ({
+    id: t.id,
+    label: t.nombre,
+  })) ?? [];
 
   return (
     <div className="ficha-card">
@@ -107,17 +130,21 @@ const FichaGestion: React.FC<Props> = ({ onSubmit }) => {
           <div className="form-grid g3" style={{ marginBottom: '12px' }}>
             <SelectField
               label="Estado de Gestión"
-              options={estadosGestion}
+              options={estadosOptions}
               value={form.estadoGestion}
               onChange={(val) => set('estadoGestion', val)}
-              placeholder="Seleccionar estado..."
+              placeholder={isLoadingEstados ? 'Cargando...' : 'Seleccionar estado...'}
+              disabled={isLoadingEstados}
+              error={errorEstados || ''}
             />
             <SelectField
               label="Tipo de Gestión"
-              options={tiposGestion}
+              options={tiposOptions}
               value={form.tipoGestion}
               onChange={(val) => set('tipoGestion', val)}
-              placeholder="Seleccionar tipo..."
+              placeholder={isLoadingTipos ? 'Cargando...' : 'Seleccionar tipo...'}
+              disabled={isLoadingTipos}
+              error={errorTipos || ''}
             />
             <div className="form-group">
               <label className="form-label">Teléfono</label>

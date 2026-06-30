@@ -11,7 +11,7 @@ import PanelEstadoGestionRealizada from '../components/paneles/PanelEstadoGestio
 import PanelGestionRealizada from '../components/paneles/PanelGestionRealizada';
 import { DeudorProvider } from '../contexts/DeudorContext';
 import { useDeudorHeader } from '../hooks/useDeudorHeader';
-import type { GestionForm } from '../../../shared/types';
+import type { GestionForm } from '../../../shared/types/indexApi';
 
 interface FichaContentProps {
   id_cliente: string;
@@ -87,7 +87,7 @@ const FichaContent: React.FC<FichaContentProps> = ({
             <PanelDireccionesReferenciadas isActive={panelActivo === 'DIRECCIONES REFERENCIADAS'} id_cliente={id_cliente} id_deudor={id_deudor} id_usuario={id_usuario} />
             <PanelGestionRealizada isActive={panelActivo === 'GESTIÓN REALIZADA'} id_cliente={id_cliente} id_cartera={id_cartera} id_deudor={id_deudor} id_usuario={id_usuario}/>
             <PanelEstadoGestionRealizada isActive={panelActivo === 'ESTADO DE GESTIÓN REALIZADA'} id_cliente={id_cliente} id_cartera={id_cartera} id_deudor={id_deudor}/>
-            <FichaGestion onSubmit={handleGestionSubmit} />
+            <FichaGestion onSubmit={handleGestionSubmit} idCliente={id_cliente} />
           </div>
         </main>
       </div>

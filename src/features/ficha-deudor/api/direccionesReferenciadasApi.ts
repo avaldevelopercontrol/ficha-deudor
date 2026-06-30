@@ -21,7 +21,6 @@ import type {
   UpdateDireccionRequest,
 } from '../../../shared/types/indexApi';
 
-const BASE_GESTION = '/v1/Gestion';
 const BASE_DIRECCION = '/v1/Direccion';
 
 // ─── GET: Todos los registros (carga masiva para filtros client-side) ───
@@ -37,7 +36,7 @@ export async function fetchDireccionesReferenciadas(
   });
 
   const result = await apiClient<ApiResponse<DireccionReferenciadaApi[]>>(
-    `${BASE_GESTION}/GetGestionDirecciones?${params.toString()}`,
+    `${BASE_DIRECCION}/GetDirecciones?${params.toString()}`,
   );
 
   if (result.statusCode !== 200) {

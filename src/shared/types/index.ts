@@ -31,7 +31,10 @@ export interface Distrito {
 }
 
 export * from '../../features/ficha-deudor/types/deudor.types';
-export * from '../../features/ficha-deudor/types/gestion.types';
 export * from '../../features/ficha-deudor/types/telefono.types';
 export * from '../../features/ficha-deudor/types/direccion.types';
 export * from '../../features/ficha-deudor/types/popups/email.types';
+export * from '../../features/ficha-deudor/types/popups/agenda.types';
+export * from '../../features/ficha-deudor/types/popups/pago.types';
+export * from '../../features/ficha-deudor/types/popups/infDeudor.types';
+export * from '../../features/ficha-deudor/types/fichaGestion.types';

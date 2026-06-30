@@ -46,13 +46,14 @@ export async function fetchColumnas(
 // ─── 2. BOTONES (mock) ───
 export async function fetchBotones(
   id_cliente: string,
+  id_cartera: string,
   id_deudor: string,
   id_usuario: string
 ): Promise<BotonApi[]> {
   return apiClient<BotonApi[]>(
     `${BASE_DOCUMENTOS}/botones?id_cliente=${id_cliente}`,
     {
-      mock: () => mockBotones(id_cliente, id_deudor, id_usuario),
+      mock: () => mockBotones(id_cliente, id_cartera, id_deudor, id_usuario),
     }
   );
 }
@@ -160,16 +161,33 @@ export function mapResponseToDocumento(raw: Record<string, unknown>): DocumentoA
 // ═══════════════════════════════════════════
 // MOCKS
 // ═══════════════════════════════════════════
-function mockBotones(id_cliente: string, id_deudor: string, id_usuario:string): BotonApi[] {
+function mockBotones(id_cliente: string, id_cartera: string, id_deudor: string, id_usuario:string): BotonApi[] {
   if (id_cliente === '95') {
     return [
-      { id: 'datos_cliente', label: 'DATOS_CLIENTE', action: 'modal_datos_cliente' },
-      { id: 'pagos', label: 'PAGOS', action: 'modal_pagos' },
+      //{ id: 'datos_cliente', label: 'DATOS_CLIENTE', action: 'modal_datos_cliente' },
+      {
+        id: 'pagos',
+        label: 'PAGOS',
+        action: 'popup_pago',
+        popupUrl: `${window.location.origin}/popup/pago-deudor/${id_cliente}/${id_cartera}/${id_deudor}`,
+      },
       {
         id: 'email',
         label: 'EMAIL',
         action: 'popup_email',
         popupUrl: `${window.location.origin}/popup/email-deudor/${id_cliente}/${id_deudor}/${id_usuario}`,
+      },
+      {
+        id: 'agendas',
+        label: 'AGENDAS',
+        action: 'popup_agenda',
+        popupUrl: `${window.location.origin}/popup/agenda-deudor/${id_cliente}/${id_cartera}/${id_deudor}/${id_usuario}`,
+      },
+      {
+        id: 'inf_deudor',
+        label: 'INF. DEUDOR',
+        action: 'popup_inf_deudor',
+        popupUrl: `${window.location.origin}/popup/inf-deudor/${id_cliente}/${id_cartera}/${id_deudor}/${id_usuario}`,
       },
     ];
   }

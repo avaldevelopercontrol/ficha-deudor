@@ -3,6 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/hooks';
 import { LoginPage } from '../features/auth/pages';
 import EmailDeudorPopup from '../features/ficha-deudor/components/popups/EmailDeudorPopup';
+import AgendaDeudorPopup from '../features/ficha-deudor/components/popups/AgendaDeudorPopup';
+import PagoDeudorPopup from '../features/ficha-deudor/components/popups/PagoDeudorPopup';
+import InfDeudorPopup from '../features/ficha-deudor/components/popups/InfDeudorPopup';
 
 // Lazy loading
 const DashboardPage = React.lazy(() => import('../features/dashboard/pages/DashboardPage'));
@@ -63,6 +66,9 @@ const App: React.FC = () => {
           }
         />
          <Route path="/popup/email-deudor/:id_cliente/:id_deudor/:id_usuario" element={<EmailDeudorPopup />} />
+         <Route path="/popup/agenda-deudor/:id_cliente/:id_cartera/:id_deudor/:id_usuario" element={<AgendaDeudorPopup />} />
+         <Route path="/popup/pago-deudor/:id_cliente/:id_cartera/:id_deudor" element={<PagoDeudorPopup />} />
+         <Route path="/popup/inf-deudor/:id_cliente/:id_cartera/:id_deudor/:id_usuario" element={<InfDeudorPopup />} />
       </Routes>
     </BrowserRouter>
   );

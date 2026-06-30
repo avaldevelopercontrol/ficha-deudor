@@ -20,11 +20,11 @@ const COLUMN_WIDTHS: Record<string, string> = {
   dyn_0: '120px',   // Tramo
   dyn_1: '80px',   // Id
   dyn_2: '160px',  // Documento
-  dyn_3: '120px',   // Estado
-  dyn_4: '158px',  // Vencimiento
+  dyn_3: '100px',   // Estado
+  dyn_4: '120px',  // Vencimiento
   dyn_5: '75px',   // Mon.
-  dyn_6: '150px',   // Importe
-  dyn_7: '150px',   // Deuda
+  dyn_6: '120px',   // Importe
+  dyn_7: '120px',   // Deuda
 };
 
 const DocumentosTable: React.FC<Props> = ({

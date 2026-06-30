@@ -49,24 +49,6 @@ export const opcionesNP2: Record<string, SelectOption[]> = {
   NEB: [{ id: 'NEB1', label: 'NEB1 - Otra persona' }],
 };
 
-export const estadosGestion: SelectOption[] = [
-  { id: 'PENDIENTE', label: 'PENDIENTE' },
-  { id: 'EN_PROCESO', label: 'EN PROCESO' },
-  { id: 'PROMESA', label: 'PROMESA DE PAGO' },
-  { id: 'INCUMPLIMIENTO', label: 'INCUMPLIMIENTO' },
-  { id: 'PAGADO', label: 'PAGADO' },
-  { id: 'PREJUDICIAL', label: 'PREJUDICIAL' },
-];
-
-export const tiposGestion: SelectOption[] = [
-  { id: 'LLAMADA', label: 'LLAMADA TELEFÓNICA' },
-  { id: 'VISITA', label: 'VISITA DOMICILIARIA' },
-  { id: 'EMAIL', label: 'CORREO ELECTRÓNICO' },
-  { id: 'SMS', label: 'MENSAJE DE TEXTO' },
-  { id: 'WHATSAPP', label: 'WHATSAPP' },
-  { id: 'CARTA', label: 'CARTA NOTARIAL' },
-];
-
 export const botonesAccionPorPerfil: Record<string, string[]> = {
   default: [
     '+ESTADO_CUENTA', '+DATOS_CLIENTE', '+CARTAS', '+ESTADO_DOCUMENTO',
