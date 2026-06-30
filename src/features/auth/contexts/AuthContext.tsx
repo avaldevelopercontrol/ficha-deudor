@@ -1,7 +1,17 @@
-// src/features/auth/contexts/AuthContext.tsx
+import React, {
+  createContext,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 
-import React, { createContext, useState, useCallback, useMemo } from 'react';
-import type { AuthContextValue, AuthState, Cliente, LoginPayload } from '../types';
+import type {
+  AuthContextValue,
+  AuthState,
+  Cliente,
+  LoginPayload,
+  LoginResponse,
+} from '../types';
 
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -17,44 +27,73 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
+const buildLoginErrorResponse = (message: string): LoginResponse => {
+  return {
+    success: false,
+    message,
+    usuario: null,
+  };
+};
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [state, setState] = useState<AuthState>(initialState);
 
-  const login = useCallback(async (payload: LoginPayload) => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-    try {
-      // Importamos dinámicamente para evitar circular dependency si fuera necesario
-      const { login: loginApi } = await import('../api/authApi');
-      const response = await loginApi(payload);
-
-      if (!response.success) {
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: response.message,
-        }));
-        return;
-      }
-
+  const login = useCallback(
+    async (payload: LoginPayload): Promise<LoginResponse> => {
       setState((prev) => ({
         ...prev,
-        isAuthenticated: true,
-        usuario: response.usuario,
-        isLoading: false,
+        isLoading: true,
         error: null,
       }));
 
-      
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
-      setState((prev) => ({ ...prev, isLoading: false, error: message }));
-    }
-  }, []);
+      try {
+        const { login: loginApi } = await import('../api/authApi');
+
+        const response = await loginApi(payload);
+
+        if (!response.success || !response.usuario) {
+          setState((prev) => ({
+            ...prev,
+            isAuthenticated: false,
+            usuario: null,
+            isLoading: false,
+            error: response.message,
+          }));
+
+          return response;
+        }
+
+        setState((prev) => ({
+          ...prev,
+          isAuthenticated: true,
+          usuario: response.usuario,
+          isLoading: false,
+          error: null,
+        }));
+
+        return response;
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Error al iniciar sesión.';
+
+        setState((prev) => ({
+          ...prev,
+          isAuthenticated: false,
+          usuario: null,
+          isLoading: false,
+          error: message,
+        }));
+
+        return buildLoginErrorResponse(message);
+      }
+    },
+    []
+  );
 
   const logout = useCallback(() => {
     setState(initialState);
-    // Limpiar cualquier dato en localStorage si se usa en el futuro
     localStorage.removeItem('auth_token');
   }, []);
 
@@ -66,7 +105,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const clearError = useCallback(() => {
-    setState((prev) => ({ ...prev, error: null }));
+    setState((prev) => ({
+      ...prev,
+      error: null,
+    }));
   }, []);
 
   const value = useMemo<AuthContextValue>(
@@ -80,5 +122,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     [state, login, logout, seleccionarCliente, clearError]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

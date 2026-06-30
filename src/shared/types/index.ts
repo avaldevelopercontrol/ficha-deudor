@@ -11,6 +11,8 @@ export interface Column {
   render?: (row: any) => React.ReactNode;
   width?: string;
   filterable?: boolean;
+  group?: string;
+  groupLabel?: string;
 }
 
 export interface Ubigeo {
@@ -38,3 +40,4 @@ export * from '../../features/ficha-deudor/types/popups/agenda.types';
 export * from '../../features/ficha-deudor/types/popups/pago.types';
 export * from '../../features/ficha-deudor/types/popups/infDeudor.types';
 export * from '../../features/ficha-deudor/types/fichaGestion.types';
+export * from '../../features/dashboard/types/dashboardDeudor.types';
