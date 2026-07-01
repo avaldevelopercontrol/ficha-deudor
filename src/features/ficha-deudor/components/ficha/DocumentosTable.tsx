@@ -1,9 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Table from '../../../../shared/components/table/Table';
 import Modal from '../../../../shared/components/modals/Modal';
 import Paginacion from '../../../../shared/components/ui/Paginacion';
-import { useDocumentos, openPopup} from '../../hooks/useDocumentos';
-import type { DocumentoApi, ColumnApi, BotonApi, DeudorInfo } from '../../../../shared/types/indexApi';
+import { useDocumentos, openPopup } from '../../hooks/useDocumentos';
+import type {
+  DocumentoApi,
+  ColumnApi,
+  BotonApi,
+  DeudorInfo,
+} from '../../../../shared/types/indexApi';
 
 interface Props {
   id_cliente: string;
@@ -15,22 +20,104 @@ interface Props {
   onDocumentoClick?: (doc: DocumentoApi) => void;
 }
 
-// ─── Anchos mínimos por columna (basado en contenido real) ───
+// ─── Anchos fijos por columna conocida ───
 const COLUMN_WIDTHS: Record<string, string> = {
-  dyn_0: '120px',   // Tramo
+  dyn_0: '120px',  // Tramo
   dyn_1: '80px',   // Id
   dyn_2: '160px',  // Documento
-  dyn_3: '100px',   // Estado
+  dyn_3: '100px',  // Estado
   dyn_4: '120px',  // Vencimiento
   dyn_5: '75px',   // Mon.
-  dyn_6: '120px',   // Importe
-  dyn_7: '120px',   // Deuda
+  dyn_6: '120px',  // Importe
+  dyn_7: '120px',  // Deuda
+};
+
+// ─── Configuración para columnas dinámicas sin ancho fijo ───
+const MIN_DYNAMIC_COLUMN_WIDTH = 90;
+const CHAR_WIDTH_PX = 8;
+const CELL_EXTRA_WIDTH_PX = 32;
+
+const STATIC_DOCUMENTO_KEYS = [
+  'nId_DocxCobrar',
+  'mejorStatus',
+  'nId_Moneda',
+  'bEstado',
+  'nZona',
+  'bSelected',
+  'nId_Estrategia',
+  'nId_Cartera',
+];
+
+const getDocumentoColumnValue = (
+  row: DocumentoApi,
+  column: ColumnApi
+): unknown => {
+  const allKeys = Object.keys(row);
+  const dynamicKeys = allKeys.filter((key) => !STATIC_DOCUMENTO_KEYS.includes(key));
+
+  const match = column.key.match(/dyn_(\d+)/);
+
+  if (!match) {
+    return row[column.key];
+  }
+
+  const index = parseInt(match[1], 10);
+  const fieldName = dynamicKeys[index];
+
+  if (!fieldName) return undefined;
+
+  return row[fieldName];
+};
+
+const getTextLengthForWidth = (
+  value: unknown,
+  column: ColumnApi
+): number => {
+  if (value === null || value === undefined) return 1;
+
+  if (column.type === 'money' && typeof value === 'number') {
+    return value.toLocaleString('es-PE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).length;
+  }
+
+  if (column.type === 'atraso') {
+    return `${String(value)}d`.length;
+  }
+
+  return String(value).length;
+};
+
+const calculateDynamicColumnWidth = (
+  column: ColumnApi,
+  rows: DocumentoApi[]
+): string => {
+  const fixedWidth = COLUMN_WIDTHS[column.key];
+
+  if (fixedWidth) {
+    return fixedWidth;
+  }
+
+  const maxContentLength = rows.reduce((maxLength, row) => {
+    const value = getDocumentoColumnValue(row, column);
+    const valueLength = getTextLengthForWidth(value, column);
+
+    return Math.max(maxLength, valueLength);
+  }, column.label.length);
+
+  const calculatedWidth = Math.max(
+    MIN_DYNAMIC_COLUMN_WIDTH,
+    maxContentLength * CHAR_WIDTH_PX + CELL_EXTRA_WIDTH_PX
+  );
+
+  return `${Math.ceil(calculatedWidth)}px`;
 };
 
 const DocumentosTable: React.FC<Props> = ({
   id_cliente,
   id_cartera,
-  id_deudor,  
+  id_deudor,
   id_contrato,
   id_usuario,
   data,
@@ -56,6 +143,15 @@ const DocumentosTable: React.FC<Props> = ({
     onSelectedFilterChange,
   } = useDocumentos(id_cliente, id_cartera, id_deudor, id_contrato, id_usuario);
 
+  const columnWidths = useMemo(() => {
+    const rowsForWidth = allData.length > 0 ? allData : paginatedData;
+
+    return columns.reduce<Record<string, string>>((acc, column) => {
+      acc[column.key] = calculateDynamicColumnWidth(column, rowsForWidth);
+      return acc;
+    }, {});
+  }, [columns, allData, paginatedData]);
+
   const handleBotonClick = (boton: BotonApi) => {
     if (boton.popupUrl) {
       const nombre = encodeURIComponent(data.nombreRazonSocial);
@@ -77,16 +173,20 @@ const DocumentosTable: React.FC<Props> = ({
   const verificarScroll = () => {
     const el = scrollRef.current;
     if (!el) return;
+
     setPuedeScrollIzq(el.scrollLeft > 0);
     setPuedeScrollDer(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
   };
 
   useEffect(() => {
     verificarScroll();
+
     const el = scrollRef.current;
     if (!el) return;
+
     el.addEventListener('scroll', verificarScroll);
     window.addEventListener('resize', verificarScroll);
+
     return () => {
       el.removeEventListener('scroll', verificarScroll);
       window.removeEventListener('resize', verificarScroll);
@@ -96,7 +196,11 @@ const DocumentosTable: React.FC<Props> = ({
   const scroll = (direccion: 'izq' | 'der') => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollBy({ left: direccion === 'izq' ? -200 : 200, behavior: 'smooth' });
+
+    el.scrollBy({
+      left: direccion === 'izq' ? -200 : 200,
+      behavior: 'smooth',
+    });
   };
 
   const openModal = (title: string) => {
@@ -105,32 +209,17 @@ const DocumentosTable: React.FC<Props> = ({
   };
 
   const renderCell = (row: DocumentoApi, column: ColumnApi) => {
-    const allKeys = Object.keys(row);
-    const staticKeys = [
-      'nId_DocxCobrar', 'mejorStatus', 'nId_Moneda', 'bEstado',
-      'nZona', 'bSelected', 'nId_Estrategia', 'nId_Cartera',
-    ];
-    const dynamicKeys = allKeys.filter((k) => !staticKeys.includes(k));
-
-    const match = column.key.match(/dyn_(\d+)/);
-    if (!match) {
-      const value = row[column.key];
-      return value === null || value === undefined ? '-' : String(value);
-    }
-
-    const index = parseInt(match[1], 10);
-    const fieldName = dynamicKeys[index];
-
-    if (!fieldName) return '-';
-
-    const value = row[fieldName];
+    const value = getDocumentoColumnValue(row, column);
 
     if (value === null || value === undefined) return '-';
 
     switch (column.type) {
       case 'money':
         return typeof value === 'number'
-          ? value.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          ? value.toLocaleString('es-PE', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
           : String(value);
 
       case 'atraso':
@@ -142,6 +231,7 @@ const DocumentosTable: React.FC<Props> = ({
 
       case 'estado': {
         const isActivo = String(value).toUpperCase() === 'ACTIVO';
+
         return (
           <span
             style={{
@@ -190,7 +280,9 @@ const DocumentosTable: React.FC<Props> = ({
     return (
       <div className="ficha-card" style={{ padding: '2rem', color: '#c00' }}>
         <p style={{ marginBottom: 12 }}>Error al cargar documentos:</p>
-        <p style={{ fontSize: '0.9em', color: '#666', marginBottom: 16 }}>{error}</p>
+        <p style={{ fontSize: '0.9em', color: '#666', marginBottom: 16 }}>
+          {error}
+        </p>
         <button
           onClick={refetch}
           style={{ padding: '8px 16px', cursor: 'pointer' }}
@@ -213,10 +305,11 @@ const DocumentosTable: React.FC<Props> = ({
       <div className="documentos-table-compact">
         <style>{`
           .documentos-table-compact table {
-            table-layout: fixed !important;
-            width: auto !important;
+            table-layout: auto !important;
+            width: max-content !important;
             min-width: 100% !important;
           }
+
           .documentos-table-compact th,
           .documentos-table-compact td {
             overflow: hidden !important;
@@ -225,6 +318,7 @@ const DocumentosTable: React.FC<Props> = ({
             padding: 6px 4px !important;
             font-size: 1em !important;
           }
+
           .documentos-table-compact th input[type="text"],
           .documentos-table-compact th input[type="search"],
           .documentos-table-compact th select {
@@ -236,22 +330,27 @@ const DocumentosTable: React.FC<Props> = ({
             padding: 3px 4px !important;
             height: 26px !important;
           }
+
           .documentos-table-compact th input::placeholder {
             font-size: 0.85em !important;
           }
+
           .documentos-table-compact th > div:first-child {
             font-size: 0.8em !important;
             font-weight: 600 !important;
             margin-bottom: 2px !important;
           }
+
           ${columns.map((col, index) => {
-            const width = COLUMN_WIDTHS[col.key] || '90px';
+            const width = columnWidths[col.key] || `${MIN_DYNAMIC_COLUMN_WIDTH}px`;
+            const isFixedColumn = Boolean(COLUMN_WIDTHS[col.key]);
+
             return `
               .documentos-table-compact th:nth-child(${index + 1}),
               .documentos-table-compact td:nth-child(${index + 1}) {
                 width: ${width} !important;
                 min-width: ${width} !important;
-                max-width: ${width} !important;
+                ${isFixedColumn ? `max-width: ${width} !important;` : ''}
               }
             `;
           }).join('\n')}
@@ -293,7 +392,10 @@ const DocumentosTable: React.FC<Props> = ({
         />
       )}
 
-      <div className="ficha-block botones-carrusel-wrapper" style={{ marginTop: 12, paddingBottom: 12 }}>
+      <div
+        className="ficha-block botones-carrusel-wrapper"
+        style={{ marginTop: 12, paddingBottom: 12 }}
+      >
         {puedeScrollIzq && (
           <button
             type="button"
@@ -332,7 +434,11 @@ const DocumentosTable: React.FC<Props> = ({
         )}
       </div>
 
-      <Modal isOpen={modalOpen} title={modalTitle} onClose={() => setModalOpen(false)} />
+      <Modal
+        isOpen={modalOpen}
+        title={modalTitle}
+        onClose={() => setModalOpen(false)}
+      />
     </div>
   );
 };

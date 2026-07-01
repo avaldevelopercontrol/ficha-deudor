@@ -12,6 +12,7 @@ import PanelGestionRealizada from '../components/paneles/PanelGestionRealizada';
 import { DeudorProvider } from '../contexts/DeudorContext';
 import { useDeudorHeader } from '../hooks/useDeudorHeader';
 import type { GestionForm } from '../../../shared/types/indexApi';
+import { useAuth } from '../../auth/hooks';
 
 interface FichaContentProps {
   id_cliente: string;
@@ -28,6 +29,7 @@ const FichaContent: React.FC<FichaContentProps> = ({
   id_contrato, 
   id_usuario 
 }) => {
+  const { usuario, clienteSeleccionada } = useAuth();
   const [contacto, setContacto] = useState('');
   const [panelActivo, setPanelActivo] = useState<string | null>(null);
   
@@ -56,9 +58,16 @@ const FichaContent: React.FC<FichaContentProps> = ({
             <span className="nav-sep">›</span>
             <span className="nav-item nav-item--active">FICHA DEUDOR</span>
           </nav>
-          <div className="app-user">
-            <span className="user-name">Gestor: {id_usuario}</span>
-            <span className="user-dot" />
+          <div className="dashboard-header__user">
+            <span>
+              <strong>Usuario:</strong> {usuario?.nombre} {usuario?.apellido}
+            </span>
+
+            <span>•</span>
+
+            <span>
+              <strong>Cliente:</strong> {clienteSeleccionada?.nombre}
+            </span>
           </div>
         </header>
 
@@ -87,7 +96,7 @@ const FichaContent: React.FC<FichaContentProps> = ({
             <PanelDireccionesReferenciadas isActive={panelActivo === 'DIRECCIONES REFERENCIADAS'} id_cliente={id_cliente} id_deudor={id_deudor} id_usuario={id_usuario} />
             <PanelGestionRealizada isActive={panelActivo === 'GESTIÓN REALIZADA'} id_cliente={id_cliente} id_cartera={id_cartera} id_deudor={id_deudor} id_usuario={id_usuario}/>
             <PanelEstadoGestionRealizada isActive={panelActivo === 'ESTADO DE GESTIÓN REALIZADA'} id_cliente={id_cliente} id_cartera={id_cartera} id_deudor={id_deudor}/>
-            <FichaGestion onSubmit={handleGestionSubmit} idCliente={id_cliente} />
+            <FichaGestion onSubmit={handleGestionSubmit} idCliente={id_cliente} idCartera={id_cartera} idContrato={id_contrato}/>
           </div>
         </main>
       </div>
