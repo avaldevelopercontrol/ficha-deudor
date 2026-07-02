@@ -1,16 +1,13 @@
-import React, { useCallback, useState } from 'react';
-import { ActionButton } from '../../../../shared/components/ui';
+import React from 'react';
 import { PanelLayout } from './PanelLayout';
 import { useTelefonosReferenciados } from '../../hooks/useTelefonosReferenciados';
 import { usePanelTelefonosReferenciadosColumns } from '../../hooks/usePanelTelefonosReferenciadosColumns';
-import type {
-  TelefonoReferenciado,
-  TelefonoFormData,
-} from '../../../../shared/types';
+import { usePanelTelefonosReferenciadosActions } from '../../hooks/usePanelTelefonosReferenciadosActions';
 import ModalRegistrarTelefono from '../modals/accionesRapidas/ModalRegistrarTelefono';
 import ModalEditarTelefono from '../modals/accionesRapidas/ModalEditarTelefono';
 import PanelTablaResumen from './shared/PanelTablaResumen';
 import PanelResumenEstado from './shared/PanelResumenEstado';
+import PanelTablaHeaderActions from './shared/PanelTablaHeaderActions';
 
 interface Props {
   isActive: boolean;
@@ -45,43 +42,20 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({
     update,
   } = useTelefonosReferenciados(id_cliente, id_deudor, id_usuario);
 
-  const [showRegistrar, setShowRegistrar] = useState(false);
-  const [showEditar, setShowEditar] = useState(false);
-  const [telefonoEditarId, setTelefonoEditarId] = useState<number | null>(null);
-
-  const handleEdit = useCallback((row: TelefonoReferenciado) => {
-    setTelefonoEditarId(row.id);
-    setShowEditar(true);
-  }, []);
-
-  const handleCloseEditar = useCallback(() => {
-    setShowEditar(false);
-    setTelefonoEditarId(null);
-  }, []);
-
-  const handleGuardarEdicion = useCallback(
-    async (formData: TelefonoFormData) => {
-      try {
-        await update(formData.id, formData);
-        handleCloseEditar();
-      } catch {
-        alert('No se pudo guardar la edición del teléfono.');
-      }
-    },
-    [update, handleCloseEditar]
-  );
-
-  const handleRegistrar = useCallback(
-    async (formData: TelefonoFormData) => {
-      try {
-        await create(formData);
-        setShowRegistrar(false);
-      } catch {
-        alert('No se pudo registrar el teléfono.');
-      }
-    },
-    [create]
-  );
+  const {
+    showRegistrar,
+    showEditar,
+    telefonoEditarId,
+    handleOpenRegistrar,
+    handleCloseRegistrar,
+    handleEdit,
+    handleCloseEditar,
+    handleGuardarEdicion,
+    handleRegistrar,
+  } = usePanelTelefonosReferenciadosActions({
+    create,
+    update,
+  });
 
   const { columns } = usePanelTelefonosReferenciadosColumns({
     onEdit: handleEdit,
@@ -119,29 +93,23 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({
           itemLabel="teléfono(s)"
           setPageNumber={setPageNumber}
           setPageSize={setPageSize}
+          fitToPanel
           onTextFilterChange={onTextFilterChange}
           onSelectedFilterChange={onSelectedFilterChange}
           headerRight={
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '12px', color: '#6b7a99' }}>
-                Página {pageNumber} de {totalPages}
-              </span>
-
-              <ActionButton
-                label="Agregar Teléfono"
-                variant="primary"
-                size="sm"
-                icon="＋"
-                onClick={() => setShowRegistrar(true)}
-              />
-            </div>
+            <PanelTablaHeaderActions
+              pageNumber={pageNumber}
+              totalPages={totalPages}
+              buttonLabel="Agregar Teléfono"
+              onAdd={handleOpenRegistrar}
+            />
           }
         />
       </PanelLayout>
 
       <ModalRegistrarTelefono
         isOpen={showRegistrar}
-        onClose={() => setShowRegistrar(false)}
+        onClose={handleCloseRegistrar}
         onRegistrar={handleRegistrar}
       />
 

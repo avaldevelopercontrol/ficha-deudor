@@ -1,13 +1,8 @@
-import React, { useCallback, useMemo } from 'react';
-import { WrapCell } from '../../../../shared/components/ui/WrapCell';
-import { Badge } from '../../../../shared/components/ui/Badge';
+import React from 'react';
 import { PanelLayout } from './PanelLayout';
 import { useDatosAdicionales } from '../../hooks/useDatosAdicionales';
-import type { Column } from '../../../../shared/types';
-import type {
-  ColumnApi,
-  DatoAdicionalApi,
-} from '../../../../shared/types/indexApi';
+import { usePanelDatosAdicionalesColumns } from '../../hooks/usePanelDatosAdicionalesColumns';
+import PanelResumenEstado from './shared/PanelResumenEstado';
 import PanelTablaResumen from './shared/PanelTablaResumen';
 
 interface Props {
@@ -16,15 +11,6 @@ interface Props {
   id_cartera: string;
   id_deudor: string;
 }
-
-const ESTADOS_SERVICIO: Record<
-  string,
-  { variant: 'success' | 'warning' | 'danger' | 'neutral' }
-> = {
-  Activo: { variant: 'success' },
-  Suspendido: { variant: 'warning' },
-  Cancelado: { variant: 'danger' },
-};
 
 const PanelDatosAdicionales: React.FC<Props> = ({
   isActive,
@@ -51,95 +37,20 @@ const PanelDatosAdicionales: React.FC<Props> = ({
     onSelectedFilterChange,
   } = useDatosAdicionales(id_cliente, id_cartera, id_deudor, 3);
 
-  const renderCell = useCallback((row: DatoAdicionalApi, column: ColumnApi) => {
-    const rawValue = row[column.key];
-
-    if (rawValue === null || rawValue === undefined) return '-';
-
-    const value = String(rawValue);
-
-    switch (column.type) {
-      case 'money': {
-        const numValue = Number(rawValue);
-
-        return Number.isNaN(numValue)
-          ? value
-          : numValue.toLocaleString('es-PE', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            });
-      }
-
-      case 'estado': {
-        const config = ESTADOS_SERVICIO[value];
-
-        return <Badge variant={config?.variant || 'neutral'}>{value}</Badge>;
-      }
-
-      default:
-        return <WrapCell weight={500}>{value}</WrapCell>;
-    }
-  }, []);
-
-  const tableColumns: Column<DatoAdicionalApi>[] = useMemo(
-    () =>
-      columns.map((column) => ({
-        key: column.key,
-        label: column.label,
-        render: (row) => renderCell(row, column),
-      })),
-    [columns, renderCell]
-  );
+  const { tableColumns } = usePanelDatosAdicionalesColumns(columns);
 
   if (!isActive) return null;
 
-  if (isLoading) {
+  if (isLoading || error) {
     return (
-      <PanelLayout title="DATOS ADICIONALES" isActive={isActive}>
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
-          <div
-            style={{
-              display: 'inline-block',
-              width: 20,
-              height: 20,
-              border: '3px solid #ddd',
-              borderTopColor: '#333',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-            }}
-          />
-
-          <p style={{ marginTop: 8, color: '#666' }}>
-            Cargando datos adicionales...
-          </p>
-
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        </div>
-      </PanelLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <PanelLayout title="DATOS ADICIONALES" isActive={isActive}>
-        <div style={{ padding: '2rem', color: '#c00' }}>
-          <p style={{ marginBottom: 12 }}>
-            Error al cargar datos adicionales:
-          </p>
-
-          <p style={{ fontSize: '0.9em', color: '#666', marginBottom: 16 }}>
-            {error}
-          </p>
-
-          <button
-            onClick={refetch}
-            style={{ padding: '8px 16px', cursor: 'pointer' }}
-            type="button"
-          >
-            Reintentar
-          </button>
-        </div>
-      </PanelLayout>
+      <PanelResumenEstado
+        title="DATOS ADICIONALES"
+        isActive={isActive}
+        error={error}
+        loadingMessage="Cargando datos adicionales..."
+        errorTitle="Error al cargar datos adicionales:"
+        onRetry={refetch}
+      />
     );
   }
 
@@ -158,6 +69,7 @@ const PanelDatosAdicionales: React.FC<Props> = ({
         emptyMessage="No se encontraron datos adicionales"
         pageSizeOptions={[5, 10, 20, 50]}
         showCount={false}
+        fitToPanel
         setPageNumber={setPageNumber}
         setPageSize={setPageSize}
         onTextFilterChange={onTextFilterChange}

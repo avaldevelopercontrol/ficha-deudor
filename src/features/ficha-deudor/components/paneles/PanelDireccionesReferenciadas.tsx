@@ -1,20 +1,13 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import ModalRegistrarDireccion from '../modals/accionesRapidas/ModalRegistrarDireccion';
 import ModalEditarDireccion from '../modals/accionesRapidas/ModalEditarDireccion';
-import { ActionButton } from '../../../../shared/components/ui';
 import { PanelLayout } from './PanelLayout';
-import {
-  useDireccionById,
-  useDireccionesReferenciadas,
-} from '../../hooks/useDireccionesReferenciadas';
+import { useDireccionesReferenciadas } from '../../hooks/useDireccionesReferenciadas';
 import { usePanelDireccionesReferenciadasColumns } from '../../hooks/usePanelDireccionesReferenciadasColumns';
-import type {
-  DireccionReferenciada,
-  DireccionEditFormData,
-  DireccionFormData,
-} from '../../../../shared/types';
+import { usePanelDireccionesReferenciadasActions } from '../../hooks/usePanelDireccionesReferenciadasActions';
 import PanelTablaResumen from './shared/PanelTablaResumen';
 import PanelResumenEstado from './shared/PanelResumenEstado';
+import PanelTablaHeaderActions from './shared/PanelTablaHeaderActions';
 
 interface Props {
   isActive: boolean;
@@ -49,45 +42,21 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
     update,
   } = useDireccionesReferenciadas(id_cliente, id_deudor, id_usuario);
 
-  const [showRegistrar, setShowRegistrar] = useState(false);
-  const [showEditar, setShowEditar] = useState(false);
-  const [direccionEditarId, setDireccionEditarId] = useState<string | null>(null);
-
-  const { data: direccionByIdData } = useDireccionById(direccionEditarId);
-
-  const handleEdit = useCallback((row: DireccionReferenciada) => {
-    setDireccionEditarId(row.id);
-    setShowEditar(true);
-  }, []);
-
-  const handleCloseEditar = useCallback(() => {
-    setShowEditar(false);
-    setDireccionEditarId(null);
-  }, []);
-
-  const handleGuardarEdicion = useCallback(
-    async (formData: DireccionEditFormData) => {
-      try {
-        await update(formData.id, formData);
-        handleCloseEditar();
-      } catch {
-        alert('No se pudo guardar la edición de la dirección.');
-      }
-    },
-    [update, handleCloseEditar]
-  );
-
-  const handleRegistrar = useCallback(
-    async (formData: DireccionFormData) => {
-      try {
-        await create(formData);
-        setShowRegistrar(false);
-      } catch {
-        alert('No se pudo registrar la dirección.');
-      }
-    },
-    [create]
-  );
+  const {
+    showRegistrar,
+    showEditar,
+    direccionEditarId,
+    direccionByIdData,
+    handleOpenRegistrar,
+    handleCloseRegistrar,
+    handleEdit,
+    handleCloseEditar,
+    handleGuardarEdicion,
+    handleRegistrar,
+  } = usePanelDireccionesReferenciadasActions({
+    create,
+    update,
+  });
 
   const { columns } = usePanelDireccionesReferenciadasColumns({
     onEdit: handleEdit,
@@ -125,29 +94,23 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
           itemLabel="dirección(es)"
           setPageNumber={setPageNumber}
           setPageSize={setPageSize}
+          fitToPanel
           onTextFilterChange={onTextFilterChange}
           onSelectedFilterChange={onSelectedFilterChange}
           headerRight={
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '12px', color: '#6b7a99' }}>
-                Página {pageNumber} de {totalPages}
-              </span>
-
-              <ActionButton
-                label="Agregar Dirección"
-                variant="primary"
-                size="sm"
-                icon="＋"
-                onClick={() => setShowRegistrar(true)}
-              />
-            </div>
+            <PanelTablaHeaderActions
+              pageNumber={pageNumber}
+              totalPages={totalPages}
+              buttonLabel="Agregar Dirección"
+              onAdd={handleOpenRegistrar}
+            />
           }
         />
       </PanelLayout>
 
       <ModalRegistrarDireccion
         isOpen={showRegistrar}
-        onClose={() => setShowRegistrar(false)}
+        onClose={handleCloseRegistrar}
         onRegistrar={handleRegistrar}
       />
 

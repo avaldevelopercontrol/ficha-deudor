@@ -23,7 +23,6 @@ const PanelGestionRealizada: React.FC<Props> = ({
   id_usuario,
 }) => {
   const {
-    // Resumido
     allData,
     paginatedData,
     isLoading,
@@ -40,8 +39,6 @@ const PanelGestionRealizada: React.FC<Props> = ({
     onTextFilterChange,
     onSelectedFilterChange,
     setResumido,
-
-    // Expandido / Completo
     completo,
     completoLoading,
     completoError,
@@ -52,32 +49,32 @@ const PanelGestionRealizada: React.FC<Props> = ({
     setCompletoPageNumber,
     setCompletoPageSize,
     refetchCompleto,
-  } = useGestionesRealizadas(id_cliente, id_cartera, id_deudor, id_usuario);
+  } = useGestionesRealizadas(
+    id_cliente,
+    id_cartera,
+    id_deudor,
+    id_usuario
+  );
 
   const [vistaExpandida, setVistaExpandida] = useState(false);
 
-  const {
-    handleVerMas,
-    handleVolver,
-    handleEliminar,
-  } = usePanelGestionRealizadaActions({
-    setVistaExpandida,
-    setResumido,
-  });
+  const { handleVerMas, handleVolver, handleEliminar } =
+    usePanelGestionRealizadaActions({
+      setVistaExpandida,
+      setResumido,
+    });
 
-  const {
-    columnsResumidas,
-    columnsExpandidas,
-  } = usePanelGestionRealizadaColumns({
-    onEliminar: handleEliminar,
-  });
+  const { columnsResumidas, columnsExpandidas } =
+    usePanelGestionRealizadaColumns({
+      onEliminar: handleEliminar,
+    });
 
   if (!isActive) return null;
 
   if (!vistaExpandida && (isLoading || error)) {
     return (
       <PanelResumenEstado
-        title="GESTIONES REALIZADAS"
+        title="GESTIÓN REALIZADA"
         isActive={isActive}
         error={error}
         loadingMessage="Cargando gestiones..."
@@ -88,10 +85,7 @@ const PanelGestionRealizada: React.FC<Props> = ({
   }
 
   return (
-    <PanelLayout
-      title={vistaExpandida ? 'TODAS LAS GESTIONES' : 'GESTIONES REALIZADAS'}
-      isActive={isActive}
-    >
+    <PanelLayout title="GESTIÓN REALIZADA" isActive={isActive}>
       {!vistaExpandida ? (
         <PanelTablaResumen
           columns={columnsResumidas}
@@ -105,7 +99,9 @@ const PanelGestionRealizada: React.FC<Props> = ({
           selectedFilters={selectedFilters}
           emptyMessage="No se encontraron gestiones realizadas"
           itemLabel="gestión(es)"
-          verMasLabel="Ver más gestiones"
+          verMasLabel="Ver más gestiones realizadas"
+          pageSizeOptions={[5, 10, 20, 50]}
+          fitToPanel
           setPageNumber={setPageNumber}
           setPageSize={setPageSize}
           onTextFilterChange={onTextFilterChange}
@@ -114,22 +110,26 @@ const PanelGestionRealizada: React.FC<Props> = ({
         />
       ) : (
         <PanelTablaExpandida
-            columns={columnsExpandidas}
-            data={completo}
-            isLoading={completoLoading}
-            error={completoError}
-            pageNumber={completoPageNumber}
-            pageSize={completoPageSize}
-            totalRecords={completoTotalRecords}
-            totalPages={completoTotalPages}
-            emptyMessage="No se encontraron gestiones históricas"
-            itemLabel="gestión(es)"
-            loadingMessage="Cargando gestiones históricas..."
-            errorTitle="Error al cargar gestiones históricas:"
-            setPageNumber={setCompletoPageNumber}
-            setPageSize={setCompletoPageSize}
-            onRetry={refetchCompleto}
-            onVolver={handleVolver} pageSizeOptions={[]}        />
+          columns={columnsExpandidas}
+          data={completo}
+          isLoading={completoLoading}
+          error={completoError}
+          pageNumber={completoPageNumber}
+          pageSize={completoPageSize}
+          totalRecords={completoTotalRecords}
+          totalPages={completoTotalPages}
+          emptyMessage="No se encontraron gestiones realizadas"
+          itemLabel="gestión(es)"
+          loadingMessage="Cargando gestiones..."
+          errorTitle="Error al cargar gestiones:"
+          pageSizeOptions={[5, 10, 30, 50]}
+          showPageSizeSelector
+          fitToPanel
+          setPageNumber={setCompletoPageNumber}
+          setPageSize={setCompletoPageSize}
+          onRetry={refetchCompleto}
+          onVolver={handleVolver}
+        />
       )}
     </PanelLayout>
   );

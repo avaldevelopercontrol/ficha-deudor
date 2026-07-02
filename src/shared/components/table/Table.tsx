@@ -1,8 +1,9 @@
 import { useCallback, useMemo } from 'react';
+import type { CSSProperties } from 'react';
 import type { Column } from '../../types';
 import ColumnFilter from '../ui/ColumnFilter';
 
-interface Props<TData = unknown> {
+interface Props<TData> {
   columns: Column<TData>[];
   data: TData[];
   onRowClick?: (row: TData) => void;
@@ -17,7 +18,7 @@ interface Props<TData = unknown> {
   fitToPanel?: boolean;
 }
 
-interface HeaderCellGroup<TData = unknown> {
+interface HeaderCellGroup<TData> {
   key: string;
   label: string;
   colSpan: number;
@@ -33,7 +34,34 @@ function getRowValue(row: unknown, key: string): unknown {
   return (row as Record<string, unknown>)[key];
 }
 
-function Table<TData = unknown>({
+function getCellStyle<TData>(
+  column: Column<TData> | undefined,
+  fitToPanel: boolean
+): CSSProperties | undefined {
+  if (!column?.width) {
+    return fitToPanel
+      ? {
+          maxWidth: 0,
+          overflow: 'hidden',
+        }
+      : undefined;
+  }
+
+  if (fitToPanel) {
+    return {
+      width: column.width,
+      maxWidth: column.width,
+      overflow: 'hidden',
+    };
+  }
+
+  return {
+    width: column.width,
+    minWidth: column.width,
+  };
+}
+
+function Table<TData>({
   columns,
   data,
   onRowClick,
@@ -59,7 +87,8 @@ function Table<TData = unknown>({
             const value = getRowValue(item, key);
 
             return (
-              value != null &&
+              value !== undefined &&
+              value !== null &&
               String(value).toLowerCase().includes(text.toLowerCase())
             );
           });
@@ -71,7 +100,9 @@ function Table<TData = unknown>({
           filtered = filtered.filter((item) => {
             const value = getRowValue(item, key);
 
-            return value != null && selectedVals.includes(String(value));
+            return value !== undefined && value !== null
+              ? selectedVals.includes(String(value))
+              : false;
           });
         }
       });
@@ -113,7 +144,6 @@ function Table<TData = unknown>({
       if (currentColumn.group && currentColumn.groupLabel) {
         const groupKey = currentColumn.group;
         const groupLabel = currentColumn.groupLabel;
-
         let colSpan = 0;
 
         while (
@@ -152,9 +182,28 @@ function Table<TData = unknown>({
       className={`table-wrapper ${
         fitToPanel ? 'table-wrapper--fit' : 'table-wrapper--auto'
       }`}
+      style={{
+        width: '100%',
+        maxWidth: '100%',
+        overflow: 'hidden',
+      }}
     >
-      <div className="table-scroll">
-        <table className="data-table">
+      <div
+        className="table-scroll"
+        style={{
+          width: '100%',
+          maxWidth: '100%',
+          overflowX: fitToPanel ? 'hidden' : 'auto',
+        }}
+      >
+        <table
+          className="data-table"
+          style={{
+            width: fitToPanel ? '100%' : undefined,
+            maxWidth: fitToPanel ? '100%' : undefined,
+            tableLayout: fitToPanel ? 'fixed' : 'auto',
+          }}
+        >
           <thead>
             {hasGroupedHeaders && (
               <tr className="data-table__group-row">
@@ -163,21 +212,23 @@ function Table<TData = unknown>({
                     key={group.key}
                     colSpan={group.colSpan}
                     rowSpan={group.grouped ? 1 : 2}
-                    style={
-                      group.column?.width
-                        ? {
-                            width: group.column.width,
-                            minWidth: group.column.width,
-                          }
-                        : undefined
-                    }
+                    style={getCellStyle(group.column, fitToPanel)}
                     className={
                       group.grouped
                         ? 'data-table__group-header'
                         : 'data-table__single-header'
                     }
                   >
-                    {group.label}
+                    <div
+                      style={{
+                        maxWidth: '100%',
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-word',
+                        whiteSpace: 'normal',
+                      }}
+                    >
+                      {group.label}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -196,15 +247,17 @@ function Table<TData = unknown>({
                 }
 
                 return (
-                  <th
-                    key={col.key}
-                    style={
-                      col.width
-                        ? { width: col.width, minWidth: col.width }
-                        : undefined
-                    }
-                  >
-                    {col.label}
+                  <th key={col.key} style={getCellStyle(col, fitToPanel)}>
+                    <div
+                      style={{
+                        maxWidth: '100%',
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-word',
+                        whiteSpace: 'normal',
+                      }}
+                    >
+                      {col.label}
+                    </div>
                   </th>
                 );
               })}
@@ -215,28 +268,31 @@ function Table<TData = unknown>({
                 {columns.map((col) => (
                   <th
                     key={`${col.key}-filter`}
-                    style={
-                      col.width
-                        ? { width: col.width, minWidth: col.width }
-                        : undefined
-                    }
+                    style={getCellStyle(col, fitToPanel)}
                   >
-                    {col.filterable !== false ? (
-                      <ColumnFilter
-                        label={col.label}
-                        values={uniqueValuesMap[col.key] || []}
-                        selectedValues={selectedFilters[col.key] || []}
-                        onSelectedChange={(selected) =>
-                          onSelectedFilterChange?.(col.key, selected)
-                        }
-                        textFilter={textFilters[col.key] || ''}
-                        onTextFilterChange={(text) =>
-                          onTextFilterChange?.(col.key, text)
-                        }
-                      />
-                    ) : (
-                      <span className="data-table__filter-empty" />
-                    )}
+                    <div
+                      style={{
+                        maxWidth: '100%',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {col.filterable !== false ? (
+                        <ColumnFilter
+                          label={col.label}
+                          values={uniqueValuesMap[col.key] || []}
+                          selectedValues={selectedFilters[col.key] || []}
+                          onSelectedChange={(selected) =>
+                            onSelectedFilterChange?.(col.key, selected)
+                          }
+                          textFilter={textFilters[col.key] || ''}
+                          onTextFilterChange={(text) =>
+                            onTextFilterChange?.(col.key, text)
+                          }
+                        />
+                      ) : (
+                        <span className="data-table__filter-empty" />
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -260,17 +316,19 @@ function Table<TData = unknown>({
                   }`}
                 >
                   {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      style={
-                        col.width
-                          ? { width: col.width, minWidth: col.width }
-                          : undefined
-                      }
-                    >
-                      {col.render
-                        ? col.render(row)
-                        : String(getRowValue(row, col.key) ?? '—')}
+                    <td key={col.key} style={getCellStyle(col, fitToPanel)}>
+                      <div
+                        style={{
+                          maxWidth: '100%',
+                          overflowWrap: 'break-word',
+                          wordBreak: 'break-word',
+                          whiteSpace: 'normal',
+                        }}
+                      >
+                        {col.render
+                          ? col.render(row)
+                          : String(getRowValue(row, col.key) ?? '—')}
+                      </div>
                     </td>
                   ))}
                 </tr>

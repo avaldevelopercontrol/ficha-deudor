@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { PanelLayout } from './PanelLayout';
 import { useEstadosGestion } from '../../hooks/useEstadosGestion';
 import { usePanelEstadoGestionColumns } from '../../hooks/usePanelEstadoGestionColumns';
@@ -20,7 +20,6 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({
   id_deudor,
 }) => {
   const {
-    // Resumido
     allData,
     paginatedData,
     isLoading,
@@ -36,8 +35,6 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
-
-    // Expandido / Completo
     completo,
     completoLoading,
     completoError,
@@ -52,13 +49,16 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({
 
   const [vistaExpandida, setVistaExpandida] = useState(false);
 
-  const handleVerMas = () => setVistaExpandida(true);
-  const handleVolver = () => setVistaExpandida(false);
+  const handleVerMas = useCallback(() => {
+    setVistaExpandida(true);
+  }, []);
 
-  const {
-    columnsResumidas,
-    columnsExpandidas,
-  } = usePanelEstadoGestionColumns();
+  const handleVolver = useCallback(() => {
+    setVistaExpandida(false);
+  }, []);
+
+  const { columnsResumidas, columnsExpandidas } =
+    usePanelEstadoGestionColumns();
 
   if (!isActive) return null;
 
@@ -98,6 +98,7 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({
           emptyMessage="No se encontraron estados de gestión"
           itemLabel="estado(s) de gestión"
           verMasLabel="Ver más estados de gestiones"
+          fitToPanel
           setPageNumber={setPageNumber}
           setPageSize={setPageSize}
           onTextFilterChange={onTextFilterChange}
@@ -106,22 +107,26 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({
         />
       ) : (
         <PanelTablaExpandida
-            columns={columnsExpandidas}
-            data={completo}
-            isLoading={completoLoading}
-            error={completoError}
-            pageNumber={completoPageNumber}
-            pageSize={completoPageSize}
-            totalRecords={completoTotalRecords}
-            totalPages={completoTotalPages}
-            emptyMessage="No se encontraron estados de gestión históricos"
-            itemLabel="estado(s) de gestión"
-            loadingMessage="Cargando estados de gestión históricos..."
-            errorTitle="Error al cargar estados de gestión históricos:"
-            setPageNumber={setCompletoPageNumber}
-            setPageSize={setCompletoPageSize}
-            onRetry={refetchCompleto}
-            onVolver={handleVolver} pageSizeOptions={[]}        />
+          columns={columnsExpandidas}
+          data={completo}
+          isLoading={completoLoading}
+          error={completoError}
+          pageNumber={completoPageNumber}
+          pageSize={completoPageSize}
+          totalRecords={completoTotalRecords}
+          totalPages={completoTotalPages}
+          emptyMessage="No se encontraron estados de gestión históricos"
+          itemLabel="estado(s) de gestión"
+          loadingMessage="Cargando estados de gestión históricos..."
+          errorTitle="Error al cargar estados de gestión históricos:"
+          pageSizeOptions={[5, 10, 30, 50]}
+          showPageSizeSelector
+          fitToPanel
+          setPageNumber={setCompletoPageNumber}
+          setPageSize={setCompletoPageSize}
+          onRetry={refetchCompleto}
+          onVolver={handleVolver}
+        />
       )}
     </PanelLayout>
   );
