@@ -63,7 +63,7 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
   handleAgendar,
 }) => {
   return (
-    <div className="ficha-block ficha-block--with-side-title">
+    <div className="ficha-block ficha-block--with-side-title ficha-block--compact-gestion ficha-block--acciones-tomar">
       <div className="block-side-title-wrapper">
         <div className="block-side-title">ACCIONES A TOMAR</div>
       </div>

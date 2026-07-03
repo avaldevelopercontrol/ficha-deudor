@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { SelectField } from '../../../../shared/components/ui';
 import type { SelectOption } from '../../../../shared/types';
 import type { GestionFormClaro } from '../../hooks/useFichaGestionForm';
@@ -14,23 +15,18 @@ interface Props {
   handleNP0Change: (value: string) => void;
   handleNP1Change: (value: string) => void;
   handleOpenWhatsApp: () => void;
-
   estadosOptions: SelectOption[];
   isLoadingEstados: boolean;
   errorEstados?: string | null;
-
   tiposOptions: SelectOption[];
   isLoadingTipos: boolean;
   errorTipos?: string | null;
-
   np0Options: SelectOption[];
   isLoadingNP0: boolean;
   errorNP0?: string | null;
-
   np1Options: SelectOption[];
   isLoadingNP1: boolean;
   errorNP1?: string | null;
-
   np2Options: SelectOption[];
   isLoadingNP2: boolean;
   errorNP2?: string | null;
@@ -43,37 +39,34 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
   handleNP0Change,
   handleNP1Change,
   handleOpenWhatsApp,
-
   estadosOptions,
   isLoadingEstados,
   errorEstados,
-
   tiposOptions,
   isLoadingTipos,
   errorTipos,
-
   np0Options,
   isLoadingNP0,
   errorNP0,
-
   np1Options,
   isLoadingNP1,
   errorNP1,
-
   np2Options,
   isLoadingNP2,
   errorNP2,
 }) => {
   return (
-    <div className="ficha-block ficha-block--with-side-title" style={{ minHeight: 'auto' }}>
+    <div className="ficha-block ficha-block--with-side-title ficha-block--compact-gestion">
       <div className="block-side-title-wrapper">
         <div className="block-side-title">DATOS PRINCIPALES</div>
       </div>
 
-      <div className="block-content">
-        <div className="form-grid g2 form-grid--inline" style={{ marginBottom: '12px' }}>
+      <div className="block-content block-content--compact-gestion">
+        <div className="gestion-compact-grid gestion-compact-grid--datos-contacto">
           <div className="form-row-inline">
-            <label className="form-label form-label--inline">Nombre Contacto:</label>
+            <label className="form-label form-label--inline">
+              Nombre Contacto:
+            </label>
             <input
               type="text"
               className="form-input form-input--inline-field"
@@ -93,9 +86,35 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
               onChange={(e) => setField('cargo', e.target.value)}
             />
           </div>
+
+          <div className="form-group">
+            <label className="form-label">Teléfono</label>
+            <div className="tel-input-group tel-input-group--compact">
+              <input
+                type="tel"
+                className="form-input"
+                placeholder="Ingresar teléfono..."
+                value={form.telefono}
+                readOnly
+              />
+
+              <button
+                type="button"
+                className="btn btn-whatsapp btn-whatsapp--compact"
+                onClick={handleOpenWhatsApp}
+                disabled={!form.telefono}
+                title="Abrir WhatsApp"
+              >
+                WhatsApp
+              </button>
+            </div>
+            {validationErrors.telefono && (
+              <span className="form-error">{validationErrors.telefono}</span>
+            )}
+          </div>
         </div>
 
-        <div className="form-grid g3" style={{ marginBottom: '12px' }}>
+        <div className="gestion-compact-grid gestion-compact-grid--np">
           <SelectField
             label="NP0"
             options={np0Options}
@@ -139,7 +158,7 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
           />
         </div>
 
-        <div className="form-grid g3" style={{ marginBottom: '12px' }}>
+        <div className="gestion-compact-grid gestion-compact-grid--resultado-gestor">
           <SelectField
             label="Estado de Gestión"
             options={estadosOptions}
@@ -160,60 +179,32 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
             error={validationErrors.tipoGestion || errorTipos || ''}
           />
 
-          <div className="form-group">
-            <label className="form-label">Teléfono</label>
-            <div className="tel-input-group">
+          <div className="form-group gestor-field">
+            <label className="form-label">Gestor</label>
+            <div className="gestor-row gestor-row--compact gestor-row--inline">
+              <button className="btn btn-info btn-xs" type="button">
+                Buscar Gestor
+              </button>
+
               <input
-                type="tel"
-                className="form-input"
-                placeholder="Seleccione un teléfono..."
-                value={form.telefono}
+                type="text"
+                className="form-input form-input--xs gestor-row__id"
+                placeholder="ID"
+                value={form.gestorId}
+                onChange={(e) => setField('gestorId', e.target.value)}
                 readOnly
               />
 
-              <button
-                type="button"
-                className="btn btn-whatsapp btn-whatsapp--compact"
-                onClick={handleOpenWhatsApp}
-                disabled={!form.telefono}
-                title="Abrir WhatsApp"
-              >
-                WhatsApp
-              </button>
+              <input
+                type="text"
+                className="form-input form-input--xs gestor-row__name"
+                placeholder="Nombre del gestor"
+                value={form.gestorNombre}
+                onChange={(e) => setField('gestorNombre', e.target.value)}
+                readOnly
+              />
             </div>
-
-            {validationErrors.telefono && (
-              <span className="form-error">
-                {validationErrors.telefono}
-              </span>
-            )}
           </div>
-        </div>
-
-        <div className="gestor-row gestor-row--compact">
-          <button className="btn btn-info btn-xs" type="button">
-            🔍 Buscar Gestor
-          </button>
-
-          <input
-            type="text"
-            className="form-input form-input--xs"
-            placeholder="ID Gestor"
-            value={form.gestorId}
-            onChange={(e) => setField('gestorId', e.target.value)}
-            readOnly
-            style={{ width: '70px' }}
-          />
-
-          <input
-            type="text"
-            className="form-input form-input--xs"
-            placeholder="Nombre del gestor"
-            value={form.gestorNombre}
-            onChange={(e) => setField('gestorNombre', e.target.value)}
-            readOnly
-            style={{ flex: 1 }}
-          />
         </div>
       </div>
     </div>

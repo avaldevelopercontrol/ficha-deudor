@@ -681,3 +681,285 @@
 .form-error-summary li:last-child {
   margin-bottom: 0;
 }
+
+/* ═══════════════════════════════════════════════════
+   FICHA GESTIÓN COMPACTA
+   Reduce altura general aprox. 30% - 40% en desktop
+   ═══════════════════════════════════════════════════ */
+
+.ficha-gestion--compact .ficha-gestion-header {
+  padding: 5px 14px;
+  line-height: 1;
+}
+
+.ficha-gestion--compact .fg-title {
+  font-size: 10px;
+  letter-spacing: 0.9px;
+}
+
+.ficha-gestion--compact .ficha-block--compact-gestion {
+  border-bottom: 1px solid var(--ap-gray-200);
+}
+
+.ficha-gestion--compact .ficha-block--compact-gestion .block-side-title-wrapper {
+  flex: 0 0 30px;
+  min-height: 64px;
+}
+
+.ficha-gestion--compact .ficha-block--compact-gestion .block-side-title {
+  font-size: 8.5px;
+  letter-spacing: 1.5px;
+}
+
+.ficha-gestion--compact .block-content--compact-gestion {
+  padding: 7px 10px;
+}
+
+.ficha-gestion--compact .form-label {
+  margin-bottom: 1px;
+  font-size: 8.5px;
+  line-height: 1.1;
+}
+
+.ficha-gestion--compact .form-group {
+  gap: 1px;
+}
+
+.ficha-gestion--compact .form-input,
+.ficha-gestion--compact .form-select,
+.ficha-gestion--compact .form-input--inline-field {
+  height: 24px;
+  min-height: 24px;
+  padding: 0 7px;
+  font-size: 10.5px;
+}
+
+.ficha-gestion--compact .form-textarea {
+  min-height: 30px;
+  padding: 4px 7px;
+  font-size: 10.5px;
+  line-height: 1.25;
+  resize: vertical;
+}
+
+.ficha-gestion--compact .btn-xs,
+.ficha-gestion--compact .btn-sm {
+  min-height: 24px;
+  padding: 0 8px;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.ficha-gestion--compact .btn-whatsapp--compact {
+  min-height: 24px;
+  padding: 0 8px;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.gestion-compact-grid {
+  display: grid;
+  align-items: end;
+  gap: 5px 8px;
+  margin-bottom: 6px;
+}
+
+.gestion-compact-grid:last-child {
+  margin-bottom: 0;
+}
+
+.gestion-compact-grid--datos-contacto {
+  grid-template-columns: minmax(180px, 1.25fr) minmax(160px, 1.15fr) minmax(220px, 1fr);
+}
+
+.gestion-compact-grid--np {
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+}
+
+.gestion-compact-grid--resultado-gestor {
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(300px, 1.25fr);
+}
+
+.gestion-compact-grid--compromiso {
+  grid-template-columns: minmax(170px, 1.1fr) minmax(120px, 0.75fr) minmax(120px, 0.75fr);
+}
+
+.gestion-compact-grid--fechas {
+  grid-template-columns:
+    minmax(150px, 1fr)
+    minmax(110px, 0.85fr)
+    minmax(180px, 1.15fr)
+    auto
+    minmax(150px, 1fr)
+    minmax(110px, 0.85fr);
+}
+
+.gestion-compact-grid--claro-resultados {
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+}
+
+.tel-input-group--compact {
+  gap: 5px;
+}
+
+.gestor-row--inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 0;
+}
+
+.gestor-row--inline .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.gestor-row__id {
+  flex: 0 0 62px;
+  width: 62px;
+}
+
+.gestor-row__name {
+  flex: 1;
+  min-width: 130px;
+}
+
+.time-select-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.time-select-group .form-input {
+  min-width: 52px;
+}
+
+.agendar-btn--compact {
+  align-self: end;
+  height: 24px;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.gestion-compact-errors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: -2px 0 5px;
+}
+
+.resultados-compact-main {
+  display: grid;
+  grid-template-columns: 145px minmax(300px, 1fr);
+  align-items: start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.resultados-compact-main .form-group {
+  margin: 0;
+}
+
+.ficha-gestion--compact .form-error {
+  margin-top: 1px;
+  font-size: 9px;
+  line-height: 1.15;
+}
+
+.ficha-gestion--compact .form-error-summary--compact {
+  margin: 4px 0 0;
+  padding: 5px 8px;
+  font-size: 10px;
+}
+
+.ficha-gestion--compact .form-error-summary--compact p {
+  margin-bottom: 2px;
+}
+
+.ficha-gestion--compact .form-error-summary--compact ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.ficha-gestion--compact .ficha-submit--compact-gestion {
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 6px 0 0;
+  background: transparent;
+  border-top: 1px solid var(--ap-gray-100);
+}
+
+@media (max-width: 1400px) {
+  .gestion-compact-grid--fechas {
+    grid-template-columns:
+      minmax(150px, 1fr)
+      minmax(110px, 0.85fr)
+      minmax(180px, 1.15fr)
+      auto;
+  }
+}
+
+@media (max-width: 1100px) {
+  .gestion-compact-grid--datos-contacto,
+  .gestion-compact-grid--np,
+  .gestion-compact-grid--resultado-gestor,
+  .gestion-compact-grid--compromiso,
+  .gestion-compact-grid--claro-resultados {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+  .gestion-compact-grid--fechas {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+  .agendar-btn--compact {
+    width: fit-content;
+  }
+
+  .resultados-compact-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .ficha-gestion--compact .block-content--compact-gestion {
+    padding: 8px;
+  }
+
+  .ficha-gestion--compact .ficha-block--compact-gestion .block-side-title-wrapper {
+    min-height: auto;
+    padding: 6px;
+  }
+
+  .gestion-compact-grid,
+  .gestion-compact-grid--datos-contacto,
+  .gestion-compact-grid--np,
+  .gestion-compact-grid--resultado-gestor,
+  .gestion-compact-grid--compromiso,
+  .gestion-compact-grid--fechas,
+  .gestion-compact-grid--claro-resultados {
+    grid-template-columns: 1fr;
+  }
+
+  .gestor-row--inline {
+    flex-wrap: wrap;
+  }
+
+  .gestor-row__id {
+    flex: 0 0 70px;
+  }
+
+  .gestor-row__name {
+    flex: 1 1 180px;
+  }
+}
+
+/* Ajuste solo para el título vertical de ACCIONES A TOMAR */
+.ficha-gestion--compact
+  .ficha-block--acciones-tomar
+  .block-side-title-wrapper {
+  align-self: center;
+  height: 145px;
+  min-height: 145px;
+}

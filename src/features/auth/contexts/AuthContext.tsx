@@ -7,7 +7,6 @@ import React, {
 
 import { AuthContext } from './authContextValue';
 import { login as loginApi } from '../api/authApi';
-
 import type {
   AuthContextValue,
   AuthState,
@@ -15,73 +14,15 @@ import type {
   LoginPayload,
   LoginResponse,
 } from '../types';
-
 import {
+  AUTH_LOGOUT_CUSTOM_EVENT,
   AUTH_LOGOUT_EVENT_KEY,
   AUTH_STORAGE_KEY,
   clearStoredAuthState,
-  closePopupOrRedirectToLogin,
-  hasStoredAuthState,
-  isPublicAuthPath,
-  logoutSession,
-} from '../utils/logoutSession';
-
-const initialState: AuthState = {
-  isAuthenticated: false,
-  usuario: null,
-  clienteSeleccionada: null,
-  isLoading: false,
-  error: null,
-};
-
-function loadStoredAuthState(): AuthState {
-  try {
-    const rawState = localStorage.getItem(AUTH_STORAGE_KEY);
-
-    if (!rawState) {
-      return initialState;
-    }
-
-    const parsedState = JSON.parse(rawState) as Partial<AuthState>;
-
-    if (!parsedState.usuario) {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-      return initialState;
-    }
-
-    return {
-      ...initialState,
-      isAuthenticated: true,
-      usuario: parsedState.usuario,
-      clienteSeleccionada: parsedState.clienteSeleccionada ?? null,
-      isLoading: false,
-      error: null,
-    };
-  } catch {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    return initialState;
-  }
-}
-
-function saveStoredAuthState(state: AuthState) {
-  try {
-    if (!state.usuario) {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-      return;
-    }
-
-    const stateToStore: AuthState = {
-      ...state,
-      isAuthenticated: true,
-      isLoading: false,
-      error: null,
-    };
-
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(stateToStore));
-  } catch {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-  }
-}
+  initialAuthState,
+  loadStoredAuthState,
+  saveStoredAuthState,
+} from '../utils/authStorage';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -99,36 +40,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [state, setState] = useState<AuthState>(() => loadStoredAuthState());
 
   useEffect(() => {
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key !== AUTH_LOGOUT_EVENT_KEY || !event.newValue) {
+    const handleExternalLogout = () => {
+      setState(initialAuthState);
+    };
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === AUTH_LOGOUT_EVENT_KEY) {
+        setState(initialAuthState);
         return;
       }
 
-      clearStoredAuthState();
-      setState(initialState);
-      closePopupOrRedirectToLogin();
+      if (event.key === AUTH_STORAGE_KEY && event.newValue === null) {
+        setState(initialAuthState);
+      }
     };
 
-    window.addEventListener('storage', handleStorage);
+    window.addEventListener(AUTH_LOGOUT_CUSTOM_EVENT, handleExternalLogout);
+    window.addEventListener('storage', handleStorageChange);
 
     return () => {
-      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener(AUTH_LOGOUT_CUSTOM_EVENT, handleExternalLogout);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
-
-  useEffect(() => {
-    const pathname = window.location.pathname;
-
-    if (isPublicAuthPath(pathname)) {
-      return;
-    }
-
-    if (state.isLoading || state.isAuthenticated || hasStoredAuthState()) {
-      return;
-    }
-
-    closePopupOrRedirectToLogin();
-  }, [state.isAuthenticated, state.isLoading]);
 
   const login = useCallback(
     async (payload: LoginPayload): Promise<LoginResponse> => {
@@ -142,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const response = await loginApi(payload);
 
         if (!response.success || !response.usuario) {
-          clearStoredAuthState();
+          clearStoredAuthState('manual');
 
           setState((prev) => ({
             ...prev,
@@ -174,11 +108,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return response;
       } catch (error) {
         const message =
-          error instanceof Error
-            ? error.message
-            : 'Error al iniciar sesión.';
+          error instanceof Error ? error.message : 'Error al iniciar sesión.';
 
-        clearStoredAuthState();
+        clearStoredAuthState('manual');
 
         setState((prev) => ({
           ...prev,
@@ -196,8 +128,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 
   const logout = useCallback(() => {
-    logoutSession();
-    setState(initialState);
+    clearStoredAuthState('manual');
+    setState(initialAuthState);
   }, []);
 
   const seleccionarCliente = useCallback((cliente: Cliente) => {
@@ -231,7 +163,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
   }, []);
 
-  const value = useMemo<AuthContextValue>(
+  const value: AuthContextValue = useMemo(
     () => ({
       ...state,
       login,
@@ -242,9 +174,5 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     [state, login, logout, seleccionarCliente, clearError]
   );
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

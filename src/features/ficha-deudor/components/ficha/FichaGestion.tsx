@@ -1,13 +1,16 @@
 import React, { useEffect } from 'react';
+
 import {
   useFichaGestionForm,
   type GestionFormClaro,
 } from '../../hooks/useFichaGestionForm';
 import { useFichaGestionCatalogos } from '../../hooks/useFichaGestionCatalogos';
 import { useFichaGestionActions } from '../../hooks/useFichaGestionActions';
+
 import FichaGestionDatosPrincipales from '../ficha-gestion/FichaGestionDatosPrincipales';
 import FichaGestionAccionesTomar from '../ficha-gestion/FichaGestionAccionesTomar';
 import FichaGestionResultadosLlamada from '../ficha-gestion/FichaGestionResultadosLlamada';
+
 import type { DocumentoApi } from '../../../../shared/types/indexApi';
 
 interface Props {
@@ -58,27 +61,21 @@ const FichaGestion: React.FC<Props> = ({
     estadosOptions,
     isLoadingEstados,
     errorEstados,
-
     tiposOptions,
     isLoadingTipos,
     errorTipos,
-
     np0Options,
     isLoadingNP0,
     errorNP0,
-
     np1Options,
     isLoadingNP1,
     errorNP1,
-
     np2Options,
     isLoadingNP2,
     errorNP2,
-
     estadoGestionClaroOptions,
     isLoadingEstadoGestionClaro,
     errorEstadoGestionClaro,
-
     motivoNoPagoOptions,
     isLoadingMotivoNoPago,
     errorMotivoNoPago,
@@ -120,7 +117,7 @@ const FichaGestion: React.FC<Props> = ({
   });
 
   return (
-    <div className="ficha-card">
+    <div className="ficha-card ficha-gestion ficha-gestion--compact">
       <div className="ficha-gestion-header">
         <span className="fg-title">FICHA DE GESTIÓN</span>
       </div>
