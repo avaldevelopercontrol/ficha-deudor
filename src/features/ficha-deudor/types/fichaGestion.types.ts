@@ -24,11 +24,13 @@ export interface GestionTipoList {
 export interface GestionPaletaRespuestaApi {
   nId_OpeCodCliOut: number;
   cNombre_OpeCodCliOut: string;
+  nId_TipoContacto?: number | null;
 }
 
 export interface GestionPaletaRespuestaList {
   id: string;
   nombre: string;
+  idTipoContacto?: number | null;
 }
 
 export interface GestionPaletaRespuestaParams {

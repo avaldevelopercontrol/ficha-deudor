@@ -1,5 +1,6 @@
 import React from 'react';
 import type { GestionFormClaro } from '../../hooks/useFichaGestionForm';
+import type { FichaGestionValidationErrors } from '../../validations/fichaGestionValidation';
 
 interface Props {
   form: GestionFormClaro;
@@ -7,13 +8,57 @@ interface Props {
     field: K,
     value: GestionFormClaro[K]
   ) => void;
+  validationErrors?: FichaGestionValidationErrors;
   usuarioActual: string;
   handleAgendar: () => void;
 }
 
+const HOURS = Array.from({ length: 24 }, (_, index) =>
+  String(index).padStart(2, '0')
+);
+
+const MINUTES = Array.from({ length: 12 }, (_, index) =>
+  String(index * 5).padStart(2, '0')
+);
+
+const sanitizeDecimalValue = (value: string) => {
+  const cleanedValue = value.replace(/[^0-9.]/g, '');
+  const [integerPart, ...decimalParts] = cleanedValue.split('.');
+
+  if (decimalParts.length === 0) {
+    return integerPart;
+  }
+
+  return `${integerPart}.${decimalParts.join('')}`;
+};
+
+const getTimeHour = (time: string) => {
+  return time?.split(':')[0] ?? '';
+};
+
+const getTimeMinute = (time: string) => {
+  return time?.split(':')[1] ?? '';
+};
+
+const buildTimeValue = (
+  currentTime: string,
+  type: 'hour' | 'minute',
+  value: string
+) => {
+  const currentHour = getTimeHour(currentTime) || '00';
+  const currentMinute = getTimeMinute(currentTime) || '00';
+
+  if (type === 'hour') {
+    return `${value}:${currentMinute}`;
+  }
+
+  return `${currentHour}:${value}`;
+};
+
 const FichaGestionAccionesTomar: React.FC<Props> = ({
   form,
   setField,
+  validationErrors = {},
   usuarioActual,
   handleAgendar,
 }) => {
@@ -24,7 +69,7 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
       </div>
 
       <div className="block-content">
-        <div className="form-grid g3 form-grid--inline" style={{ marginBottom: '12px' }}>
+        <div className="form-grid g3 form-grid--inline" style={{ marginBottom: '6px' }}>
           <div className="form-row-inline">
             <label className="form-label form-label--inline">Fecha Compromiso:</label>
             <input
@@ -38,29 +83,51 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
           <div className="form-row-inline">
             <label className="form-label form-label--inline">Compromiso S/.:</label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               className="form-input form-input--inline-field"
               placeholder="0.00"
               value={form.compromisoSoles}
-              onChange={(e) => setField('compromisoSoles', e.target.value)}
+              onChange={(e) =>
+                setField('compromisoSoles', sanitizeDecimalValue(e.target.value))
+              }
             />
           </div>
 
           <div className="form-row-inline">
             <label className="form-label form-label--inline">Compromiso $US:</label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               className="form-input form-input--inline-field"
               placeholder="0.00"
               value={form.compromisoUSD}
-              onChange={(e) => setField('compromisoUSD', e.target.value)}
+              onChange={(e) =>
+                setField('compromisoUSD', sanitizeDecimalValue(e.target.value))
+              }
             />
           </div>
         </div>
 
+        {(validationErrors.fechaCompromisoPago || validationErrors.montoCompromiso) && (
+          <div style={{ marginBottom: '6px' }}>
+            {validationErrors.fechaCompromisoPago && (
+              <span className="form-error">
+                {validationErrors.fechaCompromisoPago}
+              </span>
+            )}
+
+            {validationErrors.montoCompromiso && (
+              <span className="form-error">
+                {validationErrors.montoCompromiso}
+              </span>
+            )}
+          </div>
+        )}
+
         <div
           className="agendar-gestion-row agendar-gestion-row--compact agendar-gestion-row--inline"
-          style={{ marginBottom: '12px' }}
+          style={{ marginBottom: '6px' }}
         >
           <div className="form-row-inline">
             <label className="form-label form-label--inline">Fecha Nueva Gestión:</label>
@@ -72,14 +139,43 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
             />
           </div>
 
-          <div className="form-row-inline">
+          <div className="form-row-inline form-row-inline--time">
             <label className="form-label form-label--inline">Hora:</label>
-            <input
-              type="time"
+            <select
               className="form-input form-input--inline-field"
-              value={form.horaNuevaGestion}
-              onChange={(e) => setField('horaNuevaGestion', e.target.value)}
-            />
+              value={getTimeHour(form.horaNuevaGestion)}
+              onChange={(e) =>
+                setField(
+                  'horaNuevaGestion',
+                  buildTimeValue(form.horaNuevaGestion, 'hour', e.target.value)
+                )
+              }
+            >
+              <option value="">HH</option>
+              {HOURS.map((hour) => (
+                <option key={hour} value={hour}>
+                  {hour}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="form-input form-input--inline-field"
+              value={getTimeMinute(form.horaNuevaGestion)}
+              onChange={(e) =>
+                setField(
+                  'horaNuevaGestion',
+                  buildTimeValue(form.horaNuevaGestion, 'minute', e.target.value)
+                )
+              }
+            >
+              <option value="">MM</option>
+              {MINUTES.map((minute) => (
+                <option key={minute} value={minute}>
+                  {minute}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-row-inline">
@@ -113,14 +209,43 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
             />
           </div>
 
-          <div className="form-row-inline">
+          <div className="form-row-inline form-row-inline--time">
             <label className="form-label form-label--inline">Hora:</label>
-            <input
-              type="time"
+            <select
               className="form-input form-input--inline-field"
-              value={form.horaGestion}
-              onChange={(e) => setField('horaGestion', e.target.value)}
-            />
+              value={getTimeHour(form.horaGestion)}
+              onChange={(e) =>
+                setField(
+                  'horaGestion',
+                  buildTimeValue(form.horaGestion, 'hour', e.target.value)
+                )
+              }
+            >
+              <option value="">HH</option>
+              {HOURS.map((hour) => (
+                <option key={hour} value={hour}>
+                  {hour}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="form-input form-input--inline-field"
+              value={getTimeMinute(form.horaGestion)}
+              onChange={(e) =>
+                setField(
+                  'horaGestion',
+                  buildTimeValue(form.horaGestion, 'minute', e.target.value)
+                )
+              }
+            >
+              <option value="">MM</option>
+              {MINUTES.map((minute) => (
+                <option key={minute} value={minute}>
+                  {minute}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>

@@ -16,6 +16,52 @@ import type { ApiResponse } from '../../../shared/types/indexApi';
 
 const BASE_GESTION = '/v1/Gestion';
 
+export interface CreateGestionOpeGesContratosPayload {
+  nId_DocxCobrarOpe: number;
+  nId_Cliente: number;
+  nId_Contrato: number;
+  nId_Cartera: number;
+  nId_DocxCobrars: string;
+  nId_PersDeudor: number;
+  nId_Usuario: number;
+  cNOMBRECONTACTO: string;
+  cCARGO: string;
+  nNP0: number;
+  nNP1: number;
+  nNP2: number;
+  nESTADOGESTION: number;
+  cTELEFONO: string;
+  nTIPOGESTION: number;
+  nASIGNARGESTOR: number | null;
+  dFECHACOMPROMISO: string;
+  nMONTOSOLES: number;
+  nMONTODOLARES: number;
+  dFECHANUEVAGESTION: string;
+  cHORANUEVAGESTION: string;
+  cMINUTONUEVAGESTION: string;
+  dFECHAGESTION: string;
+  cHORAGESTION: string;
+  cMINUTOGESTION: string;
+  cOBSERVACION: string;
+  cSISTEMA: string;
+  nESTADOGESTIONCLARO: number;
+  nMOTIVONOPAGO: number;
+  dFechaInicioGestion: string;
+  bEstado: boolean;
+}
+
+export interface CreateGestionOpeGesContratosResponse {
+  nro: number;
+  nId_DocxCobrarOpeGes: number;
+  nId_DocxCobrarOpe: number;
+  nId_Cliente: number;
+  nId_Contrato: number;
+  nId_Cartera: number;
+  nId_DocxCobrar: number;
+  nId_PersDeudor: number;
+  nId_Usuario: number;
+}
+
 export async function fetchGestionEstados(
   idCliente: string,
   signal?: AbortSignal
@@ -81,6 +127,7 @@ export async function fetchGestionPaletaRespuesta(
   return (result.response ?? []).map((item) => ({
     id: String(item.nId_OpeCodCliOut),
     nombre: item.cNombre_OpeCodCliOut,
+    idTipoContacto: item.nId_TipoContacto ?? null,
   }));
 }
 
@@ -132,4 +179,28 @@ export async function fetchGestionMotivoNoPago(
     id: String(item.nId_MotivoNoPago),
     nombre: item.cNombreMotivoNoPago,
   }));
+}
+
+export async function createGestionOpeGesContratos(
+  payload: CreateGestionOpeGesContratosPayload,
+  signal?: AbortSignal
+): Promise<ApiResponse<CreateGestionOpeGesContratosResponse[]>> {
+  const result = await apiClient<ApiResponse<CreateGestionOpeGesContratosResponse[]>>(
+    `${BASE_GESTION}/CreateGestionOpeGesContratos`,
+    {
+      method: 'POST',
+      body: payload,
+      signal,
+    }
+  );
+
+  if (result.statusCode !== 200) {
+    throw new Error(
+      result.messageUser ||
+        result.message ||
+        'Error guardando la gestión'
+    );
+  }
+
+  return result;
 }

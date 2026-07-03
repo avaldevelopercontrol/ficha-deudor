@@ -76,16 +76,19 @@ export const useFichaGestionCatalogos = (
   const np0Options = np0Data?.map((item) => ({
     id: item.id,
     label: item.nombre,
+    idTipoContacto: item.idTipoContacto ?? null,
   })) ?? [];
 
   const np1Options = np1Data?.map((item) => ({
     id: item.id,
     label: item.nombre,
+    idTipoContacto: item.idTipoContacto ?? null,
   })) ?? [];
 
   const np2Options = np2Data?.map((item) => ({
     id: item.id,
     label: item.nombre,
+    idTipoContacto: item.idTipoContacto ?? null,
   })) ?? [];
 
   const {

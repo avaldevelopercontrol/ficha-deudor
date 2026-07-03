@@ -22,6 +22,7 @@ interface Props {
   id_usuario: string;
   data: DeudorInfo;
   onDocumentoClick?: (doc: DocumentoApi) => void;
+  onFilteredDocumentosChange?: (documentos: DocumentoApi[]) => void;
 }
 
 // ─── Anchos fijos por columna conocida ───
@@ -93,10 +94,12 @@ const DocumentosTable: React.FC<Props> = ({
   id_usuario,
   data,
   onDocumentoClick,
+  onFilteredDocumentosChange,
 }) => {
   const {
     columns,
     allData,
+    filteredData,
     paginatedData,
     botones,
     isLoading,
@@ -113,6 +116,10 @@ const DocumentosTable: React.FC<Props> = ({
     onTextFilterChange,
     onSelectedFilterChange,
   } = useDocumentos(id_cliente, id_cartera, id_deudor, id_contrato, id_usuario);
+
+  useEffect(() => {
+    onFilteredDocumentosChange?.(filteredData);
+  }, [filteredData, onFilteredDocumentosChange]);
 
   const columnWidths = useMemo(() => {
     const rowsForWidth = allData.length > 0 ? allData : paginatedData;

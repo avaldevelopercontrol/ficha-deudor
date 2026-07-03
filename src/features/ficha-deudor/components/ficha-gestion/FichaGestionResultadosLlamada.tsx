@@ -1,7 +1,15 @@
 import React from 'react';
-import { SelectField, TextAreaField, CheckboxField } from '../../../../shared/components/ui';
+import {
+  SelectField,
+  TextAreaField,
+  CheckboxField,
+} from '../../../../shared/components/ui';
 import type { SelectOption } from '../../../../shared/types';
 import type { GestionFormClaro } from '../../hooks/useFichaGestionForm';
+import {
+  getFichaGestionErrorMessages,
+  type FichaGestionValidationErrors,
+} from '../../validations/fichaGestionValidation';
 
 interface Props {
   form: GestionFormClaro;
@@ -9,6 +17,7 @@ interface Props {
     field: K,
     value: GestionFormClaro[K]
   ) => void;
+  validationErrors?: FichaGestionValidationErrors;
   mostrarCamposClaro: boolean;
 
   estadoGestionClaroOptions: SelectOption[];
@@ -26,6 +35,7 @@ interface Props {
 const FichaGestionResultadosLlamada: React.FC<Props> = ({
   form,
   setField,
+  validationErrors = {},
   mostrarCamposClaro,
 
   estadoGestionClaroOptions,
@@ -39,6 +49,8 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
   resetForm,
   handleGuardar,
 }) => {
+  const validationErrorMessages = getFichaGestionErrorMessages(validationErrors);
+
   return (
     <div className="ficha-block ficha-block--with-side-title">
       <div className="block-side-title-wrapper">
@@ -61,6 +73,7 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
                 value={form.observaciones}
                 onChange={(e) => setField('observaciones', e.target.value)}
                 rows={2}
+                error={validationErrors.observaciones || ''}
               />
             </div>
 
@@ -76,7 +89,11 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
                     : 'Seleccionar Estado Gestion Claro...'
                 }
                 disabled={isLoadingEstadoGestionClaro}
-                error={errorEstadoGestionClaro || ''}
+                error={
+                  validationErrors.estadoGestionClaro ||
+                  errorEstadoGestionClaro ||
+                  ''
+                }
               />
 
               <SelectField
@@ -90,7 +107,11 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
                     : 'Seleccionar Motivo No Pago...'
                 }
                 disabled={isLoadingMotivoNoPago}
-                error={errorMotivoNoPago || ''}
+                error={
+                  validationErrors.motivoNoPago ||
+                  errorMotivoNoPago ||
+                  ''
+                }
               />
             </div>
           </>
@@ -108,7 +129,20 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
               value={form.observaciones}
               onChange={(e) => setField('observaciones', e.target.value)}
               rows={2}
+              error={validationErrors.observaciones || ''}
             />
+          </div>
+        )}
+
+        {validationErrorMessages.length > 0 && (
+          <div className="form-error-summary">
+            <p>Por favor, corrija los siguientes errores:</p>
+
+            <ul>
+              {validationErrorMessages.map((error, index) => (
+                <li key={`${error}-${index}`}>{error}</li>
+              ))}
+            </ul>
           </div>
         )}
 

@@ -201,6 +201,7 @@ export const DashboardPage: React.FC = () => {
       id_deudor: String(row.nId_PersDeudor),
       id_contrato: String(row.nId_Contrato),
       id_usuario: String(idUsuario),
+      fecha_inicio_gestion: new Date().toISOString(),
     });
 
     navigate(`/ficha-deudor?${queryParams.toString()}`);

@@ -1,4 +1,15 @@
+import { useState } from 'react';
+import {
+  createGestionOpeGesContratos,
+  type CreateGestionOpeGesContratosPayload,
+} from '../api/fichaGestionApi';
+import {
+  hasFichaGestionErrors,
+  validateFichaGestion,
+  type FichaGestionValidationErrors,
+} from '../validations/fichaGestionValidation';
 import type { GestionFormClaro } from './useFichaGestionForm';
+import type { DocumentoApi } from '../../../shared/types/indexApi';
 
 type SetGestionField = <K extends keyof GestionFormClaro>(
   field: K,
@@ -9,15 +20,77 @@ interface UseFichaGestionActionsParams {
   form: GestionFormClaro;
   setField: SetGestionField;
   usuarioActual: string;
+  idCliente: string;
+  idCartera: string;
+  idContrato: string;
+  idDeudor: string;
+  idUsuario: string;
+  fechaInicioGestion: string;
+  documentosFiltrados: DocumentoApi[];
+  np1TipoContacto: number;
+  onGestionGuardada?: (gestionTerminada: boolean) => void;
   onSubmit?: (data: GestionFormClaro) => void;
 }
+
+const toNumber = (value: string | number | null | undefined) => {
+  const parsedValue = Number(value);
+
+  return Number.isFinite(parsedValue) ? parsedValue : 0;
+};
+
+const toDecimalNumber = (value: string | number | null | undefined) => {
+  if (value === null || value === undefined || value === '') return 0;
+
+  const parsedValue = Number(String(value).replace(',', '.'));
+
+  return Number.isFinite(parsedValue) ? parsedValue : 0;
+};
+
+const splitTime = (time: string | null | undefined) => {
+  const [hour = '', minute = ''] = String(time ?? '').split(':');
+
+  return {
+    hour,
+    minute,
+  };
+};
+
+const toApiDateTime = (date: string | null | undefined) => {
+  if (!date) return '';
+
+  if (date.includes('T')) {
+    return date;
+  }
+
+  return `${date}T00:00:00.000Z`;
+};
+
+const buildDocxCobrars = (documentos: DocumentoApi[]) => {
+  return documentos
+    .map((documento) => documento.nId_DocxCobrar)
+    .filter((id) => id !== null && id !== undefined && String(id).trim() !== '')
+    .map(String)
+    .join(',');
+};
 
 export const useFichaGestionActions = ({
   form,
   setField,
   usuarioActual,
+  idCliente,
+  idCartera,
+  idContrato,
+  idDeudor,
+  idUsuario,
+  fechaInicioGestion,
+  documentosFiltrados,
+  np1TipoContacto,
+  onGestionGuardada,
   onSubmit,
 }: UseFichaGestionActionsParams) => {
+  const [validationErrors, setValidationErrors] =
+    useState<FichaGestionValidationErrors>({});
+
   const handleAgendar = () => {
     if (form.fechaNuevaGestion && form.horaNuevaGestion) {
       const mensaje = `Gestión agendada para: ${form.fechaNuevaGestion} a las ${form.horaNuevaGestion} por ${usuarioActual}`;
@@ -34,7 +107,7 @@ export const useFichaGestionActions = ({
     const telefono = form.telefono.replace(/\D/g, '');
 
     if (!telefono) {
-      alert('Por favor ingrese un número de teléfono');
+      alert('Por favor seleccione un número de teléfono');
       return;
     }
 
@@ -45,11 +118,85 @@ export const useFichaGestionActions = ({
     window.open(`https://wa.me/${telefono}?text=${mensaje}`, '_blank');
   };
 
-  const handleGuardar = () => {
-    onSubmit?.(form);
+  const handleGuardar = async () => {
+    try {
+      const nIdDocxCobrars = buildDocxCobrars(documentosFiltrados);
+
+      const errors = validateFichaGestion({
+        form,
+        np1TipoContacto,
+        tieneDocumentos: Boolean(nIdDocxCobrars),
+      });
+
+      setValidationErrors(errors);
+
+      if (hasFichaGestionErrors(errors)) {
+        return;
+      }
+
+      const nuevaGestionTime = splitTime(form.horaNuevaGestion);
+      const gestionTime = splitTime(form.horaGestion);
+
+      const payload: CreateGestionOpeGesContratosPayload = {
+        nId_DocxCobrarOpe: 0,
+        nId_Cliente: toNumber(idCliente),
+        nId_Contrato: toNumber(idContrato),
+        nId_Cartera: toNumber(idCartera),
+        nId_DocxCobrars: nIdDocxCobrars,
+        nId_PersDeudor: toNumber(idDeudor),
+        nId_Usuario: toNumber(idUsuario),
+
+        cNOMBRECONTACTO: form.nombreContacto.trim(),
+        cCARGO: form.cargo.trim(),
+        nNP0: toNumber(form.np0),
+        nNP1: toNumber(form.np1),
+        nNP2: toNumber(form.np2),
+        nESTADOGESTION: toNumber(form.estadoGestion),
+        cTELEFONO: form.telefono.trim(),
+        nTIPOGESTION: toNumber(form.tipoGestion),
+        nASIGNARGESTOR: null,
+
+        dFECHACOMPROMISO: toApiDateTime(form.fechaCompromisoPago),
+        nMONTOSOLES: toDecimalNumber(form.compromisoSoles),
+        nMONTODOLARES: toDecimalNumber(form.compromisoUSD),
+
+        dFECHANUEVAGESTION: form.fechaNuevaGestion,
+        cHORANUEVAGESTION: nuevaGestionTime.hour,
+        cMINUTONUEVAGESTION: nuevaGestionTime.minute,
+
+        dFECHAGESTION: form.fechaGestion,
+        cHORAGESTION: gestionTime.hour,
+        cMINUTOGESTION: gestionTime.minute,
+
+        cOBSERVACION: form.observaciones.trim(),
+        cSISTEMA: 'SISGES',
+        nESTADOGESTIONCLARO: toNumber(form.estadoGestionClaro),
+        nMOTIVONOPAGO: toNumber(form.motivoNoPago),
+        dFechaInicioGestion: fechaInicioGestion,
+        bEstado: true,
+      };
+
+      await createGestionOpeGesContratos(payload);
+
+      setValidationErrors({});
+
+      onSubmit?.(form);
+
+      alert('Gestión guardada correctamente.');
+
+      onGestionGuardada?.(form.gestionTerminada);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ocurrió un error al guardar la gestión.';
+
+      alert(message);
+    }
   };
 
   return {
+    validationErrors,
     handleAgendar,
     handleOpenWhatsApp,
     handleGuardar,

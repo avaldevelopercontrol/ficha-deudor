@@ -13,6 +13,7 @@ import PanelGestionRealizada from '../components/paneles/PanelGestionRealizada';
 import { DeudorProvider } from '../contexts/DeudorContext';
 import { useDeudorHeader } from '../hooks/useDeudorHeader';
 import { useAuth } from '../../auth/contexts/authContextValue';
+import type { DocumentoApi } from '../../../shared/types/indexApi';
 
 interface FichaContentProps {
   id_cliente: string;
@@ -20,6 +21,7 @@ interface FichaContentProps {
   id_deudor: string;
   id_contrato: string;
   id_usuario: string;
+  fecha_inicio_gestion: string;
 }
 
 const FichaContent: React.FC<FichaContentProps> = ({
@@ -28,16 +30,30 @@ const FichaContent: React.FC<FichaContentProps> = ({
   id_deudor,
   id_contrato,
   id_usuario,
+  fecha_inicio_gestion,
 }) => {
   const navigate = useNavigate();
   const { usuario, clienteSeleccionada, logout } = useAuth();
   const [contacto, setContacto] = useState('');
   const [panelActivo, setPanelActivo] = useState<string | null>(null);
+  const [telefonoSeleccionado, setTelefonoSeleccionado] = useState('');
+  const [documentosFiltrados, setDocumentosFiltrados] = useState<DocumentoApi[]>([]);
 
   const { data: deudorData } = useDeudorHeader(id_cliente, id_cartera, id_deudor);
 
   const handleGestionSubmit = () => {
     alert('Gestión guardada. Revisa la consola.');
+  };
+
+  const handleGestionGuardada = (gestionTerminada: boolean) => {
+    if (!gestionTerminada) return;
+
+    const queryParams = new URLSearchParams({
+      id_cliente,
+      id_usuario,
+    });
+
+    navigate(`/dashboard?${queryParams.toString()}`, { replace: true });
   };
 
   const handleTogglePanel = (accion: string) => {
@@ -110,6 +126,7 @@ const FichaContent: React.FC<FichaContentProps> = ({
                 id_contrato={id_contrato}
                 id_usuario={id_usuario}
                 data={deudorData}
+                onFilteredDocumentosChange={setDocumentosFiltrados}
               />
             )}
             <PanelDatosAdicionales
@@ -123,6 +140,7 @@ const FichaContent: React.FC<FichaContentProps> = ({
               id_cliente={id_cliente}
               id_deudor={id_deudor}
               id_usuario={id_usuario}
+              onSelectTelefono={setTelefonoSeleccionado}
             />
             <PanelDireccionesReferenciadas
               isActive={panelActivo === 'DIRECCIONES REFERENCIADAS'}
@@ -148,6 +166,12 @@ const FichaContent: React.FC<FichaContentProps> = ({
               idCliente={id_cliente}
               idCartera={id_cartera}
               idContrato={id_contrato}
+              idDeudor={id_deudor}
+              idUsuario={id_usuario}
+              fechaInicioGestion={fecha_inicio_gestion}
+              documentosFiltrados={documentosFiltrados}
+              telefonoSeleccionado={telefonoSeleccionado}
+              onGestionGuardada={handleGestionGuardada}
             />
           </div>
         </main>
@@ -170,6 +194,7 @@ const FichaDeudor: React.FC = () => {
     id_deudor,
     id_contrato,
     id_usuario,
+    fecha_inicio_gestion,
   } = params;
 
   if (!hasRequiredParams) {
@@ -215,6 +240,7 @@ const FichaDeudor: React.FC = () => {
       id_deudor={id_deudor}
       id_contrato={id_contrato}
       id_usuario={id_usuario}
+      fecha_inicio_gestion={fecha_inicio_gestion}
     />
   );
 };

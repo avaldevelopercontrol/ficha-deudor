@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   useFichaGestionForm,
   type GestionFormClaro,
@@ -8,11 +8,18 @@ import { useFichaGestionActions } from '../../hooks/useFichaGestionActions';
 import FichaGestionDatosPrincipales from '../ficha-gestion/FichaGestionDatosPrincipales';
 import FichaGestionAccionesTomar from '../ficha-gestion/FichaGestionAccionesTomar';
 import FichaGestionResultadosLlamada from '../ficha-gestion/FichaGestionResultadosLlamada';
+import type { DocumentoApi } from '../../../../shared/types/indexApi';
 
 interface Props {
   idCliente: string;
   idCartera: string;
   idContrato: string;
+  idDeudor: string;
+  idUsuario: string;
+  fechaInicioGestion: string;
+  documentosFiltrados: DocumentoApi[];
+  telefonoSeleccionado?: string;
+  onGestionGuardada?: (gestionTerminada: boolean) => void;
   onSubmit?: (data: GestionFormClaro) => void;
 }
 
@@ -23,6 +30,12 @@ const FichaGestion: React.FC<Props> = ({
   idCliente,
   idCartera,
   idContrato,
+  idDeudor,
+  idUsuario,
+  fechaInicioGestion,
+  documentosFiltrados,
+  telefonoSeleccionado,
+  onGestionGuardada,
   onSubmit,
 }) => {
   const {
@@ -32,6 +45,14 @@ const FichaGestion: React.FC<Props> = ({
     handleNP1Change,
     resetForm,
   } = useFichaGestionForm();
+
+  useEffect(() => {
+    const telefono = telefonoSeleccionado?.trim();
+
+    if (telefono && telefono !== form.telefono) {
+      setField('telefono', telefono);
+    }
+  }, [telefonoSeleccionado, form.telefono, setField]);
 
   const {
     estadosOptions,
@@ -71,7 +92,14 @@ const FichaGestion: React.FC<Props> = ({
 
   const mostrarCamposClaro = String(idCliente) === ID_CLIENTE_CLARO;
 
+  const np1Seleccionado = np1Options.find(
+    (option) => String(option.id) === String(form.np1)
+  );
+
+  const np1TipoContacto = Number(np1Seleccionado?.idTipoContacto ?? 0);
+
   const {
+    validationErrors,
     handleAgendar,
     handleOpenWhatsApp,
     handleGuardar,
@@ -79,6 +107,15 @@ const FichaGestion: React.FC<Props> = ({
     form,
     setField,
     usuarioActual: USUARIO_ACTUAL,
+    idCliente,
+    idCartera,
+    idContrato,
+    idDeudor,
+    idUsuario,
+    fechaInicioGestion,
+    documentosFiltrados,
+    np1TipoContacto,
+    onGestionGuardada,
     onSubmit,
   });
 
@@ -91,6 +128,7 @@ const FichaGestion: React.FC<Props> = ({
       <FichaGestionDatosPrincipales
         form={form}
         setField={setField}
+        validationErrors={validationErrors}
         handleNP0Change={handleNP0Change}
         handleNP1Change={handleNP1Change}
         handleOpenWhatsApp={handleOpenWhatsApp}
@@ -114,6 +152,7 @@ const FichaGestion: React.FC<Props> = ({
       <FichaGestionAccionesTomar
         form={form}
         setField={setField}
+        validationErrors={validationErrors}
         usuarioActual={USUARIO_ACTUAL}
         handleAgendar={handleAgendar}
       />
@@ -121,6 +160,7 @@ const FichaGestion: React.FC<Props> = ({
       <FichaGestionResultadosLlamada
         form={form}
         setField={setField}
+        validationErrors={validationErrors}
         mostrarCamposClaro={mostrarCamposClaro}
         estadoGestionClaroOptions={estadoGestionClaroOptions}
         isLoadingEstadoGestionClaro={isLoadingEstadoGestionClaro}

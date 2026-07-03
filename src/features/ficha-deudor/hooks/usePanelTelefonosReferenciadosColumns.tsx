@@ -6,10 +6,12 @@ import type { Column, TelefonoReferenciado } from '../../../shared/types';
 
 interface UsePanelTelefonosReferenciadosColumnsParams {
   onEdit: (row: TelefonoReferenciado) => void;
+  onSelectTelefono?: (telefono: string) => void;
 }
 
 export const usePanelTelefonosReferenciadosColumns = ({
   onEdit,
+  onSelectTelefono,
 }: UsePanelTelefonosReferenciadosColumnsParams) => {
   const columns: Column<TelefonoReferenciado>[] = useMemo(
     () => [
@@ -20,6 +22,32 @@ export const usePanelTelefonosReferenciadosColumns = ({
       {
         key: 'numero',
         label: 'Número',
+        render: (row) => {
+          const numero = String(row.numero ?? '').trim();
+
+          if (!numero) return '—';
+
+          return (
+            <span
+              role="button"
+              tabIndex={0}
+              style={{ cursor: 'pointer' }}
+              onClick={(event) => {
+                event.stopPropagation();
+                onSelectTelefono?.(numero);
+              }}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+
+                event.preventDefault();
+                event.stopPropagation();
+                onSelectTelefono?.(numero);
+              }}
+            >
+              {numero}
+            </span>
+          );
+        },
       },
       {
         key: 'horario',
@@ -91,7 +119,7 @@ export const usePanelTelefonosReferenciadosColumns = ({
         ),
       },
     ],
-    [onEdit]
+    [onEdit, onSelectTelefono]
   );
 
   return {

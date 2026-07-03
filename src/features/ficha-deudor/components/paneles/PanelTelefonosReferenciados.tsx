@@ -14,6 +14,7 @@ interface Props {
   id_cliente: string;
   id_deudor: string;
   id_usuario: string;
+  onSelectTelefono?: (telefono: string) => void;
 }
 
 const PanelTelefonosReferenciados: React.FC<Props> = ({
@@ -21,6 +22,7 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({
   id_cliente,
   id_deudor,
   id_usuario,
+  onSelectTelefono,
 }) => {
   const {
     allData,
@@ -59,6 +61,7 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({
 
   const { columns } = usePanelTelefonosReferenciadosColumns({
     onEdit: handleEdit,
+    onSelectTelefono,
   });
 
   if (!isActive) return null;
