@@ -2,10 +2,12 @@ import type { Cliente, LoginResponse, Usuario, ClientesResponse } from '../types
 
 // ─────────────────────────────────────────────
 // USUARIOS MOCK
+// Solo se mantienen para simular login local.
+// Ya no contienen clientesAsignados.
 // ─────────────────────────────────────────────
 
 const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
-  'admin': {
+  admin: {
     password: 'admin123',
     usuario: {
       id_usuario: '16068',
@@ -14,10 +16,9 @@ const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
       username: 'admin',
       email: 'c.ramirez@avalperu.pe',
       perfil: 'SUPERVISOR',
-      clientesAsignados: ['95'],
     },
   },
-  'gestor1': {
+  gestor1: {
     password: 'gestor123',
     usuario: {
       id_usuario: 'USR002',
@@ -26,10 +27,9 @@ const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
       username: 'gestor1',
       email: 'm.lopez@avalperu.pe',
       perfil: 'GESTOR',
-      clientesAsignados: ['95'],
     },
   },
-  'gestor2': {
+  gestor2: {
     password: 'gestor456',
     usuario: {
       id_usuario: 'USR003',
@@ -38,7 +38,6 @@ const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
       username: 'gestor2',
       email: 'j.perez@avalperu.pe',
       perfil: 'GESTOR',
-      clientesAsignados: ['95'],
     },
   },
 };
@@ -48,19 +47,26 @@ const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
 // ─────────────────────────────────────────────
 
 export const clientesMock: Cliente[] = [
-  { id_cliente: '95', nombre: 'CLARO CORPORATIVO', codigo: 'CLARO', activa: true },
+  {
+    id_cliente: '95',
+    nombre: 'CLARO CORPORATIVO',
+    codigo: 'CLARO',
+    activa: true,
+  },
 ];
 
 // ─────────────────────────────────────────────
-// MOCK FUNCTIONS (simulan la API)
+// MOCK FUNCTIONS
 // ─────────────────────────────────────────────
 
 /**
- * Simula el endpoint de login
+ * Simula el endpoint de login.
  * POST /api/auth/login
  */
-export const mockLogin = async (payload: { username: string; password: string }): Promise<LoginResponse> => {
-  // Simular latencia de red
+export const mockLogin = async (payload: {
+  username: string;
+  password: string;
+}): Promise<LoginResponse> => {
   await new Promise((resolve) => setTimeout(resolve, 800));
 
   const registro = usuariosMock[payload.username];
@@ -69,7 +75,7 @@ export const mockLogin = async (payload: { username: string; password: string })
     return {
       success: false,
       message: 'Usuario no encontrado',
-      usuario: null as unknown as Usuario,
+      usuario: null,
     };
   }
 
@@ -77,7 +83,7 @@ export const mockLogin = async (payload: { username: string; password: string })
     return {
       success: false,
       message: 'Contraseña incorrecta',
-      usuario: null as unknown as Usuario,
+      usuario: null,
     };
   }
 
@@ -90,26 +96,18 @@ export const mockLogin = async (payload: { username: string; password: string })
 };
 
 /**
- * Simula el endpoint de obtener <clientes> por usuario
- * GET /api/auth/clientes/:id_usuario
+ * Simula la carga de clientes disponibles.
+ * Ya no filtra por usuario.
  */
-export const mockGetClientesByUsuario = async (id_usuario: string): Promise<ClientesResponse> => {
+export const mockGetClientesByUsuario = async (
+  _id_usuario?: string
+): Promise<ClientesResponse> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
 
-  const usuarioEntry = Object.values(usuariosMock).find(
-    (u) => u.usuario.id_usuario === id_usuario
-  );
-
-  if (!usuarioEntry) {
-    return { success: false, clientes: [] };
-  }
-
-  const clientesFiltrados = clientesMock.filter(
-    (c) => usuarioEntry.usuario.clientesAsignados.includes(c.id_cliente) && c.activa
-  );
+  const clientesActivos = clientesMock.filter((cliente) => cliente.activa);
 
   return {
     success: true,
-    clientes: clientesFiltrados,
+    clientes: clientesActivos,
   };
 };

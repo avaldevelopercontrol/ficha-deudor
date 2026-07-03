@@ -1,1 +1,5 @@
-export * from './authMocks';
+export {
+  clientesMock,
+  mockGetClientesByUsuario,
+  mockLogin,
+} from './authMocks';

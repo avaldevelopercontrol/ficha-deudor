@@ -37,9 +37,6 @@ const mapUsuarioApiToUsuario = (usuarioApi: LoginUsuarioApi): Usuario => {
     username: cleanText(usuarioApi.cUsr_Login),
     email,
     perfil: String(usuarioApi.nid_perfil ?? usuarioApi.nId_PerfilGest ?? ''),
-    clientesAsignados: usuarioApi.nId_ClientePri
-      ? [String(usuarioApi.nId_ClientePri)]
-      : [],
   };
 };
 

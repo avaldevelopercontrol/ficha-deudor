@@ -1,6 +1,5 @@
 import React from 'react';
 import type { GestionFormClaro } from '../../hooks/useFichaGestionForm';
-import type { FichaGestionValidationErrors } from '../../validations/fichaGestionValidation';
 
 interface Props {
   form: GestionFormClaro;
@@ -8,7 +7,6 @@ interface Props {
     field: K,
     value: GestionFormClaro[K]
   ) => void;
-  validationErrors?: FichaGestionValidationErrors;
   usuarioActual: string;
   handleAgendar: () => void;
 }
@@ -58,7 +56,6 @@ const buildTimeValue = (
 const FichaGestionAccionesTomar: React.FC<Props> = ({
   form,
   setField,
-  validationErrors = {},
   usuarioActual,
   handleAgendar,
 }) => {
@@ -68,7 +65,7 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
         <div className="block-side-title">ACCIONES A TOMAR</div>
       </div>
 
-      <div className="block-content">
+      <div className="block-content block-content--compact-gestion">
         <div className="form-grid g3 form-grid--inline" style={{ marginBottom: '6px' }}>
           <div className="form-row-inline">
             <label className="form-label form-label--inline">Fecha Compromiso:</label>
@@ -108,22 +105,6 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
             />
           </div>
         </div>
-
-        {(validationErrors.fechaCompromisoPago || validationErrors.montoCompromiso) && (
-          <div style={{ marginBottom: '6px' }}>
-            {validationErrors.fechaCompromisoPago && (
-              <span className="form-error">
-                {validationErrors.fechaCompromisoPago}
-              </span>
-            )}
-
-            {validationErrors.montoCompromiso && (
-              <span className="form-error">
-                {validationErrors.montoCompromiso}
-              </span>
-            )}
-          </div>
-        )}
 
         <div
           className="agendar-gestion-row agendar-gestion-row--compact agendar-gestion-row--inline"

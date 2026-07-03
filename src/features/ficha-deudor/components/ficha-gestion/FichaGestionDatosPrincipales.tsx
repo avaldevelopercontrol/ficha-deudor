@@ -3,7 +3,6 @@ import React from 'react';
 import { SelectField } from '../../../../shared/components/ui';
 import type { SelectOption } from '../../../../shared/types';
 import type { GestionFormClaro } from '../../hooks/useFichaGestionForm';
-import type { FichaGestionValidationErrors } from '../../validations/fichaGestionValidation';
 
 interface Props {
   form: GestionFormClaro;
@@ -11,7 +10,6 @@ interface Props {
     field: K,
     value: GestionFormClaro[K]
   ) => void;
-  validationErrors?: FichaGestionValidationErrors;
   handleNP0Change: (value: string) => void;
   handleNP1Change: (value: string) => void;
   handleOpenWhatsApp: () => void;
@@ -35,7 +33,6 @@ interface Props {
 const FichaGestionDatosPrincipales: React.FC<Props> = ({
   form,
   setField,
-  validationErrors = {},
   handleNP0Change,
   handleNP1Change,
   handleOpenWhatsApp,
@@ -108,9 +105,6 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
                 WhatsApp
               </button>
             </div>
-            {validationErrors.telefono && (
-              <span className="form-error">{validationErrors.telefono}</span>
-            )}
           </div>
         </div>
 
@@ -122,7 +116,7 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
             onChange={handleNP0Change}
             placeholder={isLoadingNP0 ? 'Cargando NP0...' : 'Seleccionar NP0...'}
             disabled={isLoadingNP0}
-            error={validationErrors.np0 || errorNP0 || ''}
+            error={errorNP0 || ''}
           />
 
           <SelectField
@@ -138,7 +132,7 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
                   : 'Seleccionar NP1...'
             }
             disabled={!form.np0 || isLoadingNP1}
-            error={validationErrors.np1 || (form.np0 ? errorNP1 || '' : '')}
+            error={form.np0 ? errorNP1 || '' : ''}
           />
 
           <SelectField
@@ -166,7 +160,7 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
             onChange={(val) => setField('estadoGestion', val)}
             placeholder={isLoadingEstados ? 'Cargando...' : 'Seleccionar estado...'}
             disabled={isLoadingEstados}
-            error={validationErrors.estadoGestion || errorEstados || ''}
+            error={errorEstados || ''}
           />
 
           <SelectField
@@ -176,7 +170,7 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
             onChange={(val) => setField('tipoGestion', val)}
             placeholder={isLoadingTipos ? 'Cargando...' : 'Seleccionar tipo...'}
             disabled={isLoadingTipos}
-            error={validationErrors.tipoGestion || errorTipos || ''}
+            error={errorTipos || ''}
           />
 
           <div className="form-group gestor-field">

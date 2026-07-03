@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { PanelLayout } from './PanelLayout';
 import { useGestionesRealizadas } from '../../hooks/useGestionesRealizadas';
 import { usePanelGestionRealizadaColumns } from '../../hooks/usePanelGestionRealizadaColumns';
@@ -13,6 +13,7 @@ interface Props {
   id_cartera: string;
   id_deudor: string;
   id_usuario: string;
+  refreshKey?: number;
 }
 
 const PanelGestionRealizada: React.FC<Props> = ({
@@ -21,6 +22,7 @@ const PanelGestionRealizada: React.FC<Props> = ({
   id_cartera,
   id_deudor,
   id_usuario,
+  refreshKey = 0,
 }) => {
   const {
     allData,
@@ -57,6 +59,18 @@ const PanelGestionRealizada: React.FC<Props> = ({
   );
 
   const [vistaExpandida, setVistaExpandida] = useState(false);
+  const lastRefreshKeyRef = useRef(refreshKey);
+
+  useEffect(() => {
+    if (refreshKey === 0 || refreshKey === lastRefreshKeyRef.current) {
+      return;
+    }
+
+    lastRefreshKeyRef.current = refreshKey;
+
+    void refetch();
+    void refetchCompleto();
+  }, [refreshKey, refetch, refetchCompleto]);
 
   const { handleVerMas, handleVolver, handleEliminar } =
     usePanelGestionRealizadaActions({

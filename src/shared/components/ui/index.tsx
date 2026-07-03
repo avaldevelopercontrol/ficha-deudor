@@ -14,3 +14,4 @@ export * from './SectionHeader';
 export * from './SelectField';
 export * from './StatusBadge';
 export * from './TextAreaField';
+export * from './FeedbackMessage';

@@ -4,6 +4,8 @@ import {
   SelectField,
   TextAreaField,
   CheckboxField,
+  FeedbackMessage,
+  type FeedbackMessageVariant,
 } from '../../../../shared/components/ui';
 import type { SelectOption } from '../../../../shared/types';
 import type { GestionFormClaro } from '../../hooks/useFichaGestionForm';
@@ -12,6 +14,12 @@ import {
   type FichaGestionValidationErrors,
 } from '../../validations/fichaGestionValidation';
 
+interface GestionFeedback {
+  variant: FeedbackMessageVariant;
+  title: string;
+  message: string;
+}
+
 interface Props {
   form: GestionFormClaro;
   setField: <K extends keyof GestionFormClaro>(
@@ -19,6 +27,8 @@ interface Props {
     value: GestionFormClaro[K]
   ) => void;
   validationErrors?: FichaGestionValidationErrors;
+  feedback?: GestionFeedback | null;
+  onCloseFeedback?: () => void;
   mostrarCamposClaro: boolean;
   estadoGestionClaroOptions: SelectOption[];
   isLoadingEstadoGestionClaro: boolean;
@@ -28,12 +38,15 @@ interface Props {
   errorMotivoNoPago?: string | null;
   resetForm: () => void;
   handleGuardar: () => void;
+  isSaving?: boolean;
 }
 
 const FichaGestionResultadosLlamada: React.FC<Props> = ({
   form,
   setField,
   validationErrors = {},
+  feedback,
+  onCloseFeedback,
   mostrarCamposClaro,
   estadoGestionClaroOptions,
   isLoadingEstadoGestionClaro,
@@ -43,6 +56,7 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
   errorMotivoNoPago,
   resetForm,
   handleGuardar,
+  isSaving = false,
 }) => {
   const validationErrorMessages = getFichaGestionErrorMessages(validationErrors);
 
@@ -66,7 +80,6 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
             value={form.observaciones}
             onChange={(e) => setField('observaciones', e.target.value)}
             rows={1}
-            error={validationErrors.observaciones || ''}
           />
         </div>
 
@@ -83,11 +96,7 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
                   : 'Seleccionar Estado Gestión Claro...'
               }
               disabled={isLoadingEstadoGestionClaro}
-              error={
-                validationErrors.estadoGestionClaro ||
-                errorEstadoGestionClaro ||
-                ''
-              }
+              error={errorEstadoGestionClaro || ''}
             />
 
             <SelectField
@@ -101,7 +110,7 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
                   : 'Seleccionar Motivo No Pago...'
               }
               disabled={isLoadingMotivoNoPago}
-              error={validationErrors.motivoNoPago || errorMotivoNoPago || ''}
+              error={errorMotivoNoPago || ''}
             />
           </div>
         )}
@@ -117,21 +126,23 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
           </div>
         )}
 
-        <div className="ficha-submit ficha-submit--compact ficha-submit--compact-gestion">
-          <button
-            className="btn btn-danger btn-sm"
-            type="button"
-            onClick={resetForm}
-          >
-            Limpiar
-          </button>
+        {feedback && (
+          <FeedbackMessage
+            variant={feedback.variant}
+            title={feedback.title}
+            message={feedback.message}
+            onClose={onCloseFeedback}
+          />
+        )}
 
+        <div className="ficha-submit ficha-submit--compact ficha-submit--compact-gestion">
           <button
             className="btn btn-primary btn-sm"
             type="button"
             onClick={handleGuardar}
+            disabled={isSaving}
           >
-            Guardar Gestión
+            {isSaving ? 'Guardando...' : 'Guardar Gestión'}
           </button>
         </div>
       </div>

@@ -33,10 +33,10 @@ export interface CreateGestionOpeGesContratosPayload {
   cTELEFONO: string;
   nTIPOGESTION: number;
   nASIGNARGESTOR: number | null;
-  dFECHACOMPROMISO: string;
+  dFECHACOMPROMISO: string | null;
   nMONTOSOLES: number;
   nMONTODOLARES: number;
-  dFECHANUEVAGESTION: string;
+  dFECHANUEVAGESTION: string | null;
   cHORANUEVAGESTION: string;
   cMINUTONUEVAGESTION: string;
   dFECHAGESTION: string;

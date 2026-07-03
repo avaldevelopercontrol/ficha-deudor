@@ -55,14 +55,40 @@ const splitTime = (time: string | null | undefined) => {
   };
 };
 
-const toApiDateTime = (date: string | null | undefined) => {
-  if (!date) return '';
+const getCurrentDateTime = () => {
+  return new Date().toISOString();
+};
 
-  if (date.includes('T')) {
-    return date;
+const normalizeDateValue = (date: string | null | undefined) => {
+  const value = String(date ?? '').trim();
+
+  if (!value) return '';
+
+  const slashDateMatch = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+
+  if (slashDateMatch) {
+    const [, day, month, year] = slashDateMatch;
+
+    return `${year}-${month}-${day}`;
   }
 
-  return `${date}T00:00:00.000Z`;
+  return value.replace(' ', 'T');
+};
+
+const toApiDateTimeOrNull = (date: string | null | undefined) => {
+  const normalizedDate = normalizeDateValue(date);
+
+  if (!normalizedDate) return null;
+
+  if (normalizedDate.includes('T')) {
+    return normalizedDate;
+  }
+
+  return `${normalizedDate}T00:00:00`;
+};
+
+const toApiDateTimeOrCurrent = (date: string | null | undefined) => {
+  return toApiDateTimeOrNull(date) ?? getCurrentDateTime();
 };
 
 const buildDocxCobrars = (documentos: DocumentoApi[]) => {
@@ -90,6 +116,7 @@ export const useFichaGestionActions = ({
 }: UseFichaGestionActionsParams) => {
   const [validationErrors, setValidationErrors] =
     useState<FichaGestionValidationErrors>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleAgendar = () => {
     if (form.fechaNuevaGestion && form.horaNuevaGestion) {
@@ -119,7 +146,11 @@ export const useFichaGestionActions = ({
   };
 
   const handleGuardar = async () => {
+    if (isSaving) return;
+
     try {
+      setIsSaving(true);
+
       const nIdDocxCobrars = buildDocxCobrars(documentosFiltrados);
 
       const errors = validateFichaGestion({
@@ -156,15 +187,15 @@ export const useFichaGestionActions = ({
         nTIPOGESTION: toNumber(form.tipoGestion),
         nASIGNARGESTOR: null,
 
-        dFECHACOMPROMISO: toApiDateTime(form.fechaCompromisoPago),
+        dFECHACOMPROMISO: toApiDateTimeOrNull(form.fechaCompromisoPago),
         nMONTOSOLES: toDecimalNumber(form.compromisoSoles),
         nMONTODOLARES: toDecimalNumber(form.compromisoUSD),
 
-        dFECHANUEVAGESTION: form.fechaNuevaGestion,
+        dFECHANUEVAGESTION: toApiDateTimeOrNull(form.fechaNuevaGestion),
         cHORANUEVAGESTION: nuevaGestionTime.hour,
         cMINUTONUEVAGESTION: nuevaGestionTime.minute,
 
-        dFECHAGESTION: form.fechaGestion,
+        dFECHAGESTION: toApiDateTimeOrCurrent(form.fechaGestion),
         cHORAGESTION: gestionTime.hour,
         cMINUTOGESTION: gestionTime.minute,
 
@@ -172,7 +203,7 @@ export const useFichaGestionActions = ({
         cSISTEMA: 'SISGES',
         nESTADOGESTIONCLARO: toNumber(form.estadoGestionClaro),
         nMOTIVONOPAGO: toNumber(form.motivoNoPago),
-        dFechaInicioGestion: fechaInicioGestion,
+        dFechaInicioGestion: toApiDateTimeOrCurrent(fechaInicioGestion),
         bEstado: true,
       };
 
@@ -182,8 +213,6 @@ export const useFichaGestionActions = ({
 
       onSubmit?.(form);
 
-      alert('Gestión guardada correctamente.');
-
       onGestionGuardada?.(form.gestionTerminada);
     } catch (error) {
       const message =
@@ -192,11 +221,14 @@ export const useFichaGestionActions = ({
           : 'Ocurrió un error al guardar la gestión.';
 
       alert(message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return {
     validationErrors,
+    isSaving,
     handleAgendar,
     handleOpenWhatsApp,
     handleGuardar,

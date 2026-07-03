@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   useFichaGestionForm,
@@ -11,6 +11,7 @@ import FichaGestionDatosPrincipales from '../ficha-gestion/FichaGestionDatosPrin
 import FichaGestionAccionesTomar from '../ficha-gestion/FichaGestionAccionesTomar';
 import FichaGestionResultadosLlamada from '../ficha-gestion/FichaGestionResultadosLlamada';
 
+import type { FeedbackMessageVariant } from '../../../../shared/components/ui';
 import type { DocumentoApi } from '../../../../shared/types/indexApi';
 
 interface Props {
@@ -24,6 +25,12 @@ interface Props {
   telefonoSeleccionado?: string;
   onGestionGuardada?: (gestionTerminada: boolean) => void;
   onSubmit?: (data: GestionFormClaro) => void;
+}
+
+interface GestionFeedback {
+  variant: FeedbackMessageVariant;
+  title: string;
+  message: string;
 }
 
 const ID_CLIENTE_CLARO = '95';
@@ -41,6 +48,8 @@ const FichaGestion: React.FC<Props> = ({
   onGestionGuardada,
   onSubmit,
 }) => {
+  const [feedback, setFeedback] = useState<GestionFeedback | null>(null);
+
   const {
     form,
     setField,
@@ -95,8 +104,21 @@ const FichaGestion: React.FC<Props> = ({
 
   const np1TipoContacto = Number(np1Seleccionado?.idTipoContacto ?? 0);
 
+  const handleGestionRegistrada = (data: GestionFormClaro) => {
+    resetForm();
+
+    setFeedback({
+      variant: 'success',
+      title: 'Gestión registrada correctamente',
+      message: 'La nueva gestión fue guardada y la tabla de Gestión Realizada se actualizó.',
+    });
+
+    onSubmit?.(data);
+  };
+
   const {
     validationErrors,
+    isSaving,
     handleAgendar,
     handleOpenWhatsApp,
     handleGuardar,
@@ -113,8 +135,13 @@ const FichaGestion: React.FC<Props> = ({
     documentosFiltrados,
     np1TipoContacto,
     onGestionGuardada,
-    onSubmit,
+    onSubmit: handleGestionRegistrada,
   });
+
+  const handleGuardarGestion = async () => {
+    setFeedback(null);
+    await handleGuardar();
+  };
 
   return (
     <div className="ficha-card ficha-gestion ficha-gestion--compact">
@@ -125,7 +152,6 @@ const FichaGestion: React.FC<Props> = ({
       <FichaGestionDatosPrincipales
         form={form}
         setField={setField}
-        validationErrors={validationErrors}
         handleNP0Change={handleNP0Change}
         handleNP1Change={handleNP1Change}
         handleOpenWhatsApp={handleOpenWhatsApp}
@@ -149,7 +175,6 @@ const FichaGestion: React.FC<Props> = ({
       <FichaGestionAccionesTomar
         form={form}
         setField={setField}
-        validationErrors={validationErrors}
         usuarioActual={USUARIO_ACTUAL}
         handleAgendar={handleAgendar}
       />
@@ -158,6 +183,8 @@ const FichaGestion: React.FC<Props> = ({
         form={form}
         setField={setField}
         validationErrors={validationErrors}
+        feedback={feedback}
+        onCloseFeedback={() => setFeedback(null)}
         mostrarCamposClaro={mostrarCamposClaro}
         estadoGestionClaroOptions={estadoGestionClaroOptions}
         isLoadingEstadoGestionClaro={isLoadingEstadoGestionClaro}
@@ -166,7 +193,8 @@ const FichaGestion: React.FC<Props> = ({
         isLoadingMotivoNoPago={isLoadingMotivoNoPago}
         errorMotivoNoPago={errorMotivoNoPago}
         resetForm={resetForm}
-        handleGuardar={handleGuardar}
+        handleGuardar={handleGuardarGestion}
+        isSaving={isSaving}
       />
     </div>
   );

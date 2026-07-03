@@ -18,7 +18,6 @@ export interface Usuario {
   username: string;
   email: string;
   perfil: string;
-  clientesAsignados: string[];
 }
 
 // ─────────────────────────────────────────────

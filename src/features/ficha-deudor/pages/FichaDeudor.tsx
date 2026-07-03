@@ -38,11 +38,13 @@ const FichaContent: React.FC<FichaContentProps> = ({
   const [panelActivo, setPanelActivo] = useState<string | null>(null);
   const [telefonoSeleccionado, setTelefonoSeleccionado] = useState('');
   const [documentosFiltrados, setDocumentosFiltrados] = useState<DocumentoApi[]>([]);
+  const [gestionRealizadaRefreshKey, setGestionRealizadaRefreshKey] = useState(0);
 
   const { data: deudorData } = useDeudorHeader(id_cliente, id_cartera, id_deudor);
 
   const handleGestionSubmit = () => {
-    alert('Gestión guardada. Revisa la consola.');
+    setGestionRealizadaRefreshKey((current) => current + 1);
+    setTelefonoSeleccionado('');
   };
 
   const handleGestionGuardada = (gestionTerminada: boolean) => {
@@ -154,6 +156,7 @@ const FichaContent: React.FC<FichaContentProps> = ({
               id_cartera={id_cartera}
               id_deudor={id_deudor}
               id_usuario={id_usuario}
+              refreshKey={gestionRealizadaRefreshKey}
             />
             <PanelEstadoGestionRealizada
               isActive={panelActivo === 'ESTADO DE GESTIÓN REALIZADA'}
