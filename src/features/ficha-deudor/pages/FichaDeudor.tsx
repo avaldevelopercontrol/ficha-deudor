@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { useFichaDeudorParams } from '../hooks/useFichaDeudorParams';
 import DeudorHeader from '../components/ficha/DeudorHeader';
 import AccionesRapidas from '../components/ficha/AccionesRapidas';
@@ -13,6 +14,9 @@ import PanelGestionRealizada from '../components/paneles/PanelGestionRealizada';
 import { DeudorProvider } from '../contexts/DeudorContext';
 import { useDeudorHeader } from '../hooks/useDeudorHeader';
 import { useAuth } from '../../auth/contexts/authContextValue';
+
+import { ActionButton } from '../../../shared/components/ui/ActionButton';
+
 import type { DocumentoApi } from '../../../shared/types/indexApi';
 
 interface FichaContentProps {
@@ -33,14 +37,32 @@ const FichaContent: React.FC<FichaContentProps> = ({
   fecha_inicio_gestion,
 }) => {
   const navigate = useNavigate();
-  const { usuario, clienteSeleccionada, logout } = useAuth();
+  const { usuario, clienteSeleccionada } = useAuth();
+
   const [contacto, setContacto] = useState('');
   const [panelActivo, setPanelActivo] = useState<string | null>(null);
   const [telefonoSeleccionado, setTelefonoSeleccionado] = useState('');
   const [documentosFiltrados, setDocumentosFiltrados] = useState<DocumentoApi[]>([]);
   const [gestionRealizadaRefreshKey, setGestionRealizadaRefreshKey] = useState(0);
 
-  const { data: deudorData } = useDeudorHeader(id_cliente, id_cartera, id_deudor);
+  const { data: deudorData } = useDeudorHeader(
+    id_cliente,
+    id_cartera,
+    id_deudor
+  );
+
+  const goToDashboard = () => {
+    const queryParams = new URLSearchParams({
+      id_cliente,
+      id_usuario,
+    });
+
+    navigate(`/dashboard?${queryParams.toString()}`, { replace: true });
+  };
+
+  const handleCancelar = () => {
+    goToDashboard();
+  };
 
   const handleGestionSubmit = () => {
     setGestionRealizadaRefreshKey((current) => current + 1);
@@ -50,21 +72,11 @@ const FichaContent: React.FC<FichaContentProps> = ({
   const handleGestionGuardada = (gestionTerminada: boolean) => {
     if (!gestionTerminada) return;
 
-    const queryParams = new URLSearchParams({
-      id_cliente,
-      id_usuario,
-    });
-
-    navigate(`/dashboard?${queryParams.toString()}`, { replace: true });
+    goToDashboard();
   };
 
   const handleTogglePanel = (accion: string) => {
     setPanelActivo((actual) => (actual === accion ? null : accion));
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
   };
 
   return (
@@ -75,29 +87,30 @@ const FichaContent: React.FC<FichaContentProps> = ({
             <span className="logo-text">AVAL</span>
             <span className="logo-sub">PERÚ</span>
           </div>
+
           <nav className="app-nav">
             <span className="nav-item">GESTIÓN DE COBRANZAS</span>
             <span className="nav-sep">›</span>
             <span className="nav-item nav-item--active">FICHA DEUDOR</span>
           </nav>
-          <div className="dashboard-header__user">
-            <span>
-              <strong>Usuario:</strong> {usuario?.nombre} {usuario?.apellido}
-            </span>
 
-            <span>•</span>
+          <div className="app-header__right">
+            <div className="dashboard-header__user">
+              <span>
+                <strong>Usuario:</strong> {usuario?.nombre} {usuario?.apellido}
+              </span>
 
-            <span>
-              <strong>Cliente:</strong> {clienteSeleccionada?.nombre}
-            </span>
+              <span>•</span>
 
-            <button
-              type="button"
-              className="dashboard-header__logout"
-              onClick={handleLogout}
-            >
-              Cerrar sesión
-            </button>
+              <span>
+                <strong>Cliente:</strong> {clienteSeleccionada?.nombre}
+              </span>
+              <ActionButton
+                label="Cancelar Gestión"
+                variant="secondary"
+                onClick={handleCancelar}
+              />
+            </div>
           </div>
         </header>
 
@@ -113,6 +126,7 @@ const FichaContent: React.FC<FichaContentProps> = ({
                 compact={true}
               />
             )}
+
             <AccionesRapidas
               panelActivo={panelActivo}
               onTogglePanel={handleTogglePanel}
@@ -131,12 +145,14 @@ const FichaContent: React.FC<FichaContentProps> = ({
                 onFilteredDocumentosChange={setDocumentosFiltrados}
               />
             )}
+
             <PanelDatosAdicionales
               isActive={panelActivo === 'DATOS ADICIONALES'}
               id_cliente={id_cliente}
               id_cartera={id_cartera}
               id_deudor={id_deudor}
             />
+
             <PanelTelefonosReferenciados
               isActive={panelActivo === 'TELÉFONOS REFERENCIADOS'}
               id_cliente={id_cliente}
@@ -144,12 +160,14 @@ const FichaContent: React.FC<FichaContentProps> = ({
               id_usuario={id_usuario}
               onSelectTelefono={setTelefonoSeleccionado}
             />
+
             <PanelDireccionesReferenciadas
               isActive={panelActivo === 'DIRECCIONES REFERENCIADAS'}
               id_cliente={id_cliente}
               id_deudor={id_deudor}
               id_usuario={id_usuario}
             />
+
             <PanelGestionRealizada
               isActive={panelActivo === 'GESTIÓN REALIZADA'}
               id_cliente={id_cliente}
@@ -158,12 +176,14 @@ const FichaContent: React.FC<FichaContentProps> = ({
               id_usuario={id_usuario}
               refreshKey={gestionRealizadaRefreshKey}
             />
+
             <PanelEstadoGestionRealizada
               isActive={panelActivo === 'ESTADO DE GESTIÓN REALIZADA'}
               id_cliente={id_cliente}
               id_cartera={id_cartera}
               id_deudor={id_deudor}
             />
+
             <FichaGestion
               onSubmit={handleGestionSubmit}
               idCliente={id_cliente}

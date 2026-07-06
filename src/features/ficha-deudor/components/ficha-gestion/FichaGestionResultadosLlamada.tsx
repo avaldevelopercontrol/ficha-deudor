@@ -54,7 +54,6 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
   motivoNoPagoOptions,
   isLoadingMotivoNoPago,
   errorMotivoNoPago,
-  resetForm,
   handleGuardar,
   isSaving = false,
 }) => {

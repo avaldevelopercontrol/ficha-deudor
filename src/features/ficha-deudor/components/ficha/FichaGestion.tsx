@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   useFichaGestionForm,
@@ -10,6 +10,8 @@ import { useFichaGestionActions } from '../../hooks/useFichaGestionActions';
 import FichaGestionDatosPrincipales from '../ficha-gestion/FichaGestionDatosPrincipales';
 import FichaGestionAccionesTomar from '../ficha-gestion/FichaGestionAccionesTomar';
 import FichaGestionResultadosLlamada from '../ficha-gestion/FichaGestionResultadosLlamada';
+
+import { useAuth } from '../../../auth/contexts/authContextValue';
 
 import type { FeedbackMessageVariant } from '../../../../shared/components/ui';
 import type { DocumentoApi } from '../../../../shared/types/indexApi';
@@ -34,7 +36,6 @@ interface GestionFeedback {
 }
 
 const ID_CLIENTE_CLARO = '95';
-const USUARIO_ACTUAL = 'CARLOS R. (Gestor)';
 
 const FichaGestion: React.FC<Props> = ({
   idCliente,
@@ -48,6 +49,7 @@ const FichaGestion: React.FC<Props> = ({
   onGestionGuardada,
   onSubmit,
 }) => {
+  const { usuario } = useAuth();
   const [feedback, setFeedback] = useState<GestionFeedback | null>(null);
 
   const {
@@ -57,6 +59,18 @@ const FichaGestion: React.FC<Props> = ({
     handleNP1Change,
     resetForm,
   } = useFichaGestionForm();
+
+  const usuarioActual = useMemo(() => {
+    const nombreCompleto = [
+      usuario?.nombre,
+      usuario?.apellido,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+
+    return nombreCompleto || idUsuario || 'Usuario';
+  }, [usuario?.nombre, usuario?.apellido, idUsuario]);
 
   useEffect(() => {
     const telefono = telefonoSeleccionado?.trim();
@@ -110,7 +124,8 @@ const FichaGestion: React.FC<Props> = ({
     setFeedback({
       variant: 'success',
       title: 'Gestión registrada correctamente',
-      message: 'La nueva gestión fue guardada y la tabla de Gestión Realizada se actualizó.',
+      message:
+        'La nueva gestión fue guardada y la tabla de Gestión Realizada se actualizó.',
     });
 
     onSubmit?.(data);
@@ -125,7 +140,7 @@ const FichaGestion: React.FC<Props> = ({
   } = useFichaGestionActions({
     form,
     setField,
-    usuarioActual: USUARIO_ACTUAL,
+    usuarioActual,
     idCliente,
     idCartera,
     idContrato,
@@ -175,7 +190,7 @@ const FichaGestion: React.FC<Props> = ({
       <FichaGestionAccionesTomar
         form={form}
         setField={setField}
-        usuarioActual={USUARIO_ACTUAL}
+        usuarioActual={usuarioActual}
         handleAgendar={handleAgendar}
       />
 

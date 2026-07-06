@@ -102,6 +102,7 @@ export const mockLogin = async (payload: {
 export const mockGetClientesByUsuario = async (
   _id_usuario?: string
 ): Promise<ClientesResponse> => {
+  void _id_usuario;
   await new Promise((resolve) => setTimeout(resolve, 500));
 
   const clientesActivos = clientesMock.filter((cliente) => cliente.activa);

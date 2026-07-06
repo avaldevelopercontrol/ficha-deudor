@@ -74,15 +74,22 @@ export const validateFichaGestion = ({
     errors.motivoNoPago = 'Selecciona: Motivo No Pago';
   }
 
+  const tieneFechaCompromiso = !isEmptyValue(form.fechaCompromisoPago);
+  const montoSoles = toDecimalNumber(form.compromisoSoles);
+  const montoDolares = toDecimalNumber(form.compromisoUSD);
+  const tieneMontoCompromiso = montoSoles > 0 || montoDolares > 0;
+
+  if (tieneFechaCompromiso && !tieneMontoCompromiso) {
+    errors.montoCompromiso =
+      'Ingrese Compromiso S/. o Compromiso $US cuando registre Fecha Compromiso';
+  }
+
   if (np1TipoContacto === TIPO_CONTACTO_COMPROMISO) {
     if (isEmptyValue(form.fechaCompromisoPago)) {
       errors.fechaCompromisoPago = 'Ingrese Fecha de Compromiso es Obligatorio';
     }
 
-    const montoSoles = toDecimalNumber(form.compromisoSoles);
-    const montoDolares = toDecimalNumber(form.compromisoUSD);
-
-    if (montoSoles <= 0 && montoDolares <= 0) {
+    if (!tieneMontoCompromiso) {
       errors.montoCompromiso = 'Ingrese Monto de Compromiso';
     }
   }
@@ -104,7 +111,5 @@ export const hasFichaGestionErrors = (
 export const getFichaGestionErrorMessages = (
   errors: FichaGestionValidationErrors
 ) => {
-  return Array.from(
-    new Set(Object.values(errors).filter(Boolean))
-  );
+  return Array.from(new Set(Object.values(errors).filter(Boolean)));
 };
