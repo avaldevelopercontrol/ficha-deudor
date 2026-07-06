@@ -87,19 +87,42 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const { logout } = useAuth();
 
   const [isHovered, setIsHovered] = useState(false);
+  const [isHoverLockedAfterCollapse, setIsHoverLockedAfterCollapse] =
+    useState(false);
+
   const [isCobranzaOpen, setIsCobranzaOpen] = useState(true);
 
-  const isExpanded = !isCollapsed || isHovered;
+  const isExpanded =
+    !isCollapsed || (isCollapsed && isHovered && !isHoverLockedAfterCollapse);
 
-  const updateHoverState = (nextValue: boolean) => {
-    setIsHovered(nextValue);
-    onExpandedChange?.(!isCollapsed || nextValue);
+  const handleMouseEnter = () => {
+    if (isHoverLockedAfterCollapse) {
+      return;
+    }
+
+    setIsHovered(true);
+    onExpandedChange?.(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setIsHoverLockedAfterCollapse(false);
+    onExpandedChange?.(!isCollapsed);
   };
 
   const handleToggleCollapsed = () => {
-    const nextExpanded = isCollapsed;
+    const willCollapse = !isCollapsed;
+
+    if (willCollapse) {
+      setIsHovered(false);
+      setIsHoverLockedAfterCollapse(true);
+      onExpandedChange?.(false);
+    } else {
+      setIsHoverLockedAfterCollapse(false);
+      onExpandedChange?.(true);
+    }
+
     onToggleCollapsed();
-    onExpandedChange?.(nextExpanded);
   };
 
   const handleLogout = () => {
@@ -114,8 +137,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         isCollapsed ? 'app-sidebar--collapsed' : 'app-sidebar--pinned',
         isExpanded ? 'app-sidebar--expanded' : '',
       ].join(' ')}
-      onMouseEnter={() => updateHoverState(true)}
-      onMouseLeave={() => updateHoverState(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="app-sidebar__content">
         <div className="app-sidebar__header">

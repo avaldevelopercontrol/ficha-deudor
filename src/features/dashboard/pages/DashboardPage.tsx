@@ -236,33 +236,6 @@ export const DashboardPage: React.FC = () => {
       />
 
       <div className="dashboard-shell">
-        <header className="dashboard-header">
-          <div className="dashboard-header__brand">
-            <span className="logo-text">AVAL</span>
-            <span className="logo-sub">PERÚ</span>
-          </div>
-
-          <nav className="app-nav">
-            <span className="nav-item">GESTIÓN DE COBRANZAS</span>
-            <span className="nav-sep">›</span>
-            <span className="nav-item nav-item--active">
-              GESTIÓN POR PERSONA/DEUDOR
-            </span>
-          </nav>
-
-          <div className="dashboard-header__user">
-            <span>
-              <strong>Usuario:</strong> {usuario?.nombre} {usuario?.apellido}
-            </span>
-
-            <span>•</span>
-
-            <span>
-              <strong>Cliente:</strong> {clienteSeleccionada?.nombre}
-            </span>
-          </div>
-        </header>
-
         <main className="dashboard-main">
           <section className="dashboard-card dashboard-card--search">
             <div className="dashboard-search-layout">

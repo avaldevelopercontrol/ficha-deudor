@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useFichaDeudorParams } from '../hooks/useFichaDeudorParams';
@@ -13,9 +13,9 @@ import PanelEstadoGestionRealizada from '../components/paneles/PanelEstadoGestio
 import PanelGestionRealizada from '../components/paneles/PanelGestionRealizada';
 import { DeudorProvider } from '../contexts/DeudorContext';
 import { useDeudorHeader } from '../hooks/useDeudorHeader';
-import { useAuth } from '../../auth/contexts/authContextValue';
 
 import { ActionButton } from '../../../shared/components/ui/ActionButton';
+import { useAppLayout } from '../../../shared/components/layout/AppLayoutContext';
 
 import type { DocumentoApi } from '../../../shared/types/indexApi';
 
@@ -37,13 +37,16 @@ const FichaContent: React.FC<FichaContentProps> = ({
   fecha_inicio_gestion,
 }) => {
   const navigate = useNavigate();
-  const { usuario, clienteSeleccionada } = useAuth();
+  const { setHeaderActions } = useAppLayout();
 
   const [contacto, setContacto] = useState('');
   const [panelActivo, setPanelActivo] = useState<string | null>(null);
   const [telefonoSeleccionado, setTelefonoSeleccionado] = useState('');
-  const [documentosFiltrados, setDocumentosFiltrados] = useState<DocumentoApi[]>([]);
-  const [gestionRealizadaRefreshKey, setGestionRealizadaRefreshKey] = useState(0);
+  const [documentosFiltrados, setDocumentosFiltrados] = useState<
+    DocumentoApi[]
+  >([]);
+  const [gestionRealizadaRefreshKey, setGestionRealizadaRefreshKey] =
+    useState(0);
 
   const { data: deudorData } = useDeudorHeader(
     id_cliente,
@@ -51,18 +54,32 @@ const FichaContent: React.FC<FichaContentProps> = ({
     id_deudor
   );
 
-  const goToDashboard = () => {
+  const goToDashboard = useCallback(() => {
     const queryParams = new URLSearchParams({
       id_cliente,
       id_usuario,
     });
 
     navigate(`/dashboard?${queryParams.toString()}`, { replace: true });
-  };
+  }, [id_cliente, id_usuario, navigate]);
 
-  const handleCancelar = () => {
+  const handleCancelar = useCallback(() => {
     goToDashboard();
-  };
+  }, [goToDashboard]);
+
+  useEffect(() => {
+    setHeaderActions(
+      <ActionButton
+        label="Cancelar Gestión"
+        variant="secondary"
+        onClick={handleCancelar}
+      />
+    );
+
+    return () => {
+      setHeaderActions(null);
+    };
+  }, [handleCancelar, setHeaderActions]);
 
   const handleGestionSubmit = () => {
     setGestionRealizadaRefreshKey((current) => current + 1);
@@ -81,39 +98,7 @@ const FichaContent: React.FC<FichaContentProps> = ({
 
   return (
     <DeudorProvider value={deudorData ?? null}>
-      <div>
-        <header className="app-header">
-          <div className="app-logo">
-            <span className="logo-text">AVAL</span>
-            <span className="logo-sub">PERÚ</span>
-          </div>
-
-          <nav className="app-nav">
-            <span className="nav-item">GESTIÓN DE COBRANZAS</span>
-            <span className="nav-sep">›</span>
-            <span className="nav-item nav-item--active">FICHA DEUDOR</span>
-          </nav>
-
-          <div className="app-header__right">
-            <div className="dashboard-header__user">
-              <span>
-                <strong>Usuario:</strong> {usuario?.nombre} {usuario?.apellido}
-              </span>
-
-              <span>•</span>
-
-              <span>
-                <strong>Cliente:</strong> {clienteSeleccionada?.nombre}
-              </span>
-              <ActionButton
-                label="Cancelar Gestión"
-                variant="secondary"
-                onClick={handleCancelar}
-              />
-            </div>
-          </div>
-        </header>
-
+      <div className="ficha-page">
         <main className="ficha-main ficha-main--two-columns">
           <aside className="ficha-sidebar">
             {deudorData && (
@@ -229,7 +214,8 @@ const FichaDeudor: React.FC = () => {
           </h1>
 
           <p className="text-gray-700 mb-4">
-            No se puede cargar la ficha del deudor porque faltan parámetros requeridos en la URL.
+            No se puede cargar la ficha del deudor porque faltan parámetros
+            requeridos en la URL.
           </p>
 
           <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">

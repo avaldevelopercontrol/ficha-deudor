@@ -9,7 +9,7 @@ import type {
 
 export function useDashboardDeudores(idCliente?: string | null) {
   const [tipoBusqueda, setTipoBusqueda] =
-    useState<TipoBusquedaDashboard>('D');
+    useState<TipoBusquedaDashboard>('R');
 
   const [valorBusqueda, setValorBusqueda] = useState('');
   const [allData, setAllData] = useState<DeudorDashboard[]>([]);
