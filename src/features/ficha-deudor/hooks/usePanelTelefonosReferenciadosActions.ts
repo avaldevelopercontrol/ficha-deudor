@@ -3,6 +3,7 @@ import type {
   TelefonoFormData,
   TelefonoReferenciado,
 } from '../../../shared/types';
+import { PANEL_TELEFONOS_REFERENCIADOS_ACTION_MESSAGES } from '../constants/panelTelefonosReferenciados.constants';
 
 interface Params {
   create: (formData: TelefonoFormData) => Promise<void>;
@@ -41,7 +42,7 @@ export const usePanelTelefonosReferenciadosActions = ({
         await update(formData.id, formData);
         handleCloseEditar();
       } catch {
-        alert('No se pudo guardar la edición del teléfono.');
+        alert(PANEL_TELEFONOS_REFERENCIADOS_ACTION_MESSAGES.UPDATE_ERROR);
       }
     },
     [update, handleCloseEditar]
@@ -53,7 +54,7 @@ export const usePanelTelefonosReferenciadosActions = ({
         await create(formData);
         handleCloseRegistrar();
       } catch {
-        alert('No se pudo registrar el teléfono.');
+        alert(PANEL_TELEFONOS_REFERENCIADOS_ACTION_MESSAGES.CREATE_ERROR);
       }
     },
     [create, handleCloseRegistrar]

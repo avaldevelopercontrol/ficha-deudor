@@ -1,8 +1,12 @@
 import { useMemo } from 'react';
-import { ActionButton } from '../../../shared/components/ui';
-import { Badge } from '../../../shared/components/ui/Badge';
-import { WrapCell } from '../../../shared/components/ui/WrapCell';
 import type { Column, TelefonoReferenciado } from '../../../shared/types';
+import {
+  renderTelefonoContactadosCell,
+  renderTelefonoEditCell,
+  renderTelefonoEstadoCell,
+  renderTelefonoNumeroCell,
+  renderTelefonoWrappedCell,
+} from '../utils/panelTelefonosReferenciadosCells.utils';
 
 interface UsePanelTelefonosReferenciadosColumnsParams {
   onEdit: (row: TelefonoReferenciado) => void;
@@ -22,54 +26,22 @@ export const usePanelTelefonosReferenciadosColumns = ({
       {
         key: 'numero',
         label: 'Número',
-        render: (row) => {
-          const numero = String(row.numero ?? '').trim();
-
-          if (!numero) return '—';
-
-          return (
-            <span
-              role="button"
-              tabIndex={0}
-              style={{ cursor: 'pointer' }}
-              onClick={(event) => {
-                event.stopPropagation();
-                onSelectTelefono?.(numero);
-              }}
-              onKeyDown={(event) => {
-                if (event.key !== 'Enter' && event.key !== ' ') return;
-
-                event.preventDefault();
-                event.stopPropagation();
-                onSelectTelefono?.(numero);
-              }}
-            >
-              {numero}
-            </span>
-          );
-        },
+        render: (row) => renderTelefonoNumeroCell(row.numero, onSelectTelefono),
       },
       {
         key: 'horario',
         label: 'Horario',
-        render: (row) => <WrapCell>{row.horario}</WrapCell>,
+        render: (row) => renderTelefonoWrappedCell(row.horario),
       },
       {
         key: 'refUbicacion',
         label: 'Ref. Ubicación',
-        render: (row) => <WrapCell>{row.refUbicacion}</WrapCell>,
+        render: (row) => renderTelefonoWrappedCell(row.refUbicacion),
       },
       {
         key: 'estado',
         label: 'Estado',
-        render: (row) => (
-          <Badge
-            variant={row.estado === 'OPERATIVO' ? 'success' : 'neutral'}
-            style={{ padding: '2px 7px', borderRadius: '10px', fontSize: '9px' }}
-          >
-            {row.estado || '—'}
-          </Badge>
-        ),
+        render: (row) => renderTelefonoEstadoCell(row.estado),
       },
       {
         key: 'fechaEstado',
@@ -82,9 +54,7 @@ export const usePanelTelefonosReferenciadosColumns = ({
       {
         key: 'contactados',
         label: 'Contactados',
-        render: (row) => (
-          <WrapCell weight={500}>{`${row.contactados}`}</WrapCell>
-        ),
+        render: (row) => renderTelefonoContactadosCell(row.contactados),
       },
       {
         key: 'noContactados',
@@ -97,7 +67,7 @@ export const usePanelTelefonosReferenciadosColumns = ({
       {
         key: 'fuente',
         label: 'Fuente',
-        render: (row) => <WrapCell>{row.fuente}</WrapCell>,
+        render: (row) => renderTelefonoWrappedCell(row.fuente),
       },
       {
         key: 'ordenSearch',
@@ -108,15 +78,7 @@ export const usePanelTelefonosReferenciadosColumns = ({
         label: 'Editar',
         width: '55px',
         filterable: false,
-        render: (row) => (
-          <ActionButton
-            label=""
-            variant="primary"
-            size="sm"
-            icon="✎"
-            onClick={() => onEdit(row)}
-          />
-        ),
+        render: (row) => renderTelefonoEditCell(row, onEdit),
       },
     ],
     [onEdit, onSelectTelefono]

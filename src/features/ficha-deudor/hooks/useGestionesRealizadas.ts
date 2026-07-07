@@ -13,6 +13,11 @@ import type {
   GestionRealizada,
   GestionCompleta,
 } from '../../../shared/types/indexApi';
+import {
+  GESTIONES_HISTORICAS_INITIAL_PAGE_SIZE,
+  GESTIONES_REALIZADAS_ERROR_MESSAGES,
+  GESTIONES_REALIZADAS_INITIAL_PAGE_SIZE,
+} from '../constants/gestionesRealizadas.constants';
 
 export type { TextFilters, SelectedFilters };
 
@@ -47,13 +52,30 @@ export interface UseGestionesRealizadasReturn {
   refetchCompleto: () => Promise<void>;
 }
 
+const hasRequiredValues = (...values: string[]) => {
+  return values.every((value) => value.trim() !== '');
+};
+
 export function useGestionesRealizadas(
   id_cliente: string,
   id_cartera: string,
   id_deudor: string,
   id_usuario: string
 ): UseGestionesRealizadasReturn {
-  const fetchData = useCallback(async () => {
+  const canLoadResumidas = hasRequiredValues(
+    id_cliente,
+    id_cartera,
+    id_deudor,
+    id_usuario
+  );
+
+  const canLoadHistoricas = hasRequiredValues(
+    id_cliente,
+    id_cartera,
+    id_deudor
+  );
+
+  const fetchGestionesResumidas = useCallback(async () => {
     const result = await fetchGestionesRealizadas(
       id_cliente,
       id_cartera,
@@ -83,14 +105,14 @@ export function useGestionesRealizadas(
     onSelectedFilterChange,
     setAllData,
   } = useClientSideResourceTable<GestionRealizada>({
-    fetchData,
+    fetchData: fetchGestionesResumidas,
     resetDeps: [id_cliente, id_cartera, id_deudor, id_usuario],
-    enabled: Boolean(id_cliente && id_cartera && id_deudor && id_usuario),
-    initialPageSize: 10,
-    errorMessage: 'Error cargando gestiones',
+    enabled: canLoadResumidas,
+    initialPageSize: GESTIONES_REALIZADAS_INITIAL_PAGE_SIZE,
+    errorMessage: GESTIONES_REALIZADAS_ERROR_MESSAGES.RESUMIDAS,
   });
 
-  const fetchCompleto = useCallback(
+  const fetchGestionesCompletas = useCallback(
     async (page: number, size: number) => {
       const result = await fetchGestionesHistoricas(
         id_cliente,
@@ -121,10 +143,10 @@ export function useGestionesRealizadas(
     setPageSize: setCompletoPageSize,
     refetch: refetchCompleto,
   } = useServerSideResourceTable<GestionCompleta>({
-    fetchData: fetchCompleto,
-    enabled: Boolean(id_cliente && id_cartera && id_deudor),
-    initialPageSize: 10,
-    errorMessage: 'Error cargando gestiones históricas',
+    fetchData: fetchGestionesCompletas,
+    enabled: canLoadHistoricas,
+    initialPageSize: GESTIONES_HISTORICAS_INITIAL_PAGE_SIZE,
+    errorMessage: GESTIONES_REALIZADAS_ERROR_MESSAGES.HISTORICAS,
   });
 
   return {

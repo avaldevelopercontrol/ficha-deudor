@@ -1,4 +1,6 @@
-import type { GestionFormClaro } from '../hooks/useFichaGestionForm';
+import { TIPO_CONTACTO, TIPO_GESTION } from '../constants/fichaGestion.constants';
+import type { GestionFormClaro } from '../types/fichaGestion.types';
+import { toDecimalNumber, toNumber } from '../utils/number.utils';
 
 export type FichaGestionValidationErrors = Partial<
   Record<keyof GestionFormClaro | 'montoCompromiso' | 'documentos', string>
@@ -9,23 +11,6 @@ interface ValidateFichaGestionParams {
   np1TipoContacto: number;
   tieneDocumentos: boolean;
 }
-
-const TIPO_CONTACTO_COMPROMISO = 2;
-const TIPO_GESTION_EMAIL = 5;
-
-const toNumber = (value: string | number | null | undefined) => {
-  const parsedValue = Number(value);
-
-  return Number.isFinite(parsedValue) ? parsedValue : 0;
-};
-
-const toDecimalNumber = (value: string | number | null | undefined) => {
-  if (value === null || value === undefined || value === '') return 0;
-
-  const parsedValue = Number(String(value).replace(',', '.'));
-
-  return Number.isFinite(parsedValue) ? parsedValue : 0;
-};
 
 const isEmptyValue = (value: string | number | null | undefined) => {
   return value === null || value === undefined || String(value).trim() === '';
@@ -84,7 +69,7 @@ export const validateFichaGestion = ({
       'Ingrese Compromiso S/. o Compromiso $US cuando registre Fecha Compromiso';
   }
 
-  if (np1TipoContacto === TIPO_CONTACTO_COMPROMISO) {
+  if (np1TipoContacto === TIPO_CONTACTO.COMPROMISO) {
     if (isEmptyValue(form.fechaCompromisoPago)) {
       errors.fechaCompromisoPago = 'Ingrese Fecha de Compromiso es Obligatorio';
     }
@@ -94,7 +79,10 @@ export const validateFichaGestion = ({
     }
   }
 
-  if (!isEmptyValue(form.fechaNuevaGestion) && isEmptyValue(form.horaNuevaGestion)) {
+  if (
+    !isEmptyValue(form.fechaNuevaGestion) &&
+    isEmptyValue(form.horaNuevaGestion)
+  ) {
     errors.horaNuevaGestion = 'Ingrese Hora de Nueva Gestión';
   }
 
@@ -105,7 +93,7 @@ export const validateFichaGestion = ({
   const tipoGestion = toNumber(form.tipoGestion);
   const telefono = form.telefono.trim();
 
-  if (tipoGestion !== TIPO_GESTION_EMAIL && telefono.length > 10) {
+  if (tipoGestion !== TIPO_GESTION.EMAIL && telefono.length > 10) {
     errors.telefono = 'Sólo se puede ingresar un Nro de Teléfono';
   }
 

@@ -6,7 +6,11 @@ import {
   useGestionMotivoNoPago,
 } from './useFichaGestion';
 
-const TIPO_GESTION_PALETA = '3';
+import { TIPO_GESTION_PALETA } from '../constants/fichaGestion.constants';
+import {
+  mapCatalogToOptions,
+  mapPaletaRespuestaToOptions,
+} from '../utils/selectOptions.utils';
 
 export const useFichaGestionCatalogos = (
   idCliente: string,
@@ -21,10 +25,7 @@ export const useFichaGestionCatalogos = (
     error: errorEstados,
   } = useGestionEstados(idCliente);
 
-  const estadosOptions = estadosData?.map((estado) => ({
-    id: estado.id,
-    label: estado.nombre,
-  })) ?? [];
+  const estadosOptions = mapCatalogToOptions(estadosData);
 
   const {
     data: tiposData,
@@ -32,10 +33,7 @@ export const useFichaGestionCatalogos = (
     error: errorTipos,
   } = useGestionTipos();
 
-  const tiposOptions = tiposData?.map((tipo) => ({
-    id: tipo.id,
-    label: tipo.nombre,
-  })) ?? [];
+  const tiposOptions = mapCatalogToOptions(tiposData);
 
   const {
     data: np0Data,
@@ -73,23 +71,9 @@ export const useFichaGestionCatalogos = (
     TIPO_GESTION_PALETA
   );
 
-  const np0Options = np0Data?.map((item) => ({
-    id: item.id,
-    label: item.nombre,
-    idTipoContacto: item.idTipoContacto ?? null,
-  })) ?? [];
-
-  const np1Options = np1Data?.map((item) => ({
-    id: item.id,
-    label: item.nombre,
-    idTipoContacto: item.idTipoContacto ?? null,
-  })) ?? [];
-
-  const np2Options = np2Data?.map((item) => ({
-    id: item.id,
-    label: item.nombre,
-    idTipoContacto: item.idTipoContacto ?? null,
-  })) ?? [];
+  const np0Options = mapPaletaRespuestaToOptions(np0Data);
+  const np1Options = mapPaletaRespuestaToOptions(np1Data);
+  const np2Options = mapPaletaRespuestaToOptions(np2Data);
 
   const {
     data: estadoGestionClaroData,
@@ -97,10 +81,9 @@ export const useFichaGestionCatalogos = (
     error: errorEstadoGestionClaro,
   } = useGestionEstadoGestionClaro(idCliente, idCartera);
 
-  const estadoGestionClaroOptions = estadoGestionClaroData?.map((item) => ({
-    id: item.id,
-    label: item.nombre,
-  })) ?? [];
+  const estadoGestionClaroOptions = mapCatalogToOptions(
+    estadoGestionClaroData
+  );
 
   const {
     data: motivoNoPagoData,
@@ -108,10 +91,7 @@ export const useFichaGestionCatalogos = (
     error: errorMotivoNoPago,
   } = useGestionMotivoNoPago(idCliente, idCartera);
 
-  const motivoNoPagoOptions = motivoNoPagoData?.map((item) => ({
-    id: item.id,
-    label: item.nombre,
-  })) ?? [];
+  const motivoNoPagoOptions = mapCatalogToOptions(motivoNoPagoData);
 
   return {
     estadosOptions,

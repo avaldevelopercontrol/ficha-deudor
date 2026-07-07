@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 
 import { useFichaDeudorParams } from '../hooks/useFichaDeudorParams';
+import { useFichaDeudorPage } from '../hooks/useFichaDeudorPage';
 import DeudorHeader from '../components/ficha/DeudorHeader';
 import AccionesRapidas from '../components/ficha/AccionesRapidas';
 import DocumentosTable from '../components/ficha/DocumentosTable';
@@ -12,12 +12,7 @@ import PanelDireccionesReferenciadas from '../components/paneles/PanelDireccione
 import PanelEstadoGestionRealizada from '../components/paneles/PanelEstadoGestionRealizada';
 import PanelGestionRealizada from '../components/paneles/PanelGestionRealizada';
 import { DeudorProvider } from '../contexts/DeudorContext';
-import { useDeudorHeader } from '../hooks/useDeudorHeader';
-
-import { ActionButton } from '../../../shared/components/ui/ActionButton';
-import { useAppLayout } from '../../../shared/components/layout/AppLayoutContext';
-
-import type { DocumentoApi } from '../../../shared/types/indexApi';
+import { FICHA_DEUDOR_PANEL } from '../constants/fichaDeudorPanels.constants';
 
 interface FichaContentProps {
   id_cliente: string;
@@ -36,65 +31,26 @@ const FichaContent: React.FC<FichaContentProps> = ({
   id_usuario,
   fecha_inicio_gestion,
 }) => {
-  const navigate = useNavigate();
-  const { setHeaderActions } = useAppLayout();
-
-  const [contacto, setContacto] = useState('');
-  const [panelActivo, setPanelActivo] = useState<string | null>(null);
-  const [telefonoSeleccionado, setTelefonoSeleccionado] = useState('');
-  const [documentosFiltrados, setDocumentosFiltrados] = useState<
-    DocumentoApi[]
-  >([]);
-  const [gestionRealizadaRefreshKey, setGestionRealizadaRefreshKey] =
-    useState(0);
-
-  const { data: deudorData } = useDeudorHeader(
+  const {
+    contacto,
+    setContacto,
+    panelActivo,
+    telefonoSeleccionado,
+    setTelefonoSeleccionado,
+    documentosFiltrados,
+    setDocumentosFiltrados,
+    gestionRealizadaRefreshKey,
+    deudorData,
+    handleGestionSubmit,
+    handleGestionGuardada,
+    handleTogglePanel,
+  } = useFichaDeudorPage({
     id_cliente,
     id_cartera,
-    id_deudor
-  );
-
-  const goToDashboard = useCallback(() => {
-    const queryParams = new URLSearchParams({
-      id_cliente,
-      id_usuario,
-    });
-
-    navigate(`/dashboard?${queryParams.toString()}`, { replace: true });
-  }, [id_cliente, id_usuario, navigate]);
-
-  const handleCancelar = useCallback(() => {
-    goToDashboard();
-  }, [goToDashboard]);
-
-  useEffect(() => {
-    setHeaderActions(
-      <ActionButton
-        label="Cancelar Gestión"
-        variant="secondary"
-        onClick={handleCancelar}
-      />
-    );
-
-    return () => {
-      setHeaderActions(null);
-    };
-  }, [handleCancelar, setHeaderActions]);
-
-  const handleGestionSubmit = () => {
-    setGestionRealizadaRefreshKey((current) => current + 1);
-    setTelefonoSeleccionado('');
-  };
-
-  const handleGestionGuardada = (gestionTerminada: boolean) => {
-    if (!gestionTerminada) return;
-
-    goToDashboard();
-  };
-
-  const handleTogglePanel = (accion: string) => {
-    setPanelActivo((actual) => (actual === accion ? null : accion));
-  };
+    id_deudor,
+    id_contrato,
+    id_usuario,
+  });
 
   return (
     <DeudorProvider value={deudorData ?? null}>
@@ -132,14 +88,16 @@ const FichaContent: React.FC<FichaContentProps> = ({
             )}
 
             <PanelDatosAdicionales
-              isActive={panelActivo === 'DATOS ADICIONALES'}
+              isActive={panelActivo === FICHA_DEUDOR_PANEL.DATOS_ADICIONALES}
               id_cliente={id_cliente}
               id_cartera={id_cartera}
               id_deudor={id_deudor}
             />
 
             <PanelTelefonosReferenciados
-              isActive={panelActivo === 'TELÉFONOS REFERENCIADOS'}
+              isActive={
+                panelActivo === FICHA_DEUDOR_PANEL.TELEFONOS_REFERENCIADOS
+              }
               id_cliente={id_cliente}
               id_deudor={id_deudor}
               id_usuario={id_usuario}
@@ -147,14 +105,16 @@ const FichaContent: React.FC<FichaContentProps> = ({
             />
 
             <PanelDireccionesReferenciadas
-              isActive={panelActivo === 'DIRECCIONES REFERENCIADAS'}
+              isActive={
+                panelActivo === FICHA_DEUDOR_PANEL.DIRECCIONES_REFERENCIADAS
+              }
               id_cliente={id_cliente}
               id_deudor={id_deudor}
               id_usuario={id_usuario}
             />
 
             <PanelGestionRealizada
-              isActive={panelActivo === 'GESTIÓN REALIZADA'}
+              isActive={panelActivo === FICHA_DEUDOR_PANEL.GESTION_REALIZADA}
               id_cliente={id_cliente}
               id_cartera={id_cartera}
               id_deudor={id_deudor}
@@ -163,7 +123,9 @@ const FichaContent: React.FC<FichaContentProps> = ({
             />
 
             <PanelEstadoGestionRealizada
-              isActive={panelActivo === 'ESTADO DE GESTIÓN REALIZADA'}
+              isActive={
+                panelActivo === FICHA_DEUDOR_PANEL.ESTADO_GESTION_REALIZADA
+              }
               id_cliente={id_cliente}
               id_cartera={id_cartera}
               id_deudor={id_deudor}

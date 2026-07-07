@@ -2,6 +2,12 @@ import React, { useCallback, useState } from 'react';
 import { PanelLayout } from './PanelLayout';
 import { useEstadosGestion } from '../../hooks/useEstadosGestion';
 import { usePanelEstadoGestionColumns } from '../../hooks/usePanelEstadoGestionColumns';
+import {
+  PANEL_ESTADO_GESTION_REALIZADA_EXPANDED_TITLE,
+  PANEL_ESTADO_GESTION_REALIZADA_MESSAGES,
+  PANEL_ESTADO_GESTION_REALIZADA_PAGE_SIZE_OPTIONS,
+  PANEL_ESTADO_GESTION_REALIZADA_TITLE,
+} from '../../constants/panelEstadoGestionRealizada.constants';
 import PanelTablaResumen from './shared/PanelTablaResumen';
 import PanelTablaExpandida from './shared/PanelTablaExpandida';
 import PanelResumenEstado from './shared/PanelResumenEstado';
@@ -65,11 +71,11 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({
   if (!vistaExpandida && (isLoading || error)) {
     return (
       <PanelResumenEstado
-        title="ESTADO DE GESTIÓN REALIZADA"
+        title={PANEL_ESTADO_GESTION_REALIZADA_TITLE}
         isActive={isActive}
         error={error}
-        loadingMessage="Cargando estados de gestión..."
-        errorTitle="Error al cargar estados de gestión:"
+        loadingMessage={PANEL_ESTADO_GESTION_REALIZADA_MESSAGES.LOADING}
+        errorTitle={PANEL_ESTADO_GESTION_REALIZADA_MESSAGES.ERROR_TITLE}
         onRetry={refetch}
       />
     );
@@ -79,8 +85,8 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({
     <PanelLayout
       title={
         vistaExpandida
-          ? 'TODOS LOS ESTADOS DE GESTIÓN'
-          : 'ESTADO DE GESTIÓN REALIZADA'
+          ? PANEL_ESTADO_GESTION_REALIZADA_EXPANDED_TITLE
+          : PANEL_ESTADO_GESTION_REALIZADA_TITLE
       }
       isActive={isActive}
     >
@@ -95,9 +101,9 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({
           totalPages={totalPages}
           textFilters={textFilters}
           selectedFilters={selectedFilters}
-          emptyMessage="No se encontraron estados de gestión"
-          itemLabel="estado(s) de gestión"
-          verMasLabel="Ver más estados de gestiones"
+          emptyMessage={PANEL_ESTADO_GESTION_REALIZADA_MESSAGES.EMPTY}
+          itemLabel={PANEL_ESTADO_GESTION_REALIZADA_MESSAGES.ITEM_LABEL}
+          verMasLabel={PANEL_ESTADO_GESTION_REALIZADA_MESSAGES.VER_MAS}
           fitToPanel
           setPageNumber={setPageNumber}
           setPageSize={setPageSize}
@@ -115,11 +121,17 @@ const PanelEstadoGestionRealizada: React.FC<Props> = ({
           pageSize={completoPageSize}
           totalRecords={completoTotalRecords}
           totalPages={completoTotalPages}
-          emptyMessage="No se encontraron estados de gestión históricos"
-          itemLabel="estado(s) de gestión"
-          loadingMessage="Cargando estados de gestión históricos..."
-          errorTitle="Error al cargar estados de gestión históricos:"
-          pageSizeOptions={[5, 10, 30, 50]}
+          emptyMessage={
+            PANEL_ESTADO_GESTION_REALIZADA_MESSAGES.HISTORICAL_EMPTY
+          }
+          itemLabel={PANEL_ESTADO_GESTION_REALIZADA_MESSAGES.ITEM_LABEL}
+          loadingMessage={
+            PANEL_ESTADO_GESTION_REALIZADA_MESSAGES.HISTORICAL_LOADING
+          }
+          errorTitle={
+            PANEL_ESTADO_GESTION_REALIZADA_MESSAGES.HISTORICAL_ERROR_TITLE
+          }
+          pageSizeOptions={PANEL_ESTADO_GESTION_REALIZADA_PAGE_SIZE_OPTIONS}
           showPageSizeSelector
           fitToPanel
           setPageNumber={setCompletoPageNumber}

@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { SelectField } from '../../../../shared/components/ui';
 import type { SelectOption } from '../../../../shared/types';
-import type { GestionFormClaro } from '../../hooks/useFichaGestionForm';
+import type {
+  GestionFormClaro,
+  SetGestionField,
+} from '../../types/fichaGestion.types';
 
 interface Props {
   form: GestionFormClaro;
-  setField: <K extends keyof GestionFormClaro>(
-    field: K,
-    value: GestionFormClaro[K]
-  ) => void;
+  setField: SetGestionField;
   handleNP0Change: (value: string) => void;
   handleNP1Change: (value: string) => void;
   handleOpenWhatsApp: () => void;
@@ -52,6 +52,42 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
   isLoadingNP2,
   errorNP2,
 }) => {
+  const np1Placeholder = useMemo(() => {
+    if (!form.np0) return 'Primero seleccione NP0';
+    if (isLoadingNP1) return 'Cargando NP1...';
+
+    return 'Seleccionar NP1...';
+  }, [form.np0, isLoadingNP1]);
+
+  const np2Placeholder = useMemo(() => {
+    if (!form.np1) return 'Primero seleccione NP1';
+    if (isLoadingNP2) return 'Cargando NP2...';
+
+    return 'Seleccionar NP2...';
+  }, [form.np1, isLoadingNP2]);
+
+  const handleNombreContactoChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setField('nombreContacto', event.target.value);
+  };
+
+  const handleCargoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setField('cargo', event.target.value);
+  };
+
+  const handleNP2Change = (value: string) => {
+    setField('np2', value);
+  };
+
+  const handleEstadoGestionChange = (value: string) => {
+    setField('estadoGestion', value);
+  };
+
+  const handleTipoGestionChange = (value: string) => {
+    setField('tipoGestion', value);
+  };
+
   return (
     <div className="ficha-block ficha-block--with-side-title ficha-block--compact-gestion">
       <div className="block-side-title-wrapper">
@@ -69,7 +105,7 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
               className="form-input form-input--inline-field"
               placeholder="Ingresar nombre..."
               value={form.nombreContacto}
-              onChange={(e) => setField('nombreContacto', e.target.value)}
+              onChange={handleNombreContactoChange}
             />
           </div>
 
@@ -80,7 +116,7 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
               className="form-input form-input--inline-field"
               placeholder="Ingresar cargo..."
               value={form.cargo}
-              onChange={(e) => setField('cargo', e.target.value)}
+              onChange={handleCargoChange}
             />
           </div>
 
@@ -124,13 +160,7 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
             options={np1Options}
             value={form.np1}
             onChange={handleNP1Change}
-            placeholder={
-              !form.np0
-                ? 'Primero seleccione NP0'
-                : isLoadingNP1
-                  ? 'Cargando NP1...'
-                  : 'Seleccionar NP1...'
-            }
+            placeholder={np1Placeholder}
             disabled={!form.np0 || isLoadingNP1}
             error={form.np0 ? errorNP1 || '' : ''}
           />
@@ -139,14 +169,8 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
             label="NP2"
             options={np2Options}
             value={form.np2}
-            onChange={(val) => setField('np2', val)}
-            placeholder={
-              !form.np1
-                ? 'Primero seleccione NP1'
-                : isLoadingNP2
-                  ? 'Cargando NP2...'
-                  : 'Seleccionar NP2...'
-            }
+            onChange={handleNP2Change}
+            placeholder={np2Placeholder}
             disabled={!form.np1 || isLoadingNP2}
             error={form.np1 ? errorNP2 || '' : ''}
           />
@@ -157,8 +181,10 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
             label="Estado de Gestión"
             options={estadosOptions}
             value={form.estadoGestion}
-            onChange={(val) => setField('estadoGestion', val)}
-            placeholder={isLoadingEstados ? 'Cargando...' : 'Seleccionar estado...'}
+            onChange={handleEstadoGestionChange}
+            placeholder={
+              isLoadingEstados ? 'Cargando...' : 'Seleccionar estado...'
+            }
             disabled={isLoadingEstados}
             error={errorEstados || ''}
           />
@@ -167,7 +193,7 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
             label="Tipo de Gestión"
             options={tiposOptions}
             value={form.tipoGestion}
-            onChange={(val) => setField('tipoGestion', val)}
+            onChange={handleTipoGestionChange}
             placeholder={isLoadingTipos ? 'Cargando...' : 'Seleccionar tipo...'}
             disabled={isLoadingTipos}
             error={errorTipos || ''}
@@ -185,7 +211,6 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
                 className="form-input form-input--xs gestor-row__id"
                 placeholder="ID"
                 value={form.gestorId}
-                onChange={(e) => setField('gestorId', e.target.value)}
                 readOnly
               />
 
@@ -194,7 +219,6 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
                 className="form-input form-input--xs gestor-row__name"
                 placeholder="Nombre del gestor"
                 value={form.gestorNombre}
-                onChange={(e) => setField('gestorNombre', e.target.value)}
                 readOnly
               />
             </div>

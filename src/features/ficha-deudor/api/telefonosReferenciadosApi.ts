@@ -1,266 +1,193 @@
 import { apiClient } from '../../../shared/api/apiClient';
-
 import type {
-  TelefonoReferenciado,
-  TelefonoFormData,
   ApiResponse,
-  TelefonoReferenciadoApi,
   ApiResponseSimple,
-  TelefonoList,
-  TelefonoResultadoApi,
-  TelefonoOperadorApi,
-  TelefonoUbicacionApi,
-  TelefonoHorarioGestionApi,
-  TelefonoFuenteBusquedaApi,
-  TelefonoEditarApi,
   CreateTelefonoResponse,
-  CreateTelefonoRequest,
+  TelefonoEditarApi,
+  TelefonoFormData,
+  TelefonoFuenteBusquedaApi,
+  TelefonoHorarioGestionApi,
+  TelefonoList,
+  TelefonoOperadorApi,
+  TelefonoReferenciado,
+  TelefonoReferenciadoApi,
+  TelefonoResultadoApi,
+  TelefonoUbicacionApi,
 } from '../../../shared/types/indexApi';
+import {
+  TELEFONOS_REFERENCIADOS_ENDPOINTS,
+  TELEFONOS_REFERENCIADOS_ERROR_MESSAGES,
+  TELEFONOS_REFERENCIADOS_FETCH_PAGE_NUMBER,
+  TELEFONOS_REFERENCIADOS_FETCH_PAGE_SIZE,
+} from '../constants/telefonosReferenciados.constants';
+import {
+  buildCreateTelefonoRequest,
+  buildUpdateTelefonoRequest,
+  mapTelefonoFuenteBusqueda,
+  mapTelefonoHorarioGestion,
+  mapTelefonoOperadores,
+  mapTelefonoResultados,
+  mapTelefonosReferenciados,
+  mapTelefonoUbicaciones,
+} from '../mappers/telefonosReferenciados.mapper';
+import { assertApiSuccess } from '../utils/apiResponse.utils';
 
-import { parseApiDate } from '@shared/utils/dateUtils';
-import { toNumberValue, toStringValue } from '@shared/utils/formValueMappers';
-
-const BASE_TELEFONO = '/v1/Telefono';
-
-// ─── GET: Todos los registros (carga masiva para filtros client-side) ───
-export async function fetchTelefonosReferenciados(
+const buildTelefonosReferenciadosParams = (
   id_cliente: string,
-  id_deudor: string,
-): Promise<TelefonoReferenciado[]> {
-  const params = new URLSearchParams({
+  id_deudor: string
+) => {
+  return new URLSearchParams({
     nId_Cliente: id_cliente,
     nId_Persdeudor: id_deudor,
-    PageNumber: '1',
-    PageSize: '1000',
+    PageNumber: String(TELEFONOS_REFERENCIADOS_FETCH_PAGE_NUMBER),
+    PageSize: String(TELEFONOS_REFERENCIADOS_FETCH_PAGE_SIZE),
   });
+};
+
+export async function fetchTelefonosReferenciados(
+  id_cliente: string,
+  id_deudor: string
+): Promise<TelefonoReferenciado[]> {
+  const params = buildTelefonosReferenciadosParams(id_cliente, id_deudor);
 
   const result = await apiClient<ApiResponse<TelefonoReferenciadoApi[]>>(
-    `${BASE_TELEFONO}/GetTelefonos?${params.toString()}`,
+    `${TELEFONOS_REFERENCIADOS_ENDPOINTS.LIST}?${params.toString()}`
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando teléfonos');
-  }
+  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.LIST);
 
-  return result.response.map((item) => ({
-    id: item.nId_PersTelef,
-    prioridad: item.prioridad,
-    numero: item.nroTelefono,
-    horario: item.horario,
-    refUbicacion: item.referenciaUbicacion,
-    estado: item.estado,
-    fechaEstado: item.fechaEstado,
-    fechaBase: item.fechaBase,
-    contactados: item.contactados,
-    noContactados: item.noContactados,
-    ivr: toStringValue(item.cantidadIvr),
-    fuente: item.fuente,
-    ordenSearch: toNumberValue(item.ordenSearch),
-
-    // Campos que no vienen en el GET pero existen en el type del frontend
-    anexo: '',
-    operadorTelefonico: '',
-    referencia: 0,
-    reclamoIndecopi: false,
-  }));
+  return mapTelefonosReferenciados(result.response);
 }
 
 export async function fetchTelefonoById(
   idTelefono: number,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<TelefonoEditarApi> {
   const result = await apiClient<ApiResponseSimple<TelefonoEditarApi>>(
-    `${BASE_TELEFONO}/${idTelefono}`,
-    { signal },
+    `${TELEFONOS_REFERENCIADOS_ENDPOINTS.BY_ID}/${idTelefono}`,
+    { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando teléfono para editar');
-  }
+  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.BY_ID_EDIT);
 
   return result.response;
 }
 
-// ─── POST: Crear nuevo teléfono ───
 export async function createTelefono(
   _id_cliente: string,
   id_deudor: string,
   id_usuario: string,
-  data: TelefonoFormData,
+  data: TelefonoFormData
 ): Promise<CreateTelefonoResponse> {
-  const nowIso = new Date().toISOString();
-
-  const body: CreateTelefonoRequest = {
-    nId_PersDeudor: toNumberValue(id_deudor),
-    nTelef_Pre: '',
-    nTelef_Nro: toStringValue(data.numero),
-    nTelef_Anexo: toStringValue(data.anexo),
-    nId_PersRefUbi: toNumberValue(data.ubicacion),
-    nTelef_Prioridad: toNumberValue(data.prioridad),
-    cTelef_Coment: toStringValue(data.comentario),
-    nId_PersDeudorGestionHrs: toNumberValue(data.horarioGestion),
-    nId_PersTelefOpe: toNumberValue(data.resultado),
-    nId_Fuente: toNumberValue(data.fuenteBusqueda),
-    nreferencia: toNumberValue(data.referencia),
-    nid_usuarioupd: toNumberValue(id_usuario),
-    nId_OperadorTelefonico: toNumberValue(data.operadorTelefonico),
-    bEstado: data.bEstado ?? true,
-    dFecUlt_PerstelefOpe: nowIso,
-    dFecCarga_PersTelef: nowIso,
-    bReclamo: data.reclamoIndecopi ?? false,
-  };
+  const body = buildCreateTelefonoRequest(id_deudor, id_usuario, data);
 
   const result = await apiClient<ApiResponse<CreateTelefonoResponse>>(
-    BASE_TELEFONO,
+    TELEFONOS_REFERENCIADOS_ENDPOINTS.CREATE,
     {
       method: 'POST',
       body,
-    },
+    }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error al crear teléfono');
-  }
+  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.CREATE);
 
   return result.response;
 }
 
-// ─── PUT: Actualizar teléfono existente ───
 export async function updateTelefono(
   _id_cliente: string,
   id_deudor: string,
   id_usuario: string,
   id_telefono: number,
-  data: TelefonoFormData,
+  data: TelefonoFormData
 ): Promise<CreateTelefonoResponse> {
-  const numero = toStringValue(data.numero);
-
-  const [nTelef_Pre, nTelef_Nro] = numero.includes('-')
-    ? numero.split('-', 2)
-    : ['', numero];
-
-  const body: CreateTelefonoRequest = {
-    nId_PersTelef: id_telefono,
-    nId_PersDeudor: toNumberValue(id_deudor),
-    nTelef_Pre: toStringValue(nTelef_Pre),
-    nTelef_Nro: toStringValue(nTelef_Nro),
-    nTelef_Anexo: toStringValue(data.anexo),
-    nId_PersRefUbi: toNumberValue(data.ubicacion),
-    nTelef_Prioridad: toNumberValue(data.prioridad),
-    cTelef_Coment: toStringValue(data.comentario),
-    nId_PersDeudorGestionHrs: toNumberValue(data.horarioGestion),
-    nId_PersTelefOpe: toNumberValue(data.resultado),
-    nId_Fuente: toNumberValue(data.fuenteBusqueda),
-    nreferencia: toNumberValue(data.referencia),
-    nid_usuarioupd: toNumberValue(id_usuario),
-    nId_OperadorTelefonico: toNumberValue(data.operadorTelefonico),
-    bEstado: data.bEstado ?? true,
-    dFecUlt_PerstelefOpe: new Date().toISOString(),
-    dFecCarga_PersTelef: parseApiDate(data.dFecCarga_PersTelef),
-    bReclamo: data.reclamoIndecopi ?? false,
-  };
+  const body = buildUpdateTelefonoRequest(
+    id_deudor,
+    id_usuario,
+    id_telefono,
+    data
+  );
 
   const result = await apiClient<ApiResponse<CreateTelefonoResponse>>(
-    BASE_TELEFONO,
+    TELEFONOS_REFERENCIADOS_ENDPOINTS.UPDATE,
     {
       method: 'PUT',
       body,
-    },
+    }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error al actualizar teléfono');
-  }
+  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.UPDATE);
 
   return result.response;
 }
 
 export async function fetchTelefonoResultados(
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<TelefonoList[]> {
   const result = await apiClient<ApiResponseSimple<TelefonoResultadoApi[]>>(
-    `${BASE_TELEFONO}/GetTelefonoResultados`,
-    { signal },
+    TELEFONOS_REFERENCIADOS_ENDPOINTS.RESULTADOS,
+    { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando resultados telefónicos');
-  }
+  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.RESULTADOS);
 
-  return result.response.map((item) => ({
-    id: toStringValue(item.nId_PersTelefOpe),
-    nombre: item.cNombre_PersTelefOpe,
-  }));
+  return mapTelefonoResultados(result.response);
 }
 
 export async function fetchTelefonoOperadores(
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<TelefonoList[]> {
   const result = await apiClient<ApiResponseSimple<TelefonoOperadorApi[]>>(
-    `${BASE_TELEFONO}/GetTelefonoOperadores`,
-    { signal },
+    TELEFONOS_REFERENCIADOS_ENDPOINTS.OPERADORES,
+    { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando operadores telefónicos');
-  }
+  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.OPERADORES);
 
-  return result.response.map((item) => ({
-    id: toStringValue(item.nId_OperadorTelefonico),
-    nombre: item.cAbrevOperadorTelef,
-  }));
+  return mapTelefonoOperadores(result.response);
 }
 
 export async function fetchTelefonoUbicaciones(
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<TelefonoList[]> {
   const result = await apiClient<ApiResponseSimple<TelefonoUbicacionApi[]>>(
-    `${BASE_TELEFONO}/GetTelefonoUbicaciones`,
-    { signal },
+    TELEFONOS_REFERENCIADOS_ENDPOINTS.UBICACIONES,
+    { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando ubicaciones telefónicas');
-  }
+  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.UBICACIONES);
 
-  return result.response.map((item) => ({
-    id: toStringValue(item.nId_PersRefUbi),
-    nombre: item.cNombre_PersRefUbi,
-  }));
+  return mapTelefonoUbicaciones(result.response);
 }
 
 export async function fetchTelefonoHorarioGestion(
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<TelefonoList[]> {
   const result = await apiClient<ApiResponseSimple<TelefonoHorarioGestionApi[]>>(
-    `${BASE_TELEFONO}/GetTelefonoHorarioGestion`,
-    { signal },
+    TELEFONOS_REFERENCIADOS_ENDPOINTS.HORARIO_GESTION,
+    { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando horarios de gestión');
-  }
+  assertApiSuccess(
+    result,
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.HORARIO_GESTION
+  );
 
-  return result.response.map((item) => ({
-    id: toStringValue(item.nId_PersDeudorGestionHrs),
-    nombre: item.cNombren_PersDeudorGestionHrs,
-  }));
+  return mapTelefonoHorarioGestion(result.response);
 }
 
 export async function fetchTelefonoFuenteBusqueda(
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<TelefonoList[]> {
   const result = await apiClient<ApiResponseSimple<TelefonoFuenteBusquedaApi[]>>(
-    `${BASE_TELEFONO}/GetTelefonoFuenteBusqueda`,
-    { signal },
+    TELEFONOS_REFERENCIADOS_ENDPOINTS.FUENTE_BUSQUEDA,
+    { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando fuentes de búsqueda');
-  }
+  assertApiSuccess(
+    result,
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.FUENTE_BUSQUEDA
+  );
 
-  return result.response.map((item) => ({
-    id: toStringValue(item.nId_Fuente),
-    nombre: item.cDescripcion,
-  }));
+  return mapTelefonoFuenteBusqueda(result.response);
 }

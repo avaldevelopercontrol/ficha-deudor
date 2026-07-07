@@ -26,6 +26,10 @@ import type {
   TextFilters,
   SelectedFilters,
 } from '../../../shared/hooks/useClientSideTable';
+import {
+  DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES,
+  DIRECCIONES_REFERENCIADAS_INITIAL_PAGE_SIZE,
+} from '../constants/direccionesReferenciadas.constants';
 
 export type { TextFilters, SelectedFilters };
 
@@ -53,6 +57,14 @@ interface UseDireccionesReferenciadasReturn {
 
 type DireccionCatalogFetcher<T> = (signal: AbortSignal) => Promise<T[]>;
 
+const hasRequiredValues = (...values: string[]) => {
+  return values.every((value) => value.trim() !== '');
+};
+
+const getErrorMessage = (error: unknown, fallbackMessage: string) => {
+  return error instanceof Error ? error.message : fallbackMessage;
+};
+
 function useDireccionCatalog<T>(fetchCatalog: DireccionCatalogFetcher<T>) {
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchCatalog(signal),
@@ -67,7 +79,12 @@ export function useDireccionesReferenciadas(
   id_deudor: string,
   id_usuario: string
 ): UseDireccionesReferenciadasReturn {
-  const fetchData = useCallback(() => {
+  const canLoadDireccionesReferenciadas = hasRequiredValues(
+    id_cliente,
+    id_deudor
+  );
+
+  const fetchDireccionesReferenciadasData = useCallback(() => {
     return fetchDireccionesReferenciadas(id_cliente, id_deudor);
   }, [id_cliente, id_deudor]);
 
@@ -91,11 +108,11 @@ export function useDireccionesReferenciadas(
     resetFilters,
     setError,
   } = useClientSideResourceTable<DireccionReferenciada>({
-    fetchData,
+    fetchData: fetchDireccionesReferenciadasData,
     resetDeps: [id_cliente, id_deudor],
-    enabled: Boolean(id_cliente && id_deudor),
-    initialPageSize: 10,
-    errorMessage: 'Error cargando direcciones',
+    enabled: canLoadDireccionesReferenciadas,
+    initialPageSize: DIRECCIONES_REFERENCIADAS_INITIAL_PAGE_SIZE,
+    errorMessage: DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.LIST,
   });
 
   const create = useCallback(
@@ -103,12 +120,15 @@ export function useDireccionesReferenciadas(
       try {
         await createDireccion(id_cliente, id_deudor, id_usuario, formData);
         await refetch();
-      } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : 'Error al crear dirección';
+      } catch (error) {
+        setError(
+          getErrorMessage(
+            error,
+            DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.CREATE
+          )
+        );
 
-        setError(msg);
-        throw err;
+        throw error;
       }
     },
     [id_cliente, id_deudor, id_usuario, refetch, setError]
@@ -119,12 +139,15 @@ export function useDireccionesReferenciadas(
       try {
         await updateDireccion(id_cliente, id_deudor, id_usuario, id, formData);
         await refetch();
-      } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : 'Error al actualizar dirección';
+      } catch (error) {
+        setError(
+          getErrorMessage(
+            error,
+            DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.UPDATE
+          )
+        );
 
-        setError(msg);
-        throw err;
+        throw error;
       }
     },
     [id_cliente, id_deudor, id_usuario, refetch, setError]
@@ -162,7 +185,7 @@ export function useDireccionById(idDireccion: string | null) {
   return useNullableResourceById<string, DireccionByIdApi>({
     id: idDireccion,
     fetcher,
-    errorMessage: 'Error cargando dirección',
+    errorMessage: DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.BY_ID,
   });
 }
 

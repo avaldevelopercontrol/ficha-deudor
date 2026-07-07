@@ -1,31 +1,25 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import {
   SelectField,
   TextAreaField,
   CheckboxField,
   FeedbackMessage,
-  type FeedbackMessageVariant,
 } from '../../../../shared/components/ui';
 import type { SelectOption } from '../../../../shared/types';
-import type { GestionFormClaro } from '../../hooks/useFichaGestionForm';
+import type {
+  GestionFeedback,
+  GestionFormClaro,
+  SetGestionField,
+} from '../../types/fichaGestion.types';
 import {
   getFichaGestionErrorMessages,
   type FichaGestionValidationErrors,
 } from '../../validations/fichaGestionValidation';
 
-interface GestionFeedback {
-  variant: FeedbackMessageVariant;
-  title: string;
-  message: string;
-}
-
 interface Props {
   form: GestionFormClaro;
-  setField: <K extends keyof GestionFormClaro>(
-    field: K,
-    value: GestionFormClaro[K]
-  ) => void;
+  setField: SetGestionField;
   validationErrors?: FichaGestionValidationErrors;
   feedback?: GestionFeedback | null;
   onCloseFeedback?: () => void;
@@ -36,7 +30,6 @@ interface Props {
   motivoNoPagoOptions: SelectOption[];
   isLoadingMotivoNoPago: boolean;
   errorMotivoNoPago?: string | null;
-  resetForm: () => void;
   handleGuardar: () => void;
   isSaving?: boolean;
 }
@@ -57,7 +50,36 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
   handleGuardar,
   isSaving = false,
 }) => {
-  const validationErrorMessages = getFichaGestionErrorMessages(validationErrors);
+  const validationErrorMessages = useMemo(
+    () => getFichaGestionErrorMessages(validationErrors),
+    [validationErrors]
+  );
+
+  const estadoGestionClaroPlaceholder = isLoadingEstadoGestionClaro
+    ? 'Cargando Estado Gestión Claro...'
+    : 'Seleccionar Estado Gestión Claro...';
+
+  const motivoNoPagoPlaceholder = isLoadingMotivoNoPago
+    ? 'Cargando Motivo No Pago...'
+    : 'Seleccionar Motivo No Pago...';
+
+  const handleGestionTerminadaChange = (value: boolean) => {
+    setField('gestionTerminada', value);
+  };
+
+  const handleObservacionesChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setField('observaciones', event.target.value);
+  };
+
+  const handleEstadoGestionClaroChange = (value: string) => {
+    setField('estadoGestionClaro', value);
+  };
+
+  const handleMotivoNoPagoChange = (value: string) => {
+    setField('motivoNoPago', value);
+  };
 
   return (
     <div className="ficha-block ficha-block--with-side-title ficha-block--compact-gestion">
@@ -70,14 +92,14 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
           <CheckboxField
             label="Gestión Terminada"
             checked={form.gestionTerminada}
-            onChange={(val) => setField('gestionTerminada', val)}
+            onChange={handleGestionTerminadaChange}
           />
 
           <TextAreaField
             label="Observaciones"
             placeholder="Ingresar observaciones..."
             value={form.observaciones}
-            onChange={(e) => setField('observaciones', e.target.value)}
+            onChange={handleObservacionesChange}
             rows={1}
           />
         </div>
@@ -88,12 +110,8 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
               label="Estado Gestión Claro:"
               options={estadoGestionClaroOptions}
               value={form.estadoGestionClaro}
-              onChange={(val) => setField('estadoGestionClaro', val)}
-              placeholder={
-                isLoadingEstadoGestionClaro
-                  ? 'Cargando Estado Gestión Claro...'
-                  : 'Seleccionar Estado Gestión Claro...'
-              }
+              onChange={handleEstadoGestionClaroChange}
+              placeholder={estadoGestionClaroPlaceholder}
               disabled={isLoadingEstadoGestionClaro}
               error={errorEstadoGestionClaro || ''}
             />
@@ -102,12 +120,8 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
               label="Motivo No Pago:"
               options={motivoNoPagoOptions}
               value={form.motivoNoPago}
-              onChange={(val) => setField('motivoNoPago', val)}
-              placeholder={
-                isLoadingMotivoNoPago
-                  ? 'Cargando Motivo No Pago...'
-                  : 'Seleccionar Motivo No Pago...'
-              }
+              onChange={handleMotivoNoPagoChange}
+              placeholder={motivoNoPagoPlaceholder}
               disabled={isLoadingMotivoNoPago}
               error={errorMotivoNoPago || ''}
             />

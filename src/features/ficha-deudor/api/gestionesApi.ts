@@ -1,4 +1,4 @@
-import { env } from "@app/config/env";
+import { env } from '@app/config/env';
 import { apiClient } from '../../../shared/api/apiClient';
 
 import type {
@@ -10,10 +10,52 @@ import type {
   BotonApi,
 } from '../../../shared/types/indexApi';
 
+import { DOCUMENTOS_ERROR_MESSAGES, DOCUMENTOS_FETCH_ALL_PAGE_NUMBER, DOCUMENTOS_FETCH_ALL_PAGE_SIZE } from '../constants/documentos.constants';
+import { mapCabecerasToColumns } from '../mappers/gestionDocumentos.mapper';
+import { mockBotones } from '../mocks/documentosBotones.mock';
+
 const BASE_GESTION = '/v1/Gestion';
 const BASE_DOCUMENTOS = '/v1/documentos';
 
-// ─── 1. CABECERAS ───
+const GESTION_ENDPOINTS = {
+  CABECERA: `${BASE_GESTION}/GetGestionDocumentosCabecera`,
+  DOCUMENTOS: `${BASE_GESTION}/GetGestionDocumentos`,
+  BOTONES: `${BASE_DOCUMENTOS}/botones`,
+} as const;
+
+interface GestionDocumentosParams {
+  idCliente: string;
+  idCartera: string;
+  idDeudor: string;
+  pageNumber: number;
+  pageSize: number;
+}
+
+const assertSuccessfulResponse = <T extends { statusCode: number; message?: string }>(
+  result: T,
+  fallbackMessage: string
+) => {
+  if (result.statusCode !== 200) {
+    throw new Error(result.message || fallbackMessage);
+  }
+};
+
+const buildGestionDocumentosParams = ({
+  idCliente,
+  idCartera,
+  idDeudor,
+  pageNumber,
+  pageSize,
+}: GestionDocumentosParams) => {
+  return new URLSearchParams({
+    nId_Cliente: idCliente,
+    nId_Cartera: idCartera,
+    nId_Persdeudor: idDeudor,
+    PageNumber: String(pageNumber),
+    PageSize: String(pageSize),
+  });
+};
+
 export async function fetchColumnas(
   id_cliente: string,
   id_contrato: string
@@ -24,58 +66,61 @@ export async function fetchColumnas(
   });
 
   const result = await apiClient<ApiResponseSimple<CabeceraPantallaApi[]>>(
-    `${BASE_GESTION}/GetGestionDocumentosCabecera?${params.toString()}`
+    `${GESTION_ENDPOINTS.CABECERA}?${params.toString()}`
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando cabeceras');
-  }
+  assertSuccessfulResponse(result, DOCUMENTOS_ERROR_MESSAGES.HEADERS);
 
   return mapCabecerasToColumns(result.response);
 }
 
-// ─── 2. BOTONES (mock) ───
 export async function fetchBotones(
   id_cliente: string,
   id_cartera: string,
   id_deudor: string,
   id_usuario: string
 ): Promise<BotonApi[]> {
+  const params = new URLSearchParams({
+    id_cliente,
+  });
+
   return apiClient<BotonApi[]>(
-    `${BASE_DOCUMENTOS}/botones?id_cliente=${id_cliente}`,
+    `${GESTION_ENDPOINTS.BOTONES}?${params.toString()}`,
     {
-      mock: () => mockBotones(id_cliente, id_cartera, id_deudor, id_usuario),
+      mock: () =>
+        mockBotones({
+          idCliente: id_cliente,
+          idCartera: id_cartera,
+          idDeudor: id_deudor,
+          idUsuario: id_usuario,
+        }),
       useMock: env.useDocumentosMock,
     }
   );
 }
 
-// ─── 3. TODOS LOS REGISTROS (sin paginación server-side) ───
 export async function fetchAllGestiones(
   id_cliente: string,
   id_cartera: string,
   id_deudor: string
 ): Promise<DocumentoApi[]> {
-  const params = new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
-    nId_Persdeudor: id_deudor,
-    PageNumber: '1',
-    PageSize: '2000',
+  const params = buildGestionDocumentosParams({
+    idCliente: id_cliente,
+    idCartera: id_cartera,
+    idDeudor: id_deudor,
+    pageNumber: DOCUMENTOS_FETCH_ALL_PAGE_NUMBER,
+    pageSize: DOCUMENTOS_FETCH_ALL_PAGE_SIZE,
   });
 
   const result = await apiClient<ApiResponse<DocumentoApi[]>>(
-    `${BASE_GESTION}/GetGestionDocumentos?${params.toString()}`
+    `${GESTION_ENDPOINTS.DOCUMENTOS}?${params.toString()}`
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando documentos');
-  }
+  assertSuccessfulResponse(result, DOCUMENTOS_ERROR_MESSAGES.DATA);
 
   return Array.isArray(result.response) ? result.response : [];
 }
 
-// ─── 4. PAGINACIÓN SERVER-SIDE (mantenido por si lo necesitas luego) ───
 export async function fetchGestiones(
   id_cliente: string,
   id_cartera: string,
@@ -83,96 +128,15 @@ export async function fetchGestiones(
   pageNumber: number,
   pageSize: number
 ): Promise<ApiResponse<DocumentoApi[]>> {
-  const params = new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
-    nId_Persdeudor: id_deudor,
-    PageNumber: String(pageNumber),
-    PageSize: String(pageSize),
+  const params = buildGestionDocumentosParams({
+    idCliente: id_cliente,
+    idCartera: id_cartera,
+    idDeudor: id_deudor,
+    pageNumber,
+    pageSize,
   });
 
   return apiClient<ApiResponse<DocumentoApi[]>>(
-    `${BASE_GESTION}/GetGestionDocumentos?${params.toString()}`
+    `${GESTION_ENDPOINTS.DOCUMENTOS}?${params.toString()}`
   );
-}
-
-// ═══════════════════════════════════════════
-// MAPEO
-// ═══════════════════════════════════════════
-function mapCabecerasToColumns(cabeceras: CabeceraPantallaApi[]): ColumnApi[] {
-  const ordenadas = [...cabeceras].sort((a, b) => a.orden - b.orden);
-
-  return ordenadas.map((cab, index) => ({
-    key: getDynamicFieldKey(index),
-    label: cab.tituloCabeceraPantalla,
-    type: inferTypeFromCabecera(cab),
-  }));
-}
-
-function getDynamicFieldKey(index: number): string {
-  return `dyn_${index}`;
-}
-
-function inferTypeFromCabecera(cab: CabeceraPantallaApi): ColumnApi['type'] {
-  const tipoDato = cab.tipoDato.toUpperCase();
-  const titulo = cab.tituloCabeceraPantalla.toLowerCase();
-
-  if (tipoDato === 'MONEY') return 'money';
-  if (titulo.includes('atraso')) return 'atraso';
-  if (titulo.includes('vencimiento') || titulo.includes('fecha')) return 'date';
-  if (titulo === 'estado' || titulo.includes('estado_')) return 'estado';
-
-  return 'text';
-}
-
-// ═══════════════════════════════════════════
-// MOCKS
-// ═══════════════════════════════════════════
-function mockBotones(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
-  id_usuario: string
-): BotonApi[] {
-  if (id_cliente === '95') {
-    return [
-      {
-        id: 'pagos',
-        label: 'PAGOS',
-        action: 'popup_pago',
-        popupUrl: `${window.location.origin}/popup/pago-deudor/${id_cliente}/${id_cartera}/${id_deudor}`,
-      },
-      {
-        id: 'email',
-        label: 'EMAIL',
-        action: 'popup_email',
-        popupUrl: `${window.location.origin}/popup/email-deudor/${id_cliente}/${id_deudor}/${id_usuario}`,
-      },
-      {
-        id: 'agendas',
-        label: 'AGENDAS',
-        action: 'popup_agenda',
-        popupUrl: `${window.location.origin}/popup/agenda-deudor/${id_cliente}/${id_cartera}/${id_deudor}/${id_usuario}`,
-      },
-      {
-        id: 'inf_deudor',
-        label: 'INF. DEUDOR',
-        action: 'popup_inf_deudor',
-        popupUrl: `${window.location.origin}/popup/inf-deudor/${id_cliente}/${id_cartera}/${id_deudor}/${id_usuario}`,
-      },
-    ];
-  }
-
-  return [
-    {
-      id: 'estado_cuenta',
-      label: 'ESTADO_CUENTA',
-      action: 'modal_estado_cuenta',
-    },
-    {
-      id: 'pagos',
-      label: 'PAGOS',
-      action: 'modal_pagos',
-    },
-  ];
 }

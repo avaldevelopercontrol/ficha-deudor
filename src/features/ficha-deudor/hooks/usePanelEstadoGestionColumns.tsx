@@ -1,11 +1,16 @@
 import { useMemo } from 'react';
-import { WrapCell } from '../../../shared/components/ui/WrapCell';
-import ExpandableCell from '../../../shared/components/ui/ExpandableCell';
 import type { Column } from '../../../shared/types';
 import type {
   EstadoGestion,
   EstadoGestionCompleta,
 } from '../../../shared/types/indexApi';
+import {
+  renderEstadoGestionComentarioCell,
+  renderEstadoGestionNroCell,
+  renderEstadoGestionOperacionCell,
+  renderEstadoGestionResultadoCell,
+  renderEstadoGestionWrappedTextCell,
+} from '../utils/panelEstadoGestionCells.utils';
 
 export const usePanelEstadoGestionColumns = () => {
   const columnsResumidas: Column<EstadoGestion>[] = useMemo(
@@ -13,11 +18,7 @@ export const usePanelEstadoGestionColumns = () => {
       {
         key: 'nro',
         label: 'Nro',
-        render: (row) => (
-          <span style={{ fontWeight: 700, color: '#1a2540' }}>
-            {row.nro}
-          </span>
-        ),
+        render: (row) => renderEstadoGestionNroCell(row.nro),
       },
       {
         key: 'fecha',
@@ -26,9 +27,7 @@ export const usePanelEstadoGestionColumns = () => {
       {
         key: 'operador',
         label: 'Operador',
-        render: (row) => (
-          <WrapCell>{row.operador}</WrapCell>
-        ),
+        render: (row) => renderEstadoGestionWrappedTextCell(row.operador),
       },
       {
         key: 'documento',
@@ -37,33 +36,17 @@ export const usePanelEstadoGestionColumns = () => {
       {
         key: 'operacion',
         label: 'Operación',
-        render: (row) => (
-          <span
-            className="badge badge-info"
-            style={{ fontSize: '10px', textTransform: 'uppercase' }}
-          >
-            {row.operacion}
-          </span>
-        ),
+        render: (row) => renderEstadoGestionOperacionCell(row.operacion),
       },
       {
         key: 'resultado',
         label: 'Resultado',
-        render: (row) => (
-          <WrapCell
-            color={row.resultado.includes('Contactado') ? '#166534' : '#991b1b'}
-            weight={500}
-          >
-            {row.resultado}
-          </WrapCell>
-        ),
+        render: (row) => renderEstadoGestionResultadoCell(row.resultado),
       },
       {
         key: 'comentario',
         label: 'Comentario',
-        render: (row) => (
-          <ExpandableCell text={row.comentario} maxLines={2} lineHeight={18} />
-        ),
+        render: (row) => renderEstadoGestionComentarioCell(row.comentario),
       },
     ],
     []
@@ -74,25 +57,17 @@ export const usePanelEstadoGestionColumns = () => {
       {
         key: 'nro',
         label: 'Nro',
-        render: (row) => (
-          <span style={{ fontWeight: 700, color: '#1a2540' }}>
-            {row.nro}
-          </span>
-        ),
+        render: (row) => renderEstadoGestionNroCell(row.nro),
       },
       {
         key: 'cliente',
         label: 'Cliente',
-        render: (row) => (
-          <WrapCell>{row.cliente}</WrapCell>
-        ),
+        render: (row) => renderEstadoGestionWrappedTextCell(row.cliente),
       },
       {
         key: 'cartera',
         label: 'Cartera',
-        render: (row) => (
-          <WrapCell>{row.cartera}</WrapCell>
-        ),
+        render: (row) => renderEstadoGestionWrappedTextCell(row.cartera),
       },
       {
         key: 'campana',
@@ -105,9 +80,7 @@ export const usePanelEstadoGestionColumns = () => {
       {
         key: 'gestor',
         label: 'Gestor',
-        render: (row) => (
-          <WrapCell>{row.gestor}</WrapCell>
-        ),
+        render: (row) => renderEstadoGestionWrappedTextCell(row.gestor),
       },
       {
         key: 'documento',
@@ -116,33 +89,17 @@ export const usePanelEstadoGestionColumns = () => {
       {
         key: 'operacion',
         label: 'Operación',
-        render: (row) => (
-          <span
-            className="badge badge-info"
-            style={{ fontSize: '10px', textTransform: 'uppercase' }}
-          >
-            {row.operacion}
-          </span>
-        ),
+        render: (row) => renderEstadoGestionOperacionCell(row.operacion),
       },
       {
         key: 'resultado',
         label: 'Resultado',
-        render: (row) => (
-          <WrapCell
-            color={row.resultado.includes('Contactado') ? '#166534' : '#991b1b'}
-            weight={500}
-          >
-            {row.resultado}
-          </WrapCell>
-        ),
+        render: (row) => renderEstadoGestionResultadoCell(row.resultado),
       },
       {
         key: 'comentario',
         label: 'Comentario',
-        render: (row) => (
-          <ExpandableCell text={row.comentario} maxLines={2} lineHeight={18} />
-        ),
+        render: (row) => renderEstadoGestionComentarioCell(row.comentario),
       },
     ],
     []

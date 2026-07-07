@@ -1,12 +1,21 @@
 import React from 'react';
-import type { GestionFormClaro } from '../../hooks/useFichaGestionForm';
+import type {
+  GestionFormClaro,
+  SetGestionField,
+  SetGestionFields,
+} from '../../types/fichaGestion.types';
+import {
+  buildTimeValue,
+  getTimeHour,
+  getTimeMinute,
+  hasValidDate,
+} from '../../utils/date.utils';
+import { sanitizeDecimalValue } from '../../utils/number.utils';
 
 interface Props {
   form: GestionFormClaro;
-  setField: <K extends keyof GestionFormClaro>(
-    field: K,
-    value: GestionFormClaro[K]
-  ) => void;
+  setField: SetGestionField;
+  setFields: SetGestionFields;
   usuarioActual: string;
   handleAgendar: () => void;
 }
@@ -19,47 +28,10 @@ const MINUTES = Array.from({ length: 12 }, (_, index) =>
   String(index * 5).padStart(2, '0')
 );
 
-const sanitizeDecimalValue = (value: string) => {
-  const cleanedValue = value.replace(/[^0-9.]/g, '');
-  const [integerPart, ...decimalParts] = cleanedValue.split('.');
-
-  if (decimalParts.length === 0) {
-    return integerPart;
-  }
-
-  return `${integerPart}.${decimalParts.join('')}`;
-};
-
-const getTimeHour = (time: string) => {
-  return time?.split(':')[0] ?? '';
-};
-
-const getTimeMinute = (time: string) => {
-  return time?.split(':')[1] ?? '';
-};
-
-const buildTimeValue = (
-  currentTime: string,
-  type: 'hour' | 'minute',
-  value: string
-) => {
-  const currentHour = getTimeHour(currentTime) || '00';
-  const currentMinute = getTimeMinute(currentTime) || '00';
-
-  if (type === 'hour') {
-    return `${value}:${currentMinute}`;
-  }
-
-  return `${currentHour}:${value}`;
-};
-
-const hasValidDate = (date: string) => {
-  return Boolean(date && date.trim());
-};
-
 const FichaGestionAccionesTomar: React.FC<Props> = ({
   form,
   setField,
+  setFields,
   usuarioActual,
   handleAgendar,
 }) => {
@@ -72,12 +44,23 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
   ) => {
     const value = event.target.value;
 
-    setField('fechaCompromisoPago', value);
+    setFields({
+      fechaCompromisoPago: value,
+      compromisoSoles: value ? form.compromisoSoles : '',
+      compromisoUSD: value ? form.compromisoUSD : '',
+    });
+  };
 
-    if (!value) {
-      setField('compromisoSoles', '');
-      setField('compromisoUSD', '');
-    }
+  const handleCompromisoSolesChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setField('compromisoSoles', sanitizeDecimalValue(event.target.value));
+  };
+
+  const handleCompromisoUsdChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setField('compromisoUSD', sanitizeDecimalValue(event.target.value));
   };
 
   const handleFechaNuevaGestionChange = (
@@ -85,11 +68,20 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
   ) => {
     const value = event.target.value;
 
-    setField('fechaNuevaGestion', value);
+    setFields({
+      fechaNuevaGestion: value,
+      horaNuevaGestion: value ? form.horaNuevaGestion : '',
+    });
+  };
 
-    if (!value) {
-      setField('horaNuevaGestion', '');
-    }
+  const handleHoraNuevaGestionChange = (
+    type: 'hour' | 'minute',
+    value: string
+  ) => {
+    setField(
+      'horaNuevaGestion',
+      buildTimeValue(form.horaNuevaGestion, type, value)
+    );
   };
 
   const handleFechaGestionChange = (
@@ -97,11 +89,17 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
   ) => {
     const value = event.target.value;
 
-    setField('fechaGestion', value);
+    setFields({
+      fechaGestion: value,
+      horaGestion: value ? form.horaGestion : '',
+    });
+  };
 
-    if (!value) {
-      setField('horaGestion', '');
-    }
+  const handleHoraGestionChange = (
+    type: 'hour' | 'minute',
+    value: string
+  ) => {
+    setField('horaGestion', buildTimeValue(form.horaGestion, type, value));
   };
 
   return (
@@ -140,12 +138,7 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
               placeholder="0.00"
               value={form.compromisoSoles}
               disabled={!puedeIngresarCompromiso}
-              onChange={(event) =>
-                setField(
-                  'compromisoSoles',
-                  sanitizeDecimalValue(event.target.value)
-                )
-              }
+              onChange={handleCompromisoSolesChange}
             />
           </div>
 
@@ -161,12 +154,7 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
               placeholder="0.00"
               value={form.compromisoUSD}
               disabled={!puedeIngresarCompromiso}
-              onChange={(event) =>
-                setField(
-                  'compromisoUSD',
-                  sanitizeDecimalValue(event.target.value)
-                )
-              }
+              onChange={handleCompromisoUsdChange}
             />
           </div>
         </div>
@@ -196,14 +184,7 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
               value={getTimeHour(form.horaNuevaGestion)}
               disabled={!puedeSeleccionarHoraNuevaGestion}
               onChange={(event) =>
-                setField(
-                  'horaNuevaGestion',
-                  buildTimeValue(
-                    form.horaNuevaGestion,
-                    'hour',
-                    event.target.value
-                  )
-                )
+                handleHoraNuevaGestionChange('hour', event.target.value)
               }
             >
               <option value="">HH</option>
@@ -219,14 +200,7 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
               value={getTimeMinute(form.horaNuevaGestion)}
               disabled={!puedeSeleccionarHoraNuevaGestion}
               onChange={(event) =>
-                setField(
-                  'horaNuevaGestion',
-                  buildTimeValue(
-                    form.horaNuevaGestion,
-                    'minute',
-                    event.target.value
-                  )
-                )
+                handleHoraNuevaGestionChange('minute', event.target.value)
               }
             >
               <option value="">MM</option>
@@ -281,10 +255,7 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
               value={getTimeHour(form.horaGestion)}
               disabled={!puedeSeleccionarHoraGestion}
               onChange={(event) =>
-                setField(
-                  'horaGestion',
-                  buildTimeValue(form.horaGestion, 'hour', event.target.value)
-                )
+                handleHoraGestionChange('hour', event.target.value)
               }
             >
               <option value="">HH</option>
@@ -300,10 +271,7 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
               value={getTimeMinute(form.horaGestion)}
               disabled={!puedeSeleccionarHoraGestion}
               onChange={(event) =>
-                setField(
-                  'horaGestion',
-                  buildTimeValue(form.horaGestion, 'minute', event.target.value)
-                )
+                handleHoraGestionChange('minute', event.target.value)
               }
             >
               <option value="">MM</option>

@@ -5,6 +5,7 @@ import type {
   DireccionFormData,
   DireccionReferenciada,
 } from '../../../shared/types';
+import { PANEL_DIRECCIONES_REFERENCIADAS_ACTION_MESSAGES } from '../constants/panelDireccionesReferenciadas.constants';
 
 interface Params {
   create: (formData: DireccionFormData) => Promise<void>;
@@ -47,7 +48,7 @@ export const usePanelDireccionesReferenciadasActions = ({
         await update(formData.id, formData);
         handleCloseEditar();
       } catch {
-        alert('No se pudo guardar la edición de la dirección.');
+        alert(PANEL_DIRECCIONES_REFERENCIADAS_ACTION_MESSAGES.UPDATE_ERROR);
       }
     },
     [update, handleCloseEditar]
@@ -59,7 +60,7 @@ export const usePanelDireccionesReferenciadasActions = ({
         await create(formData);
         handleCloseRegistrar();
       } catch {
-        alert('No se pudo registrar la dirección.');
+        alert(PANEL_DIRECCIONES_REFERENCIADAS_ACTION_MESSAGES.CREATE_ERROR);
       }
     },
     [create, handleCloseRegistrar]

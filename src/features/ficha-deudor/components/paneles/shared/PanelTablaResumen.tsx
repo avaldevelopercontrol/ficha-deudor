@@ -4,6 +4,8 @@ import { ActionButton } from '../../../../../shared/components/ui';
 import Paginacion from '../../../../../shared/components/ui/Paginacion';
 import type { Column } from '../../../../../shared/types';
 
+const DEFAULT_PAGE_SIZE_OPTIONS = [5, 10, 30, 50];
+
 interface Props<TData> {
   columns: Column<TData>[];
   data: TData[];
@@ -30,6 +32,74 @@ interface Props<TData> {
   onRowClick?: (row: TData) => void;
 }
 
+interface PanelTablaResumenHeaderProps {
+  showCount: boolean;
+  itemLabel?: string;
+  headerRight?: React.ReactNode;
+  indiceInicio: number;
+  indiceFin: number;
+  totalRecords: number;
+}
+
+const PanelTablaResumenHeader: React.FC<PanelTablaResumenHeaderProps> = ({
+  showCount,
+  itemLabel,
+  headerRight,
+  indiceInicio,
+  indiceFin,
+  totalRecords,
+}) => {
+  const shouldShowHeader = (showCount && itemLabel) || headerRight;
+
+  if (!shouldShowHeader) return null;
+
+  return (
+    <div
+      style={{
+        display: headerRight ? 'flex' : 'block',
+        justifyContent: headerRight ? 'space-between' : undefined,
+        alignItems: headerRight ? 'center' : undefined,
+        marginBottom: '12px',
+      }}
+    >
+      {showCount && itemLabel ? (
+        <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>
+          Mostrando {indiceInicio + 1}-{indiceFin} de {totalRecords}{' '}
+          {itemLabel}
+        </span>
+      ) : (
+        <span />
+      )}
+
+      {headerRight}
+    </div>
+  );
+};
+
+interface PanelVerMasButtonProps {
+  label?: string;
+  onClick?: () => void;
+}
+
+const PanelVerMasButton: React.FC<PanelVerMasButtonProps> = ({
+  label,
+  onClick,
+}) => {
+  if (!onClick || !label) return null;
+
+  return (
+    <div style={{ textAlign: 'center', marginTop: '16px' }}>
+      <ActionButton
+        label={label}
+        variant="info"
+        size="md"
+        icon="▼"
+        onClick={onClick}
+      />
+    </div>
+  );
+};
+
 const PanelTablaResumen = <TData,>({
   columns,
   data,
@@ -43,7 +113,7 @@ const PanelTablaResumen = <TData,>({
   emptyMessage,
   itemLabel,
   verMasLabel,
-  pageSizeOptions = [5, 10, 30, 50],
+  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
   showCount = true,
   enableColumnFilters = true,
   fitToPanel = false,
@@ -58,31 +128,24 @@ const PanelTablaResumen = <TData,>({
   const indiceInicio = (pageNumber - 1) * pageSize;
   const indiceFin = Math.min(pageNumber * pageSize, totalRecords);
 
-  const showHeader = (showCount && itemLabel) || headerRight;
+  const handlePaginaAnterior = () => {
+    setPageNumber(Math.max(1, pageNumber - 1));
+  };
+
+  const handlePaginaSiguiente = () => {
+    setPageNumber(Math.min(totalPages, pageNumber + 1));
+  };
 
   return (
     <div style={{ padding: '16px 0' }}>
-      {showHeader && (
-        <div
-          style={{
-            display: headerRight ? 'flex' : 'block',
-            justifyContent: headerRight ? 'space-between' : undefined,
-            alignItems: headerRight ? 'center' : undefined,
-            marginBottom: '12px',
-          }}
-        >
-          {showCount && itemLabel ? (
-            <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>
-              Mostrando {indiceInicio + 1}-{indiceFin} de {totalRecords}{' '}
-              {itemLabel}
-            </span>
-          ) : (
-            <span />
-          )}
-
-          {headerRight}
-        </div>
-      )}
+      <PanelTablaResumenHeader
+        showCount={showCount}
+        itemLabel={itemLabel}
+        headerRight={headerRight}
+        indiceInicio={indiceInicio}
+        indiceFin={indiceFin}
+        totalRecords={totalRecords}
+      />
 
       <Table
         columns={columns}
@@ -105,10 +168,8 @@ const PanelTablaResumen = <TData,>({
           totalRegistros={totalRecords}
           indiceInicio={indiceInicio}
           indiceFin={indiceFin}
-          onPaginaAnterior={() => setPageNumber(Math.max(1, pageNumber - 1))}
-          onPaginaSiguiente={() =>
-            setPageNumber(Math.min(totalPages, pageNumber + 1))
-          }
+          onPaginaAnterior={handlePaginaAnterior}
+          onPaginaSiguiente={handlePaginaSiguiente}
           onIrAPagina={setPageNumber}
           showPageSizeSelector={true}
           pageSize={pageSize}
@@ -117,17 +178,7 @@ const PanelTablaResumen = <TData,>({
         />
       )}
 
-      {onVerMas && verMasLabel && (
-        <div style={{ textAlign: 'center', marginTop: '16px' }}>
-          <ActionButton
-            label={verMasLabel}
-            variant="info"
-            size="md"
-            icon="▼"
-            onClick={onVerMas}
-          />
-        </div>
-      )}
+      <PanelVerMasButton label={verMasLabel} onClick={onVerMas} />
     </div>
   );
 };

@@ -13,6 +13,11 @@ import type {
   EstadoGestion,
   EstadoGestionCompleta,
 } from '../../../shared/types/indexApi';
+import {
+  ESTADOS_GESTION_ERROR_MESSAGES,
+  ESTADOS_GESTION_HISTORICOS_INITIAL_PAGE_SIZE,
+  ESTADOS_GESTION_INITIAL_PAGE_SIZE,
+} from '../constants/estadosGestion.constants';
 
 export type { TextFilters, SelectedFilters };
 
@@ -46,12 +51,22 @@ export interface UseEstadosGestionReturn {
   refetchCompleto: () => Promise<void>;
 }
 
+const hasRequiredValues = (...values: string[]) => {
+  return values.every((value) => value.trim() !== '');
+};
+
 export function useEstadosGestion(
   id_cliente: string,
   id_cartera: string,
   id_deudor: string
 ): UseEstadosGestionReturn {
-  const fetchData = useCallback(async () => {
+  const canLoadEstadosGestion = hasRequiredValues(
+    id_cliente,
+    id_cartera,
+    id_deudor
+  );
+
+  const fetchEstadosGestionResumidos = useCallback(async () => {
     const result = await fetchEstadosGestion(
       id_cliente,
       id_cartera,
@@ -79,14 +94,14 @@ export function useEstadosGestion(
     onTextFilterChange,
     onSelectedFilterChange,
   } = useClientSideResourceTable<EstadoGestion>({
-    fetchData,
+    fetchData: fetchEstadosGestionResumidos,
     resetDeps: [id_cliente, id_cartera, id_deudor],
-    enabled: Boolean(id_cliente && id_cartera && id_deudor),
-    initialPageSize: 10,
-    errorMessage: 'Error cargando estados de gestión',
+    enabled: canLoadEstadosGestion,
+    initialPageSize: ESTADOS_GESTION_INITIAL_PAGE_SIZE,
+    errorMessage: ESTADOS_GESTION_ERROR_MESSAGES.RESUMIDOS,
   });
 
-  const fetchCompleto = useCallback(
+  const fetchEstadosGestionCompletos = useCallback(
     async (page: number, size: number) => {
       const result = await fetchEstadosGestionHistoricos(
         id_cliente,
@@ -117,10 +132,10 @@ export function useEstadosGestion(
     setPageSize: setCompletoPageSize,
     refetch: refetchCompleto,
   } = useServerSideResourceTable<EstadoGestionCompleta>({
-    fetchData: fetchCompleto,
-    enabled: Boolean(id_cliente && id_cartera && id_deudor),
-    initialPageSize: 10,
-    errorMessage: 'Error cargando estados de gestión históricos',
+    fetchData: fetchEstadosGestionCompletos,
+    enabled: canLoadEstadosGestion,
+    initialPageSize: ESTADOS_GESTION_HISTORICOS_INITIAL_PAGE_SIZE,
+    errorMessage: ESTADOS_GESTION_ERROR_MESSAGES.HISTORICOS,
   });
 
   return {

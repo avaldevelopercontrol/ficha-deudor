@@ -7,52 +7,78 @@ import type {
   EstadoGestionCompleta,
   GestionHistoricaApi,
 } from '../../../shared/types/indexApi';
+import {
+  ESTADOS_GESTION_ENDPOINTS,
+  ESTADOS_GESTION_ERROR_MESSAGES,
+  ESTADOS_GESTION_FETCH_PAGE_NUMBER,
+  ESTADOS_GESTION_FETCH_PAGE_SIZE,
+  ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_NUMBER,
+  ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_SIZE,
+} from '../constants/estadosGestion.constants';
+import {
+  mapEstadosGestion,
+  mapEstadosGestionHistoricos,
+} from '../mappers/estadosGestion.mapper';
+import { assertApiSuccess } from '../utils/apiResponse.utils';
 
-const BASE_GESTION = '/v1/Gestion';
-
-// ─── GET: Estados de Gestión Resumidos ───
-export async function fetchEstadosGestion(
+const buildEstadosGestionParams = (
   id_cliente: string,
   id_cartera: string,
-  id_deudor: string,
-): Promise<{ resumido: EstadoGestion[] }> {
-  const params = new URLSearchParams({
+  id_deudor: string
+) => {
+  return new URLSearchParams({
     nId_Cliente: id_cliente,
     nId_Cartera: id_cartera,
     nId_Persdeudor: id_deudor,
-    PageNumber: '1',
-    PageSize: '1000',
+    PageNumber: String(ESTADOS_GESTION_FETCH_PAGE_NUMBER),
+    PageSize: String(ESTADOS_GESTION_FETCH_PAGE_SIZE),
   });
+};
 
-  const result = await apiClient<ApiResponseSimple<EstadoGestionApi[]>>(
-    `${BASE_GESTION}/GetGestionEstadosGestionesCarteraDeudor?${params.toString()}`,
+const buildEstadosGestionHistoricosParams = (
+  id_cliente: string,
+  id_cartera: string,
+  id_deudor: string,
+  pageNumber: number,
+  pageSize: number
+) => {
+  return new URLSearchParams({
+    nId_Cliente: id_cliente,
+    nId_Cartera: id_cartera,
+    nId_PersDeudor: id_deudor,
+    PageNumber: String(pageNumber),
+    PageSize: String(pageSize),
+  });
+};
+
+export async function fetchEstadosGestion(
+  id_cliente: string,
+  id_cartera: string,
+  id_deudor: string
+): Promise<{ resumido: EstadoGestion[] }> {
+  const params = buildEstadosGestionParams(
+    id_cliente,
+    id_cartera,
+    id_deudor
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando estados de gestión');
-  }
+  const result = await apiClient<ApiResponseSimple<EstadoGestionApi[]>>(
+    `${ESTADOS_GESTION_ENDPOINTS.RESUMIDOS}?${params.toString()}`
+  );
 
-  const resumido: EstadoGestion[] = result.response.map((item) => ({
-    id: String(item.nId_DocxCobrarOpe),
-    nro: item.nro,
-    fecha: item.fechaGestion,
-    operador: item.operador,
-    documento: item.documento,
-    operacion: item.operacion,
-    resultado: item.resultado,
-    comentario: item.comentario,
-  }));
+  assertApiSuccess(result, ESTADOS_GESTION_ERROR_MESSAGES.RESUMIDOS);
 
-  return { resumido };
+  return {
+    resumido: mapEstadosGestion(result.response),
+  };
 }
 
-// ─── GET: Estados de Gestión Históricos (Vista Expandida / Completa) ───
 export async function fetchEstadosGestionHistoricos(
   id_cliente: string,
   id_cartera: string,
   id_deudor: string,
-  pageNumber: number = 1,
-  pageSize: number = 1000,
+  pageNumber = ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_NUMBER,
+  pageSize = ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_SIZE
 ): Promise<{
   completo: EstadoGestionCompleta[];
   pageNumber: number;
@@ -60,38 +86,22 @@ export async function fetchEstadosGestionHistoricos(
   totalRecords: number;
   totalPages: number;
 }> {
-  const params = new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
-    nId_PersDeudor: id_deudor,
-    PageNumber: String(pageNumber),
-    PageSize: String(pageSize),
-  });
-
-  const result = await apiClient<ApiResponse<GestionHistoricaApi[]>>(
-    `${BASE_GESTION}/GetGestionEstadosGestionesCarteraDeudorHistorica?${params.toString()}`,
+  const params = buildEstadosGestionHistoricosParams(
+    id_cliente,
+    id_cartera,
+    id_deudor,
+    pageNumber,
+    pageSize
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando estados de gestión históricos');
-  }
+  const result = await apiClient<ApiResponse<GestionHistoricaApi[]>>(
+    `${ESTADOS_GESTION_ENDPOINTS.HISTORICOS}?${params.toString()}`
+  );
 
-  const completo: EstadoGestionCompleta[] = result.response.map((item) => ({
-    id: String(item.nId_DocxCobrarOpe),
-    nro: item.nro,
-    cliente: item.cliente,
-    cartera: item.cartera,
-    campana: item.campanna,
-    fecha: item.fecha,
-    gestor: item.gestor,
-    documento: item.documento,
-    operacion: item.operacion,
-    resultado: item.resultado,
-    comentario: item.comentario,
-  }));
+  assertApiSuccess(result, ESTADOS_GESTION_ERROR_MESSAGES.HISTORICOS);
 
   return {
-    completo,
+    completo: mapEstadosGestionHistoricos(result.response),
     pageNumber: result.pageNumber,
     pageSize: result.pageSize,
     totalRecords: result.totalRecords,

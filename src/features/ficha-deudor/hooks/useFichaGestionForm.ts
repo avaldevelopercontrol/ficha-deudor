@@ -1,12 +1,9 @@
-import { useState } from 'react';
-import type { GestionForm } from '../../../shared/types/indexApi';
+import { useCallback, useState } from 'react';
+import type { GestionFormClaro } from '../types/fichaGestion.types';
 
-export type GestionFormClaro = GestionForm & {
-  estadoGestionClaro: string;
-  motivoNoPago: string;
-};
+export type { GestionFormClaro } from '../types/fichaGestion.types';
 
-const initialForm: GestionFormClaro = {
+const INITIAL_FICHA_GESTION_FORM: GestionFormClaro = {
   nombreContacto: '',
   cargo: '',
   np0: '',
@@ -31,33 +28,61 @@ const initialForm: GestionFormClaro = {
 };
 
 export const useFichaGestionForm = () => {
-  const [form, setForm] = useState<GestionFormClaro>(initialForm);
+  const [form, setForm] = useState<GestionFormClaro>(() => ({
+    ...INITIAL_FICHA_GESTION_FORM,
+  }));
 
-  const setField = <K extends keyof GestionFormClaro>(
-    field: K,
-    value: GestionFormClaro[K]
-  ) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
+  const setField = useCallback(
+    <K extends keyof GestionFormClaro>(
+      field: K,
+      value: GestionFormClaro[K]
+    ) => {
+      setForm((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    },
+    []
+  );
 
-  const handleNP0Change = (value: string) => {
-    setField('np0', value);
-    setField('np1', '');
-    setField('np2', '');
-  };
+  const setFields = useCallback((fields: Partial<GestionFormClaro>) => {
+    setForm((prev) => ({
+      ...prev,
+      ...fields,
+    }));
+  }, []);
 
-  const handleNP1Change = (value: string) => {
-    setField('np1', value);
-    setField('np2', '');
-  };
+  const handleNP0Change = useCallback(
+    (value: string) => {
+      setFields({
+        np0: value,
+        np1: '',
+        np2: '',
+      });
+    },
+    [setFields]
+  );
 
-  const resetForm = () => {
-    setForm(initialForm);
-  };
+  const handleNP1Change = useCallback(
+    (value: string) => {
+      setFields({
+        np1: value,
+        np2: '',
+      });
+    },
+    [setFields]
+  );
+
+  const resetForm = useCallback(() => {
+    setForm({
+      ...INITIAL_FICHA_GESTION_FORM,
+    });
+  }, []);
 
   return {
     form,
     setField,
+    setFields,
     handleNP0Change,
     handleNP1Change,
     resetForm,

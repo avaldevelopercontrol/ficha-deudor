@@ -1,3 +1,6 @@
+import type { FeedbackMessageVariant } from '../../../shared/components/ui';
+import type { GestionForm } from '../../../shared/types/indexApi';
+
 // ─── GESTIÓN: Estado de Gestión ───
 export interface GestionEstadoApi {
   nId_OpeCodCliOut: number;
@@ -61,4 +64,22 @@ export interface GestionMotivoNoPagoApi {
 export interface GestionMotivoNoPagoList {
   id: string;
   nombre: string;
+}
+
+export type GestionFormClaro = GestionForm & {
+  estadoGestionClaro: string;
+  motivoNoPago: string;
+};
+
+export type SetGestionField = <K extends keyof GestionFormClaro>(
+  field: K,
+  value: GestionFormClaro[K]
+) => void;
+
+export type SetGestionFields = (fields: Partial<GestionFormClaro>) => void;
+
+export interface GestionFeedback {
+  variant: FeedbackMessageVariant;
+  title: string;
+  message: string;
 }

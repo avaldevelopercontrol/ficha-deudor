@@ -19,6 +19,10 @@ import type {
 } from '../../../shared/types/indexApi';
 
 import { enrichDocumentoWithDynamicColumns } from '../utils/documentosDynamicKeys';
+import {
+  DOCUMENTOS_ERROR_MESSAGES,
+  DOCUMENTOS_INITIAL_PAGE_SIZE,
+} from '../constants/documentos.constants';
 
 export type { TextFilters, SelectedFilters };
 
@@ -42,6 +46,28 @@ interface UseDocumentosReturn {
   onTextFilterChange: (columnKey: string, value: string) => void;
   onSelectedFilterChange: (columnKey: string, values: string[]) => void;
 }
+
+const getErrorMessage = (error: unknown, fallbackMessage: string) => {
+  return error instanceof Error ? error.message : fallbackMessage;
+};
+
+const hasRequiredMetaParams = (
+  idCliente: string,
+  idCartera: string,
+  idDeudor: string,
+  idContrato: string,
+  idUsuario: string
+) => {
+  return Boolean(idCliente && idCartera && idDeudor && idContrato && idUsuario);
+};
+
+const hasRequiredDataParams = (
+  idCliente: string,
+  idCartera: string,
+  idDeudor: string
+) => {
+  return Boolean(idCliente && idCartera && idDeudor);
+};
 
 export function useDocumentos(
   id_cliente: string,
@@ -67,16 +93,26 @@ export function useDocumentos(
   const table = useClientSideTable<DocumentoApi>(
     allData,
     [id_cliente, id_cartera, id_deudor, id_contrato],
-    { initialPageSize: 10 }
+    { initialPageSize: DOCUMENTOS_INITIAL_PAGE_SIZE }
   );
+
+  const fetchDocumentosData = useCallback(async () => {
+    if (!hasRequiredDataParams(id_cliente, id_cartera, id_deudor)) {
+      return [];
+    }
+
+    return fetchAllGestiones(id_cliente, id_cartera, id_deudor);
+  }, [id_cliente, id_cartera, id_deudor]);
 
   useEffect(() => {
     if (
-      !id_cliente ||
-      !id_cartera ||
-      !id_deudor ||
-      !id_contrato ||
-      !id_usuario
+      !hasRequiredMetaParams(
+        id_cliente,
+        id_cartera,
+        id_deudor,
+        id_contrato,
+        id_usuario
+      )
     ) {
       return;
     }
@@ -93,16 +129,14 @@ export function useDocumentos(
           fetchBotones(id_cliente, id_cartera, id_deudor, id_usuario),
         ]);
 
-        if (!cancelled) {
-          setColumns(cols);
-          setBotones(btns);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setMetaError(
-            err instanceof Error ? err.message : 'Error cargando metadatos'
-          );
-        }
+        if (cancelled) return;
+
+        setColumns(cols);
+        setBotones(btns);
+      } catch (error) {
+        if (cancelled) return;
+
+        setMetaError(getErrorMessage(error, DOCUMENTOS_ERROR_MESSAGES.META));
       } finally {
         if (!cancelled) {
           setMetaLoading(false);
@@ -118,8 +152,6 @@ export function useDocumentos(
   }, [id_cliente, id_cartera, id_deudor, id_contrato, id_usuario]);
 
   useEffect(() => {
-    if (!id_cliente || !id_cartera || !id_deudor) return;
-
     let cancelled = false;
 
     const loadData = async () => {
@@ -127,22 +159,16 @@ export function useDocumentos(
       setDataError(null);
 
       try {
-        const result = await fetchAllGestiones(
-          id_cliente,
-          id_cartera,
-          id_deudor
-        );
+        const result = await fetchDocumentosData();
 
         if (cancelled) return;
 
         setRawData(result);
-      } catch (err) {
-        if (!cancelled) {
-          setDataError(
-            err instanceof Error ? err.message : 'Error cargando documentos'
-          );
-          setRawData([]);
-        }
+      } catch (error) {
+        if (cancelled) return;
+
+        setDataError(getErrorMessage(error, DOCUMENTOS_ERROR_MESSAGES.DATA));
+        setRawData([]);
       } finally {
         if (!cancelled) {
           setDataLoading(false);
@@ -155,28 +181,27 @@ export function useDocumentos(
     return () => {
       cancelled = true;
     };
-  }, [id_cliente, id_cartera, id_deudor]);
+  }, [fetchDocumentosData]);
 
   const refetch = useCallback(() => {
-    if (!id_cliente || !id_cartera || !id_deudor) return;
+    const loadData = async () => {
+      setDataLoading(true);
+      setDataError(null);
 
-    setDataLoading(true);
-    setDataError(null);
+      try {
+        const result = await fetchDocumentosData();
 
-    fetchAllGestiones(id_cliente, id_cartera, id_deudor)
-      .then((result) => {
         setRawData(result);
-      })
-      .catch((err) => {
-        setDataError(
-          err instanceof Error ? err.message : 'Error cargando documentos'
-        );
+      } catch (error) {
+        setDataError(getErrorMessage(error, DOCUMENTOS_ERROR_MESSAGES.DATA));
         setRawData([]);
-      })
-      .finally(() => {
+      } finally {
         setDataLoading(false);
-      });
-  }, [id_cliente, id_cartera, id_deudor]);
+      }
+    };
+
+    void loadData();
+  }, [fetchDocumentosData]);
 
   const isLoading = metaLoading || dataLoading;
   const error = metaError || dataError;
@@ -201,29 +226,4 @@ export function useDocumentos(
     onTextFilterChange: table.onTextFilterChange,
     onSelectedFilterChange: table.onSelectedFilterChange,
   };
-}
-
-export function openPopup(
-  url: string,
-  title: string,
-  width = 1600,
-  height = 800
-): Window | null {
-  const left = (window.screen.width - width) / 2;
-  const top = (window.screen.height - height) / 2;
-
-  const features = [
-    `width=${width}`,
-    `height=${height}`,
-    `left=${left}`,
-    `top=${top}`,
-    'resizable=yes',
-    'scrollbars=yes',
-    'status=yes',
-    'toolbar=no',
-    'menubar=no',
-    'location=no',
-  ].join(',');
-
-  return window.open(url, title, features);
 }

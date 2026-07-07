@@ -7,6 +7,8 @@ import type { Column } from '../../../../../shared/types';
 type TextFilters = Record<string, string>;
 type SelectedFilters = Record<string, string[]>;
 
+const DEFAULT_PAGE_SIZE_OPTIONS = [5, 10, 30, 50];
+
 interface Props<TData> {
   columns: Column<TData>[];
   data: TData[];
@@ -30,6 +32,89 @@ interface Props<TData> {
   onVolver: () => void;
 }
 
+interface PanelTablaExpandidaHeaderProps {
+  indiceInicio: number;
+  indiceFin: number;
+  totalRecords: number;
+  itemLabel: string;
+  onVolver: () => void;
+}
+
+const PanelTablaExpandidaHeader: React.FC<PanelTablaExpandidaHeaderProps> = ({
+  indiceInicio,
+  indiceFin,
+  totalRecords,
+  itemLabel,
+  onVolver,
+}) => {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '12px',
+      }}
+    >
+      <span style={{ fontSize: '12px', color: '#6b7a99' }}>
+        Mostrando {indiceInicio}-{indiceFin} de {totalRecords} {itemLabel}
+      </span>
+
+      <ActionButton
+        label="Volver"
+        variant="secondary"
+        size="sm"
+        icon="←"
+        onClick={onVolver}
+      />
+    </div>
+  );
+};
+
+interface PanelTablaExpandidaLoadingProps {
+  message: string;
+}
+
+const PanelTablaExpandidaLoading: React.FC<PanelTablaExpandidaLoadingProps> = ({
+  message,
+}) => {
+  return (
+    <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+      {message}
+    </div>
+  );
+};
+
+interface PanelTablaExpandidaErrorProps {
+  title: string;
+  error: string;
+  onRetry: () => void;
+}
+
+const PanelTablaExpandidaError: React.FC<PanelTablaExpandidaErrorProps> = ({
+  title,
+  error,
+  onRetry,
+}) => {
+  return (
+    <div style={{ padding: '2rem', color: '#c00' }}>
+      <p style={{ marginBottom: 12 }}>{title}</p>
+
+      <p style={{ fontSize: '0.9em', color: '#666', marginBottom: 16 }}>
+        {error}
+      </p>
+
+      <button
+        onClick={onRetry}
+        style={{ padding: '8px 16px', cursor: 'pointer' }}
+        type="button"
+      >
+        Reintentar
+      </button>
+    </div>
+  );
+};
+
 function getRowValue(row: unknown, key: string): unknown {
   if (typeof row !== 'object' || row === null) {
     return undefined;
@@ -51,7 +136,7 @@ const PanelTablaExpandida = <TData,>({
   itemLabel,
   loadingMessage,
   errorTitle,
-  pageSizeOptions = [5, 10, 30, 50],
+  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
   showPageSizeSelector = true,
   enableColumnFilters = true,
   fitToPanel = true,
@@ -118,49 +203,32 @@ const PanelTablaExpandida = <TData,>({
   const indiceInicio = totalRecords === 0 ? 0 : (pageNumber - 1) * pageSize + 1;
   const indiceFin = Math.min(pageNumber * pageSize, totalRecords);
 
+  const handlePaginaAnterior = () => {
+    setPageNumber(Math.max(1, pageNumber - 1));
+  };
+
+  const handlePaginaSiguiente = () => {
+    setPageNumber(Math.min(totalPages, pageNumber + 1));
+  };
+
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '12px',
-        }}
-      >
-        <span style={{ fontSize: '12px', color: '#6b7a99' }}>
-          Mostrando {indiceInicio}-{indiceFin} de {totalRecords} {itemLabel}
-        </span>
-
-        <ActionButton
-          label="Volver"
-          variant="secondary"
-          size="sm"
-          icon="←"
-          onClick={onVolver}
-        />
-      </div>
+      <PanelTablaExpandidaHeader
+        indiceInicio={indiceInicio}
+        indiceFin={indiceFin}
+        totalRecords={totalRecords}
+        itemLabel={itemLabel}
+        onVolver={onVolver}
+      />
 
       {isLoading ? (
-        <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
-          {loadingMessage}
-        </div>
+        <PanelTablaExpandidaLoading message={loadingMessage} />
       ) : error ? (
-        <div style={{ padding: '2rem', color: '#c00' }}>
-          <p style={{ marginBottom: 12 }}>{errorTitle}</p>
-
-          <p style={{ fontSize: '0.9em', color: '#666', marginBottom: 16 }}>
-            {error}
-          </p>
-
-          <button
-            onClick={onRetry}
-            style={{ padding: '8px 16px', cursor: 'pointer' }}
-            type="button"
-          >
-            Reintentar
-          </button>
-        </div>
+        <PanelTablaExpandidaError
+          title={errorTitle}
+          error={error}
+          onRetry={onRetry}
+        />
       ) : (
         <>
           <Table
@@ -183,12 +251,8 @@ const PanelTablaExpandida = <TData,>({
               totalRegistros={totalRecords}
               indiceInicio={indiceInicio}
               indiceFin={indiceFin}
-              onPaginaAnterior={() =>
-                setPageNumber(Math.max(1, pageNumber - 1))
-              }
-              onPaginaSiguiente={() =>
-                setPageNumber(Math.min(totalPages, pageNumber + 1))
-              }
+              onPaginaAnterior={handlePaginaAnterior}
+              onPaginaSiguiente={handlePaginaSiguiente}
               onIrAPagina={setPageNumber}
               showPageSizeSelector={showPageSizeSelector}
               pageSize={pageSize}

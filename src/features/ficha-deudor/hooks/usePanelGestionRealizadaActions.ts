@@ -1,12 +1,12 @@
-import { useCallback } from 'react';
-import type { GestionRealizada } from '../../../shared/types/indexApi';
-import type { useGestionesRealizadas } from './useGestionesRealizadas';
+import { useCallback, type Dispatch, type SetStateAction } from 'react';
 
-type GestionesRealizadasState = ReturnType<typeof useGestionesRealizadas>;
+import type { GestionRealizada } from '../../../shared/types/indexApi';
+import type { UseGestionesRealizadasReturn } from './useGestionesRealizadas';
+import { buildEliminarGestionConfirmMessage } from '../constants/panelGestionRealizada.constants';
 
 interface UsePanelGestionRealizadaActionsParams {
-  setVistaExpandida: React.Dispatch<React.SetStateAction<boolean>>;
-  setResumido: GestionesRealizadasState['setResumido'];
+  setVistaExpandida: Dispatch<SetStateAction<boolean>>;
+  setResumido: UseGestionesRealizadasReturn['setResumido'];
 }
 
 export const usePanelGestionRealizadaActions = ({
@@ -23,9 +23,15 @@ export const usePanelGestionRealizadaActions = ({
 
   const handleEliminar = useCallback(
     (row: GestionRealizada) => {
-      if (window.confirm(`¿Eliminar gestión N° ${row.nro}?`)) {
-        setResumido((prev) => prev.filter((gestion) => gestion.id !== row.id));
-      }
+      const shouldDelete = window.confirm(
+        buildEliminarGestionConfirmMessage(row.nro)
+      );
+
+      if (!shouldDelete) return;
+
+      setResumido((prev) =>
+        prev.filter((gestion) => gestion.id !== row.id)
+      );
     },
     [setResumido]
   );

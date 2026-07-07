@@ -5,6 +5,10 @@ import { PanelLayout } from './PanelLayout';
 import { useDireccionesReferenciadas } from '../../hooks/useDireccionesReferenciadas';
 import { usePanelDireccionesReferenciadasColumns } from '../../hooks/usePanelDireccionesReferenciadasColumns';
 import { usePanelDireccionesReferenciadasActions } from '../../hooks/usePanelDireccionesReferenciadasActions';
+import {
+  PANEL_DIRECCIONES_REFERENCIADAS_MESSAGES,
+  PANEL_DIRECCIONES_REFERENCIADAS_TITLE,
+} from '../../constants/panelDireccionesReferenciadas.constants';
 import PanelTablaResumen from './shared/PanelTablaResumen';
 import PanelResumenEstado from './shared/PanelResumenEstado';
 import PanelTablaHeaderActions from './shared/PanelTablaHeaderActions';
@@ -67,11 +71,11 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
   if (isLoading || error) {
     return (
       <PanelResumenEstado
-        title="DIRECCIONES REFERENCIADAS"
+        title={PANEL_DIRECCIONES_REFERENCIADAS_TITLE}
         isActive={isActive}
         error={error}
-        loadingMessage="Cargando direcciones..."
-        errorTitle="Error al cargar direcciones:"
+        loadingMessage={PANEL_DIRECCIONES_REFERENCIADAS_MESSAGES.LOADING}
+        errorTitle={PANEL_DIRECCIONES_REFERENCIADAS_MESSAGES.ERROR_TITLE}
         onRetry={refetch}
       />
     );
@@ -79,7 +83,10 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
 
   return (
     <>
-      <PanelLayout title="DIRECCIONES REFERENCIADAS" isActive={isActive}>
+      <PanelLayout
+        title={PANEL_DIRECCIONES_REFERENCIADAS_TITLE}
+        isActive={isActive}
+      >
         <PanelTablaResumen
           columns={columns}
           data={paginatedData}
@@ -90,8 +97,8 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
           totalPages={totalPages}
           textFilters={textFilters}
           selectedFilters={selectedFilters}
-          emptyMessage="No se encontraron direcciones referenciadas"
-          itemLabel="dirección(es)"
+          emptyMessage={PANEL_DIRECCIONES_REFERENCIADAS_MESSAGES.EMPTY}
+          itemLabel={PANEL_DIRECCIONES_REFERENCIADAS_MESSAGES.ITEM_LABEL}
           setPageNumber={setPageNumber}
           setPageSize={setPageSize}
           fitToPanel
@@ -101,7 +108,7 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
             <PanelTablaHeaderActions
               pageNumber={pageNumber}
               totalPages={totalPages}
-              buttonLabel="Agregar Dirección"
+              buttonLabel={PANEL_DIRECCIONES_REFERENCIADAS_MESSAGES.ADD_BUTTON}
               onAdd={handleOpenRegistrar}
             />
           }

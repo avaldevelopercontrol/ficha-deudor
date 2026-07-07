@@ -3,6 +3,10 @@ import { PanelLayout } from './PanelLayout';
 import { useTelefonosReferenciados } from '../../hooks/useTelefonosReferenciados';
 import { usePanelTelefonosReferenciadosColumns } from '../../hooks/usePanelTelefonosReferenciadosColumns';
 import { usePanelTelefonosReferenciadosActions } from '../../hooks/usePanelTelefonosReferenciadosActions';
+import {
+  PANEL_TELEFONOS_REFERENCIADOS_MESSAGES,
+  PANEL_TELEFONOS_REFERENCIADOS_TITLE,
+} from '../../constants/panelTelefonosReferenciados.constants';
 import ModalRegistrarTelefono from '../modals/accionesRapidas/ModalRegistrarTelefono';
 import ModalEditarTelefono from '../modals/accionesRapidas/ModalEditarTelefono';
 import PanelTablaResumen from './shared/PanelTablaResumen';
@@ -69,11 +73,11 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({
   if (isLoading || error) {
     return (
       <PanelResumenEstado
-        title="TELÉFONOS REFERENCIADOS"
+        title={PANEL_TELEFONOS_REFERENCIADOS_TITLE}
         isActive={isActive}
         error={error}
-        loadingMessage="Cargando teléfonos..."
-        errorTitle="Error al cargar teléfonos:"
+        loadingMessage={PANEL_TELEFONOS_REFERENCIADOS_MESSAGES.LOADING}
+        errorTitle={PANEL_TELEFONOS_REFERENCIADOS_MESSAGES.ERROR_TITLE}
         onRetry={refetch}
       />
     );
@@ -81,7 +85,10 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({
 
   return (
     <>
-      <PanelLayout title="TELÉFONOS REFERENCIADOS" isActive={isActive}>
+      <PanelLayout
+        title={PANEL_TELEFONOS_REFERENCIADOS_TITLE}
+        isActive={isActive}
+      >
         <PanelTablaResumen
           columns={columns}
           data={paginatedData}
@@ -92,8 +99,8 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({
           totalPages={totalPages}
           textFilters={textFilters}
           selectedFilters={selectedFilters}
-          emptyMessage="No se encontraron teléfonos referenciados"
-          itemLabel="teléfono(s)"
+          emptyMessage={PANEL_TELEFONOS_REFERENCIADOS_MESSAGES.EMPTY}
+          itemLabel={PANEL_TELEFONOS_REFERENCIADOS_MESSAGES.ITEM_LABEL}
           setPageNumber={setPageNumber}
           setPageSize={setPageSize}
           fitToPanel
@@ -103,7 +110,7 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({
             <PanelTablaHeaderActions
               pageNumber={pageNumber}
               totalPages={totalPages}
-              buttonLabel="Agregar Teléfono"
+              buttonLabel={PANEL_TELEFONOS_REFERENCIADOS_MESSAGES.ADD_BUTTON}
               onAdd={handleOpenRegistrar}
             />
           }

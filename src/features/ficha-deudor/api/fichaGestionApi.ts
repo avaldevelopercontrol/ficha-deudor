@@ -13,8 +13,19 @@ import type {
   GestionMotivoNoPagoList,
 } from '../../../shared/types';
 import type { ApiResponse } from '../../../shared/types/indexApi';
-
-const BASE_GESTION = '/v1/Gestion';
+import { TIPO_GESTION_PALETA } from '../constants/fichaGestion.constants';
+import {
+  FICHA_GESTION_ENDPOINTS,
+  FICHA_GESTION_ERROR_MESSAGES,
+} from '../constants/fichaGestionApi.constants';
+import {
+  mapGestionEstadoClaro,
+  mapGestionEstados,
+  mapGestionMotivoNoPago,
+  mapGestionPaletaRespuesta,
+  mapGestionTipos,
+} from '../mappers/fichaGestionCatalogos.mapper';
+import { assertApiSuccess } from '../utils/apiResponse.utils';
 
 export interface CreateGestionOpeGesContratosPayload {
   nId_DocxCobrarOpe: number;
@@ -71,36 +82,26 @@ export async function fetchGestionEstados(
   });
 
   const result = await apiClient<ApiResponse<GestionEstadoApi[]>>(
-    `${BASE_GESTION}/GetGestionEstadoGestion?${params.toString()}`,
+    `${FICHA_GESTION_ENDPOINTS.ESTADOS}?${params.toString()}`,
     { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando estados de gestión');
-  }
+  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.ESTADOS);
 
-  return (result.response ?? []).map((item) => ({
-    id: String(item.nId_OpeCodCliOut),
-    nombre: item.cNombre_OpeCodCliOut,
-  }));
+  return mapGestionEstados(result.response);
 }
 
 export async function fetchGestionTipos(
   signal?: AbortSignal
 ): Promise<GestionTipoList[]> {
   const result = await apiClient<ApiResponse<GestionTipoApi[]>>(
-    `${BASE_GESTION}/GetGestionTipoGestion`,
+    FICHA_GESTION_ENDPOINTS.TIPOS,
     { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando tipos de gestión');
-  }
+  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.TIPOS);
 
-  return (result.response ?? []).map((item) => ({
-    id: String(item.nId_TipoGestion),
-    nombre: item.cNomTipoGestion,
-  }));
+  return mapGestionTipos(result.response);
 }
 
 export async function fetchGestionPaletaRespuesta(
@@ -112,23 +113,17 @@ export async function fetchGestionPaletaRespuesta(
     nId_Contrato: params.idContrato,
     nNivelPaleta: String(params.nivelPaleta),
     nId_SupOpeCodCliOut: String(params.idSupOpeCodCliOut),
-    nId_TipoGestion: String(params.idTipoGestion ?? 3),
+    nId_TipoGestion: String(params.idTipoGestion ?? TIPO_GESTION_PALETA),
   });
 
   const result = await apiClient<ApiResponse<GestionPaletaRespuestaApi[]>>(
-    `${BASE_GESTION}/GetGestionPaletaRespuesta?${searchParams.toString()}`,
+    `${FICHA_GESTION_ENDPOINTS.PALETA_RESPUESTA}?${searchParams.toString()}`,
     { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando paleta de respuesta');
-  }
+  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.PALETA_RESPUESTA);
 
-  return (result.response ?? []).map((item) => ({
-    id: String(item.nId_OpeCodCliOut),
-    nombre: item.cNombre_OpeCodCliOut,
-    idTipoContacto: item.nId_TipoContacto ?? null,
-  }));
+  return mapGestionPaletaRespuesta(result.response);
 }
 
 export async function fetchGestionEstadoGestionClaro(
@@ -142,18 +137,13 @@ export async function fetchGestionEstadoGestionClaro(
   });
 
   const result = await apiClient<ApiResponse<GestionEstadoClaroApi[]>>(
-    `${BASE_GESTION}/GetGestionEstadoGestionClaro?${params.toString()}`,
+    `${FICHA_GESTION_ENDPOINTS.ESTADO_GESTION_CLARO}?${params.toString()}`,
     { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando Estado Gestión Claro');
-  }
+  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.ESTADO_GESTION_CLARO);
 
-  return (result.response ?? []).map((item) => ({
-    id: String(item.nId_OpeCodCliOut),
-    nombre: item.cNombre_OpeCodCliOut,
-  }));
+  return mapGestionEstadoClaro(result.response);
 }
 
 export async function fetchGestionMotivoNoPago(
@@ -167,18 +157,13 @@ export async function fetchGestionMotivoNoPago(
   });
 
   const result = await apiClient<ApiResponse<GestionMotivoNoPagoApi[]>>(
-    `${BASE_GESTION}/GetGestionMotivoNoPago?${params.toString()}`,
+    `${FICHA_GESTION_ENDPOINTS.MOTIVO_NO_PAGO}?${params.toString()}`,
     { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando Motivo No Pago');
-  }
+  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.MOTIVO_NO_PAGO);
 
-  return (result.response ?? []).map((item) => ({
-    id: String(item.nId_MotivoNoPago),
-    nombre: item.cNombreMotivoNoPago,
-  }));
+  return mapGestionMotivoNoPago(result.response);
 }
 
 export async function createGestionOpeGesContratos(
@@ -186,7 +171,7 @@ export async function createGestionOpeGesContratos(
   signal?: AbortSignal
 ): Promise<ApiResponse<CreateGestionOpeGesContratosResponse[]>> {
   const result = await apiClient<ApiResponse<CreateGestionOpeGesContratosResponse[]>>(
-    `${BASE_GESTION}/CreateGestionOpeGesContratos`,
+    FICHA_GESTION_ENDPOINTS.CREATE_GESTION,
     {
       method: 'POST',
       body: payload,
@@ -194,13 +179,7 @@ export async function createGestionOpeGesContratos(
     }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(
-      result.messageUser ||
-        result.message ||
-        'Error guardando la gestión'
-    );
-  }
+  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.CREATE_GESTION);
 
   return result;
 }

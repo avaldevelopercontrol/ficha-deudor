@@ -2,6 +2,12 @@ import React from 'react';
 import { PanelLayout } from './PanelLayout';
 import { useDatosAdicionales } from '../../hooks/useDatosAdicionales';
 import { usePanelDatosAdicionalesColumns } from '../../hooks/usePanelDatosAdicionalesColumns';
+import {
+  PANEL_DATOS_ADICIONALES_MESSAGES,
+  PANEL_DATOS_ADICIONALES_NIVEL,
+  PANEL_DATOS_ADICIONALES_PAGE_SIZE_OPTIONS,
+  PANEL_DATOS_ADICIONALES_TITLE,
+} from '../../constants/panelDatosAdicionales.constants';
 import PanelResumenEstado from './shared/PanelResumenEstado';
 import PanelTablaResumen from './shared/PanelTablaResumen';
 
@@ -35,7 +41,12 @@ const PanelDatosAdicionales: React.FC<Props> = ({
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
-  } = useDatosAdicionales(id_cliente, id_cartera, id_deudor, 3);
+  } = useDatosAdicionales(
+    id_cliente,
+    id_cartera,
+    id_deudor,
+    PANEL_DATOS_ADICIONALES_NIVEL
+  );
 
   const { tableColumns } = usePanelDatosAdicionalesColumns(columns);
 
@@ -44,18 +55,18 @@ const PanelDatosAdicionales: React.FC<Props> = ({
   if (isLoading || error) {
     return (
       <PanelResumenEstado
-        title="DATOS ADICIONALES"
+        title={PANEL_DATOS_ADICIONALES_TITLE}
         isActive={isActive}
         error={error}
-        loadingMessage="Cargando datos adicionales..."
-        errorTitle="Error al cargar datos adicionales:"
+        loadingMessage={PANEL_DATOS_ADICIONALES_MESSAGES.LOADING}
+        errorTitle={PANEL_DATOS_ADICIONALES_MESSAGES.ERROR_TITLE}
         onRetry={refetch}
       />
     );
   }
 
   return (
-    <PanelLayout title="DATOS ADICIONALES" isActive={isActive}>
+    <PanelLayout title={PANEL_DATOS_ADICIONALES_TITLE} isActive={isActive}>
       <PanelTablaResumen
         columns={tableColumns}
         data={paginatedData}
@@ -66,8 +77,8 @@ const PanelDatosAdicionales: React.FC<Props> = ({
         totalPages={totalPages}
         textFilters={textFilters}
         selectedFilters={selectedFilters}
-        emptyMessage="No se encontraron datos adicionales"
-        pageSizeOptions={[5, 10, 20, 50]}
+        emptyMessage={PANEL_DATOS_ADICIONALES_MESSAGES.EMPTY}
+        pageSizeOptions={PANEL_DATOS_ADICIONALES_PAGE_SIZE_OPTIONS}
         showCount={false}
         fitToPanel
         setPageNumber={setPageNumber}

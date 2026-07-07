@@ -23,6 +23,10 @@ import type {
   TextFilters,
   SelectedFilters,
 } from '../../../shared/hooks/useClientSideTable';
+import {
+  TELEFONOS_REFERENCIADOS_ERROR_MESSAGES,
+  TELEFONOS_REFERENCIADOS_INITIAL_PAGE_SIZE,
+} from '../constants/telefonosReferenciados.constants';
 
 export type { TextFilters, SelectedFilters };
 
@@ -51,6 +55,14 @@ type TelefonoCatalogFetcher = (
   signal: AbortSignal
 ) => Promise<TelefonoList[]>;
 
+const hasRequiredValues = (...values: string[]) => {
+  return values.every((value) => value.trim() !== '');
+};
+
+const getErrorMessage = (error: unknown, fallbackMessage: string) => {
+  return error instanceof Error ? error.message : fallbackMessage;
+};
+
 function useTelefonoCatalog(fetchCatalog: TelefonoCatalogFetcher) {
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchCatalog(signal),
@@ -65,7 +77,12 @@ export function useTelefonosReferenciados(
   id_deudor: string,
   id_usuario: string
 ): UseTelefonosReferenciadosReturn {
-  const fetchData = useCallback(() => {
+  const canLoadTelefonosReferenciados = hasRequiredValues(
+    id_cliente,
+    id_deudor
+  );
+
+  const fetchTelefonosReferenciadosData = useCallback(() => {
     return fetchTelefonosReferenciados(id_cliente, id_deudor);
   }, [id_cliente, id_deudor]);
 
@@ -88,11 +105,11 @@ export function useTelefonosReferenciados(
     onSelectedFilterChange,
     setError,
   } = useClientSideResourceTable<TelefonoReferenciado>({
-    fetchData,
+    fetchData: fetchTelefonosReferenciadosData,
     resetDeps: [id_cliente, id_deudor],
-    enabled: Boolean(id_cliente && id_deudor),
-    initialPageSize: 10,
-    errorMessage: 'Error cargando teléfonos',
+    enabled: canLoadTelefonosReferenciados,
+    initialPageSize: TELEFONOS_REFERENCIADOS_INITIAL_PAGE_SIZE,
+    errorMessage: TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.LIST,
   });
 
   const create = useCallback(
@@ -100,12 +117,15 @@ export function useTelefonosReferenciados(
       try {
         await createTelefono(id_cliente, id_deudor, id_usuario, formData);
         await refetch();
-      } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : 'Error al crear teléfono';
+      } catch (error) {
+        setError(
+          getErrorMessage(
+            error,
+            TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.CREATE
+          )
+        );
 
-        setError(msg);
-        throw err;
+        throw error;
       }
     },
     [id_cliente, id_deudor, id_usuario, refetch, setError]
@@ -116,12 +136,15 @@ export function useTelefonosReferenciados(
       try {
         await updateTelefono(id_cliente, id_deudor, id_usuario, id, formData);
         await refetch();
-      } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : 'Error al actualizar teléfono';
+      } catch (error) {
+        setError(
+          getErrorMessage(
+            error,
+            TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.UPDATE
+          )
+        );
 
-        setError(msg);
-        throw err;
+        throw error;
       }
     },
     [id_cliente, id_deudor, id_usuario, refetch, setError]
@@ -158,7 +181,7 @@ export function useTelefonoById(idTelefono: number | null) {
   return useNullableResourceById<number, TelefonoEditarApi>({
     id: idTelefono,
     fetcher,
-    errorMessage: 'Error cargando teléfono',
+    errorMessage: TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.BY_ID,
   });
 }
 

@@ -14,13 +14,34 @@ import type {
   GestionEstadoClaroList,
   GestionMotivoNoPagoList,
 } from '../../../shared/types';
+import {
+  CLIENTE_CLARO_ID,
+  TIPO_GESTION_PALETA,
+} from '../constants/fichaGestion.constants';
 
-const ID_CLIENTE_CLARO = '95';
+const resolveEmptyList = <T>() => Promise.resolve<T[]>([]);
+
+const hasValue = (value: string | number | null | undefined) => {
+  return String(value ?? '').trim() !== '';
+};
+
+const hasRequiredValues = (
+  ...values: Array<string | number | null | undefined>
+) => {
+  return values.every(hasValue);
+};
+
+const isClienteClaro = (idCliente: string) => {
+  return String(idCliente) === CLIENTE_CLARO_ID;
+};
 
 export function useGestionEstados(idCliente: string) {
   const fetcher = useCallback(
     (signal: AbortSignal): Promise<GestionEstadoList[]> => {
-      if (!idCliente) return Promise.resolve([]);
+      if (!hasRequiredValues(idCliente)) {
+        return resolveEmptyList<GestionEstadoList>();
+      }
+
       return fetchGestionEstados(idCliente, signal);
     },
     [idCliente]
@@ -44,12 +65,12 @@ export function useGestionPaletaRespuesta(
   idContrato: string,
   nivelPaleta: number,
   idSupOpeCodCliOut: string,
-  idTipoGestion: string = '3'
+  idTipoGestion: string = TIPO_GESTION_PALETA
 ) {
   const fetcher = useCallback(
     (signal: AbortSignal): Promise<GestionPaletaRespuestaList[]> => {
-      if (!idCliente || !idContrato || idSupOpeCodCliOut === '') {
-        return Promise.resolve([]);
+      if (!hasRequiredValues(idCliente, idContrato, idSupOpeCodCliOut)) {
+        return resolveEmptyList<GestionPaletaRespuestaList>();
       }
 
       return fetchGestionPaletaRespuesta(
@@ -81,8 +102,8 @@ export function useGestionEstadoGestionClaro(
 ) {
   const fetcher = useCallback(
     (signal: AbortSignal): Promise<GestionEstadoClaroList[]> => {
-      if (idCliente !== ID_CLIENTE_CLARO || !idCartera) {
-        return Promise.resolve([]);
+      if (!isClienteClaro(idCliente) || !hasRequiredValues(idCartera)) {
+        return resolveEmptyList<GestionEstadoClaroList>();
       }
 
       return fetchGestionEstadoGestionClaro(idCliente, idCartera, signal);
@@ -99,8 +120,8 @@ export function useGestionMotivoNoPago(
 ) {
   const fetcher = useCallback(
     (signal: AbortSignal): Promise<GestionMotivoNoPagoList[]> => {
-      if (idCliente !== ID_CLIENTE_CLARO || !idCartera) {
-        return Promise.resolve([]);
+      if (!isClienteClaro(idCliente) || !hasRequiredValues(idCartera)) {
+        return resolveEmptyList<GestionMotivoNoPagoList>();
       }
 
       return fetchGestionMotivoNoPago(idCliente, idCartera, signal);

@@ -7,54 +7,97 @@ import type {
   GestionCompleta,
   GestionHistoricaApi,
 } from '../../../shared/types/indexApi';
+import {
+  GESTIONES_HISTORICAS_DEFAULT_PAGE_NUMBER,
+  GESTIONES_HISTORICAS_DEFAULT_PAGE_SIZE,
+  GESTIONES_REALIZADAS_ENDPOINTS,
+  GESTIONES_REALIZADAS_ERROR_MESSAGES,
+  GESTIONES_REALIZADAS_FETCH_PAGE_NUMBER,
+  GESTIONES_REALIZADAS_FETCH_PAGE_SIZE,
+} from '../constants/gestionesRealizadas.constants';
+import {
+  mapGestionesHistoricas,
+  mapGestionesRealizadas,
+} from '../mappers/gestionesRealizadas.mapper';
+import { assertApiSuccess } from '../utils/apiResponse.utils';
 
-const BASE_GESTION = '/v1/Gestion';
+interface GestionesRealizadasParams {
+  idCliente: string;
+  idCartera: string;
+  idDeudor: string;
+  idUsuario: string;
+}
 
-// ─── GET: Gestiones Resumidas ───
+interface GestionesHistoricasParams {
+  idCliente: string;
+  idCartera: string;
+  idDeudor: string;
+  pageNumber: number;
+  pageSize: number;
+}
+
+const buildGestionesRealizadasParams = ({
+  idCliente,
+  idCartera,
+  idDeudor,
+  idUsuario,
+}: GestionesRealizadasParams) => {
+  return new URLSearchParams({
+    nId_Cliente: idCliente,
+    nId_Cartera: idCartera,
+    nId_Persdeudor: idDeudor,
+    nId_PerfilUsuario: idUsuario,
+    PageNumber: String(GESTIONES_REALIZADAS_FETCH_PAGE_NUMBER),
+    PageSize: String(GESTIONES_REALIZADAS_FETCH_PAGE_SIZE),
+  });
+};
+
+const buildGestionesHistoricasParams = ({
+  idCliente,
+  idCartera,
+  idDeudor,
+  pageNumber,
+  pageSize,
+}: GestionesHistoricasParams) => {
+  return new URLSearchParams({
+    nId_Cliente: idCliente,
+    nId_Cartera: idCartera,
+    nId_PersDeudor: idDeudor,
+    PageNumber: String(pageNumber),
+    PageSize: String(pageSize),
+  });
+};
+
 export async function fetchGestionesRealizadas(
   id_cliente: string,
   id_cartera: string,
   id_deudor: string,
-  id_usuario: string,
+  id_usuario: string
 ): Promise<{ resumido: GestionRealizada[] }> {
-  const params = new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
-    nId_Persdeudor: id_deudor,
-    nId_PerfilUsuario: id_usuario,
-    PageNumber: '1',
-    PageSize: '1000',
+  const params = buildGestionesRealizadasParams({
+    idCliente: id_cliente,
+    idCartera: id_cartera,
+    idDeudor: id_deudor,
+    idUsuario: id_usuario,
   });
 
   const result = await apiClient<ApiResponseSimple<GestionRealizadaApi[]>>(
-    `${BASE_GESTION}/GetGestionGestionesCarteraDeudor?${params.toString()}`,
+    `${GESTIONES_REALIZADAS_ENDPOINTS.RESUMIDAS}?${params.toString()}`
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando gestiones');
-  }
-  
-  const resumido: GestionRealizada[] = result.response.map((item) => ({
-    id: String(item.nId_DocxCobrarOpe),
-    nro: item.nro,
-    fecha: item.fechaGestion,
-    gestor: item.gestor,
-    documento: item.documento,
-    operacion: item.operacion,
-    respuesta: item.respuesta,
-    comentario: item.comentario,
-  }));
+  assertApiSuccess(result, GESTIONES_REALIZADAS_ERROR_MESSAGES.RESUMIDAS);
 
-  return { resumido };
+  return {
+    resumido: mapGestionesRealizadas(result.response),
+  };
 }
 
-// ─── GET: Gestiones Históricas (Vista Expandida / Completa) ───
 export async function fetchGestionesHistoricas(
   id_cliente: string,
   id_cartera: string,
   id_deudor: string,
-  pageNumber: number = 1,
-  pageSize: number = 1000,
+  pageNumber: number = GESTIONES_HISTORICAS_DEFAULT_PAGE_NUMBER,
+  pageSize: number = GESTIONES_HISTORICAS_DEFAULT_PAGE_SIZE
 ): Promise<{
   completo: GestionCompleta[];
   pageNumber: number;
@@ -62,38 +105,22 @@ export async function fetchGestionesHistoricas(
   totalRecords: number;
   totalPages: number;
 }> {
-  const params = new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
-    nId_PersDeudor: id_deudor,
-    PageNumber: String(pageNumber),
-    PageSize: String(pageSize),
+  const params = buildGestionesHistoricasParams({
+    idCliente: id_cliente,
+    idCartera: id_cartera,
+    idDeudor: id_deudor,
+    pageNumber,
+    pageSize,
   });
 
   const result = await apiClient<ApiResponse<GestionHistoricaApi[]>>(
-    `${BASE_GESTION}/GetGestionEstadosGestionesCarteraDeudorHistorica?${params.toString()}`,
+    `${GESTIONES_REALIZADAS_ENDPOINTS.HISTORICAS}?${params.toString()}`
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando gestiones históricas');
-  }
-
-  const completo: GestionCompleta[] = result.response.map((item) => ({
-    id: String(item.nId_DocxCobrarOpe),
-    nro: item.nro,
-    cliente: item.cliente,
-    cartera: item.cartera,
-    campana: item.campanna,
-    fecha: item.fecha,
-    gestor: item.gestor,
-    documento: item.documento,
-    operacion: item.operacion,
-    resultado: item.resultado,
-    comentario: item.comentario,
-  }));
+  assertApiSuccess(result, GESTIONES_REALIZADAS_ERROR_MESSAGES.HISTORICAS);
 
   return {
-    completo,
+    completo: mapGestionesHistoricas(result.response),
     pageNumber: result.pageNumber,
     pageSize: result.pageSize,
     totalRecords: result.totalRecords,

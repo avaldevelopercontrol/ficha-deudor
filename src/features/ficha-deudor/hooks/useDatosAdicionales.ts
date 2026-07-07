@@ -12,6 +12,10 @@ import type {
   ColumnApi,
   DatoAdicionalApi,
 } from '../../../shared/types/indexApi';
+import {
+  DATOS_ADICIONALES_ERROR_MESSAGES,
+  DATOS_ADICIONALES_INITIAL_PAGE_SIZE,
+} from '../constants/datosAdicionales.constants';
 
 export type { TextFilters, SelectedFilters };
 
@@ -35,22 +39,37 @@ interface UseDatosAdicionalesReturn {
   onSelectedFilterChange: (columnKey: string, values: string[]) => void;
 }
 
+const hasRequiredValues = (...values: string[]) => {
+  return values.every((value) => value.trim() !== '');
+};
+
+const getErrorMessage = (error: unknown, fallbackMessage: string) => {
+  return error instanceof Error ? error.message : fallbackMessage;
+};
+
 export function useDatosAdicionales(
   id_cliente: string,
   id_cartera: string,
   id_deudor: string,
-  pantalla: number = 3
+  pantalla = 3
 ): UseDatosAdicionalesReturn {
   const [columns, setColumns] = useState<ColumnApi[]>([]);
   const [metaLoading, setMetaLoading] = useState(false);
   const [metaError, setMetaError] = useState<string | null>(null);
 
+  const canLoadCabeceraDatosAdicionales = hasRequiredValues(id_cliente);
+  const canLoadDatosAdicionales = hasRequiredValues(
+    id_cliente,
+    id_cartera,
+    id_deudor
+  );
+
   useEffect(() => {
-    if (!id_cliente) return;
+    if (!canLoadCabeceraDatosAdicionales) return;
 
     let cancelled = false;
 
-    const loadMeta = async () => {
+    const loadCabeceraDatosAdicionales = async () => {
       setMetaLoading(true);
       setMetaError(null);
 
@@ -60,10 +79,10 @@ export function useDatosAdicionales(
         if (!cancelled) {
           setColumns(cols);
         }
-      } catch (err) {
+      } catch (error) {
         if (!cancelled) {
           setMetaError(
-            err instanceof Error ? err.message : 'Error cargando cabeceras'
+            getErrorMessage(error, DATOS_ADICIONALES_ERROR_MESSAGES.META)
           );
         }
       } finally {
@@ -74,15 +93,15 @@ export function useDatosAdicionales(
     };
 
     void Promise.resolve().then(() => {
-      void loadMeta();
+      void loadCabeceraDatosAdicionales();
     });
 
     return () => {
       cancelled = true;
     };
-  }, [id_cliente, pantalla]);
+  }, [canLoadCabeceraDatosAdicionales, id_cliente, pantalla]);
 
-  const fetchData = useCallback(() => {
+  const fetchDatosAdicionalesData = useCallback(() => {
     return fetchAllDatosAdicionales(id_cliente, id_cartera, id_deudor);
   }, [id_cliente, id_cartera, id_deudor]);
 
@@ -104,11 +123,11 @@ export function useDatosAdicionales(
     onTextFilterChange,
     onSelectedFilterChange,
   } = useClientSideResourceTable<DatoAdicionalApi>({
-    fetchData,
+    fetchData: fetchDatosAdicionalesData,
     resetDeps: [id_cliente, id_cartera, id_deudor],
-    enabled: Boolean(id_cliente && id_cartera && id_deudor),
-    initialPageSize: 10,
-    errorMessage: 'Error cargando datos adicionales',
+    enabled: canLoadDatosAdicionales,
+    initialPageSize: DATOS_ADICIONALES_INITIAL_PAGE_SIZE,
+    errorMessage: DATOS_ADICIONALES_ERROR_MESSAGES.DATA,
   });
 
   const isLoading = metaLoading || dataLoading;
