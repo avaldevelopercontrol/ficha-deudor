@@ -1,29 +1,27 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React from 'react';
 
 import { ModalFormLayout } from '../../layout/ModalFormLayout';
-import { FormGrid } from '../../../../../shared/components/ui/FormGrid';
-import {
-  InputField,
-  SelectField,
-  TextAreaField,
-} from '../../../../../shared/components/ui';
+
 import { useModalForm } from '../../../../../shared/hooks/ui/useModalForm';
+
 import type { DireccionFormData } from '../../../../../shared/types';
-import {
-  toBooleanValue,
-  toStringValue,
-} from '../../../../../shared/utils/formValueMappers';
-import {
-  useDepartamentos,
-  useProvincias,
-  useDistritos,
-  useDireccionUbicaciones,
-} from '../../../hooks/useDireccionesReferenciadas';
-import {
-  llegoDeBaseOptions,
-  tipoDeudorOptions,
-} from '../../../mocks/catalogosDireccion';
+
+import { toStringValue } from '../../../../../shared/utils/formValueMappers';
+
+import { useDireccionCatalogosForm } from '../../../hooks/useDireccionCatalogosForm';
+import { useDireccionCascadeFields } from '../../../hooks/useDireccionCascadeFields';
+
 import { validateDireccionForm } from '../../../validations/direccionValidations';
+import {
+  MODAL_REGISTRAR_DIRECCION_INITIAL_FORM,
+  MODAL_REGISTRAR_DIRECCION_LABELS,
+  MODAL_REGISTRAR_DIRECCION_LAYOUT,
+  MODAL_REGISTRAR_DIRECCION_LIMITS,
+  MODAL_REGISTRAR_DIRECCION_PLACEHOLDERS,
+  MODAL_REGISTRAR_DIRECCION_TEXTS,
+} from '../../../constants/modalRegistrarDireccion.constants';
+import { ModalErrorSummary } from '../common/ModalErrorSummary';
+import { DireccionFormFields } from './DireccionFormFields';
 
 interface Props {
   isOpen: boolean;
@@ -31,28 +29,14 @@ interface Props {
   onRegistrar?: (data: DireccionFormData) => void;
 }
 
-const INITIAL_FORM: DireccionFormData = {
-  direccion: '',
-  departamento: '',
-  provincia: '',
-  distrito: '',
-  refUbicacion: '',
-  comentario: '',
-  llegoDeBase: false,
-  tipoDeudor: 'TITULAR',
-};
-
 const ModalRegistrarDireccion: React.FC<Props> = ({
   isOpen,
   onClose,
   onRegistrar,
 }) => {
-  const previousDepartamentoRef = useRef(INITIAL_FORM.departamento);
-  const previousProvinciaRef = useRef(INITIAL_FORM.provincia);
-
   const { form, errors, handleChange, handleSubmit, handleCancel } =
     useModalForm<DireccionFormData>({
-      initialForm: INITIAL_FORM,
+      initialForm: MODAL_REGISTRAR_DIRECCION_INITIAL_FORM,
       onClose,
       onSubmit: (data) => {
         onRegistrar?.(data);
@@ -62,96 +46,27 @@ const ModalRegistrarDireccion: React.FC<Props> = ({
     });
 
   const {
-    data: departamentosData,
-    isLoading: isLoadingDepartamentos,
-    error: errorDepartamentos,
-  } = useDepartamentos();
+    handleDepartamentoChange,
+    handleProvinciaChange,
+  } = useDireccionCascadeFields({
+    handleChange,
+  });
 
   const {
-    data: provinciasData,
-    isLoading: isLoadingProvincias,
-  } = useProvincias(form.departamento || null);
-
-  const {
-    data: distritosData,
-    isLoading: isLoadingDistritos,
-  } = useDistritos(form.departamento || null, form.provincia || null);
-
-  const {
-    data: ubicacionesData,
-    isLoading: isLoadingUbicaciones,
-    error: errorUbicaciones,
-  } = useDireccionUbicaciones();
-
-  const departamentos = useMemo(
-    () =>
-      departamentosData?.map((departamento) => ({
-        id: departamento.id,
-        label: departamento.nombre,
-      })) ?? [],
-    [departamentosData]
+    departamentos,
+    provincias,
+    distritos,
+    refUbicacionOptions,
+    isLoadingDepartamentos,
+    isLoadingProvincias,
+    isLoadingDistritos,
+    isLoadingUbicaciones,
+    errorDepartamentos,
+    errorUbicaciones,
+  } = useDireccionCatalogosForm(
+    form.departamento || null,
+    form.provincia || null
   );
-
-  const provincias = useMemo(
-    () =>
-      provinciasData?.map((provincia) => ({
-        id: provincia.id,
-        label: provincia.nombre,
-      })) ?? [],
-    [provinciasData]
-  );
-
-  const distritos = useMemo(
-    () =>
-      distritosData?.map((distrito) => ({
-        id: distrito.id,
-        label: distrito.nombre,
-      })) ?? [],
-    [distritosData]
-  );
-
-  const refUbicacionOptions = useMemo(
-    () =>
-      ubicacionesData?.map((ubicacion) => ({
-        id: ubicacion.id,
-        label: ubicacion.nombre,
-      })) ?? [],
-    [ubicacionesData]
-  );
-
-  useEffect(() => {
-    const previousDepartamento = previousDepartamentoRef.current;
-    const departamentoChanged = previousDepartamento !== form.departamento;
-
-    previousDepartamentoRef.current = form.departamento;
-
-    if (!departamentoChanged) {
-      return;
-    }
-
-    if (form.provincia) {
-      handleChange('provincia', '');
-    }
-
-    if (form.distrito) {
-      handleChange('distrito', '');
-    }
-  }, [form.departamento, form.provincia, form.distrito, handleChange]);
-
-  useEffect(() => {
-    const previousProvincia = previousProvinciaRef.current;
-    const provinciaChanged = previousProvincia !== form.provincia;
-
-    previousProvinciaRef.current = form.provincia;
-
-    if (!provinciaChanged) {
-      return;
-    }
-
-    if (form.distrito) {
-      handleChange('distrito', '');
-    }
-  }, [form.provincia, form.distrito, handleChange]);
 
   const refUbicacionValue = toStringValue(
     form.refUbicacion || refUbicacionOptions[0]?.id
@@ -162,114 +77,39 @@ const ModalRegistrarDireccion: React.FC<Props> = ({
   return (
     <ModalFormLayout
       isOpen={isOpen}
-      title="REGISTRAR DIRECCIÓN"
+      title={MODAL_REGISTRAR_DIRECCION_TEXTS.title}
       onClose={handleCancel}
-      submitLabel="Registrar"
+      submitLabel={MODAL_REGISTRAR_DIRECCION_TEXTS.submitLabel}
       onSubmit={handleSubmit}
-      minHeight="auto"
+      minHeight={MODAL_REGISTRAR_DIRECCION_LAYOUT.minHeight}
     >
-      <InputField
-        label="Dirección"
-        layout="inline"
-        placeholder="Ingrese dirección completa"
-        value={toStringValue(form.direccion)}
-        onChange={(e) => handleChange('direccion', e.target.value)}
-        maxLength={200}
-        error={errors.direccion}
-        required
+      <DireccionFormFields
+        form={form}
+        errors={errors}
+        onChange={handleChange}
+        onDepartamentoChange={handleDepartamentoChange}
+        onProvinciaChange={handleProvinciaChange}
+        labels={MODAL_REGISTRAR_DIRECCION_LABELS}
+        placeholders={MODAL_REGISTRAR_DIRECCION_PLACEHOLDERS}
+        limits={MODAL_REGISTRAR_DIRECCION_LIMITS}
+        layout={MODAL_REGISTRAR_DIRECCION_LAYOUT}
+        departamentos={departamentos}
+        provincias={provincias}
+        distritos={distritos}
+        refUbicacionOptions={refUbicacionOptions}
+        refUbicacionValue={refUbicacionValue}
+        isLoadingDepartamentos={isLoadingDepartamentos}
+        isLoadingProvincias={isLoadingProvincias}
+        isLoadingDistritos={isLoadingDistritos}
+        isLoadingUbicaciones={isLoadingUbicaciones}
+        errorDepartamentos={errorDepartamentos}
+        errorUbicaciones={errorUbicaciones}
       />
 
-      <FormGrid columns={3}>
-        <SelectField
-          label="Departamento"
-          layout="inline"
-          options={departamentos}
-          value={toStringValue(form.departamento)}
-          onChange={(v) => handleChange('departamento', v)}
-          placeholder={isLoadingDepartamentos ? 'Cargando...' : '-- Seleccione --'}
-          error={errors.departamento || errorDepartamentos || ''}
-          required
-          disabled={isLoadingDepartamentos}
-        />
-
-        <SelectField
-          label="Provincia"
-          layout="inline"
-          options={provincias}
-          value={toStringValue(form.provincia)}
-          onChange={(v) => handleChange('provincia', v)}
-          placeholder={isLoadingProvincias ? 'Cargando...' : '-- Seleccione --'}
-          disabled={!form.departamento || isLoadingProvincias}
-          error={errors.provincia}
-          required
-        />
-
-        <SelectField
-          label="Distrito"
-          layout="inline"
-          options={distritos}
-          value={toStringValue(form.distrito)}
-          onChange={(v) => handleChange('distrito', v)}
-          placeholder={isLoadingDistritos ? 'Cargando...' : '-- Seleccione --'}
-          disabled={!form.provincia || isLoadingDistritos}
-          error={errors.distrito}
-          required
-        />
-      </FormGrid>
-
-      <SelectField
-        label="Referencia de Ubicación"
-        layout="inline"
-        options={refUbicacionOptions}
-        value={refUbicacionValue}
-        onChange={(v) => handleChange('refUbicacion', v)}
-        error={errors.refUbicacion || errorUbicaciones || ''}
-        disabled={isLoadingUbicaciones}
+      <ModalErrorSummary
+        errors={errors}
+        title={MODAL_REGISTRAR_DIRECCION_TEXTS.validationSummary}
       />
-
-      <TextAreaField
-        label="Comentario / Des. Ref. (Opcional)"
-        layout="inline"
-        placeholder="Ingrese comentario o descripción de referencia..."
-        value={toStringValue(form.comentario)}
-        onChange={(e) => handleChange('comentario', e.target.value)}
-        rows={3}
-        maxLength={500}
-        error={errors.comentario}
-      />
-
-      <FormGrid columns={2}>
-        <SelectField
-          label="Llegó de Base"
-          layout="inline"
-          options={llegoDeBaseOptions}
-          value={form.llegoDeBase}
-          onChange={(v) => handleChange('llegoDeBase', toBooleanValue(v))}
-          error={errors.llegoDeBase}
-          hidePlaceholder
-        />
-
-        <SelectField
-          label="Tipo Deudor"
-          layout="inline"
-          options={tipoDeudorOptions}
-          value={toStringValue(form.tipoDeudor)}
-          onChange={(v) => handleChange('tipoDeudor', v)}
-          error={errors.tipoDeudor}
-          hidePlaceholder
-        />
-      </FormGrid>
-
-      {Object.keys(errors).length > 0 && (
-        <div className="error-summary">
-          <strong>Por favor, corrija los siguientes errores:</strong>
-          <ul>
-            {Object.values(errors).map((error, idx) => (
-              <li key={idx}>{error}</li>
-            ))}
-          </ul>
-        </div>
-      )}
     </ModalFormLayout>
   );
 };

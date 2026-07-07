@@ -1,10 +1,5 @@
-import {
-  useEffect,
-  useMemo,
-  useCallback,
-  useRef,
-  useReducer,
-} from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
+
 import {
   createEmail,
   fetchEmailById,
@@ -15,83 +10,16 @@ import type {
   Email,
   EmailByIdApi,
   EmailFormData,
-  EmailStatus,
 } from '../../../../shared/types';
-import {
-  useClientSideTable,
-  type TextFilters,
-  type SelectedFilters,
-} from '../../../../shared/hooks/useClientSideTable';
 import { useApiResource } from '../../../../shared/hooks/useApiResource';
+import {
+  usePopupTableResource,
+  type UsePopupTableResourceReturn,
+} from './usePopupTableResource';
 
-export type { TextFilters, SelectedFilters };
+export type { TextFilters, SelectedFilters } from './usePopupTableResource';
 
-interface UseEmailsByDeudorReturn {
-  allData: Email[];
-  filteredData: Email[];
-  paginatedData: Email[];
-  isLoading: boolean;
-  error: string | null;
-  pageNumber: number;
-  pageSize: number;
-  totalRecords: number;
-  totalPages: number;
-  setPageNumber: (page: number) => void;
-  setPageSize: (size: number) => void;
-  refetch: () => void;
-  textFilters: TextFilters;
-  selectedFilters: SelectedFilters;
-  onTextFilterChange: (columnKey: string, value: string) => void;
-  onSelectedFilterChange: (columnKey: string, values: string[]) => void;
-  resetFilters: () => void;
-}
-
-interface EmailsState {
-  allData: Email[];
-  isLoading: boolean;
-  error: string | null;
-}
-
-type EmailsAction =
-  | { type: 'LOAD_START' }
-  | { type: 'LOAD_SUCCESS'; data: Email[] }
-  | { type: 'LOAD_ERROR'; error: string }
-  | { type: 'RESET_WITH_ERROR'; error: string };
-
-const emailsInitialState: EmailsState = {
-  allData: [],
-  isLoading: false,
-  error: null,
-};
-
-function emailsReducer(state: EmailsState, action: EmailsAction): EmailsState {
-  switch (action.type) {
-    case 'LOAD_START':
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
-
-    case 'LOAD_SUCCESS':
-      return {
-        allData: action.data,
-        isLoading: false,
-        error: null,
-      };
-
-    case 'LOAD_ERROR':
-    case 'RESET_WITH_ERROR':
-      return {
-        allData: [],
-        isLoading: false,
-        error: action.error,
-      };
-
-    default:
-      return state;
-  }
-}
+type UseEmailsByDeudorReturn = UsePopupTableResourceReturn<Email>;
 
 interface EmailByIdState {
   data: EmailByIdApi | null;
@@ -104,6 +32,15 @@ type EmailByIdAction =
   | { type: 'LOAD_START' }
   | { type: 'LOAD_SUCCESS'; data: EmailByIdApi }
   | { type: 'LOAD_ERROR'; error: string };
+
+const EMAILS_BY_DEUDOR_MESSAGES = {
+  missingParams: 'Faltan parámetros: id_cliente o id_deudor',
+  loadError: 'Error cargando emails',
+} as const;
+
+const EMAIL_BY_ID_MESSAGES = {
+  loadError: 'Error cargando email',
+} as const;
 
 const emailByIdInitialState: EmailByIdState = {
   data: null,
@@ -149,119 +86,25 @@ export function useEmailsByDeudor(
   id_cliente: string,
   id_deudor: string
 ): UseEmailsByDeudorReturn {
-  const [state, dispatch] = useReducer(emailsReducer, emailsInitialState);
-  const { allData, isLoading, error } = state;
-
   const resetDeps = useMemo(
     () => [id_cliente, id_deudor] as const,
     [id_cliente, id_deudor]
   );
 
-  const table = useClientSideTable<Email>(allData, resetDeps, {
+  const fetcher = useCallback(
+    (signal?: AbortSignal) =>
+      fetchEmailsByDeudor(id_cliente, id_deudor, signal),
+    [id_cliente, id_deudor]
+  );
+
+  return usePopupTableResource<Email>({
+    areParamsReady: Boolean(id_cliente && id_deudor),
+    missingParamsError: EMAILS_BY_DEUDOR_MESSAGES.missingParams,
+    loadError: EMAILS_BY_DEUDOR_MESSAGES.loadError,
+    resetDeps,
+    fetcher,
     initialPageSize: 10,
   });
-
-  const isMountedRef = useRef(true);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!id_cliente || !id_deudor) {
-      dispatch({
-        type: 'RESET_WITH_ERROR',
-        error: 'Faltan parámetros: id_cliente o id_deudor',
-      });
-      return;
-    }
-
-    const controller = new AbortController();
-
-    const loadData = async () => {
-      dispatch({
-        type: 'LOAD_START',
-      });
-
-      try {
-        const result = await fetchEmailsByDeudor(
-          id_cliente,
-          id_deudor,
-          controller.signal
-        );
-
-        if (controller.signal.aborted) return;
-
-        dispatch({
-          type: 'LOAD_SUCCESS',
-          data: result,
-        });
-      } catch (err) {
-        if (!controller.signal.aborted) {
-          dispatch({
-            type: 'LOAD_ERROR',
-            error: err instanceof Error ? err.message : 'Error cargando emails',
-          });
-        }
-      }
-    };
-
-    void loadData();
-
-    return () => {
-      controller.abort();
-    };
-  }, [id_cliente, id_deudor]);
-
-  const refetch = useCallback(() => {
-    if (!id_cliente || !id_deudor) return;
-
-    dispatch({
-      type: 'LOAD_START',
-    });
-
-    fetchEmailsByDeudor(id_cliente, id_deudor)
-      .then((result) => {
-        if (!isMountedRef.current) return;
-
-        dispatch({
-          type: 'LOAD_SUCCESS',
-          data: result,
-        });
-      })
-      .catch((err) => {
-        if (!isMountedRef.current) return;
-
-        dispatch({
-          type: 'LOAD_ERROR',
-          error: err instanceof Error ? err.message : 'Error cargando emails',
-        });
-      });
-  }, [id_cliente, id_deudor]);
-
-  return {
-    allData,
-    filteredData: table.filteredData,
-    paginatedData: table.paginatedData,
-    isLoading,
-    error,
-    pageNumber: table.pageNumber,
-    pageSize: table.pageSize,
-    totalRecords: table.totalRecords,
-    totalPages: table.totalPages,
-    setPageNumber: table.setPageNumber,
-    setPageSize: table.setPageSize,
-    refetch,
-    textFilters: table.textFilters,
-    selectedFilters: table.selectedFilters,
-    onTextFilterChange: table.onTextFilterChange,
-    onSelectedFilterChange: table.onSelectedFilterChange,
-    resetFilters: table.resetFilters,
-  };
 }
 
 export function useEmailStatuses() {
@@ -270,7 +113,7 @@ export function useEmailStatuses() {
     []
   );
 
-  return useApiResource<EmailStatus[]>(fetcher, []);
+  return useApiResource(fetcher, []);
 }
 
 export function useCreateEmail(
@@ -299,6 +142,7 @@ export function useEmailById(idEmail: string | null) {
       dispatch({
         type: 'RESET',
       });
+
       return;
     }
 
@@ -324,7 +168,10 @@ export function useEmailById(idEmail: string | null) {
 
         dispatch({
           type: 'LOAD_ERROR',
-          error: err instanceof Error ? err.message : 'Error cargando email',
+          error:
+            err instanceof Error
+              ? err.message
+              : EMAIL_BY_ID_MESSAGES.loadError,
         });
       });
 

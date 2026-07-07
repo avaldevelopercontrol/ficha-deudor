@@ -1,31 +1,25 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
-import Table from '../../../../shared/components/table/Table';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+
 import { ActionButton } from '../../../../shared/components/ui';
-import Paginacion from '../../../../shared/components/ui/Paginacion';
-import { WrapCell } from '../../../../shared/components/ui/WrapCell';
 import { useEmailsByDeudor } from '../../hooks/popups/useEmailsByDeudor';
-import type { Column, Email, EmailFormData, EmailEditFormData, DeudorInfo } from '../../../../shared/types';
+import { usePopupDeudorSearchParams } from '../../hooks/popups/usePopupDeudorSearchParams';
+import { useEmailDeudorColumns } from '../../hooks/popups/useEmailDeudorColumns';
+import { useEmailDeudorModalActions } from '../../hooks/popups/useEmailDeudorModalActions';
 import ModalRegistrarEmail from '../modals/popups/email/ModalRegistrarEmail';
 import ModalEditarEmail from '../modals/popups/email/ModalEditarEmail';
-import { createEmail, updateEmail } from '../../api/popups/emailsApi';
-import { getErrorMessage } from '../../utils/getErrorMessage';
-
-const ESTADOS_BADGE: Record<string, string> = {
-  ACTIVO: 'badge-s',
-  INACTIVO: 'badge-d',
-};
-
-const formatFecha = (fechaIso: string): string => {
-  if (!fechaIso) return '—';
-  const d = new Date(fechaIso);
-  if (isNaN(d.getTime())) return fechaIso;
-  return d.toLocaleDateString('es-PE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-};
+import {
+  EMAIL_DEUDOR_POPUP_PAGE_SIZE_OPTIONS,
+  EMAIL_DEUDOR_POPUP_TEXTS,
+} from '../../constants/emailDeudorPopup.constants';
+import { buildEmailDeudorInfo } from '../../utils/emailDeudorPopup.utils';
+import {
+  PopupErrorState,
+  PopupLoadingState,
+  PopupPageLayout,
+  PopupPaginatedTableSection,
+} from './common';
+import { closePopupWindow } from '../../utils/popupWindow.utils';
 
 const EmailDeudorPopup: React.FC = () => {
   const { id_cliente, id_deudor, id_usuario } = useParams<{
@@ -34,23 +28,9 @@ const EmailDeudorPopup: React.FC = () => {
     id_usuario: string;
   }>();
 
-  const [searchParams] = useSearchParams();
-  const nombre = decodeURIComponent(searchParams.get('nombre') || '');
-  const documento = decodeURIComponent(searchParams.get('documento') || '');
+  const { nombre, documento } = usePopupDeudorSearchParams();
 
-  const deudorData: DeudorInfo | null = nombre
-    ? {
-        nombreRazonSocial: nombre,
-        dniRuc: documento,
-        gradoInstruccion: '',
-        edad: '',
-        contacto: '',
-        asesorPostVenta: '',
-        asesorComercial: '',
-        correoApv: '',
-        correoAc: '',
-      }
-    : null;
+  const deudorData = buildEmailDeudorInfo(nombre, documento);
 
   const {
     allData,
@@ -70,261 +50,93 @@ const EmailDeudorPopup: React.FC = () => {
     onSelectedFilterChange,
   } = useEmailsByDeudor(id_cliente ?? '', id_deudor ?? '');
 
-  const [showRegistrar, setShowRegistrar] = useState(false);
-  const [showEditar, setShowEditar] = useState(false);
-  const [emailEditarId, setEmailEditarId] = useState<string | null>(null);
+  const {
+    showRegistrar,
+    showEditar,
+    emailEditarId,
+    handleNuevo,
+    handleEdit,
+    handleCloseRegistrar,
+    handleCloseEditar,
+    handleRegistrar,
+    handleGuardarEdicion,
+  } = useEmailDeudorModalActions({
+    idCliente: id_cliente,
+    idDeudor: id_deudor,
+    idUsuario: id_usuario,
+    refetch,
+  });
 
-  const handleClose = () => {
-    window.close();
-  };
-
-  const handleEdit = useCallback((row: Email) => {
-    setEmailEditarId(row.id);
-    setShowEditar(true);
-  }, []);
-
-  const handleNuevo = () => {
-    setShowRegistrar(true);
-  };
-
-  const handleRegistrar = async (formData: EmailFormData): Promise<void> => {
-    if (!id_cliente || !id_deudor || !id_usuario) {
-      throw new Error(
-        'Faltan datos necesarios para registrar el email. Cierre esta ventana y vuelva a abrirla desde la ficha del deudor.'
-      );
-    }
-
-    try {
-      await createEmail(id_cliente, id_deudor, id_usuario, formData);
-      refetch();
-    } catch (err) {
-      throw new Error(getErrorMessage(err, 'No se pudo registrar el email. Intente nuevamente.'));
-    }
-  };
-
-  const handleGuardarEdicion = async (formData: EmailEditFormData): Promise<void> => {
-    if (!id_cliente || !id_deudor || !id_usuario) {
-      throw new Error(
-        'Faltan datos necesarios para editar el email. Cierre esta ventana y vuelva a abrirla desde la ficha del deudor.'
-      );
-    }
-
-    if (!emailEditarId) {
-      throw new Error('No se encontró el email seleccionado para editar.');
-    }
-
-    try {
-      await updateEmail(
-        id_cliente,
-        id_deudor,
-        id_usuario,
-        emailEditarId,
-        formData,
-        formData.dFecRegistro
-      );
-      refetch();
-    } catch (err) {
-      throw new Error(getErrorMessage(err, 'No se pudo guardar la edición del email. Intente nuevamente.'));
-    }
-  };
-
-  const columns: Column[] = useMemo(
-    () => [
-      {
-        key: 'id',
-        label: 'Id',
-        width: '80px',
-        render: (row: Email) => <span>{row.id}</span>,
-      },
-      {
-        key: 'email',
-        label: 'Email',
-        render: (row: Email) => <WrapCell>{row.email}</WrapCell>,
-      },
-      {
-        key: 'fechaActivacion',
-        label: 'Fecha Registro',
-        width: '120px',
-        render: (row: Email) => <span>{formatFecha(row.fechaActivacion)}</span>,
-      },
-      {
-        key: 'estado',
-        label: 'Estado',
-        width: '90px',
-        render: (row: Email) => {
-          const badgeClass = ESTADOS_BADGE[row.estado] || '';
-          return <span className={`badge ${badgeClass}`}>{row.estado || '—'}</span>;
-        },
-      },
-      {
-        key: 'status',
-        label: 'Status',
-        width: '110px',
-        render: (row: Email) => <span>{row.status || '—'}</span>,
-      },
-      {
-        key: 'fuente',
-        label: 'Fuente',
-        render: (row: Email) => <span>{row.fuente || '—'}</span>,
-      },
-      {
-        key: 'baseCliente',
-        label: 'Base Cliente',
-        render: (row: Email) => <span>{row.baseCliente || '—'}</span>,
-      },
-      {
-        key: 'contacto',
-        label: 'Contacto',
-        render: (row: Email) => <span>{row.contacto || '—'}</span>,
-      },
-      {
-        key: 'prioridad',
-        label: 'Prioridad',
-        width: '80px',
-        render: (row: Email) => <span>{row.prioridad}</span>,
-      },
-      {
-        key: 'comentario',
-        label: 'Comentario',
-        render: (row: Email) => <WrapCell>{row.comentario || '—'}</WrapCell>,
-      },
-      {
-        key: 'acciones',
-        label: 'Editar',
-        width: '55px',
-        filterable: false,
-        render: (row: Email) => (
-          <ActionButton
-            label=""
-            variant="primary"
-            size="sm"
-            icon="✎"
-            onClick={() => handleEdit(row)}
-          />
-        ),
-      },
-    ],
-    [handleEdit]
-  );
-
-  const indiceInicio = (pageNumber - 1) * pageSize;
-  const indiceFin = Math.min(pageNumber * pageSize, totalRecords);
+  const columns = useEmailDeudorColumns({
+    onEdit: handleEdit,
+  });
 
   if (isLoading) {
-    return (
-      <div className="popup-loading">
-        <div className="popup-loading-spinner" />
-        <p>Cargando emails...</p>
-      </div>
-    );
+    return <PopupLoadingState message={EMAIL_DEUDOR_POPUP_TEXTS.loading} />;
   }
 
   if (error) {
     return (
-      <div className="popup-error">
-        <div className="popup-error-icon">⚠</div>
-        <h4>Error al cargar emails</h4>
-        <p>{error}</p>
-        <div className="popup-error-actions">
-          <button className="btn btn-primary" onClick={refetch}>
-            Reintentar
-          </button>
-          <button className="btn btn-secondary" onClick={handleClose}>
-            Cerrar
-          </button>
-        </div>
-      </div>
+      <PopupErrorState
+        title={EMAIL_DEUDOR_POPUP_TEXTS.errorTitle}
+        message={error}
+        retryLabel={EMAIL_DEUDOR_POPUP_TEXTS.retryButton}
+        closeLabel={EMAIL_DEUDOR_POPUP_TEXTS.closeButton}
+        onRetry={refetch}
+        onClose={closePopupWindow}
+      />
     );
   }
 
   return (
     <>
-      <header className="app-header">
-        <div className="app-logo">
-          <span className="logo-text">EMAIL</span>
-          <span className="logo-sub">DEUDOR</span>
-        </div>
-        <nav className="app-nav">
-          <span className="nav-item">GESTIÓN DE COBRANZAS</span>
-          <span className="nav-sep">›</span>
-          <span className="nav-item nav-item--active">EMAILS</span>
-        </nav>
-        <div className="app-user">
-          {nombre && (
-            <span className="user-name" title={documento || undefined}>
-              {nombre}
-              {documento && <span className="user-doc"> — {documento}</span>}
-            </span>
-          )}
-        </div>
-      </header>
-
-      <main className="popup-main">
-        <div className="popup-toolbar">
-          <div className="toolbar-info">
-            <span className="toolbar-count">
-              Mostrando <strong>{indiceInicio + 1}-{indiceFin}</strong> de <strong>{totalRecords}</strong> email(s)
-            </span>
-            <span className="toolbar-page">
-              Página {pageNumber} de {totalPages}
-            </span>
-          </div>
-          <ActionButton
-            label="Agregar Email"
-            variant="primary"
-            size="sm"
-            icon="＋"
-            onClick={handleNuevo}
-          />
-        </div>
-
-        <div className="popup-table-wrapper">
-          <Table
-            columns={columns}
-            data={paginatedData}
-            emptyMessage="No se encontraron emails"
-            enableColumnFilters={true}
-            allData={allData}
-            textFilters={textFilters}
-            selectedFilters={selectedFilters}
-            onTextFilterChange={onTextFilterChange}
-            onSelectedFilterChange={onSelectedFilterChange}
-          />
-        </div>
-
-        {totalPages > 1 && (
-          <div className="popup-pagination">
-            <Paginacion
-              paginaActual={pageNumber}
-              totalPaginas={totalPages}
-              totalRegistros={totalRecords}
-              indiceInicio={indiceInicio}
-              indiceFin={indiceFin}
-              onPaginaAnterior={() => setPageNumber(Math.max(1, pageNumber - 1))}
-              onPaginaSiguiente={() => setPageNumber(Math.min(totalPages, pageNumber + 1))}
-              onIrAPagina={setPageNumber}
-              showPageSizeSelector={true}
-              pageSize={pageSize}
-              pageSizeOptions={[5, 10, 30, 50]}
-              onPageSizeChange={setPageSize}
+      <PopupPageLayout
+        logoText={EMAIL_DEUDOR_POPUP_TEXTS.logoText}
+        logoSub={EMAIL_DEUDOR_POPUP_TEXTS.logoSub}
+        navSection={EMAIL_DEUDOR_POPUP_TEXTS.navSection}
+        navActive={EMAIL_DEUDOR_POPUP_TEXTS.navActive}
+        nombre={nombre}
+        documento={documento}
+      >
+        <PopupPaginatedTableSection
+          columns={columns}
+          data={paginatedData}
+          allData={allData}
+          emptyMessage={EMAIL_DEUDOR_POPUP_TEXTS.tableEmptyMessage}
+          textFilters={textFilters}
+          selectedFilters={selectedFilters}
+          onTextFilterChange={onTextFilterChange}
+          onSelectedFilterChange={onSelectedFilterChange}
+          totalRecords={totalRecords}
+          pageNumber={pageNumber}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          pageSizeOptions={EMAIL_DEUDOR_POPUP_PAGE_SIZE_OPTIONS}
+          countSuffix={EMAIL_DEUDOR_POPUP_TEXTS.toolbarCountSuffix}
+          onPageNumberChange={setPageNumber}
+          onPageSizeChange={setPageSize}
+          actions={
+            <ActionButton
+              label={EMAIL_DEUDOR_POPUP_TEXTS.addButton}
+              variant="primary"
+              size="sm"
+              icon={EMAIL_DEUDOR_POPUP_TEXTS.addButtonIcon}
+              onClick={handleNuevo}
             />
-          </div>
-        )}
-      </main>
+          }
+        />
+      </PopupPageLayout>
 
       <ModalRegistrarEmail
         isOpen={showRegistrar}
-        onClose={() => setShowRegistrar(false)}
+        onClose={handleCloseRegistrar}
         onRegistrar={handleRegistrar}
         deudorData={deudorData}
       />
 
       <ModalEditarEmail
         isOpen={showEditar}
-        onClose={() => {
-          setShowEditar(false);
-          setEmailEditarId(null);
-        }}
+        onClose={handleCloseEditar}
         emailId={emailEditarId}
         onGuardar={handleGuardarEdicion}
         deudorData={deudorData}

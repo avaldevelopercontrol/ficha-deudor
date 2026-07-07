@@ -1,56 +1,36 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ModalFormLayout } from '../../../layout/ModalFormLayout';
 
-import { FormGrid } from '../../../../../../shared/components/ui/FormGrid';
-
-import {
-  InputField,
-  SelectField,
-  TextAreaField,
-} from '../../../../../../shared/components/ui';
-
 import { useModalForm } from '../../../../../../shared/hooks/ui/useModalForm';
-
-import { useEmailById, useEmailStatuses } from '../../../../hooks/popups/useEmailsByDeudor';
-import type { EmailEditFormData, EmailByIdApi, DeudorInfo } from '../../../../../../shared/types';
-
-import {
-  prioridadesOptions,
-  estadosEmailOptions,
-} from '../../../../mocks/catalogoEmail';
+import { useEmailById } from '../../../../hooks/popups/useEmailsByDeudor';
+import { useEmailCatalogosForm } from '../../../../hooks/useEmailCatalogosForm';
+import type {
+  EmailEditFormData,
+  EmailByIdApi,
+  DeudorInfo,
+} from '../../../../../../shared/types';
 
 import { validateEmailEditForm } from '../../../../validations/popups/emailValidations';
-import { getErrorMessage } from '../../../../utils/getErrorMessage';
+import {
+  MODAL_EDITAR_EMAIL_INITIAL_FORM,
+  MODAL_EDITAR_EMAIL_LABELS,
+  MODAL_EDITAR_EMAIL_LAYOUT,
+  MODAL_EDITAR_EMAIL_LIMITS,
+  MODAL_EDITAR_EMAIL_PLACEHOLDERS,
+  MODAL_EDITAR_EMAIL_TEXTS,
+} from '../../../../constants/modalEditarEmail.constants';
+import { mapEmailByIdApiToEditFormData } from '../../../../mappers/modalEditarEmail.mapper';
+import { ModalErrorSummary } from '../../common/ModalErrorSummary';
+import { ModalAsyncStatusLayout } from '../../common/ModalAsyncStatusLayout';
+import { EmailFormFields } from './EmailFormFields';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   emailId: string | null;
-  onGuardar?: (data: EmailEditFormData) => void | Promise<void>;
+  onGuardar?: (data: EmailEditFormData) => void;
   deudorData?: DeudorInfo | null;
 }
-
-const INITIAL_FORM: EmailEditFormData = {
-  id: '',
-  email: '',
-  contacto: '',
-  comentario: '',
-  prioridad: '',
-  estado: true,
-  status: '',
-  dFecRegistro: '',
-};
-
-const mapApiToFormData = (api: EmailByIdApi): EmailEditFormData => ({
-  id: String(api.nId_PersEmail),
-  email: api.cPers_Email ?? '',
-  contacto: api.cEmail_Contacto ?? '',
-  comentario: api.cEmail_Coment ?? '',
-  prioridad: api.nEmail_Prioridad ? String(api.nEmail_Prioridad) : '',
-  estado: api.bEstado ?? true,
-  status: api.nId_PersEmailOpe ? String(api.nId_PersEmailOpe) : '',
-  dFecRegistro: api.dFecRegistro ?? '',
-});
 
 const ModalEditarEmail: React.FC<Props> = ({
   isOpen,
@@ -59,223 +39,102 @@ const ModalEditarEmail: React.FC<Props> = ({
   onGuardar,
   deudorData,
 }) => {
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
   const {
     data: emailApi,
     isLoading: isLoadingEmail,
     error: errorEmail,
   } = useEmailById(emailId);
 
-  const {
-    data: statusesData,
-    isLoading: isLoadingStatuses,
-    error: errorStatuses,
-  } = useEmailStatuses();
+  const { statusesOptions, isLoadingStatuses, errorStatuses } =
+    useEmailCatalogosForm();
 
-  const statusesOptions =
-    statusesData?.map((s) => ({
-      id: s.id,
-      label: s.nombre,
-    })) ?? [];
-
-  const {
-    form,
-    errors,
-    setErrors,
-    handleChange,
-    handleCancel,
-    resetForm,
-  } = useModalForm<EmailEditFormData, EmailByIdApi>({
-    initialForm: INITIAL_FORM,
-    entity: emailApi,
-    mapEntityToForm: mapApiToFormData,
-    onClose,
-    onSubmit: () => undefined,
-    validate: validateEmailEditForm,
-    resetOnClose: true,
-  });
-
-  const handleClose = () => {
-    setSubmitError(null);
-    handleCancel();
-  };
-
-  const submitEmail = async () => {
-    const validationErrors = validateEmailEditForm(form);
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    setSubmitError(null);
-
-    try {
-      await onGuardar?.(form);
-      resetForm();
-      onClose();
-    } catch (err) {
-      setSubmitError(getErrorMessage(err, 'No se pudo guardar la edición del email. Intente nuevamente.'));
-    }
-  };
-
-  const handleSubmitEmail = () => {
-    void submitEmail();
-  };
+  const { form, errors, handleChange, handleSubmit, handleCancel } =
+    useModalForm<EmailEditFormData, EmailByIdApi>({
+      initialForm: MODAL_EDITAR_EMAIL_INITIAL_FORM,
+      entity: emailApi,
+      mapEntityToForm: mapEmailByIdApiToEditFormData,
+      onClose,
+      onSubmit: (data) => {
+        onGuardar?.(data);
+      },
+      validate: validateEmailEditForm,
+      resetOnClose: true,
+    });
 
   if (!isOpen || !emailId) return null;
 
   if (isLoadingEmail) {
     return (
-      <ModalFormLayout
+      <ModalAsyncStatusLayout
         isOpen={isOpen}
-        title="EDITAR EMAIL"
-        onClose={handleClose}
-        submitLabel="Guardar Cambios"
-        onSubmit={() => undefined}
-        minHeight="auto"
+        title={MODAL_EDITAR_EMAIL_TEXTS.title}
+        onClose={handleCancel}
+        submitLabel={MODAL_EDITAR_EMAIL_TEXTS.submitLabel}
+        minHeight={MODAL_EDITAR_EMAIL_LAYOUT.minHeight}
+        variant="loading"
         deudorData={deudorData}
       >
-        <div className="loading-message">Cargando datos del email...</div>
-      </ModalFormLayout>
+        {MODAL_EDITAR_EMAIL_TEXTS.loadingEmail}
+      </ModalAsyncStatusLayout>
     );
   }
 
   if (errorEmail) {
     return (
-      <ModalFormLayout
+      <ModalAsyncStatusLayout
         isOpen={isOpen}
-        title="EDITAR EMAIL"
-        onClose={handleClose}
-        submitLabel="Guardar Cambios"
-        onSubmit={() => undefined}
-        minHeight="auto"
-        deudorData={deudorData}
+        title={MODAL_EDITAR_EMAIL_TEXTS.title}
+        onClose={handleCancel}
+        submitLabel={MODAL_EDITAR_EMAIL_TEXTS.submitLabel}
+        minHeight={MODAL_EDITAR_EMAIL_LAYOUT.minHeight}
+        variant="error"
       >
-        <div className="error-message">
-          Error al cargar el email: {String(errorEmail)}
-        </div>
-      </ModalFormLayout>
+        {MODAL_EDITAR_EMAIL_TEXTS.errorEmailPrefix} {String(errorEmail)}
+      </ModalAsyncStatusLayout>
     );
   }
 
   if (!emailApi) {
     return (
-      <ModalFormLayout
+      <ModalAsyncStatusLayout
         isOpen={isOpen}
-        title="EDITAR EMAIL"
-        onClose={handleClose}
-        submitLabel="Guardar Cambios"
-        onSubmit={() => undefined}
-        minHeight="auto"
-        deudorData={deudorData}
+        title={MODAL_EDITAR_EMAIL_TEXTS.title}
+        onClose={handleCancel}
+        submitLabel={MODAL_EDITAR_EMAIL_TEXTS.submitLabel}
+        minHeight={MODAL_EDITAR_EMAIL_LAYOUT.minHeight}
+        variant="error"
       >
-        <div className="error-message">No se encontraron datos del email</div>
-      </ModalFormLayout>
+        {MODAL_EDITAR_EMAIL_TEXTS.emptyEmail}
+      </ModalAsyncStatusLayout>
     );
   }
 
   return (
     <ModalFormLayout
       isOpen={isOpen}
-      title="EDITAR EMAIL"
-      onClose={handleClose}
-      submitLabel="Guardar Cambios"
-      onSubmit={handleSubmitEmail}
-      minHeight="auto"
-      deudorData={deudorData}
+      title={MODAL_EDITAR_EMAIL_TEXTS.title}
+      onClose={handleCancel}
+      submitLabel={MODAL_EDITAR_EMAIL_TEXTS.submitLabel}
+      onSubmit={handleSubmit}
+      minHeight={MODAL_EDITAR_EMAIL_LAYOUT.minHeight}
     >
-      <FormGrid columns={1}>
-        <InputField
-          label="Email"
-          layout="inline"
-          placeholder="Ingrese email"
-          value={form.email}
-          onChange={(e) => handleChange('email', e.target.value)}
-          maxLength={100}
-          error={errors.email}
-          required
-        />
-      </FormGrid>
-
-      <FormGrid columns={1}>
-        <InputField
-          label="Contacto"
-          layout="inline"
-          placeholder="Ingrese nombre del contacto"
-          value={form.contacto}
-          onChange={(e) => handleChange('contacto', e.target.value)}
-          maxLength={150}
-          error={errors.contacto}
-          required
-        />
-      </FormGrid>
-
-      <FormGrid columns={3}>
-        <SelectField
-          label="Prioridad"
-          layout="inline"
-          options={prioridadesOptions}
-          value={form.prioridad}
-          onChange={(v) => handleChange('prioridad', v)}
-          placeholder="-- Seleccione --"
-          error={errors.prioridad}
-          required
-        />
-
-        <SelectField
-          label="Estado"
-          layout="inline"
-          options={estadosEmailOptions}
-          value={form.estado}
-          onChange={(v) => handleChange('estado', v)}
-          placeholder="-- Seleccione --"
-          hidePlaceholder
-        />
-
-        <SelectField
-          label="Status"
-          layout="inline"
-          options={statusesOptions}
-          value={form.status}
-          onChange={(v) => handleChange('status', v)}
-          placeholder={isLoadingStatuses ? 'Cargando...' : '-- Seleccione --'}
-          error={errors.status || errorStatuses || ''}
-          required
-          disabled={isLoadingStatuses}
-        />
-      </FormGrid>
-
-      <TextAreaField
-        label="Comentario"
-        layout="inline"
-        placeholder="Ingrese comentario..."
-        value={form.comentario}
-        onChange={(e) => handleChange('comentario', e.target.value)}
-        rows={3}
-        error={errors.comentario}
+      <EmailFormFields
+        form={form}
+        errors={errors}
+        onChange={handleChange}
+        labels={MODAL_EDITAR_EMAIL_LABELS}
+        placeholders={MODAL_EDITAR_EMAIL_PLACEHOLDERS}
+        limits={MODAL_EDITAR_EMAIL_LIMITS}
+        layout={MODAL_EDITAR_EMAIL_LAYOUT}
+        statusesOptions={statusesOptions}
+        isLoadingStatuses={isLoadingStatuses}
+        errorStatuses={errorStatuses}
       />
 
-      {submitError && (
-        <div className="error-summary">
-          <strong>No se pudo completar la operación:</strong>
-          <ul>
-            <li>{submitError}</li>
-          </ul>
-        </div>
-      )}
-
-      {Object.keys(errors).length > 0 && (
-        <div className="error-summary">
-          <strong>Por favor, corrija los siguientes errores:</strong>
-          <ul>
-            {Object.values(errors).map((error, idx) => (
-              <li key={idx}>{error}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <ModalErrorSummary
+        errors={errors}
+        title={MODAL_EDITAR_EMAIL_TEXTS.validationSummary}
+      />
     </ModalFormLayout>
   );
 };

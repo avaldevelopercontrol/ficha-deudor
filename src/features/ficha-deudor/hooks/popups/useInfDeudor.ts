@@ -1,14 +1,13 @@
 import { useEffect, useCallback, useRef, useReducer } from 'react';
+
 import {
   fetchInfDeudorCabeceraFalse,
   fetchInfDeudorCabeceraTrue,
   fetchInfDeudorParams,
 } from '../../api/popups/infDeudorApi';
-import type {
-  InfDeudorTableRow,
-  InfDeudorCabeceraApi,
-  InfDeudorParamApi,
-} from '../../../../shared/types';
+import type { InfDeudorTableRow } from '../../../../shared/types';
+import { INF_DEUDOR_POPUP_MESSAGES } from '../../constants/infDeudorPopup.constants';
+import { mapInfDeudorApiToTableRows } from '../../mappers/infDeudor.mapper';
 
 interface UseInfDeudorReturn {
   rows: InfDeudorTableRow[];
@@ -65,29 +64,9 @@ function infDeudorReducer(
   }
 }
 
-function buildRow(
-  id: string,
-  tipo: string,
-  source: InfDeudorCabeceraApi | InfDeudorParamApi,
-  prefix: 'cNombre_Param' | 'cPersInf_Param'
-): InfDeudorTableRow {
-  const row: InfDeudorTableRow = { id, tipo };
-
-  for (let i = 1; i <= 80; i++) {
-    const idx = i.toString().padStart(2, '0');
-    const apiKey = `${prefix}${idx}`;
-    const val = (source as Record<string, unknown>)[apiKey];
-
-    row[`param${idx}`] = typeof val === 'string' ? val : '';
-  }
-
-  return row;
-}
-
 export function useInfDeudor(id_deudor: string): UseInfDeudorReturn {
   const [state, dispatch] = useReducer(infDeudorReducer, initialState);
   const { rows, isLoading, error } = state;
-
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -105,31 +84,22 @@ export function useInfDeudor(id_deudor: string): UseInfDeudorReturn {
       });
 
       try {
-        const [cabFalse, cabTrue, params] = await Promise.all([
-          fetchInfDeudorCabeceraFalse(signal),
-          fetchInfDeudorCabeceraTrue(signal),
-          fetchInfDeudorParams(id_deudor, signal),
-        ]);
+        const [cabeceraPrincipal, cabeceraAdicional, valoresDeudor] =
+          await Promise.all([
+            fetchInfDeudorCabeceraFalse(signal),
+            fetchInfDeudorCabeceraTrue(signal),
+            fetchInfDeudorParams(id_deudor, signal),
+          ]);
 
         if (signal.aborted || !isMountedRef.current) return;
 
         dispatch({
           type: 'LOAD_SUCCESS',
-          rows: [
-            buildRow(
-              'cab_false',
-              'Cabecera Principal (false)',
-              cabFalse,
-              'cNombre_Param'
-            ),
-            buildRow(
-              'cab_true',
-              'Cabecera Adicional (true)',
-              cabTrue,
-              'cNombre_Param'
-            ),
-            buildRow('valores', 'Valores Deudor', params, 'cPersInf_Param'),
-          ],
+          rows: mapInfDeudorApiToTableRows(
+            cabeceraPrincipal,
+            cabeceraAdicional,
+            valoresDeudor
+          ),
         });
       } catch (err) {
         if (!signal.aborted && isMountedRef.current) {
@@ -138,7 +108,7 @@ export function useInfDeudor(id_deudor: string): UseInfDeudorReturn {
             error:
               err instanceof Error
                 ? err.message
-                : 'Error cargando información',
+                : INF_DEUDOR_POPUP_MESSAGES.loadError,
           });
         }
       }
