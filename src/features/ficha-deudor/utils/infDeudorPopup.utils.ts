@@ -1,4 +1,4 @@
-import type { InfDeudorTableRow } from '../../../shared/types';
+import type { InfDeudorTableRow } from '../types';
 import { INF_DEUDOR_POPUP_COLUMNS_CONFIG } from '../constants/infDeudorPopup.constants';
 
 export const getInfDeudorParamKey = (index: number): string => {

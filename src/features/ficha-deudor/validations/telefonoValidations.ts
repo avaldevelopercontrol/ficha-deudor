@@ -1,4 +1,4 @@
-import type { TelefonoFormData } from '../../../shared/types';
+import type { TelefonoFormData } from '../types';
 import { isEmptyValue } from '../../../shared/utils/validators';
 
 type TelefonoFormErrors = Record<string, string>;

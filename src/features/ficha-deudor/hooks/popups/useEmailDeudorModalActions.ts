@@ -5,7 +5,7 @@ import type {
   Email,
   EmailEditFormData,
   EmailFormData,
-} from '../../../../shared/types';
+} from '../../types';
 import { EMAIL_DEUDOR_POPUP_TEXTS } from '../../constants/emailDeudorPopup.constants';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 

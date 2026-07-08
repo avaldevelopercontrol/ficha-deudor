@@ -1,7 +1,7 @@
 import type {
   DireccionByIdApi,
   DireccionEditFormData,
-} from '../../../shared/types';
+} from '../types';
 import {
   toBooleanValue,
   toNumberValue,

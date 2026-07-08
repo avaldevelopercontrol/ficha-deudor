@@ -5,7 +5,7 @@ import { useModalForm } from '../../../../../shared/hooks/ui/useModalForm';
 import type {
   DireccionEditFormData,
   DireccionByIdApi,
-} from '../../../../../shared/types';
+} from '../../../types';
 
 import { useDireccionCatalogosForm } from '../../../hooks/useDireccionCatalogosForm';
 import { useDireccionCascadeFields } from '../../../hooks/useDireccionCascadeFields';

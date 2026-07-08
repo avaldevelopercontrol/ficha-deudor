@@ -1,10 +1,12 @@
 import { apiClient } from '../../../shared/api/apiClient';
 import type {
-  ApiResponse,
-  ApiResponseSimple,
   CabeceraDatosAdicionalesApi,
   DatoAdicionalApi,
   ColumnApi,
+} from '../types/api.types';
+import type {
+  ApiResponse,
+  ApiResponseSimple
 } from '../../../shared/types/indexApi';
 import {
   DATOS_ADICIONALES_ENDPOINTS,

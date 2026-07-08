@@ -10,7 +10,7 @@ import type {
   Email,
   EmailByIdApi,
   EmailFormData,
-} from '../../../../shared/types';
+} from '../../types';
 import { useApiResource } from '../../../../shared/hooks/useApiResource';
 import {
   usePopupTableResource,

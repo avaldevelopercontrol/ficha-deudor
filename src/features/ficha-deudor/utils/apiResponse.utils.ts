@@ -12,3 +12,4 @@ export const assertApiSuccess = (
     throw new Error(result.messageUser || result.message || fallbackMessage);
   }
 };
+

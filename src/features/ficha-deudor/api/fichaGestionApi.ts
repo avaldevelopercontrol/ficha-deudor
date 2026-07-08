@@ -11,7 +11,7 @@ import type {
   GestionEstadoClaroList,
   GestionMotivoNoPagoApi,
   GestionMotivoNoPagoList,
-} from '../../../shared/types';
+} from '../types/fichaGestion.types';
 import type { ApiResponse } from '../../../shared/types/indexApi';
 import { TIPO_GESTION_PALETA } from '../constants/fichaGestion.constants';
 import {

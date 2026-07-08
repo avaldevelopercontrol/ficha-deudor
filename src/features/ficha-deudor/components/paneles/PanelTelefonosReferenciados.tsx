@@ -1,31 +1,27 @@
 import React from 'react';
-import { PanelLayout } from './PanelLayout';
-import { useTelefonosReferenciados } from '../../hooks/useTelefonosReferenciados';
-import { usePanelTelefonosReferenciadosColumns } from '../../hooks/usePanelTelefonosReferenciadosColumns';
-import { usePanelTelefonosReferenciadosActions } from '../../hooks/usePanelTelefonosReferenciadosActions';
+
 import {
   PANEL_TELEFONOS_REFERENCIADOS_MESSAGES,
   PANEL_TELEFONOS_REFERENCIADOS_TITLE,
 } from '../../constants/panelTelefonosReferenciados.constants';
-import ModalRegistrarTelefono from '../modals/accionesRapidas/ModalRegistrarTelefono';
+import { usePanelTelefonosReferenciadosViewModel } from '../../hooks/usePanelTelefonosReferenciadosViewModel';
+import type { FichaDeudorReferenciaPanelParams } from '../../types/fichaDeudor.types';
 import ModalEditarTelefono from '../modals/accionesRapidas/ModalEditarTelefono';
-import PanelTablaResumen from './shared/PanelTablaResumen';
+import ModalRegistrarTelefono from '../modals/accionesRapidas/ModalRegistrarTelefono';
+import { PanelLayout } from './PanelLayout';
 import PanelResumenEstado from './shared/PanelResumenEstado';
 import PanelTablaHeaderActions from './shared/PanelTablaHeaderActions';
+import PanelTablaResumen from './shared/PanelTablaResumen';
 
 interface Props {
   isActive: boolean;
-  id_cliente: string;
-  id_deudor: string;
-  id_usuario: string;
+  params: FichaDeudorReferenciaPanelParams;
   onSelectTelefono?: (telefono: string) => void;
 }
 
 const PanelTelefonosReferenciados: React.FC<Props> = ({
   isActive,
-  id_cliente,
-  id_deudor,
-  id_usuario,
+  params,
   onSelectTelefono,
 }) => {
   const {
@@ -44,27 +40,17 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
-    create,
-    update,
-  } = useTelefonosReferenciados(id_cliente, id_deudor, id_usuario);
-
-  const {
     showRegistrar,
     showEditar,
     telefonoEditarId,
     handleOpenRegistrar,
     handleCloseRegistrar,
-    handleEdit,
     handleCloseEditar,
     handleGuardarEdicion,
     handleRegistrar,
-  } = usePanelTelefonosReferenciadosActions({
-    create,
-    update,
-  });
-
-  const { columns } = usePanelTelefonosReferenciadosColumns({
-    onEdit: handleEdit,
+    columns,
+  } = usePanelTelefonosReferenciadosViewModel({
+    params,
     onSelectTelefono,
   });
 

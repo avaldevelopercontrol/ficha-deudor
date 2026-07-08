@@ -1,11 +1,3 @@
-export interface ApiResponseSimple<T> {
-  code: string;
-  message: string;
-  messageUser: string;
-  statusCode: number;
-  response: T;
-}
-
 export interface CabeceraInfoApi {
   zona: string;
   ciudad: string;

@@ -11,15 +11,6 @@ export interface ApiResponse<T> {
   response: T;
 }
 
-// ─── API Response simple (sin paginación) ───
-export interface ApiResponseSimple<T> {
-  code: string;
-  message: string;
-  messageUser: string;
-  statusCode: number;
-  response: T;
-}
-
 // ─── GESTIONES REALIZADAS (Resumido) ───
 export interface GestionRealizadaApi {
   nId_DocxCobrarOpe: number;

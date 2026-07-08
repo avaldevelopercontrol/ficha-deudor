@@ -1,19 +1,15 @@
 import React from 'react';
 
-import type { DocumentoApi } from '../../../../shared/types/indexApi';
+import type { DocumentoApi } from '../../types/api.types';
 import { useFichaGestionViewModel } from '../../hooks/useFichaGestionViewModel';
 import type { GestionFormClaro } from '../../types/fichaGestion.types';
+import type { FichaDeudorGestionFormParams } from '../../types/fichaDeudor.types';
 import FichaGestionDatosPrincipales from '../ficha-gestion/FichaGestionDatosPrincipales';
 import FichaGestionAccionesTomar from '../ficha-gestion/FichaGestionAccionesTomar';
 import FichaGestionResultadosLlamada from '../ficha-gestion/FichaGestionResultadosLlamada';
 
 interface Props {
-  idCliente: string;
-  idCartera: string;
-  idContrato: string;
-  idDeudor: string;
-  idUsuario: string;
-  fechaInicioGestion: string;
+  params: FichaDeudorGestionFormParams;
   documentosFiltrados: DocumentoApi[];
   telefonoSeleccionado?: string;
   onGestionGuardada?: (gestionTerminada: boolean) => void;

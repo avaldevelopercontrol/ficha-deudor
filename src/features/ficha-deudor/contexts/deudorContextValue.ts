@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-import type { DeudorInfo } from '../../../shared/types';
+import type { DeudorInfo } from '../types/deudor.types';
 
 export const DeudorContext = createContext<DeudorInfo | null>(null);
 

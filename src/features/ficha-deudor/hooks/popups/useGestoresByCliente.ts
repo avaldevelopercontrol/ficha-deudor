@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { fetchGestoresByCliente } from '../../api/popups/gestoresApi';
-import type { Gestor } from '../../../../shared/types';
+import type { Gestor } from '../../types';
 import {
   useClientSideTable,
   type SelectedFilters,

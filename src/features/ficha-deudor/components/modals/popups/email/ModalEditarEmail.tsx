@@ -4,11 +4,11 @@ import { ModalFormLayout } from '../../../layout/ModalFormLayout';
 import { useModalForm } from '../../../../../../shared/hooks/ui/useModalForm';
 import { useEmailById } from '../../../../hooks/popups/useEmailsByDeudor';
 import { useEmailCatalogosForm } from '../../../../hooks/useEmailCatalogosForm';
+import type { DeudorInfo } from '../../../../types/deudor.types';
 import type {
   EmailEditFormData,
   EmailByIdApi,
-  DeudorInfo,
-} from '../../../../../../shared/types';
+} from '../../../../types';
 
 import { validateEmailEditForm } from '../../../../validations/popups/emailValidations';
 import {

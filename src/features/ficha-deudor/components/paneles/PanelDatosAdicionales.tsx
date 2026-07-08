@@ -1,31 +1,23 @@
 import React from 'react';
-import { PanelLayout } from './PanelLayout';
-import { useDatosAdicionales } from '../../hooks/useDatosAdicionales';
-import { usePanelDatosAdicionalesColumns } from '../../hooks/usePanelDatosAdicionalesColumns';
+
 import {
   PANEL_DATOS_ADICIONALES_MESSAGES,
-  PANEL_DATOS_ADICIONALES_NIVEL,
   PANEL_DATOS_ADICIONALES_PAGE_SIZE_OPTIONS,
   PANEL_DATOS_ADICIONALES_TITLE,
 } from '../../constants/panelDatosAdicionales.constants';
+import { usePanelDatosAdicionalesViewModel } from '../../hooks/usePanelDatosAdicionalesViewModel';
+import type { FichaDeudorCarteraPanelParams } from '../../types/fichaDeudor.types';
+import { PanelLayout } from './PanelLayout';
 import PanelResumenEstado from './shared/PanelResumenEstado';
 import PanelTablaResumen from './shared/PanelTablaResumen';
 
 interface Props {
   isActive: boolean;
-  id_cliente: string;
-  id_cartera: string;
-  id_deudor: string;
+  params: FichaDeudorCarteraPanelParams;
 }
 
-const PanelDatosAdicionales: React.FC<Props> = ({
-  isActive,
-  id_cliente,
-  id_cartera,
-  id_deudor,
-}) => {
+const PanelDatosAdicionales: React.FC<Props> = ({ isActive, params }) => {
   const {
-    columns,
     allData,
     paginatedData,
     isLoading,
@@ -41,14 +33,8 @@ const PanelDatosAdicionales: React.FC<Props> = ({
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
-  } = useDatosAdicionales(
-    id_cliente,
-    id_cartera,
-    id_deudor,
-    PANEL_DATOS_ADICIONALES_NIVEL
-  );
-
-  const { tableColumns } = usePanelDatosAdicionalesColumns(columns);
+    tableColumns,
+  } = usePanelDatosAdicionalesViewModel({ params });
 
   if (!isActive) return null;
 

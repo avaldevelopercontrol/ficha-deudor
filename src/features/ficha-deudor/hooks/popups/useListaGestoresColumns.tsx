@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { ActionButton } from '../../../../shared/components/ui';
-import type { Column, Gestor } from '../../../../shared/types';
+import type { Column } from '../../../../shared/types';
+import type { Gestor } from '../../types';
+
 import {
   LISTA_GESTORES_POPUP_COLUMNS,
   LISTA_GESTORES_POPUP_COLUMN_WIDTHS,

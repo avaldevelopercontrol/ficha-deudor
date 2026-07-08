@@ -1,4 +1,4 @@
-import type { DireccionEditFormData } from '../../../shared/types';
+import type { DireccionEditFormData } from '../types';
 
 export const MODAL_EDITAR_DIRECCION_INITIAL_FORM: DireccionEditFormData = {
   id: '',

@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 
 import { ActionButton } from '../../../../shared/components/ui';
 import { WrapCell } from '../../../../shared/components/ui/WrapCell';
-import type { Column, Email } from '../../../../shared/types';
+import type { Column } from '../../../../shared/types';
+import type { Email } from '../../types';
+
 import {
   EMAIL_DEUDOR_POPUP_COLUMNS,
   EMAIL_DEUDOR_POPUP_COLUMN_WIDTHS,

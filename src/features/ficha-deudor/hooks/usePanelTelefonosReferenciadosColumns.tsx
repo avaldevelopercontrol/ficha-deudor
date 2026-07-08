@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import type { Column, TelefonoReferenciado } from '../../../shared/types';
+import type { Column } from '../../../shared/types';
+import type { TelefonoReferenciado } from '../types';
 import {
   renderTelefonoContactadosCell,
   renderTelefonoEditCell,

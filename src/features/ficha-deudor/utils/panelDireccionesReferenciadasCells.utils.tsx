@@ -1,6 +1,6 @@
 import { ActionButton } from '../../../shared/components/ui';
 import { WrapCell } from '../../../shared/components/ui/WrapCell';
-import type { DireccionReferenciada } from '../../../shared/types';
+import type { DireccionReferenciada } from '../types';
 
 const EMPTY_CELL = '—';
 

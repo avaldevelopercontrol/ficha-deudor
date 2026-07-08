@@ -6,7 +6,7 @@ import {
   SelectField,
   TextAreaField,
 } from '../../../../../shared/components/ui';
-import type { TelefonoFormData } from '../../../../../shared/types';
+import type { TelefonoFormData } from '../../../types';
 import {
   toBooleanValue,
   toNumberValue,
@@ -112,7 +112,6 @@ export const TelefonoFormFields: React.FC<TelefonoFormFieldsProps> = ({
   errorUbicaciones,
   errorHorarios,
   errorFuentes,
-  requireAdvancedFields = false,
 }) => {
   return (
     <>
@@ -198,7 +197,6 @@ export const TelefonoFormFields: React.FC<TelefonoFormFieldsProps> = ({
           onChange={(v) => onChange('prioridad', String(v))}
           placeholder={placeholders.select}
           error={errors.prioridad}
-          required={requireAdvancedFields}
         />
 
         <SelectField
@@ -213,7 +211,6 @@ export const TelefonoFormFields: React.FC<TelefonoFormFieldsProps> = ({
             placeholders.select
           )}
           error={errors.horarioGestion || errorHorarios || ''}
-          required={requireAdvancedFields}
           disabled={isLoadingHorarios}
         />
 
@@ -229,7 +226,6 @@ export const TelefonoFormFields: React.FC<TelefonoFormFieldsProps> = ({
             placeholders.select
           )}
           error={errors.fuenteBusqueda || errorFuentes || ''}
-          required={requireAdvancedFields}
           disabled={isLoadingFuentes}
         />
       </FormGrid>

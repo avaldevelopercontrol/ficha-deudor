@@ -13,24 +13,61 @@ import PanelEstadoGestionRealizada from '../components/paneles/PanelEstadoGestio
 import PanelGestionRealizada from '../components/paneles/PanelGestionRealizada';
 import { DeudorProvider } from '../contexts/DeudorContext';
 import { FICHA_DEUDOR_PANEL } from '../constants/fichaDeudorPanels.constants';
+import type {
+  FichaDeudorCarteraPanelParams,
+  FichaDeudorDocumentosParams,
+  FichaDeudorGestionPanelParams,
+  FichaDeudorHeaderParams,
+  FichaDeudorParams,
+  FichaDeudorReferenciaPanelParams,
+} from '../types/fichaDeudor.types';
 
 interface FichaContentProps {
-  id_cliente: string;
-  id_cartera: string;
-  id_deudor: string;
-  id_contrato: string;
-  id_usuario: string;
-  fecha_inicio_gestion: string;
+  params: FichaDeudorParams;
 }
 
-const FichaContent: React.FC<FichaContentProps> = ({
-  id_cliente,
-  id_cartera,
-  id_deudor,
-  id_contrato,
-  id_usuario,
-  fecha_inicio_gestion,
-}) => {
+const FichaContent: React.FC<FichaContentProps> = ({ params }) => {
+  const {
+    id_cliente,
+    id_cartera,
+    id_deudor,
+    id_contrato,
+    id_usuario,
+  } = params;
+
+  const headerParams: FichaDeudorHeaderParams = {
+    id_cliente,
+    id_cartera,
+    id_deudor,
+  };
+
+  const documentosParams: FichaDeudorDocumentosParams = {
+    id_cliente,
+    id_cartera,
+    id_deudor,
+    id_contrato,
+    id_usuario,
+  };
+
+  const carteraPanelParams: FichaDeudorCarteraPanelParams = {
+    id_cliente,
+    id_cartera,
+    id_deudor,
+  };
+
+  const referenciaPanelParams: FichaDeudorReferenciaPanelParams = {
+    id_cliente,
+    id_deudor,
+    id_usuario,
+  };
+
+  const gestionPanelParams: FichaDeudorGestionPanelParams = {
+    id_cliente,
+    id_cartera,
+    id_deudor,
+    id_usuario,
+  };
+
   const {
     contacto,
     setContacto,
@@ -44,13 +81,7 @@ const FichaContent: React.FC<FichaContentProps> = ({
     handleGestionSubmit,
     handleGestionGuardada,
     handleTogglePanel,
-  } = useFichaDeudorPage({
-    id_cliente,
-    id_cartera,
-    id_deudor,
-    id_contrato,
-    id_usuario,
-  });
+  } = useFichaDeudorPage(params);
 
   return (
     <DeudorProvider value={deudorData ?? null}>
@@ -59,9 +90,8 @@ const FichaContent: React.FC<FichaContentProps> = ({
           <aside className="ficha-sidebar">
             {deudorData && (
               <DeudorHeader
-                id_cliente={id_cliente}
-                id_cartera={id_cartera}
-                id_deudor={id_deudor}
+                params={headerParams}
+                deudorData={deudorData}
                 contacto={contacto}
                 onContactoChange={setContacto}
                 compact={true}
@@ -77,11 +107,7 @@ const FichaContent: React.FC<FichaContentProps> = ({
           <div className="ficha-content">
             {deudorData && (
               <DocumentosTable
-                id_cliente={id_cliente}
-                id_cartera={id_cartera}
-                id_deudor={id_deudor}
-                id_contrato={id_contrato}
-                id_usuario={id_usuario}
+                params={documentosParams}
                 data={deudorData}
                 onFilteredDocumentosChange={setDocumentosFiltrados}
               />
@@ -89,18 +115,14 @@ const FichaContent: React.FC<FichaContentProps> = ({
 
             <PanelDatosAdicionales
               isActive={panelActivo === FICHA_DEUDOR_PANEL.DATOS_ADICIONALES}
-              id_cliente={id_cliente}
-              id_cartera={id_cartera}
-              id_deudor={id_deudor}
+              params={carteraPanelParams}
             />
 
             <PanelTelefonosReferenciados
               isActive={
                 panelActivo === FICHA_DEUDOR_PANEL.TELEFONOS_REFERENCIADOS
               }
-              id_cliente={id_cliente}
-              id_deudor={id_deudor}
-              id_usuario={id_usuario}
+              params={referenciaPanelParams}
               onSelectTelefono={setTelefonoSeleccionado}
             />
 
@@ -108,17 +130,12 @@ const FichaContent: React.FC<FichaContentProps> = ({
               isActive={
                 panelActivo === FICHA_DEUDOR_PANEL.DIRECCIONES_REFERENCIADAS
               }
-              id_cliente={id_cliente}
-              id_deudor={id_deudor}
-              id_usuario={id_usuario}
+              params={referenciaPanelParams}
             />
 
             <PanelGestionRealizada
               isActive={panelActivo === FICHA_DEUDOR_PANEL.GESTION_REALIZADA}
-              id_cliente={id_cliente}
-              id_cartera={id_cartera}
-              id_deudor={id_deudor}
-              id_usuario={id_usuario}
+              params={gestionPanelParams}
               refreshKey={gestionRealizadaRefreshKey}
             />
 
@@ -126,22 +143,15 @@ const FichaContent: React.FC<FichaContentProps> = ({
               isActive={
                 panelActivo === FICHA_DEUDOR_PANEL.ESTADO_GESTION_REALIZADA
               }
-              id_cliente={id_cliente}
-              id_cartera={id_cartera}
-              id_deudor={id_deudor}
+              params={carteraPanelParams}
             />
 
             <FichaGestion
-              onSubmit={handleGestionSubmit}
-              idCliente={id_cliente}
-              idCartera={id_cartera}
-              idContrato={id_contrato}
-              idDeudor={id_deudor}
-              idUsuario={id_usuario}
-              fechaInicioGestion={fecha_inicio_gestion}
+              params={params}
               documentosFiltrados={documentosFiltrados}
               telefonoSeleccionado={telefonoSeleccionado}
               onGestionGuardada={handleGestionGuardada}
+              onSubmit={handleGestionSubmit}
             />
           </div>
         </main>
@@ -157,15 +167,6 @@ const FichaDeudor: React.FC = () => {
     missingParams,
     exampleUrl,
   } = useFichaDeudorParams();
-
-  const {
-    id_cliente,
-    id_cartera,
-    id_deudor,
-    id_contrato,
-    id_usuario,
-    fecha_inicio_gestion,
-  } = params;
 
   if (!hasRequiredParams) {
     return (
@@ -204,16 +205,7 @@ const FichaDeudor: React.FC = () => {
     );
   }
 
-  return (
-    <FichaContent
-      id_cliente={id_cliente}
-      id_cartera={id_cartera}
-      id_deudor={id_deudor}
-      id_contrato={id_contrato}
-      id_usuario={id_usuario}
-      fecha_inicio_gestion={fecha_inicio_gestion}
-    />
-  );
+  return <FichaContent params={params} />;
 };
 
 export default FichaDeudor;

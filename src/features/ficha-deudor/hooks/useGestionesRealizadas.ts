@@ -12,12 +12,14 @@ import type {
 import type {
   GestionRealizada,
   GestionCompleta,
-} from '../../../shared/types/indexApi';
+} from '../types/gestion.types';
 import {
   GESTIONES_HISTORICAS_INITIAL_PAGE_SIZE,
   GESTIONES_REALIZADAS_ERROR_MESSAGES,
   GESTIONES_REALIZADAS_INITIAL_PAGE_SIZE,
 } from '../constants/gestionesRealizadas.constants';
+import type { FichaDeudorGestionPanelParams } from '../types/fichaDeudor.types';
+import { hasRequiredValues } from '../utils/requiredValues.utils';
 
 export type { TextFilters, SelectedFilters };
 
@@ -52,16 +54,15 @@ export interface UseGestionesRealizadasReturn {
   refetchCompleto: () => Promise<void>;
 }
 
-const hasRequiredValues = (...values: string[]) => {
-  return values.every((value) => value.trim() !== '');
-};
-
 export function useGestionesRealizadas(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
-  id_usuario: string
+  params: FichaDeudorGestionPanelParams
 ): UseGestionesRealizadasReturn {
+  const {
+    id_cliente,
+    id_cartera,
+    id_deudor,
+    id_usuario,
+  } = params;
   const canLoadResumidas = hasRequiredValues(
     id_cliente,
     id_cartera,

@@ -1,12 +1,14 @@
 import { apiClient } from '../../../shared/api/apiClient';
 import type {
   ApiResponse,
-  ApiResponseSimple,
+  ApiResponseSimple
+} from '../../../shared/types/indexApi';
+import type {
   GestionRealizada,
   GestionRealizadaApi,
   GestionCompleta,
   GestionHistoricaApi,
-} from '../../../shared/types/indexApi';
+} from '../types/gestion.types';
 import {
   GESTIONES_HISTORICAS_DEFAULT_PAGE_NUMBER,
   GESTIONES_HISTORICAS_DEFAULT_PAGE_SIZE,

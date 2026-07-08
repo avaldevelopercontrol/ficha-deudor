@@ -1,13 +1,13 @@
 import { apiClient } from '../../../shared/api/apiClient';
 import { mockMejorRHeader } from '../mocks/catalogoDeudorHeader';
+import type { ApiResponseSimple } from '../../../shared/types/indexApi';
 import type {
-  ApiResponseSimple,
   CabeceraInfoApi,
   CabeceraInfo,
   DeudorInfo,
   DeudorInfoApi,
   MejorRInfo,
-} from '../../../shared/types/indexApi';
+} from '../types/deudor.types';
 
 const BASE_GESTION = '/v1/Gestion';
 

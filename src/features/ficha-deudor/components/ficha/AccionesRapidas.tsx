@@ -1,13 +1,17 @@
 import React from 'react';
-import { botonesEstaticos } from '../../mocks/mockData';
+
+import {
+  FICHA_DEUDOR_PANEL_OPTIONS,
+  type FichaDeudorPanel,
+} from '../../constants/fichaDeudorPanels.constants';
 
 interface Props {
-  panelActivo: string | null;
-  onTogglePanel: (accion: string) => void;
+  panelActivo: FichaDeudorPanel | null;
+  onTogglePanel: (accion: FichaDeudorPanel) => void;
 }
 
 const AccionesRapidas: React.FC<Props> = ({ panelActivo, onTogglePanel }) => {
-  const handleAccionClick = (accion: string) => {
+  const handleAccionClick = (accion: FichaDeudorPanel) => {
     onTogglePanel(accion);
   };
 
@@ -16,8 +20,9 @@ const AccionesRapidas: React.FC<Props> = ({ panelActivo, onTogglePanel }) => {
       <div className="acciones-rapidas-header">
         <span className="acciones-rapidas-title">ACCIONES RÁPIDAS</span>
       </div>
+
       <div className="botones-estaticos">
-        {botonesEstaticos.map((btn) => (
+        {FICHA_DEUDOR_PANEL_OPTIONS.map((btn) => (
           <button
             key={btn}
             className={`btn-est ${panelActivo === btn ? 'btn-est--active' : ''}`}

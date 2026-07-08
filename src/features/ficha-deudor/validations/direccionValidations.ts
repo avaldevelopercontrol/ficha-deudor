@@ -1,7 +1,7 @@
 import type {
   DireccionFormData,
   DireccionEditFormData,
-} from '../../../shared/types';
+} from '../types';
 import { isEmptyValue } from '../../../shared/utils/validators';
 
 type DireccionValidationData = DireccionFormData | DireccionEditFormData;

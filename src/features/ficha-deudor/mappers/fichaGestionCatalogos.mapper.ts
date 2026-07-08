@@ -9,7 +9,7 @@ import type {
   GestionEstadoClaroList,
   GestionMotivoNoPagoApi,
   GestionMotivoNoPagoList,
-} from '../../../shared/types';
+} from '../types';
 
 export const mapGestionEstados = (
   data: GestionEstadoApi[] | null | undefined

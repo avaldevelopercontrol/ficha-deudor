@@ -1,33 +1,26 @@
-import React, { useCallback, useState } from 'react';
-import { PanelLayout } from './PanelLayout';
-import { useGestionesRealizadas } from '../../hooks/useGestionesRealizadas';
-import { usePanelGestionRealizadaColumns } from '../../hooks/usePanelGestionRealizadaColumns';
-import { usePanelGestionRealizadaActions } from '../../hooks/usePanelGestionRealizadaActions';
-import { useRefreshOnKeyChange } from '../../hooks/useRefreshOnKeyChange';
+import React from 'react';
+
 import {
   PANEL_GESTION_REALIZADA_MESSAGES,
   PANEL_GESTION_REALIZADA_PAGE_SIZE_OPTIONS,
   PANEL_GESTION_REALIZADA_TITLE,
 } from '../../constants/panelGestionRealizada.constants';
-import PanelTablaResumen from './shared/PanelTablaResumen';
-import PanelTablaExpandida from './shared/PanelTablaExpandida';
+import { usePanelGestionRealizadaViewModel } from '../../hooks/usePanelGestionRealizadaViewModel';
+import type { FichaDeudorGestionPanelParams } from '../../types/fichaDeudor.types';
+import { PanelLayout } from './PanelLayout';
 import PanelResumenEstado from './shared/PanelResumenEstado';
+import PanelTablaExpandida from './shared/PanelTablaExpandida';
+import PanelTablaResumen from './shared/PanelTablaResumen';
 
 interface Props {
   isActive: boolean;
-  id_cliente: string;
-  id_cartera: string;
-  id_deudor: string;
-  id_usuario: string;
+  params: FichaDeudorGestionPanelParams;
   refreshKey?: number;
 }
 
 const PanelGestionRealizada: React.FC<Props> = ({
   isActive,
-  id_cliente,
-  id_cartera,
-  id_deudor,
-  id_usuario,
+  params,
   refreshKey = 0,
 }) => {
   const {
@@ -46,7 +39,6 @@ const PanelGestionRealizada: React.FC<Props> = ({
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
-    setResumido,
     completo,
     completoLoading,
     completoError,
@@ -57,35 +49,15 @@ const PanelGestionRealizada: React.FC<Props> = ({
     setCompletoPageNumber,
     setCompletoPageSize,
     refetchCompleto,
-  } = useGestionesRealizadas(
-    id_cliente,
-    id_cartera,
-    id_deudor,
-    id_usuario
-  );
-
-  const [vistaExpandida, setVistaExpandida] = useState(false);
-
-  const handleRefreshPanel = useCallback(() => {
-    void refetch();
-    void refetchCompleto();
-  }, [refetch, refetchCompleto]);
-
-  useRefreshOnKeyChange({
+    vistaExpandida,
+    handleVerMas,
+    handleVolver,
+    columnsResumidas,
+    columnsExpandidas,
+  } = usePanelGestionRealizadaViewModel({
+    params,
     refreshKey,
-    onRefresh: handleRefreshPanel,
   });
-
-  const { handleVerMas, handleVolver, handleEliminar } =
-    usePanelGestionRealizadaActions({
-      setVistaExpandida,
-      setResumido,
-    });
-
-  const { columnsResumidas, columnsExpandidas } =
-    usePanelGestionRealizadaColumns({
-      onEliminar: handleEliminar,
-    });
 
   if (!isActive) return null;
 

@@ -6,7 +6,7 @@ import {
   SelectField,
   TextAreaField,
 } from '../../../../../../shared/components/ui';
-import type { EmailFormData } from '../../../../../../shared/types';
+import type { EmailFormData } from '../../../../types';
 import { toBooleanValue } from '../../../../../../shared/utils/formValueMappers';
 import {
   prioridadesOptions,

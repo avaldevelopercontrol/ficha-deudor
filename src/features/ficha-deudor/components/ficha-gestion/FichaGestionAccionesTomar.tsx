@@ -1,106 +1,34 @@
 import React from 'react';
-import type {
-  GestionFormClaro,
-  SetGestionField,
-  SetGestionFields,
-} from '../../types/fichaGestion.types';
-import {
-  buildTimeValue,
-  getTimeHour,
-  getTimeMinute,
-  hasValidDate,
-} from '../../utils/date.utils';
-import { sanitizeDecimalValue } from '../../utils/number.utils';
 
-interface Props {
-  form: GestionFormClaro;
-  setField: SetGestionField;
-  setFields: SetGestionFields;
-  usuarioActual: string;
-  handleAgendar: () => void;
-}
+import { useFichaGestionAccionesTomar } from '../../hooks/useFichaGestionAccionesTomar';
+import type { FichaGestionAccionesTomarProps } from '../../types/fichaGestion.types';
+import GestionTimePicker from './shared/GestionTimePicker';
 
-const HOURS = Array.from({ length: 24 }, (_, index) =>
-  String(index).padStart(2, '0')
-);
-
-const MINUTES = Array.from({ length: 12 }, (_, index) =>
-  String(index * 5).padStart(2, '0')
-);
-
-const FichaGestionAccionesTomar: React.FC<Props> = ({
+const FichaGestionAccionesTomar: React.FC<
+  FichaGestionAccionesTomarProps
+> = ({
   form,
   setField,
   setFields,
   usuarioActual,
   handleAgendar,
 }) => {
-  const puedeIngresarCompromiso = hasValidDate(form.fechaCompromisoPago);
-  const puedeSeleccionarHoraNuevaGestion = hasValidDate(form.fechaNuevaGestion);
-  const puedeSeleccionarHoraGestion = hasValidDate(form.fechaGestion);
-
-  const handleFechaCompromisoChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = event.target.value;
-
-    setFields({
-      fechaCompromisoPago: value,
-      compromisoSoles: value ? form.compromisoSoles : '',
-      compromisoUSD: value ? form.compromisoUSD : '',
-    });
-  };
-
-  const handleCompromisoSolesChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setField('compromisoSoles', sanitizeDecimalValue(event.target.value));
-  };
-
-  const handleCompromisoUsdChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setField('compromisoUSD', sanitizeDecimalValue(event.target.value));
-  };
-
-  const handleFechaNuevaGestionChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = event.target.value;
-
-    setFields({
-      fechaNuevaGestion: value,
-      horaNuevaGestion: value ? form.horaNuevaGestion : '',
-    });
-  };
-
-  const handleHoraNuevaGestionChange = (
-    type: 'hour' | 'minute',
-    value: string
-  ) => {
-    setField(
-      'horaNuevaGestion',
-      buildTimeValue(form.horaNuevaGestion, type, value)
-    );
-  };
-
-  const handleFechaGestionChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = event.target.value;
-
-    setFields({
-      fechaGestion: value,
-      horaGestion: value ? form.horaGestion : '',
-    });
-  };
-
-  const handleHoraGestionChange = (
-    type: 'hour' | 'minute',
-    value: string
-  ) => {
-    setField('horaGestion', buildTimeValue(form.horaGestion, type, value));
-  };
+  const {
+    puedeIngresarCompromiso,
+    puedeSeleccionarHoraNuevaGestion,
+    puedeSeleccionarHoraGestion,
+    handleFechaCompromisoChange,
+    handleCompromisoSolesChange,
+    handleCompromisoUsdChange,
+    handleFechaNuevaGestionChange,
+    handleHoraNuevaGestionChange,
+    handleFechaGestionChange,
+    handleHoraGestionChange,
+  } = useFichaGestionAccionesTomar({
+    form,
+    setField,
+    setFields,
+  });
 
   return (
     <div className="ficha-block ficha-block--with-side-title ficha-block--compact-gestion ficha-block--acciones-tomar">
@@ -176,41 +104,11 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
             />
           </div>
 
-          <div className="form-row-inline form-row-inline--time">
-            <label className="form-label form-label--inline">Hora:</label>
-
-            <select
-              className="form-input form-input--inline-field"
-              value={getTimeHour(form.horaNuevaGestion)}
-              disabled={!puedeSeleccionarHoraNuevaGestion}
-              onChange={(event) =>
-                handleHoraNuevaGestionChange('hour', event.target.value)
-              }
-            >
-              <option value="">HH</option>
-              {HOURS.map((hour) => (
-                <option key={hour} value={hour}>
-                  {hour}
-                </option>
-              ))}
-            </select>
-
-            <select
-              className="form-input form-input--inline-field"
-              value={getTimeMinute(form.horaNuevaGestion)}
-              disabled={!puedeSeleccionarHoraNuevaGestion}
-              onChange={(event) =>
-                handleHoraNuevaGestionChange('minute', event.target.value)
-              }
-            >
-              <option value="">MM</option>
-              {MINUTES.map((minute) => (
-                <option key={minute} value={minute}>
-                  {minute}
-                </option>
-              ))}
-            </select>
-          </div>
+          <GestionTimePicker
+            value={form.horaNuevaGestion}
+            disabled={!puedeSeleccionarHoraNuevaGestion}
+            onChange={handleHoraNuevaGestionChange}
+          />
 
           <div className="form-row-inline">
             <label className="form-label form-label--inline">Usuario:</label>
@@ -247,41 +145,11 @@ const FichaGestionAccionesTomar: React.FC<Props> = ({
             />
           </div>
 
-          <div className="form-row-inline form-row-inline--time">
-            <label className="form-label form-label--inline">Hora:</label>
-
-            <select
-              className="form-input form-input--inline-field"
-              value={getTimeHour(form.horaGestion)}
-              disabled={!puedeSeleccionarHoraGestion}
-              onChange={(event) =>
-                handleHoraGestionChange('hour', event.target.value)
-              }
-            >
-              <option value="">HH</option>
-              {HOURS.map((hour) => (
-                <option key={hour} value={hour}>
-                  {hour}
-                </option>
-              ))}
-            </select>
-
-            <select
-              className="form-input form-input--inline-field"
-              value={getTimeMinute(form.horaGestion)}
-              disabled={!puedeSeleccionarHoraGestion}
-              onChange={(event) =>
-                handleHoraGestionChange('minute', event.target.value)
-              }
-            >
-              <option value="">MM</option>
-              {MINUTES.map((minute) => (
-                <option key={minute} value={minute}>
-                  {minute}
-                </option>
-              ))}
-            </select>
-          </div>
+          <GestionTimePicker
+            value={form.horaGestion}
+            disabled={!puedeSeleccionarHoraGestion}
+            onChange={handleHoraGestionChange}
+          />
         </div>
       </div>
     </div>

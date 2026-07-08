@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import type { Column, DireccionReferenciada } from '../../../shared/types';
+import type { Column } from '../../../shared/types';
+import type { DireccionReferenciada } from '../types';
 import {
   renderDireccionEditCell,
   renderDireccionEstadoCell,

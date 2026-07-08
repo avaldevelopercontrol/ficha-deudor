@@ -3,7 +3,7 @@ import React from 'react';
 import { ModalFormLayout } from '../../layout/ModalFormLayout';
 import { useModalForm } from '../../../../../shared/hooks/ui/useModalForm';
 import { useTelefonoCatalogosForm } from '../../../hooks/useTelefonoCatalogosForm';
-import type { TelefonoFormData } from '../../../../../shared/types';
+import type { TelefonoFormData } from '../../../types';
 import { validateTelefonoForm } from '../../../validations/telefonoValidations';
 import {
   MODAL_REGISTRAR_TELEFONO_INITIAL_FORM,

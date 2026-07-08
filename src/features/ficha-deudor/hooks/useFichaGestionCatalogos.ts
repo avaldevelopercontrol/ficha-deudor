@@ -123,3 +123,7 @@ export const useFichaGestionCatalogos = (
     errorMotivoNoPago,
   };
 };
+
+export type FichaGestionCatalogos = ReturnType<
+  typeof useFichaGestionCatalogos
+>;

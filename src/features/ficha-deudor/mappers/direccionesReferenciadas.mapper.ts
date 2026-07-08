@@ -15,7 +15,7 @@ import type {
   Provincia,
   ProvinciaApi,
   UpdateDireccionRequest,
-} from '../../../shared/types/indexApi';
+} from '../types';
 
 export const mapDireccionReferenciada = (
   item: DireccionReferenciadaApi

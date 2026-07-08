@@ -11,7 +11,7 @@ import type {
   TelefonoReferenciadoApi,
   TelefonoResultadoApi,
   TelefonoUbicacionApi,
-} from '../../../shared/types/indexApi';
+} from '../types';
 
 export const mapTelefonoReferenciado = (
   item: TelefonoReferenciadoApi

@@ -7,7 +7,7 @@ import { useTelefonoCatalogosForm } from '../../../hooks/useTelefonoCatalogosFor
 import type {
   TelefonoFormData,
   TelefonoEditarApi,
-} from '../../../../../shared/types';
+} from '../../../types';
 import {
   MODAL_EDITAR_TELEFONO_INITIAL_FORM,
   MODAL_EDITAR_TELEFONO_LABELS,

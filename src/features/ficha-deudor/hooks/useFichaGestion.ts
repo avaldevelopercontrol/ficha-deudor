@@ -13,7 +13,7 @@ import type {
   GestionPaletaRespuestaList,
   GestionEstadoClaroList,
   GestionMotivoNoPagoList,
-} from '../../../shared/types';
+} from '../types';
 import {
   CLIENTE_CLARO_ID,
   TIPO_GESTION_PALETA,

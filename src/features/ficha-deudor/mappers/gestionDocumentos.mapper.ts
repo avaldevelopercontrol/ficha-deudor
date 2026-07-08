@@ -1,7 +1,7 @@
 import type {
   CabeceraPantallaApi,
   ColumnApi,
-} from '../../../shared/types/indexApi';
+} from '../types/api.types';
 
 export function mapCabecerasToColumns(
   cabeceras: CabeceraPantallaApi[]

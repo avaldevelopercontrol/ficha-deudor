@@ -1,4 +1,4 @@
-import type { TelefonoFormData } from '../../../shared/types';
+import type { TelefonoFormData } from '../types';
 
 export const MODAL_REGISTRAR_TELEFONO_INITIAL_FORM: TelefonoFormData = {
   id: 0,

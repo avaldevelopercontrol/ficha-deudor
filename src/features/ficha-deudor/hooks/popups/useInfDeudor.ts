@@ -5,7 +5,7 @@ import {
   fetchInfDeudorCabeceraTrue,
   fetchInfDeudorParams,
 } from '../../api/popups/infDeudorApi';
-import type { InfDeudorTableRow } from '../../../../shared/types';
+import type { InfDeudorTableRow } from '../../types';
 import { INF_DEUDOR_POPUP_MESSAGES } from '../../constants/infDeudorPopup.constants';
 import { mapInfDeudorApiToTableRows } from '../../mappers/infDeudor.mapper';
 

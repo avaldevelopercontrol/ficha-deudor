@@ -21,9 +21,3 @@ export interface ApiResponseSimple<T> {
   statusCode: number;
   response: T;
 }
-
-export * from '../../features/ficha-deudor/types/api.types';
-export * from '../../features/ficha-deudor/types/telefono.types';
-export * from '../../features/ficha-deudor/types/direccion.types';
-export * from '../../features/ficha-deudor/types/gestion.types';
-export * from '../../features/ficha-deudor/types/deudor.types';

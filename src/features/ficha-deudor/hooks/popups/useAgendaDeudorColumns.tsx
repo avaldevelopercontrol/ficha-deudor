@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 
 import { WrapCell } from '../../../../shared/components/ui/WrapCell';
-import type { Agenda, Column } from '../../../../shared/types';
+import type { Column } from '../../../../shared/types';
+import type { Agenda } from '../../types';
 import {
   AGENDA_DEUDOR_POPUP_COLUMNS,
   AGENDA_DEUDOR_POPUP_COLUMN_WIDTHS,

@@ -3,7 +3,7 @@ import type { Column } from '../../../shared/types';
 import type {
   ColumnApi,
   DatoAdicionalApi,
-} from '../../../shared/types/indexApi';
+} from '../types/api.types';
 import { renderDatoAdicionalCell } from '../utils/panelDatosAdicionalesCells.utils';
 
 export const usePanelDatosAdicionalesColumns = (columns: ColumnApi[]) => {

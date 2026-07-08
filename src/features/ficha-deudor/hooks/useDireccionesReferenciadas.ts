@@ -18,7 +18,7 @@ import type {
   Distrito,
   DireccionUbicacion,
   DireccionByIdApi,
-} from '../../../shared/types';
+} from '../types';
 import { useApiResource } from '../../../shared/hooks/useApiResource';
 import { useNullableResourceById } from '../../../shared/hooks/useNullableResourceById';
 import { useClientSideResourceTable } from '../../../shared/hooks/useClientSideResourceTable';
@@ -30,40 +30,13 @@ import {
   DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES,
   DIRECCIONES_REFERENCIADAS_INITIAL_PAGE_SIZE,
 } from '../constants/direccionesReferenciadas.constants';
+import type { FichaDeudorReferenciaPanelParams } from '../types/fichaDeudor.types';
+import { getErrorMessage } from '../utils/errorMessage.utils';
+import { hasRequiredValues } from '../utils/requiredValues.utils';
 
 export type { TextFilters, SelectedFilters };
 
-interface UseDireccionesReferenciadasReturn {
-  allData: DireccionReferenciada[];
-  filteredData: DireccionReferenciada[];
-  paginatedData: DireccionReferenciada[];
-  isLoading: boolean;
-  error: string | null;
-  pageNumber: number;
-  pageSize: number;
-  totalRecords: number;
-  totalPages: number;
-  setPageNumber: (page: number) => void;
-  setPageSize: (size: number) => void;
-  refetch: () => Promise<void>;
-  textFilters: TextFilters;
-  selectedFilters: SelectedFilters;
-  onTextFilterChange: (columnKey: string, value: string) => void;
-  onSelectedFilterChange: (columnKey: string, values: string[]) => void;
-  resetFilters: () => void;
-  create: (formData: DireccionFormData) => Promise<void>;
-  update: (id: string, formData: DireccionEditFormData) => Promise<void>;
-}
-
 type DireccionCatalogFetcher<T> = (signal: AbortSignal) => Promise<T[]>;
-
-const hasRequiredValues = (...values: string[]) => {
-  return values.every((value) => value.trim() !== '');
-};
-
-const getErrorMessage = (error: unknown, fallbackMessage: string) => {
-  return error instanceof Error ? error.message : fallbackMessage;
-};
 
 function useDireccionCatalog<T>(fetchCatalog: DireccionCatalogFetcher<T>) {
   const fetcher = useCallback(
@@ -75,10 +48,13 @@ function useDireccionCatalog<T>(fetchCatalog: DireccionCatalogFetcher<T>) {
 }
 
 export function useDireccionesReferenciadas(
-  id_cliente: string,
-  id_deudor: string,
-  id_usuario: string
-): UseDireccionesReferenciadasReturn {
+  params: FichaDeudorReferenciaPanelParams
+) {
+  const {
+    id_cliente,
+    id_deudor,
+    id_usuario,
+  } = params;
   const canLoadDireccionesReferenciadas = hasRequiredValues(
     id_cliente,
     id_deudor

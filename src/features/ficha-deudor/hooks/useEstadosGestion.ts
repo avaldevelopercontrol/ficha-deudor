@@ -12,12 +12,14 @@ import type {
 import type {
   EstadoGestion,
   EstadoGestionCompleta,
-} from '../../../shared/types/indexApi';
+} from '../types/gestion.types';
+import type { FichaDeudorCarteraPanelParams } from '../types/fichaDeudor.types';
 import {
   ESTADOS_GESTION_ERROR_MESSAGES,
   ESTADOS_GESTION_HISTORICOS_INITIAL_PAGE_SIZE,
   ESTADOS_GESTION_INITIAL_PAGE_SIZE,
 } from '../constants/estadosGestion.constants';
+import { hasRequiredValues } from '../utils/requiredValues.utils';
 
 export type { TextFilters, SelectedFilters };
 
@@ -51,15 +53,14 @@ export interface UseEstadosGestionReturn {
   refetchCompleto: () => Promise<void>;
 }
 
-const hasRequiredValues = (...values: string[]) => {
-  return values.every((value) => value.trim() !== '');
-};
-
 export function useEstadosGestion(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string
+  params: FichaDeudorCarteraPanelParams
 ): UseEstadosGestionReturn {
+  const {
+    id_cliente,
+    id_cartera,
+    id_deudor,
+  } = params;
   const canLoadEstadosGestion = hasRequiredValues(
     id_cliente,
     id_cartera,

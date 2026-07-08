@@ -1,7 +1,7 @@
 import type {
   EmailByIdApi,
   EmailEditFormData,
-} from '../../../shared/types';
+} from '../types';
 import {
   toBooleanValue,
   toNumberValue,

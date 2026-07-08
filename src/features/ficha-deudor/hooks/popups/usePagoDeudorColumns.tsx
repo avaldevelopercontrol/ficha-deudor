@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 
 import { WrapCell } from '../../../../shared/components/ui/WrapCell';
-import type { Column, Pago } from '../../../../shared/types';
+import type { Column } from '../../../../shared/types';
+import type { Pago } from '../../types';
+
 import {
   PAGO_DEUDOR_POPUP_COLUMNS,
   PAGO_DEUDOR_POPUP_COLUMN_WIDTHS,

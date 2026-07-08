@@ -1,7 +1,5 @@
 import { apiClient } from '../../../shared/api/apiClient';
 import type {
-  ApiResponse,
-  ApiResponseSimple,
   CreateTelefonoResponse,
   TelefonoEditarApi,
   TelefonoFormData,
@@ -13,6 +11,10 @@ import type {
   TelefonoReferenciadoApi,
   TelefonoResultadoApi,
   TelefonoUbicacionApi,
+} from '../types/telefono.types';
+import type {
+  ApiResponse,
+  ApiResponseSimple
 } from '../../../shared/types/indexApi';
 import {
   TELEFONOS_REFERENCIADOS_ENDPOINTS,

@@ -1,23 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-
+import { useCallback, useState } from 'react';
 import { useAuth } from '../../auth/contexts/authContextValue';
-import type { DocumentoApi } from '../../../shared/types/indexApi';
-import { CLIENTE_CLARO_ID } from '../constants/fichaGestion.constants';
+import type { DocumentoApi } from '../types/api.types';
 import { useFichaGestionActions } from './useFichaGestionActions';
 import { useFichaGestionCatalogos } from './useFichaGestionCatalogos';
 import { useFichaGestionForm } from './useFichaGestionForm';
 import type {
+  FichaGestionViewModel,
   GestionFeedback,
   GestionFormClaro,
 } from '../types/fichaGestion.types';
+import type { FichaDeudorGestionFormParams } from '../types/fichaDeudor.types';
+import { useFichaGestionDerivedValues } from './useFichaGestionDerivedValues';
+import { useSyncTelefonoSeleccionado } from './useSyncTelefonoSeleccionado';
+import { buildFichaGestionViewModelProps } from '../mappers/fichaGestionViewModel.mapper';
 
 interface UseFichaGestionViewModelParams {
-  idCliente: string;
-  idCartera: string;
-  idContrato: string;
-  idDeudor: string;
-  idUsuario: string;
-  fechaInicioGestion: string;
+  params: FichaDeudorGestionFormParams;
   documentosFiltrados: DocumentoApi[];
   telefonoSeleccionado?: string;
   onGestionGuardada?: (gestionTerminada: boolean) => void;
@@ -25,17 +23,18 @@ interface UseFichaGestionViewModelParams {
 }
 
 export const useFichaGestionViewModel = ({
-  idCliente,
-  idCartera,
-  idContrato,
-  idDeudor,
-  idUsuario,
-  fechaInicioGestion,
+  params,
   documentosFiltrados,
   telefonoSeleccionado,
   onGestionGuardada,
   onSubmit,
-}: UseFichaGestionViewModelParams) => {
+}: UseFichaGestionViewModelParams): FichaGestionViewModel => {
+  const {
+    id_cliente: idCliente,
+    id_cartera: idCartera,
+    id_contrato: idContrato,
+    id_usuario: idUsuario,
+  } = params;
   const { usuario } = useAuth();
   const [feedback, setFeedback] = useState<GestionFeedback | null>(null);
 
@@ -48,46 +47,13 @@ export const useFichaGestionViewModel = ({
     resetForm,
   } = useFichaGestionForm();
 
-  const usuarioActual = useMemo(() => {
-    const nombreCompleto = [usuario?.nombre, usuario?.apellido]
-      .filter(Boolean)
-      .join(' ')
-      .trim();
+  useSyncTelefonoSeleccionado({
+    telefonoSeleccionado,
+    telefonoActual: form.telefono,
+    setField,
+  });
 
-    return nombreCompleto || idUsuario || 'Usuario';
-  }, [usuario?.nombre, usuario?.apellido, idUsuario]);
-
-  useEffect(() => {
-    const telefono = telefonoSeleccionado?.trim();
-
-    if (telefono && telefono !== form.telefono) {
-      setField('telefono', telefono);
-    }
-  }, [telefonoSeleccionado, form.telefono, setField]);
-
-  const {
-    estadosOptions,
-    isLoadingEstados,
-    errorEstados,
-    tiposOptions,
-    isLoadingTipos,
-    errorTipos,
-    np0Options,
-    isLoadingNP0,
-    errorNP0,
-    np1Options,
-    isLoadingNP1,
-    errorNP1,
-    np2Options,
-    isLoadingNP2,
-    errorNP2,
-    estadoGestionClaroOptions,
-    isLoadingEstadoGestionClaro,
-    errorEstadoGestionClaro,
-    motivoNoPagoOptions,
-    isLoadingMotivoNoPago,
-    errorMotivoNoPago,
-  } = useFichaGestionCatalogos(
+  const catalogos = useFichaGestionCatalogos(
     idCliente,
     idCartera,
     idContrato,
@@ -95,13 +61,20 @@ export const useFichaGestionViewModel = ({
     form.np1
   );
 
-  const mostrarCamposClaro = String(idCliente) === CLIENTE_CLARO_ID;
+  const { np1Options } = catalogos;
 
-  const np1Seleccionado = np1Options.find(
-    (option) => String(option.id) === String(form.np1)
-  );
-
-  const np1TipoContacto = Number(np1Seleccionado?.idTipoContacto ?? 0);
+  const {
+    usuarioActual,
+    mostrarCamposClaro,
+    np1TipoContacto,
+  } = useFichaGestionDerivedValues({
+    idCliente,
+    idUsuario,
+    usuarioNombre: usuario?.nombre,
+    usuarioApellido: usuario?.apellido,
+    np1: form.np1,
+    np1Options,
+  });
 
   const handleGestionRegistrada = useCallback(
     (data: GestionFormClaro) => {
@@ -129,14 +102,10 @@ export const useFichaGestionViewModel = ({
     form,
     setField,
     usuarioActual,
-    idCliente,
-    idCartera,
-    idContrato,
-    idDeudor,
-    idUsuario,
-    fechaInicioGestion,
+    params,
     documentosFiltrados,
     np1TipoContacto,
+    requiereCamposClaro: mostrarCamposClaro,
     onGestionGuardada,
     onSubmit: handleGestionRegistrada,
   });
@@ -150,54 +119,22 @@ export const useFichaGestionViewModel = ({
     await handleGuardar();
   }, [handleGuardar]);
 
-  return {
-    datosPrincipalesProps: {
-      idCliente,
-      form,
-      setField,
-      handleNP0Change,
-      handleNP1Change,
-      handleOpenWhatsApp,
-      estadosOptions,
-      isLoadingEstados,
-      errorEstados,
-      tiposOptions,
-      isLoadingTipos,
-      errorTipos,
-      np0Options,
-      isLoadingNP0,
-      errorNP0,
-      np1Options,
-      isLoadingNP1,
-      errorNP1,
-      np2Options,
-      isLoadingNP2,
-      errorNP2,
-    },
-
-    accionesTomarProps: {
-      form,
-      setField,
-      setFields,
-      usuarioActual,
-      handleAgendar,
-    },
-
-    resultadosLlamadaProps: {
-      form,
-      setField,
-      validationErrors,
-      feedback,
-      onCloseFeedback: handleCloseFeedback,
-      mostrarCamposClaro,
-      estadoGestionClaroOptions,
-      isLoadingEstadoGestionClaro,
-      errorEstadoGestionClaro,
-      motivoNoPagoOptions,
-      isLoadingMotivoNoPago,
-      errorMotivoNoPago,
-      handleGuardar: handleGuardarGestion,
-      isSaving,
-    },
-  };
+  return buildFichaGestionViewModelProps({
+    idCliente,
+    form,
+    setField,
+    setFields,
+    handleNP0Change,
+    handleNP1Change,
+    handleOpenWhatsApp,
+    catalogos,
+    usuarioActual,
+    handleAgendar,
+    validationErrors,
+    feedback,
+    handleCloseFeedback,
+    mostrarCamposClaro,
+    handleGuardarGestion,
+    isSaving,
+  });
 };

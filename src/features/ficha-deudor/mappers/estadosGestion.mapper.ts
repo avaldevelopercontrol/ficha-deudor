@@ -3,7 +3,7 @@ import type {
   EstadoGestionApi,
   EstadoGestionCompleta,
   GestionHistoricaApi,
-} from '../../../shared/types/indexApi';
+} from '../types/gestion.types';
 
 export const mapEstadoGestion = (
   item: EstadoGestionApi

@@ -2,7 +2,7 @@ import type { KeyboardEvent, MouseEvent } from 'react';
 import { ActionButton } from '../../../shared/components/ui';
 import { Badge } from '../../../shared/components/ui/Badge';
 import { WrapCell } from '../../../shared/components/ui/WrapCell';
-import type { TelefonoReferenciado } from '../../../shared/types';
+import type { TelefonoReferenciado } from '../types';
 
 const EMPTY_CELL = '—';
 

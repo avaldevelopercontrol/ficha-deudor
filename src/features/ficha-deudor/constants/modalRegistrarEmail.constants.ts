@@ -1,4 +1,4 @@
-import type { EmailFormData } from '../../../shared/types';
+import type { EmailFormData } from '../types';
 
 export const MODAL_REGISTRAR_EMAIL_INITIAL_FORM: EmailFormData = {
   email: '',

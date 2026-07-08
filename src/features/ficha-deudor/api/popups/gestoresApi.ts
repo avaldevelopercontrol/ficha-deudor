@@ -3,7 +3,7 @@ import type {
   Gestor,
   GestorApi,
   GestoresApiResponse,
-} from '../../../../shared/types';
+} from '../../types';
 
 const mapGestor = (item: GestorApi): Gestor => ({
   id: String(item.id ?? ''),

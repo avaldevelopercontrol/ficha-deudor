@@ -1,30 +1,26 @@
 import React from 'react';
-import ModalRegistrarDireccion from '../modals/accionesRapidas/ModalRegistrarDireccion';
-import ModalEditarDireccion from '../modals/accionesRapidas/ModalEditarDireccion';
-import { PanelLayout } from './PanelLayout';
-import { useDireccionesReferenciadas } from '../../hooks/useDireccionesReferenciadas';
-import { usePanelDireccionesReferenciadasColumns } from '../../hooks/usePanelDireccionesReferenciadasColumns';
-import { usePanelDireccionesReferenciadasActions } from '../../hooks/usePanelDireccionesReferenciadasActions';
+
 import {
   PANEL_DIRECCIONES_REFERENCIADAS_MESSAGES,
   PANEL_DIRECCIONES_REFERENCIADAS_TITLE,
 } from '../../constants/panelDireccionesReferenciadas.constants';
-import PanelTablaResumen from './shared/PanelTablaResumen';
+import { usePanelDireccionesReferenciadasViewModel } from '../../hooks/usePanelDireccionesReferenciadasViewModel';
+import type { FichaDeudorReferenciaPanelParams } from '../../types/fichaDeudor.types';
+import ModalEditarDireccion from '../modals/accionesRapidas/ModalEditarDireccion';
+import ModalRegistrarDireccion from '../modals/accionesRapidas/ModalRegistrarDireccion';
+import { PanelLayout } from './PanelLayout';
 import PanelResumenEstado from './shared/PanelResumenEstado';
 import PanelTablaHeaderActions from './shared/PanelTablaHeaderActions';
+import PanelTablaResumen from './shared/PanelTablaResumen';
 
 interface Props {
   isActive: boolean;
-  id_cliente: string;
-  id_deudor: string;
-  id_usuario: string;
+  params: FichaDeudorReferenciaPanelParams;
 }
 
 const PanelDireccionesReferenciadas: React.FC<Props> = ({
   isActive,
-  id_cliente,
-  id_deudor,
-  id_usuario,
+  params,
 }) => {
   const {
     allData,
@@ -42,29 +38,17 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
-    create,
-    update,
-  } = useDireccionesReferenciadas(id_cliente, id_deudor, id_usuario);
-
-  const {
     showRegistrar,
     showEditar,
     direccionEditarId,
     direccionByIdData,
     handleOpenRegistrar,
     handleCloseRegistrar,
-    handleEdit,
     handleCloseEditar,
     handleGuardarEdicion,
     handleRegistrar,
-  } = usePanelDireccionesReferenciadasActions({
-    create,
-    update,
-  });
-
-  const { columns } = usePanelDireccionesReferenciadasColumns({
-    onEdit: handleEdit,
-  });
+    columns,
+  } = usePanelDireccionesReferenciadasViewModel({ params });
 
   if (!isActive) return null;
 

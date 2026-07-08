@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import type {
   ColumnApi,
   DocumentoApi,
-} from '../../../shared/types/indexApi';
+} from '../types/api.types';
 import {
   buildDocumentosTableStyles,
   calculateDynamicColumnWidth,

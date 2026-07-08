@@ -1,7 +1,5 @@
 import { apiClient } from '../../../shared/api/apiClient';
 import type {
-  ApiResponse,
-  ApiResponseSimple,
   CreateDireccionResponse,
   Departamento,
   DepartamentoApi,
@@ -16,7 +14,11 @@ import type {
   DistritoApi,
   Provincia,
   ProvinciaApi,
-  UpdateDireccionResponse,
+  UpdateDireccionResponse
+} from '../types/direccion.types';
+import type {
+  ApiResponse,
+  ApiResponseSimple
 } from '../../../shared/types/indexApi';
 import {
   DIRECCIONES_REFERENCIADAS_ENDPOINTS,

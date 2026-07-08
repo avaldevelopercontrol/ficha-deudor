@@ -1,18 +1,13 @@
+import type { FichaDeudorPanel } from '../constants/fichaDeudorPanels.constants';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import type { FichaDeudorIdentityParams } from '../types/fichaDeudor.types';
 import { ActionButton } from '../../../shared/components/ui/ActionButton';
 import { useAppLayout } from '../../../shared/components/layout/AppLayoutContext';
-import type { DocumentoApi } from '../../../shared/types/indexApi';
+import type { DocumentoApi } from '../types/api.types';
 import { useDeudorHeader } from './useDeudorHeader';
 
-interface UseFichaDeudorPageParams {
-  id_cliente: string;
-  id_cartera: string;
-  id_deudor: string;
-  id_contrato: string;
-  id_usuario: string;
-}
+type UseFichaDeudorPageParams = FichaDeudorIdentityParams;
 
 export const useFichaDeudorPage = ({
   id_cliente,
@@ -24,7 +19,7 @@ export const useFichaDeudorPage = ({
   const { setHeaderActions } = useAppLayout();
 
   const [contacto, setContacto] = useState('');
-  const [panelActivo, setPanelActivo] = useState<string | null>(null);
+  const [panelActivo, setPanelActivo] = useState<FichaDeudorPanel | null>(null);
   const [telefonoSeleccionado, setTelefonoSeleccionado] = useState('');
   const [documentosFiltrados, setDocumentosFiltrados] = useState<
     DocumentoApi[]
@@ -79,7 +74,7 @@ export const useFichaDeudorPage = ({
     [goToDashboard]
   );
 
-  const handleTogglePanel = useCallback((accion: string) => {
+  const handleTogglePanel = useCallback((accion: FichaDeudorPanel) => {
     setPanelActivo((actual) => (actual === accion ? null : accion));
   }, []);
 

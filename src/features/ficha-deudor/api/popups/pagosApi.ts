@@ -1,5 +1,5 @@
 import { apiClient } from '../../../../shared/api/apiClient';
-import type { Pago, PagoListResponse } from '../../../../shared/types';
+import type { Pago, PagoListResponse } from '../../types';
 
 const BASE_GESTION = '/v1/Gestion';
 

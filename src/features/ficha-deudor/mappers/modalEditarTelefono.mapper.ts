@@ -1,7 +1,7 @@
 import type {
   TelefonoEditarApi,
   TelefonoFormData,
-} from '../../../shared/types';
+} from '../types';
 import {
   toBooleanValue,
   toNumberValue,

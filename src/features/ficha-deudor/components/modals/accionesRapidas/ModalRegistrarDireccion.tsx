@@ -4,7 +4,7 @@ import { ModalFormLayout } from '../../layout/ModalFormLayout';
 
 import { useModalForm } from '../../../../../shared/hooks/ui/useModalForm';
 
-import type { DireccionFormData } from '../../../../../shared/types';
+import type { DireccionFormData } from '../../../types';
 
 import { toStringValue } from '../../../../../shared/utils/formValueMappers';
 

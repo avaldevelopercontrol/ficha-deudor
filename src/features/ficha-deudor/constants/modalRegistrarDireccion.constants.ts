@@ -1,4 +1,4 @@
-import type { DireccionFormData } from '../../../shared/types';
+import type { DireccionFormData } from '../types';
 
 export const MODAL_REGISTRAR_DIRECCION_INITIAL_FORM: DireccionFormData = {
   direccion: '',

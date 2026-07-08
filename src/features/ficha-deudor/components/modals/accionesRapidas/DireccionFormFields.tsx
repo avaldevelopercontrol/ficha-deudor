@@ -6,7 +6,7 @@ import {
   SelectField,
   TextAreaField,
 } from '../../../../../shared/components/ui';
-import type { DireccionFormData } from '../../../../../shared/types';
+import type { DireccionFormData } from '../../../types';
 import {
   toBooleanValue,
   toStringValue,

@@ -4,7 +4,9 @@ import { ModalFormLayout } from '../../../layout/ModalFormLayout';
 
 import { useModalForm } from '../../../../../../shared/hooks/ui/useModalForm';
 import { useEmailCatalogosForm } from '../../../../hooks/useEmailCatalogosForm';
-import type { DeudorInfo, EmailFormData } from '../../../../../../shared/types';
+import type { DeudorInfo } from '../../../../types/deudor.types';
+import type { EmailFormData } from '../../../../types';
+
 
 import { validateEmailForm } from '../../../../validations/popups/emailValidations';
 import {

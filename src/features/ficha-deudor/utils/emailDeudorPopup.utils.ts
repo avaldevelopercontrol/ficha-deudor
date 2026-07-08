@@ -1,4 +1,4 @@
-import type { DeudorInfo } from '../../../shared/types';
+import type { DeudorInfo } from '../types/deudor.types';
 import {
   EMAIL_DEUDOR_POPUP_ESTADOS_BADGE,
   EMAIL_DEUDOR_POPUP_FALLBACK_TEXT,

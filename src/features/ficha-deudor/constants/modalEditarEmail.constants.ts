@@ -1,4 +1,4 @@
-import type { EmailEditFormData } from '../../../shared/types';
+import type { EmailEditFormData } from '../types';
 
 export const MODAL_EDITAR_EMAIL_INITIAL_FORM: EmailEditFormData = {
   id: '',

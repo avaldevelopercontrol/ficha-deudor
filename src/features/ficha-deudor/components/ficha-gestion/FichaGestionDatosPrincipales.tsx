@@ -1,54 +1,11 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
-
+import React, { useMemo } from 'react';
 import { SelectField } from '../../../../shared/components/ui';
-import type { SelectOption } from '../../../../shared/types';
-import type {
-  GestionFormClaro,
-  SetGestionField,
-} from '../../types/fichaGestion.types';
+import type { FichaGestionDatosPrincipalesProps } from '../../types/fichaGestion.types';
+import { useGestorSelectorPopup } from '../../hooks/useGestorSelectorPopup';
 
-interface Props {
-  idCliente: string;
-  form: GestionFormClaro;
-  setField: SetGestionField;
-  handleNP0Change: (value: string) => void;
-  handleNP1Change: (value: string) => void;
-  handleOpenWhatsApp: () => void;
-  estadosOptions: SelectOption[];
-  isLoadingEstados: boolean;
-  errorEstados?: string | null;
-  tiposOptions: SelectOption[];
-  isLoadingTipos: boolean;
-  errorTipos?: string | null;
-  np0Options: SelectOption[];
-  isLoadingNP0: boolean;
-  errorNP0?: string | null;
-  np1Options: SelectOption[];
-  isLoadingNP1: boolean;
-  errorNP1?: string | null;
-  np2Options: SelectOption[];
-  isLoadingNP2: boolean;
-  errorNP2?: string | null;
-}
-
-type GestorSelectedMessage = {
-  type: 'GESTOR_SELECTED';
-  payload?: {
-    id?: string | number;
-    nombre?: string;
-  };
-};
-
-const isGestorSelectedMessage = (
-  data: unknown
-): data is GestorSelectedMessage => {
-  if (typeof data !== 'object' || data === null) return false;
-
-  return (data as { type?: unknown }).type === 'GESTOR_SELECTED';
-};
-
-const FichaGestionDatosPrincipales: React.FC<Props> = ({
-  idCliente,
+const FichaGestionDatosPrincipales: React.FC<
+  FichaGestionDatosPrincipalesProps
+> = ({  idCliente,
   form,
   setField,
   handleNP0Change,
@@ -84,6 +41,11 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
     return 'Seleccionar NP2...';
   }, [form.np1, isLoadingNP2]);
 
+  const { handleOpenListaGestores } = useGestorSelectorPopup({
+    idCliente,
+    setField,
+  });
+
   const handleNombreContactoChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -105,40 +67,6 @@ const FichaGestionDatosPrincipales: React.FC<Props> = ({
   const handleTipoGestionChange = (value: string) => {
     setField('tipoGestion', value);
   };
-
-  const handleOpenListaGestores = useCallback(() => {
-    if (!idCliente) return;
-
-    const popupUrl = `${window.location.origin}/popup/lista-gestores/${encodeURIComponent(
-      idCliente
-    )}`;
-
-    window.open(
-      popupUrl,
-      'lista-gestores',
-      'width=1100,height=700,scrollbars=yes,resizable=yes'
-    );
-  }, [idCliente]);
-
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent<unknown>) => {
-      if (event.origin !== window.location.origin) return;
-      if (!isGestorSelectedMessage(event.data)) return;
-
-      const { id, nombre } = event.data.payload ?? {};
-
-      if (id === undefined || nombre === undefined) return;
-
-      setField('gestorId', String(id));
-      setField('gestorNombre', nombre);
-    };
-
-    window.addEventListener('message', handleMessage);
-
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
-  }, [setField]);
 
   return (
     <div className="ficha-block ficha-block--with-side-title ficha-block--compact-gestion">

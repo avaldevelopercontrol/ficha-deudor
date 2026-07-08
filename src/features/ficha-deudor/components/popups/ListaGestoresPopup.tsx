@@ -16,7 +16,7 @@ import { closePopupWindow } from '../../utils/popupWindow.utils';
 import type {
   Gestor,
   GestorSeleccionadoMessage,
-} from '../../../../shared/types';
+} from '../../types';
 
 const ListaGestoresPopup: React.FC = () => {
   const { id_cliente } = useParams<{

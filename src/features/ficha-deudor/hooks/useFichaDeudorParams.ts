@@ -1,14 +1,9 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-
-export interface FichaDeudorParams {
-  id_cliente: string;
-  id_cartera: string;
-  id_deudor: string;
-  id_contrato: string;
-  id_usuario: string;
-  fecha_inicio_gestion: string;
-}
+import type {
+  FichaDeudorParams,
+  FichaDeudorRequiredParamKey,
+} from '../types/fichaDeudor.types';
 
 const REQUIRED_PARAMS = [
   'id_cliente',
@@ -18,7 +13,7 @@ const REQUIRED_PARAMS = [
   'id_usuario',
 ] as const;
 
-type RequiredParamName = (typeof REQUIRED_PARAMS)[number];
+type RequiredParamName = FichaDeudorRequiredParamKey;
 
 export function useFichaDeudorParams() {
   const [searchParams] = useSearchParams();

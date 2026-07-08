@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 
-import type { Column, InfDeudorTableRow } from '../../../../shared/types';
+import type { Column } from '../../../../shared/types';
+import type { InfDeudorTableRow } from '../../types';
+
 import {
   INF_DEUDOR_POPUP_CELL_STYLE,
   INF_DEUDOR_POPUP_COLUMNS_CONFIG,

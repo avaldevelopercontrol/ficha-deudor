@@ -1,5 +1,6 @@
 import type { FeedbackMessageVariant } from '../../../shared/components/ui';
-import type { GestionForm } from '../../../shared/types/indexApi';
+import type { SelectOption } from '../../../shared/types';
+import type { GestionForm } from './gestion.types';
 
 // ─── GESTIÓN: Estado de Gestión ───
 export interface GestionEstadoApi {
@@ -82,4 +83,63 @@ export interface GestionFeedback {
   variant: FeedbackMessageVariant;
   title: string;
   message: string;
+}
+
+export type FichaGestionValidationErrors = Partial<
+  Record<keyof GestionFormClaro | 'montoCompromiso' | 'documentos', string>
+>;
+
+export interface FichaGestionDatosPrincipalesProps {
+  idCliente: string;
+  form: GestionFormClaro;
+  setField: SetGestionField;
+  handleNP0Change: (value: string) => void;
+  handleNP1Change: (value: string) => void;
+  handleOpenWhatsApp: () => void;
+  estadosOptions: SelectOption[];
+  isLoadingEstados: boolean;
+  errorEstados?: string | null;
+  tiposOptions: SelectOption[];
+  isLoadingTipos: boolean;
+  errorTipos?: string | null;
+  np0Options: SelectOption[];
+  isLoadingNP0: boolean;
+  errorNP0?: string | null;
+  np1Options: SelectOption[];
+  isLoadingNP1: boolean;
+  errorNP1?: string | null;
+  np2Options: SelectOption[];
+  isLoadingNP2: boolean;
+  errorNP2?: string | null;
+}
+
+export interface FichaGestionAccionesTomarProps {
+  form: GestionFormClaro;
+  setField: SetGestionField;
+  setFields: SetGestionFields;
+  usuarioActual: string;
+  handleAgendar: () => void;
+}
+
+export interface FichaGestionResultadosLlamadaProps {
+  form: GestionFormClaro;
+  setField: SetGestionField;
+  validationErrors?: FichaGestionValidationErrors;
+  feedback?: GestionFeedback | null;
+  onCloseFeedback?: () => void;
+  mostrarCamposClaro: boolean;
+  estadoGestionClaroOptions: SelectOption[];
+  isLoadingEstadoGestionClaro: boolean;
+  errorEstadoGestionClaro?: string | null;
+  motivoNoPagoOptions: SelectOption[];
+  isLoadingMotivoNoPago: boolean;
+  errorMotivoNoPago?: string | null;
+  handleGuardar: () => void;
+  isSaving?: boolean;
+}
+
+export interface FichaGestionViewModel {
+  datosPrincipalesProps: FichaGestionDatosPrincipalesProps;
+  accionesTomarProps: FichaGestionAccionesTomarProps;
+  resultadosLlamadaProps: FichaGestionResultadosLlamadaProps;
 }

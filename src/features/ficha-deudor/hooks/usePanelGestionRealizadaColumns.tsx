@@ -4,7 +4,7 @@ import type { Column } from '../../../shared/types';
 import type {
   GestionRealizada,
   GestionCompleta,
-} from '../../../shared/types/indexApi';
+} from '../types/gestion.types';
 import {
   renderComentarioCell,
   renderEliminarGestionCell,

@@ -1,12 +1,14 @@
 import { apiClient } from '../../../shared/api/apiClient';
 import type {
   ApiResponse,
-  ApiResponseSimple,
+  ApiResponseSimple
+} from '../../../shared/types/indexApi';
+import type {
   EstadoGestion,
   EstadoGestionApi,
   EstadoGestionCompleta,
   GestionHistoricaApi,
-} from '../../../shared/types/indexApi';
+} from '../types/gestion.types';
 import {
   ESTADOS_GESTION_ENDPOINTS,
   ESTADOS_GESTION_ERROR_MESSAGES,

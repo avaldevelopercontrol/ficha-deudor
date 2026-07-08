@@ -3,7 +3,7 @@ import type { Column } from '../../../shared/types';
 import type {
   EstadoGestion,
   EstadoGestionCompleta,
-} from '../../../shared/types/indexApi';
+} from '../types/gestion.types';
 import {
   renderEstadoGestionComentarioCell,
   renderEstadoGestionNroCell,

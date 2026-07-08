@@ -4,7 +4,7 @@ import type {
   DireccionEditFormData,
   DireccionFormData,
   DireccionReferenciada,
-} from '../../../shared/types';
+} from '../types';
 import { PANEL_DIRECCIONES_REFERENCIADAS_ACTION_MESSAGES } from '../constants/panelDireccionesReferenciadas.constants';
 
 interface Params {

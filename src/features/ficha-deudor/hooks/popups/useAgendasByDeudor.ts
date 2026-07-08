@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
 import { fetchAgendasByDeudor } from '../../api/popups/agendasApi';
-import type { Agenda } from '../../../../shared/types';
+import type { Agenda } from '../../types';
 import {
   usePopupTableResource,
   type UsePopupTableResourceReturn,

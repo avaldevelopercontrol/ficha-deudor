@@ -15,7 +15,7 @@ import type {
   TelefonoFormData,
   TelefonoList,
   TelefonoEditarApi,
-} from '../../../shared/types';
+} from '../types';
 import { useApiResource } from '../../../shared/hooks/useApiResource';
 import { useNullableResourceById } from '../../../shared/hooks/useNullableResourceById';
 import { useClientSideResourceTable } from '../../../shared/hooks/useClientSideResourceTable';
@@ -27,6 +27,9 @@ import {
   TELEFONOS_REFERENCIADOS_ERROR_MESSAGES,
   TELEFONOS_REFERENCIADOS_INITIAL_PAGE_SIZE,
 } from '../constants/telefonosReferenciados.constants';
+import type { FichaDeudorReferenciaPanelParams } from '../types/fichaDeudor.types';
+import { getErrorMessage } from '../utils/errorMessage.utils';
+import { hasRequiredValues } from '../utils/requiredValues.utils';
 
 export type { TextFilters, SelectedFilters };
 
@@ -55,14 +58,6 @@ type TelefonoCatalogFetcher = (
   signal: AbortSignal
 ) => Promise<TelefonoList[]>;
 
-const hasRequiredValues = (...values: string[]) => {
-  return values.every((value) => value.trim() !== '');
-};
-
-const getErrorMessage = (error: unknown, fallbackMessage: string) => {
-  return error instanceof Error ? error.message : fallbackMessage;
-};
-
 function useTelefonoCatalog(fetchCatalog: TelefonoCatalogFetcher) {
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchCatalog(signal),
@@ -73,10 +68,13 @@ function useTelefonoCatalog(fetchCatalog: TelefonoCatalogFetcher) {
 }
 
 export function useTelefonosReferenciados(
-  id_cliente: string,
-  id_deudor: string,
-  id_usuario: string
+  params: FichaDeudorReferenciaPanelParams
 ): UseTelefonosReferenciadosReturn {
+  const {
+    id_cliente,
+    id_deudor,
+    id_usuario,
+  } = params;
   const canLoadTelefonosReferenciados = hasRequiredValues(
     id_cliente,
     id_deudor

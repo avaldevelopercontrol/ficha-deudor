@@ -1,4 +1,4 @@
-import type { EmailFormData, EmailEditFormData } from '../../../../shared/types';
+import type { EmailFormData, EmailEditFormData } from '../../types';
 
 export function validateEmailForm(data: EmailFormData): Record<string, string> {
   const errors: Record<string, string> = {};

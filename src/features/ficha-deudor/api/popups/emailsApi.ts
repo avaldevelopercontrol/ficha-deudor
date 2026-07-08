@@ -1,6 +1,7 @@
 import { apiClient } from '../../../../shared/api/apiClient';
+import type { ApiResponseSimple } from '../../../../shared/types/indexApi';
+
 import type {
-  ApiResponseSimple,
   EmailApi,
   Email,
   EmailStatusApi,
@@ -12,7 +13,7 @@ import type {
   UpdateEmailResponse,
   UpdateEmailRequest,
   EmailByIdApi,
-} from '../../../../shared/types';
+} from '../../types';
 
 import type {
   ApiResponse

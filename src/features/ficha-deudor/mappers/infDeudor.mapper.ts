@@ -2,7 +2,7 @@ import type {
   InfDeudorCabeceraApi,
   InfDeudorParamApi,
   InfDeudorTableRow,
-} from '../../../shared/types';
+} from '../types';
 import {
   INF_DEUDOR_POPUP_API_PREFIXES,
   INF_DEUDOR_POPUP_COLUMNS_CONFIG,

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useApiResource } from '../../../shared/hooks/useApiResource';
 import { fetchDeudorHeader, fetchCabeceraHeader, fetchMejorRHeader } from '../api/deudorHeaderApi';
-import type { DeudorInfo, CabeceraInfo, MejorRInfo } from '../../../shared/types';
+import type { DeudorInfo, CabeceraInfo, MejorRInfo } from '../types/deudor.types';
 
 export function useCabeceraHeader(id_cliente: string, id_cartera: string) {
   const fetcher = useCallback(

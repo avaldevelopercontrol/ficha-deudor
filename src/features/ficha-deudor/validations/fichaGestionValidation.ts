@@ -1,15 +1,15 @@
 import { TIPO_CONTACTO, TIPO_GESTION } from '../constants/fichaGestion.constants';
-import type { GestionFormClaro } from '../types/fichaGestion.types';
+import type {
+  FichaGestionValidationErrors,
+  GestionFormClaro,
+} from '../types/fichaGestion.types';
 import { toDecimalNumber, toNumber } from '../utils/number.utils';
-
-export type FichaGestionValidationErrors = Partial<
-  Record<keyof GestionFormClaro | 'montoCompromiso' | 'documentos', string>
->;
 
 interface ValidateFichaGestionParams {
   form: GestionFormClaro;
   np1TipoContacto: number;
   tieneDocumentos: boolean;
+  requiereCamposClaro?: boolean;
 }
 
 const isEmptyValue = (value: string | number | null | undefined) => {
@@ -24,6 +24,7 @@ export const validateFichaGestion = ({
   form,
   np1TipoContacto,
   tieneDocumentos,
+  requiereCamposClaro = false,
 }: ValidateFichaGestionParams): FichaGestionValidationErrors => {
   const errors: FichaGestionValidationErrors = {};
 
@@ -51,12 +52,14 @@ export const validateFichaGestion = ({
     errors.observaciones = 'Ingrese Observaciones';
   }
 
-  if (isEmptyOrZero(form.estadoGestionClaro)) {
-    errors.estadoGestionClaro = 'Selecciona: Estado de Gestión Claro';
-  }
+  if (requiereCamposClaro) {
+    if (isEmptyOrZero(form.estadoGestionClaro)) {
+      errors.estadoGestionClaro = 'Selecciona: Estado de Gestión Claro';
+    }
 
-  if (isEmptyOrZero(form.motivoNoPago)) {
-    errors.motivoNoPago = 'Selecciona: Motivo No Pago';
+    if (isEmptyOrZero(form.motivoNoPago)) {
+      errors.motivoNoPago = 'Selecciona: Motivo No Pago';
+    }
   }
 
   const tieneFechaCompromiso = !isEmptyValue(form.fechaCompromisoPago);

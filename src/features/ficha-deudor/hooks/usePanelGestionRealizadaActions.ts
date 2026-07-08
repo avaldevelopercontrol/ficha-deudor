@@ -1,6 +1,6 @@
 import { useCallback, type Dispatch, type SetStateAction } from 'react';
 
-import type { GestionRealizada } from '../../../shared/types/indexApi';
+import type { GestionRealizada } from '../types/gestion.types';
 import type { UseGestionesRealizadasReturn } from './useGestionesRealizadas';
 import { buildEliminarGestionConfirmMessage } from '../constants/panelGestionRealizada.constants';
 

@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
 
-import type { BotonApi, DeudorInfo } from '../../../shared/types/indexApi';
+import type { BotonApi } from '../types/api.types';
+import type { DeudorInfo } from '../types/deudor.types';
 import {
   DOCUMENTOS_POPUP_HEIGHT,
   DOCUMENTOS_POPUP_WIDTH,
 } from '../constants/documentosTable.constants';
-import { openPopup } from '../utils/popup.utils';
+import { appendQueryParamsToUrl, openPopup } from '../utils/popup.utils';
 
 interface UseDocumentosActionsParams {
   data: DeudorInfo;
@@ -27,9 +28,10 @@ export const useDocumentosActions = ({ data }: UseDocumentosActionsParams) => {
   const handleBotonClick = useCallback(
     (boton: BotonApi) => {
       if (boton.popupUrl) {
-        const nombre = encodeURIComponent(data.nombreRazonSocial);
-        const documento = encodeURIComponent(data.dniRuc);
-        const url = `${boton.popupUrl}?nombre=${nombre}&documento=${documento}`;
+        const url = appendQueryParamsToUrl(boton.popupUrl, {
+          nombre: data.nombreRazonSocial,
+          documento: data.dniRuc,
+        });
 
         openPopup(
           url,

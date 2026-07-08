@@ -2,7 +2,7 @@ import React from 'react';
 
 import { DeudorContext } from './deudorContextValue';
 
-import type { DeudorInfo } from '../../../shared/types';
+import type { DeudorInfo } from '../types/deudor.types';
 
 export const DeudorProvider: React.FC<{
   value: DeudorInfo | null;

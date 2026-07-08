@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import type {
   TelefonoFormData,
   TelefonoReferenciado,
-} from '../../../shared/types';
+} from '../types';
 import { PANEL_TELEFONOS_REFERENCIADOS_ACTION_MESSAGES } from '../constants/panelTelefonosReferenciados.constants';
 
 interface Params {

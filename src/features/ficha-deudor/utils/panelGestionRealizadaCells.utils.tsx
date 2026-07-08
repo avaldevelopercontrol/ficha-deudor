@@ -4,7 +4,7 @@ import { WrapCell } from '../../../shared/components/ui/WrapCell';
 import type {
   GestionCompleta,
   GestionRealizada,
-} from '../../../shared/types/indexApi';
+} from '../types/gestion.types';
 
 const CONTACTADO_TEXT = 'Contactado';
 

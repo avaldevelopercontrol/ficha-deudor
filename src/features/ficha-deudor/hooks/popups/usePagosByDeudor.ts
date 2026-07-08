@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
 import { fetchPagosByDeudor } from '../../api/popups/pagosApi';
-import type { Pago } from '../../../../shared/types';
+import type { Pago } from '../../types';
 import {
   usePopupTableResource,
   type UsePopupTableResourceReturn,

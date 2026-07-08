@@ -1,41 +1,14 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import {
-  SelectField,
-  TextAreaField,
-  CheckboxField,
-  FeedbackMessage,
-} from '../../../../shared/components/ui';
-import type { SelectOption } from '../../../../shared/types';
-import type {
-  GestionFeedback,
-  GestionFormClaro,
-  SetGestionField,
-} from '../../types/fichaGestion.types';
-import {
-  getFichaGestionErrorMessages,
-  type FichaGestionValidationErrors,
-} from '../../validations/fichaGestionValidation';
+import type { FichaGestionResultadosLlamadaProps } from '../../types/fichaGestion.types';
+import FichaGestionCamposClaro from './shared/FichaGestionCamposClaro';
+import FichaGestionResultadoFields from './shared/FichaGestionResultadoFields';
+import FichaGestionSubmitSection from './shared/FichaGestionSubmitSection';
+import FichaGestionValidationSummary from './shared/FichaGestionValidationSummary';
 
-interface Props {
-  form: GestionFormClaro;
-  setField: SetGestionField;
-  validationErrors?: FichaGestionValidationErrors;
-  feedback?: GestionFeedback | null;
-  onCloseFeedback?: () => void;
-  mostrarCamposClaro: boolean;
-  estadoGestionClaroOptions: SelectOption[];
-  isLoadingEstadoGestionClaro: boolean;
-  errorEstadoGestionClaro?: string | null;
-  motivoNoPagoOptions: SelectOption[];
-  isLoadingMotivoNoPago: boolean;
-  errorMotivoNoPago?: string | null;
-  handleGuardar: () => void;
-  isSaving?: boolean;
-}
-
-const FichaGestionResultadosLlamada: React.FC<Props> = ({
-  form,
+const FichaGestionResultadosLlamada: React.FC<
+  FichaGestionResultadosLlamadaProps
+> = ({  form,
   setField,
   validationErrors = {},
   feedback,
@@ -50,36 +23,6 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
   handleGuardar,
   isSaving = false,
 }) => {
-  const validationErrorMessages = useMemo(
-    () => getFichaGestionErrorMessages(validationErrors),
-    [validationErrors]
-  );
-
-  const estadoGestionClaroPlaceholder = isLoadingEstadoGestionClaro
-    ? 'Cargando Estado Gestión Claro...'
-    : 'Seleccionar Estado Gestión Claro...';
-
-  const motivoNoPagoPlaceholder = isLoadingMotivoNoPago
-    ? 'Cargando Motivo No Pago...'
-    : 'Seleccionar Motivo No Pago...';
-
-  const handleGestionTerminadaChange = (value: boolean) => {
-    setField('gestionTerminada', value);
-  };
-
-  const handleObservacionesChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setField('observaciones', event.target.value);
-  };
-
-  const handleEstadoGestionClaroChange = (value: string) => {
-    setField('estadoGestionClaro', value);
-  };
-
-  const handleMotivoNoPagoChange = (value: string) => {
-    setField('motivoNoPago', value);
-  };
 
   return (
     <div className="ficha-block ficha-block--with-side-title ficha-block--compact-gestion">
@@ -88,76 +31,29 @@ const FichaGestionResultadosLlamada: React.FC<Props> = ({
       </div>
 
       <div className="block-content block-content--compact-gestion">
-        <div className="resultados-compact-main">
-          <CheckboxField
-            label="Gestión Terminada"
-            checked={form.gestionTerminada}
-            onChange={handleGestionTerminadaChange}
-          />
-
-          <TextAreaField
-            label="Observaciones"
-            placeholder="Ingresar observaciones..."
-            value={form.observaciones}
-            onChange={handleObservacionesChange}
-            rows={1}
-          />
-        </div>
+        <FichaGestionResultadoFields form={form} setField={setField} />
 
         {mostrarCamposClaro && (
-          <div className="gestion-compact-grid gestion-compact-grid--claro-resultados">
-            <SelectField
-              label="Estado Gestión Claro:"
-              options={estadoGestionClaroOptions}
-              value={form.estadoGestionClaro}
-              onChange={handleEstadoGestionClaroChange}
-              placeholder={estadoGestionClaroPlaceholder}
-              disabled={isLoadingEstadoGestionClaro}
-              error={errorEstadoGestionClaro || ''}
-            />
-
-            <SelectField
-              label="Motivo No Pago:"
-              options={motivoNoPagoOptions}
-              value={form.motivoNoPago}
-              onChange={handleMotivoNoPagoChange}
-              placeholder={motivoNoPagoPlaceholder}
-              disabled={isLoadingMotivoNoPago}
-              error={errorMotivoNoPago || ''}
-            />
-          </div>
-        )}
-
-        {validationErrorMessages.length > 0 && (
-          <div className="form-error-summary form-error-summary--compact">
-            <p>Por favor, corrija los siguientes errores:</p>
-            <ul>
-              {validationErrorMessages.map((error, index) => (
-                <li key={`${error}-${index}`}>{error}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {feedback && (
-          <FeedbackMessage
-            variant={feedback.variant}
-            title={feedback.title}
-            message={feedback.message}
-            onClose={onCloseFeedback}
+          <FichaGestionCamposClaro
+            form={form}
+            setField={setField}
+            estadoGestionClaroOptions={estadoGestionClaroOptions}
+            isLoadingEstadoGestionClaro={isLoadingEstadoGestionClaro}
+            errorEstadoGestionClaro={errorEstadoGestionClaro}
+            motivoNoPagoOptions={motivoNoPagoOptions}
+            isLoadingMotivoNoPago={isLoadingMotivoNoPago}
+            errorMotivoNoPago={errorMotivoNoPago}
           />
         )}
 
-        <div className="ficha-submit ficha-submit--compact ficha-submit--compact-gestion">
-          <button
-            className="btn btn-primary btn-sm"
-            type="button"
-            onClick={handleGuardar}
-            disabled={isSaving}
-          >
-            {isSaving ? 'Guardando...' : 'Guardar Gestión'}
-          </button>
-        </div>
+        <FichaGestionValidationSummary validationErrors={validationErrors} />
+
+        <FichaGestionSubmitSection
+          feedback={feedback}
+          onCloseFeedback={onCloseFeedback}
+          handleGuardar={handleGuardar}
+          isSaving={isSaving}
+        />
       </div>
     </div>
   );

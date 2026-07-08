@@ -1,4 +1,4 @@
-import type { BotonApi } from '../../../../../shared/types/indexApi';
+import type { BotonApi } from '../../../types/api.types';
 
 type ScrollDirection = 'izq' | 'der';
 

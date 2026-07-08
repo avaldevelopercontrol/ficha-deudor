@@ -5,7 +5,7 @@ import {
   Route,
   Routes,
 } from 'react-router-dom';
-
+import { FICHA_DEUDOR_ROUTES } from '../../features/ficha-deudor/constants/fichaDeudorRoutes.constants';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
 import EmailDeudorPopup from '../../features/ficha-deudor/components/popups/EmailDeudorPopup';
 import AgendaDeudorPopup from '../../features/ficha-deudor/components/popups/AgendaDeudorPopup';
@@ -42,30 +42,31 @@ export function AppRouter() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/ficha-deudor" element={<FichaDeudor />} />
+              <Route path={FICHA_DEUDOR_ROUTES.FICHA_DEUDOR} element={<FichaDeudor />} />
             </Route>
 
             <Route
-              path="/popup/email-deudor/:id_cliente/:id_deudor/:id_usuario"
+              path={FICHA_DEUDOR_ROUTES.POPUP_EMAIL_DEUDOR}
               element={<EmailDeudorPopup />}
             />
 
             <Route
-              path="/popup/agenda-deudor/:id_cliente/:id_cartera/:id_deudor/:id_usuario"
+              path={FICHA_DEUDOR_ROUTES.POPUP_AGENDA_DEUDOR}
               element={<AgendaDeudorPopup />}
             />
 
             <Route
-              path="/popup/pago-deudor/:id_cliente/:id_cartera/:id_deudor"
+              path={FICHA_DEUDOR_ROUTES.POPUP_PAGO_DEUDOR}
               element={<PagoDeudorPopup />}
             />
 
             <Route
-              path="/popup/inf-deudor/:id_cliente/:id_cartera/:id_deudor/:id_usuario"
+              path={FICHA_DEUDOR_ROUTES.POPUP_INF_DEUDOR}
               element={<InfDeudorPopup />}
             />
+
             <Route
-              path="/popup/lista-gestores/:id_cliente"
+              path={FICHA_DEUDOR_ROUTES.POPUP_LISTA_GESTORES}
               element={<ListaGestoresPopup />}
             />
           </Route>

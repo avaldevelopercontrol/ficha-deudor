@@ -1,5 +1,6 @@
 import { apiClient } from '../../../../shared/api/apiClient';
-import type { ApiResponseSimple, InfDeudorCabeceraApi, InfDeudorParamApi } from '../../../../shared/types';
+import type { ApiResponseSimple } from '../../../../shared/types/indexApi';
+import type { InfDeudorCabeceraApi, InfDeudorParamApi } from '../../types';
 
 const BASE_GESTION = '/v1/Gestion';
 

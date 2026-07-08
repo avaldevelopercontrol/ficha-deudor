@@ -1,5 +1,5 @@
 import { apiClient } from '../../../../shared/api/apiClient';
-import type { Agenda, AgendaListResponse } from '../../../../shared/types';
+import type { Agenda, AgendaListResponse } from '../../types';
 
 const BASE_GESTION = '/v1/Gestion';
 
