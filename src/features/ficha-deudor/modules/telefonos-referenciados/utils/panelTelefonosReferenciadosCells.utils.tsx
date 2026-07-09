@@ -3,6 +3,7 @@ import { ActionButton } from '@shared/components/ui';
 import { Badge } from '@shared/components/ui/Badge';
 import { WrapCell } from '@shared/components/ui/WrapCell';
 import type { TelefonoReferenciado } from '../types/telefono.types';
+import ExpandableCell from '@shared/components/ui/ExpandableCell';
 
 const EMPTY_CELL = '—';
 
@@ -42,6 +43,10 @@ export const renderTelefonoNumeroCell = (
 
 export const renderTelefonoWrappedCell = (value: string) => {
   return <WrapCell>{value}</WrapCell>;
+};
+
+export const renderTelefonoExpandableCell = (value: string) => {
+  return <ExpandableCell text={value} maxLines={2} lineHeight={18} />;
 };
 
 export const renderTelefonoEstadoCell = (estado: string) => {

@@ -33,18 +33,18 @@ export const useFichaDeudorPage = ({
     id_deudor
   );
 
-  const goToDashboard = useCallback(() => {
+  const goToGestionDeudor = useCallback(() => {
     const queryParams = new URLSearchParams({
       id_cliente,
       id_usuario,
     });
 
-    navigate(`/dashboard?${queryParams.toString()}`, { replace: true });
+    navigate(`/gestion-deudor?${queryParams.toString()}`, { replace: true });
   }, [id_cliente, id_usuario, navigate]);
 
   const handleCancelar = useCallback(() => {
-    goToDashboard();
-  }, [goToDashboard]);
+    goToGestionDeudor();
+  }, [goToGestionDeudor]);
 
   useEffect(() => {
     setHeaderActions(
@@ -69,9 +69,9 @@ export const useFichaDeudorPage = ({
     (gestionTerminada: boolean) => {
       if (!gestionTerminada) return;
 
-      goToDashboard();
+      goToGestionDeudor();
     },
-    [goToDashboard]
+    [goToGestionDeudor]
   );
 
   const handleTogglePanel = useCallback((accion: FichaDeudorPanel) => {

@@ -53,6 +53,42 @@ export const renderResultadoGestionCell = (value: string) => {
   );
 };
 
+export const renderResultadoExpandableCell = (value: string) => {
+  const isContactado = value.includes(CONTACTADO_TEXT);
+
+  return (
+    <div
+      style={{
+        color: isContactado
+          ? RESULTADO_COLOR.CONTACTADO
+          : RESULTADO_COLOR.NO_CONTACTADO,
+        fontSize: '11px',
+        fontWeight: 500,
+      }}
+    >
+      <ExpandableCell text={value} maxLines={2} lineHeight={18} />
+    </div>
+  );
+};
+
+export const renderRespuestaCell = (respuesta: string) => {
+  const isContactado = respuesta.includes(CONTACTADO_TEXT);
+
+  return (
+    <div
+      style={{
+        color: isContactado
+          ? RESULTADO_COLOR.CONTACTADO
+          : RESULTADO_COLOR.NO_CONTACTADO,
+        fontSize: '11px',
+        fontWeight: 500,
+      }}
+    >
+      <ExpandableCell text={respuesta} maxLines={2} lineHeight={18} />
+    </div>
+  );
+};
+
 export const renderComentarioCell = (comentario: string) => {
   return <ExpandableCell text={comentario} maxLines={2} lineHeight={18} />;
 };
@@ -75,11 +111,11 @@ export const renderEliminarGestionCell = (
 export const renderGestionRealizadaResultadoCell = (
   row: GestionRealizada
 ) => {
-  return renderResultadoGestionCell(row.respuesta);
+  return renderRespuestaCell(row.respuesta);
 };
 
 export const renderGestionCompletaResultadoCell = (
   row: GestionCompleta
 ) => {
-  return renderResultadoGestionCell(row.resultado);
+  return renderResultadoExpandableCell(row.resultado);
 };

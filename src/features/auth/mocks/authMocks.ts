@@ -15,7 +15,8 @@ const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
       apellido: 'Ramírez',
       username: 'admin',
       email: 'c.ramirez@avalperu.pe',
-      perfil: 'SUPERVISOR',
+      perfil: 'Administrador Base Datos',
+      perfilId: 9,
     },
   },
   gestor1: {
@@ -27,6 +28,7 @@ const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
       username: 'gestor1',
       email: 'm.lopez@avalperu.pe',
       perfil: 'GESTOR',
+      perfilId: 2,
     },
   },
   gestor2: {
@@ -38,6 +40,7 @@ const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
       username: 'gestor2',
       email: 'j.perez@avalperu.pe',
       perfil: 'GESTOR',
+      perfilId: 5,
     },
   },
 };

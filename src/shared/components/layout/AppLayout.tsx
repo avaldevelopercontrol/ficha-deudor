@@ -10,7 +10,7 @@ type HeaderConfig = {
 };
 
 const HEADER_BY_PATH: Record<string, HeaderConfig> = {
-  '/dashboard': {
+  '/gestion-deudor': {
     breadcrumb: 'GESTIÓN DE COBRANZAS › GESTIÓN POR PERSONA/DEUDOR',
   },
   '/ficha-deudor': {
@@ -18,14 +18,19 @@ const HEADER_BY_PATH: Record<string, HeaderConfig> = {
   },
 };
 
-export const AppLayout: React.FC = () => {
-  const location = useLocation();
+interface AppLayoutProps {
+  withoutSidebarPaths?: string[];
+}
+
+export const AppLayout: React.FC<AppLayoutProps> = ({
+  withoutSidebarPaths = [],
+}) => {  const location = useLocation();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [headerActions, setHeaderActions] =
     useState<React.ReactNode>(null);
-
+  const isSidebarHidden = withoutSidebarPaths.includes(location.pathname);
   const headerConfig = useMemo(() => {
     return HEADER_BY_PATH[location.pathname] ?? {
       breadcrumb: 'GESTIÓN DE COBRANZAS',
@@ -39,23 +44,29 @@ export const AppLayout: React.FC = () => {
   return (
     <AppLayoutContext.Provider value={{ setHeaderActions }}>
       <div className="app-layout">
-        <AppSidebar
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapsed={handleToggleSidebar}
-          onExpandedChange={setIsSidebarExpanded}
-        />
+        {!isSidebarHidden && (
+          <AppSidebar
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapsed={handleToggleSidebar}
+            onExpandedChange={setIsSidebarExpanded}
+          />
+        )}
 
         <div
           className={[
             'app-layout__body',
-            isSidebarExpanded
-              ? 'app-layout__body--sidebar-expanded'
-              : 'app-layout__body--sidebar-collapsed',
+            isSidebarHidden
+              ? 'app-layout__body--without-sidebar'
+              : isSidebarExpanded
+                ? 'app-layout__body--sidebar-expanded'
+                : 'app-layout__body--sidebar-collapsed',
           ].join(' ')}
         >
           <AppHeader
             breadcrumb={headerConfig.breadcrumb}
             actions={headerActions}
+            showClientInfo={isSidebarHidden}
+            showLogoutButton={isSidebarHidden}
           />
 
           <main className="app-layout__main">

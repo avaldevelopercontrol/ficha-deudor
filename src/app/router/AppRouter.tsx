@@ -5,19 +5,25 @@ import {
   Route,
   Routes,
 } from 'react-router-dom';
-import { FICHA_DEUDOR_ROUTES } from '../../features/ficha-deudor/shared/constants/fichaDeudorRoutes.constants';
+
+import { AUTH_ROUTES } from '../../features/auth/constants';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
-import EmailDeudorPopup from '../../features/ficha-deudor/modules/emails/components/EmailDeudorPopup';
 import AgendaDeudorPopup from '../../features/ficha-deudor/modules/agenda/components/AgendaDeudorPopup';
-import PagoDeudorPopup from '../../features/ficha-deudor/modules/pago/components/PagoDeudorPopup';
+import EmailDeudorPopup from '../../features/ficha-deudor/modules/emails/components/EmailDeudorPopup';
 import InfDeudorPopup from '../../features/ficha-deudor/modules/inf-deudor/components/InfDeudorPopup';
 import ListaGestoresPopup from '../../features/ficha-deudor/modules/lista-gestores/components/ListaGestoresPopup';
+import PagoDeudorPopup from '../../features/ficha-deudor/modules/pago/components/PagoDeudorPopup';
+import { FICHA_DEUDOR_ROUTES } from '../../features/ficha-deudor/shared/constants/fichaDeudorRoutes.constants';
 import AppLayout from '../../shared/components/layout/AppLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
 
-const DashboardPage = lazy(
-  () => import('../../features/dashboard/pages/DashboardPage')
+const MenuModulosPage = lazy(
+  () => import('../../features/menu-modulos/pages/MenuModulosPage')
+);
+
+const GestionDeudorPage = lazy(
+  () => import('../../features/gestion-deudor/pages/GestionDeudorPage')
 );
 
 const FichaDeudor = lazy(
@@ -33,16 +39,37 @@ export function AppRouter() {
     <BrowserRouter>
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<Navigate to={AUTH_ROUTES.LOGIN} replace />} />
 
           <Route element={<PublicRoute />}>
-            <Route path="/login" element={<LoginPage />} />
+            <Route path={AUTH_ROUTES.LOGIN} element={<LoginPage />} />
           </Route>
 
           <Route element={<ProtectedRoute />}>
-            <Route element={<AppLayout />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path={FICHA_DEUDOR_ROUTES.FICHA_DEUDOR} element={<FichaDeudor />} />
+            <Route
+              element={
+                <AppLayout
+                  withoutSidebarPaths={[
+                    AUTH_ROUTES.MENU_MODULOS,
+                    FICHA_DEUDOR_ROUTES.FICHA_DEUDOR,
+                  ]}
+                />
+              }
+            >
+              <Route
+                path={AUTH_ROUTES.MENU_MODULOS}
+                element={<MenuModulosPage />}
+              />
+
+              <Route
+                path={AUTH_ROUTES.GESTION_DEUDOR}
+                element={<GestionDeudorPage />}
+              />
+
+              <Route
+                path={FICHA_DEUDOR_ROUTES.FICHA_DEUDOR}
+                element={<FichaDeudor />}
+              />
             </Route>
 
             <Route
@@ -71,7 +98,10 @@ export function AppRouter() {
             />
           </Route>
 
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route
+            path="*"
+            element={<Navigate to={AUTH_ROUTES.MENU_MODULOS} replace />}
+          />
         </Routes>
       </Suspense>
     </BrowserRouter>

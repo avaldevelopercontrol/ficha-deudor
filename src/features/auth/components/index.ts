@@ -1,2 +1,2 @@
-export * from './LoginForm';
-export * from './ClienteSelectorModal';
+export * from '../modules/login';
+export * from '../modules/cliente-selector';

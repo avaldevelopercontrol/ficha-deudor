@@ -5,6 +5,7 @@ import {
   renderTelefonoContactadosCell,
   renderTelefonoEditCell,
   renderTelefonoEstadoCell,
+  renderTelefonoExpandableCell,
   renderTelefonoNumeroCell,
   renderTelefonoWrappedCell,
 } from '../utils/panelTelefonosReferenciadosCells.utils';
@@ -68,7 +69,7 @@ export const usePanelTelefonosReferenciadosColumns = ({
       {
         key: 'fuente',
         label: 'Fuente',
-        render: (row) => renderTelefonoWrappedCell(row.fuente),
+        render: (row) => renderTelefonoExpandableCell(row.fuente),
       },
       {
         key: 'ordenSearch',

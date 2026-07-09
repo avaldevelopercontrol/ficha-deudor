@@ -36,4 +36,4 @@ export interface Distrito {
   nombre: string;
 }
 
-export * from '../../features/dashboard/types/dashboardDeudor.types';
+export * from '../../features/gestion-deudor/types/gestionDeudor.types';

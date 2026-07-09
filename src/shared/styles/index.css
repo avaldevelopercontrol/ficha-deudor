@@ -28,6 +28,7 @@
 @import './components/19-modals-and-divider.css';
 @import '../../features/ficha-deudor/styles/20-responsive-panels-and-actions.css';
 @import '../../features/auth/styles/21-auth.css';
-@import '../../features/dashboard/styles/22-dashboard.css';
+@import '../../features/gestion-deudor/styles/22-gestion-deudor.css';
 @import './components/20-popups.css';
 @import './components/app-sidebar.css';
+@import '../../features/menu-modulos/styles/23-menu-modulos.css';

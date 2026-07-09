@@ -1,0 +1,528 @@
+/* =========================================================
+   GESTION DEUDOR
+   src/features/gestion-deudor/styles/22-gestion-deudor.css
+   ========================================================= */
+
+/* ─────────────────────────────────────────────────────────
+   Layout general
+   ───────────────────────────────────────────────────────── */
+
+.gestion-deudor-page {
+  min-height: 100vh;
+  width: 100%;
+  background: var(--ap-gray-50);
+  color: var(--ap-text);
+}
+
+.gestion-deudor-page {
+  min-height: 100%;
+  width: 100%;
+  background: var(--ap-gray-50);
+  color: var(--ap-text);
+}
+
+.gestion-deudor-main {
+  width: 100%;
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 32px clamp(16px, 2vw, 24px) 40px;
+  box-sizing: border-box;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Header superior
+   ───────────────────────────────────────────────────────── */
+
+.gestion-deudor-header {
+  width: 100%;
+  min-height: var(--app-header-height);
+  height: var(--app-header-height);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 0 24px;
+
+  background: var(--ap-navy);
+  border-bottom: 3px solid var(--ap-red);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  overflow: hidden;
+}
+
+.gestion-deudor-header__brand {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  flex: 0 0 auto;
+  min-width: 120px;
+}
+
+.gestion-deudor-header__brand .logo-text {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.gestion-deudor-header__brand .logo-sub {
+  color: var(--ap-red);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  line-height: 1;
+}
+
+.app-nav {
+  min-width: 0;
+  flex: 1 1 auto;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.nav-item {
+  min-width: 0;
+
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-item--active {
+  color: #ffffff;
+}
+
+.nav-sep {
+  flex: 0 0 auto;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.gestion-deudor-header__user {
+  flex: 0 1 auto;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.gestion-deudor-header__user span {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gestion-deudor-header__user strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Contenedor principal centrado
+   ───────────────────────────────────────────────────────── */
+
+.gestion-deudor-main {
+  width: min(100%, 1560px);
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 32px 18px 40px;
+}
+
+.gestion-deudor-title-row {
+  margin-bottom: 24px;
+}
+
+.gestion-deudor-title-row h1,
+.gestion-deudor-main h1 {
+  margin: 0;
+  color: var(--ap-text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.gestion-deudor-title-row p {
+  margin: 6px 0 0;
+  color: var(--ap-text-muted);
+  font-size: 14px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Cards generales
+   ───────────────────────────────────────────────────────── */
+
+.gestion-deudor-card {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.gestion-deudor-card__header,
+.gestion-deudor-results-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.gestion-deudor-card__title {
+  margin: 0;
+  color: var(--ap-text);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.gestion-deudor-card__subtitle {
+  margin: 4px 0 0;
+  color: var(--ap-text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Card de búsqueda
+   ───────────────────────────────────────────────────────── */
+
+.gestion-deudor-card--search {
+  max-width: 1180px;
+  margin: 0 auto 22px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.gestion-deudor-search-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 0;
+  width: 100%;
+}
+
+.gestion-deudor-search-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+
+  padding: 22px 24px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(248, 250, 252, 0.95),
+    rgba(255, 255, 255, 1)
+  );
+  border-right: 1px solid var(--ap-gray-200);
+}
+
+.gestion-deudor-search-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+  background: var(--ap-info-bg);
+  color: var(--ap-navy);
+  font-size: 18px;
+}
+
+.gestion-deudor-search-info .gestion-deudor-card__title {
+  margin: 0;
+}
+
+.gestion-deudor-search-info .gestion-deudor-card__subtitle {
+  max-width: 280px;
+  margin-top: 5px;
+}
+
+.gestion-deudor-search-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.gestion-deudor-search-tags span {
+  height: 24px;
+  padding: 0 9px;
+
+  display: inline-flex;
+  align-items: center;
+
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-200);
+
+  color: var(--ap-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.gestion-deudor-search-panel {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  padding: 22px 24px;
+}
+
+.gestion-deudor-search-row {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: 210px minmax(280px, 1fr) auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.gestion-deudor-search-field {
+  min-width: 0;
+}
+
+.gestion-deudor-search-field .form-group {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.gestion-deudor-search-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding-bottom: 1px;
+  white-space: nowrap;
+}
+
+.gestion-deudor-error {
+  margin-top: 14px;
+  padding: 10px 12px;
+
+  border-radius: var(--radius);
+  background: var(--ap-danger-bg);
+  border: 1px solid #f3b6c1;
+
+  color: var(--ap-danger);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Card de resultados
+   ───────────────────────────────────────────────────────── */
+
+.gestion-deudor-card--results {
+  padding: 18px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.gestion-deudor-results-header {
+  margin-bottom: 12px;
+}
+
+.gestion-deudor-results-count {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  color: var(--ap-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.gestion-deudor-message {
+  margin: 0;
+  color: var(--ap-text-muted);
+  font-size: 14px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Tabla de resultados
+   ───────────────────────────────────────────────────────── */
+
+.gestion-deudor-card--results .table-wrapper {
+  width: 100%;
+}
+
+.gestion-deudor-card--results .table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.gestion-deudor-card--results .data-table {
+  min-width: 2050px;
+}
+
+.gestion-deudor-card--results .data-table th,
+.gestion-deudor-card--results .data-table td {
+  vertical-align: middle;
+}
+
+.gestion-deudor-card--results .data-table th {
+  text-align: center;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.gestion-deudor-card--results .data-table td {
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.gestion-deudor-card--results .data-table__group-header,
+.gestion-deudor-card--results .data-table__single-header,
+.gestion-deudor-card--results .data-table__subheader-row th {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.gestion-deudor-card--results .data-table__group-header {
+  font-weight: 700;
+}
+
+.gestion-deudor-card--results .data-table tbody tr.clickable {
+  cursor: pointer;
+}
+
+.gestion-deudor-card--results .data-table tbody tr.clickable:hover {
+  background: var(--ap-info-bg);
+}
+
+/* ─────────────────────────────────────────────────────────
+   Cards informativas
+   ───────────────────────────────────────────────────────── */
+
+.gestion-deudor-info {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.info-card {
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.info-card h3 {
+  margin: 0 0 12px;
+  color: var(--ap-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.info-card p {
+  margin: 6px 0;
+  color: var(--ap-gray-700);
+  font-size: 14px;
+}
+
+.info-card p strong {
+  color: var(--ap-text);
+  font-size: 16px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   Responsive
+   ───────────────────────────────────────────────────────── */
+
+@media (max-width: 1200px) {
+  .gestion-deudor-main {
+    width: 100%;
+    max-width: none;
+  }
+
+  .gestion-deudor-card--search {
+    max-width: none;
+  }
+
+  .gestion-deudor-search-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .gestion-deudor-search-info {
+    border-right: none;
+    border-bottom: 1px solid var(--ap-gray-200);
+  }
+
+  .gestion-deudor-search-info .gestion-deudor-card__subtitle {
+    max-width: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  .gestion-deudor-info {
+    grid-template-columns: 1fr;
+  }
+
+  .gestion-deudor-search-row {
+    grid-template-columns: 1fr;
+  }
+
+  .gestion-deudor-search-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 700px) {
+  .gestion-deudor-main {
+    padding: 24px 12px 32px;
+  }
+
+  .gestion-deudor-card {
+    padding: 16px;
+  }
+
+  .gestion-deudor-card--search {
+    padding: 0;
+  }
+
+  .gestion-deudor-search-info,
+  .gestion-deudor-search-panel {
+    padding: 18px;
+  }
+
+  .gestion-deudor-card__header,
+  .gestion-deudor-results-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .gestion-deudor-search-actions {
+    flex-wrap: wrap;
+  }
+}

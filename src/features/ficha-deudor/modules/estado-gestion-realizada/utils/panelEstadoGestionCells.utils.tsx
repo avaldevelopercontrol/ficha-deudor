@@ -25,13 +25,18 @@ export const renderEstadoGestionOperacionCell = (operacion: string) => {
 };
 
 export const renderEstadoGestionResultadoCell = (resultado: string) => {
+  const isContactado = resultado.includes('Contactado');
+
   return (
-    <WrapCell
-      color={resultado.includes('Contactado') ? '#166534' : '#991b1b'}
-      weight={500}
+    <div
+      style={{
+        color: isContactado ? '#166534' : '#991b1b',
+        fontSize: '11px',
+        fontWeight: 500,
+      }}
     >
-      {resultado}
-    </WrapCell>
+      <ExpandableCell text={resultado} maxLines={2} lineHeight={18} />
+    </div>
   );
 };
 

@@ -1,5 +1,3 @@
-import type { SelectOption } from '../../../shared/types';
-
 // ─────────────────────────────────────────────
 // ENTIDADES
 // ─────────────────────────────────────────────
@@ -18,6 +16,7 @@ export interface Usuario {
   username: string;
   email: string;
   perfil: string;
+  perfilId: number | null;
 }
 
 // ─────────────────────────────────────────────
@@ -137,11 +136,3 @@ export interface AuthContextValue extends AuthState {
   seleccionarCliente: (cliente: Cliente) => void;
   clearError: () => void;
 }
-
-export const clienteToSelectOptions = (
-  carteras: Cliente[]
-): SelectOption<string>[] =>
-  carteras.map((c) => ({
-    id: c.id_cliente,
-    label: c.nombre,
-  }));

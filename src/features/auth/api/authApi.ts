@@ -1,51 +1,32 @@
-import { apiClient } from '../../../shared/api/apiClient';
 import { env } from '@app/config/env';
-import { mockLogin, mockGetClientesByUsuario } from '../mocks';
+import { apiClient } from '@shared/api/apiClient';
 
+import {
+  AUTH_API_ENDPOINTS,
+  AUTH_API_MESSAGES,
+} from '../constants/authApi.constants';
+import { mapUsuarioApiToUsuario } from '../mappers';
+import { mockGetClientesByUsuario, mockLogin } from '../mocks';
+import { buildLoginErrorResponse } from '../utils/authResponse.utils';
 import type {
   ClientesResponse,
   LoginPayload,
   LoginResponse,
-  LoginUsuarioApi,
   LoginUsuarioApiResponse,
-  Usuario,
 } from '../types';
 
-const BASE_USUARIO = '/v1/Usuario';
-
-const cleanText = (value?: string | null): string => {
-  return value?.trim() || '';
+const buildLoginParams = (payload: LoginPayload): URLSearchParams => {
+  return new URLSearchParams({
+    cUsr_Login: payload.username.trim(),
+    cUsr_Pass: payload.password,
+  });
 };
 
-const mapUsuarioApiToUsuario = (usuarioApi: LoginUsuarioApi): Usuario => {
-  const apellidoPaterno = cleanText(usuarioApi.cUsr_ApePat);
-  const apellidoMaterno = cleanText(usuarioApi.cUsr_ApeMat);
-
-  const apellido = [apellidoPaterno, apellidoMaterno]
-    .filter(Boolean)
-    .join(' ');
-
-  const email =
-    cleanText(usuarioApi.cUsr_Email) ||
-    cleanText(usuarioApi.cUsr_EmailPersonal) ||
-    cleanText(usuarioApi.cUsr_EmailProfile);
-
-  return {
-    id_usuario: String(usuarioApi.nId_Usuario),
-    nombre: cleanText(usuarioApi.cUsr_Nombres),
-    apellido,
-    username: cleanText(usuarioApi.cUsr_Login),
-    email,
-    perfil: String(usuarioApi.nid_perfil ?? usuarioApi.nId_PerfilGest ?? ''),
-  };
-};
-
-const buildLoginErrorResponse = (message: string): LoginResponse => {
-  return {
-    success: false,
-    message,
-    usuario: null,
-  };
+const getLoginApiMessage = (
+  result: LoginUsuarioApiResponse,
+  fallback: string
+): string => {
+  return result.messageUser || result.message || fallback;
 };
 
 export const login = async (
@@ -55,50 +36,48 @@ export const login = async (
     return mockLogin(payload);
   }
 
-  const params = new URLSearchParams({
-    cUsr_Login: payload.username.trim(),
-    cUsr_Pass: payload.password,
-  });
+  const params = buildLoginParams(payload);
 
   try {
     const result = await apiClient<LoginUsuarioApiResponse>(
-      `${BASE_USUARIO}/GetLoginUsuario?${params.toString()}`
+      `${AUTH_API_ENDPOINTS.LOGIN_USUARIO}?${params.toString()}`
     );
 
     const usuarioApi = result.response;
 
     if (result.statusCode !== 200 || result.code !== '00' || !usuarioApi) {
       return buildLoginErrorResponse(
-        result.messageUser ||
-          result.message ||
-          'Usuario o contraseña incorrectos.'
+        getLoginApiMessage(
+          result,
+          AUTH_API_MESSAGES.LOGIN_INVALID_CREDENTIALS
+        )
       );
     }
 
     if (!usuarioApi.bEstado) {
-      return buildLoginErrorResponse('El usuario se encuentra inactivo.');
+      return buildLoginErrorResponse(AUTH_API_MESSAGES.LOGIN_INACTIVE_USER);
     }
 
     return {
       success: true,
-      message: result.messageUser || result.message || 'Login exitoso.',
+      message: getLoginApiMessage(result, AUTH_API_MESSAGES.LOGIN_SUCCESS),
       usuario: mapUsuarioApiToUsuario(usuarioApi),
     };
   } catch (error) {
     return buildLoginErrorResponse(
       error instanceof Error
         ? error.message
-        : 'Error al iniciar sesión.'
+        : AUTH_API_MESSAGES.LOGIN_UNEXPECTED_ERROR
     );
   }
 };
 
-export async function fetchClientesByUsuario(id_usuario: string): Promise<ClientesResponse> {
+export async function fetchClientesByUsuario(
+  idUsuario: string
+): Promise<ClientesResponse> {
   if (env.useMocks || env.useClientesMock) {
-    return mockGetClientesByUsuario(id_usuario);
+    return mockGetClientesByUsuario(idUsuario);
   }
 
-  throw new Error(
-    'fetchClientesByUsuario requiere endpoint real. Configura VITE_USE_CLIENTES_MOCK=true o implementa el endpoint de clientes.'
-  );
+  throw new Error(AUTH_API_MESSAGES.CLIENTES_ENDPOINT_NOT_CONFIGURED);
 }

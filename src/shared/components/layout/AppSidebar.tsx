@@ -6,37 +6,72 @@ import { useAuth } from '../../../features/auth/contexts/authContextValue';
 import '../../styles/components/app-sidebar.css';
 
 interface AppSidebarProps {
-  isCollapsed: boolean;
-  onToggleCollapsed: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapsed?: () => void;
   onExpandedChange?: (isExpanded: boolean) => void;
 }
 
-const MenuIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path
-      d="M4 7h16M4 12h16M4 17h16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
+const GESTION_DEUDOR_ROUTE = '/gestion-deudor';
+
+const getRoleInitials = (role?: string) => {
+  const cleanRole = role?.trim();
+
+  if (!cleanRole) {
+    return 'R';
+  }
+
+  const words = cleanRole
+    .replace('-', ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const first = words[0]?.charAt(0) ?? '';
+  const second = words[1]?.charAt(0) ?? '';
+
+  return `${first}${second}`.toUpperCase() || 'R';
+};
 
 const GestionIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path
-      d="M7 4.5h10A1.5 1.5 0 0 1 18.5 6v12A1.5 1.5 0 0 1 17 19.5H7A1.5 1.5 0 0 1 5.5 18V6A1.5 1.5 0 0 1 7 4.5Z"
+    <rect
+      x="3"
+      y="3"
+      width="7"
+      height="7"
+      rx="1"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.7"
+      strokeWidth="2"
     />
-    <path
-      d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4.5"
+    <rect
+      x="14"
+      y="3"
+      width="7"
+      height="7"
+      rx="1"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
+      strokeWidth="2"
+    />
+    <rect
+      x="3"
+      y="14"
+      width="7"
+      height="7"
+      rx="1"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+    <rect
+      x="14"
+      y="14"
+      width="7"
+      height="7"
+      rx="1"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
     />
   </svg>
 );
@@ -44,17 +79,17 @@ const GestionIcon = () => (
 const LogoutIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path
-      d="M10 5H6.8A1.8 1.8 0 0 0 5 6.8v10.4A1.8 1.8 0 0 0 6.8 19H10"
+      d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="2"
       strokeLinecap="round"
     />
     <path
-      d="M14 8l4 4-4 4M18 12H9"
+      d="M16 17l5-5-5-5M21 12H9"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
@@ -63,12 +98,12 @@ const LogoutIcon = () => (
 
 const ChevronIcon = ({ isOpen }: { isOpen: boolean }) => (
   <svg
-    className={isOpen ? 'app-sidebar__chevron--open' : ''}
+    className={isOpen ? 'app-sidebar__arrow app-sidebar__arrow--open' : 'app-sidebar__arrow'}
     viewBox="0 0 24 24"
     aria-hidden="true"
   >
     <path
-      d="M8 10l4 4 4-4"
+      d="M6 9l6 6 6-6"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -78,119 +113,114 @@ const ChevronIcon = ({ isOpen }: { isOpen: boolean }) => (
   </svg>
 );
 
-export const AppSidebar: React.FC<AppSidebarProps> = ({
-  isCollapsed,
-  onToggleCollapsed,
-  onExpandedChange,
-}) => {
+export const AppSidebar: React.FC<AppSidebarProps> = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
-
-  const [isHovered, setIsHovered] = useState(false);
-  const [isHoverLockedAfterCollapse, setIsHoverLockedAfterCollapse] =
-    useState(false);
+  const { usuario, clienteSeleccionada, logout } = useAuth();
 
   const [isCobranzaOpen, setIsCobranzaOpen] = useState(true);
 
-  const isExpanded =
-    !isCollapsed || (isCollapsed && isHovered && !isHoverLockedAfterCollapse);
-
-  const handleMouseEnter = () => {
-    if (isHoverLockedAfterCollapse) {
-      return;
-    }
-
-    setIsHovered(true);
-    onExpandedChange?.(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setIsHoverLockedAfterCollapse(false);
-    onExpandedChange?.(!isCollapsed);
-  };
-
-  const handleToggleCollapsed = () => {
-    const willCollapse = !isCollapsed;
-
-    if (willCollapse) {
-      setIsHovered(false);
-      setIsHoverLockedAfterCollapse(true);
-      onExpandedChange?.(false);
-    } else {
-      setIsHoverLockedAfterCollapse(false);
-      onExpandedChange?.(true);
-    }
-
-    onToggleCollapsed();
-  };
-
+  const initials = getRoleInitials(usuario?.perfil);
+  
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
   };
 
   return (
-    <aside
-      className={[
-        'app-sidebar',
-        isCollapsed ? 'app-sidebar--collapsed' : 'app-sidebar--pinned',
-        isExpanded ? 'app-sidebar--expanded' : '',
-      ].join(' ')}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className="app-sidebar__content">
-        <div className="app-sidebar__header">
-          <button
-            type="button"
-            className="app-sidebar__toggle"
-            onClick={handleToggleCollapsed}
-            aria-label={isCollapsed ? 'Expandir menú' : 'Minimizar menú'}
-            title={isCollapsed ? 'Expandir menú' : 'Minimizar menú'}
-          >
-            <MenuIcon />
-          </button>
+    <aside className="app-sidebar" aria-label="Menú principal">
+      <div className="app-sidebar__top">
+        <div className="app-sidebar__brand">
+          <div className="app-sidebar__brand-title" aria-label="SISGES">
+            <span className="app-sidebar__brand-letter app-sidebar__brand-letter--white">
+              S
+            </span>
+            <span className="app-sidebar__brand-letter app-sidebar__brand-letter--red">
+              I
+            </span>
+            <span className="app-sidebar__brand-letter app-sidebar__brand-letter--white">
+              S
+            </span>
+            <span className="app-sidebar__brand-letter app-sidebar__brand-letter--white">
+              G
+            </span>
+            <span className="app-sidebar__brand-letter app-sidebar__brand-letter--red">
+              E
+            </span>
+            <span className="app-sidebar__brand-letter app-sidebar__brand-letter--white">
+              S
+            </span>
+          </div>
         </div>
 
-        <nav className="app-sidebar__nav" aria-label="Menú principal">
-          <button
-            type="button"
-            className="app-sidebar__item app-sidebar__item--parent"
-            onClick={() => setIsCobranzaOpen((prev) => !prev)}
-            aria-expanded={isCobranzaOpen}
-            title="GESTION COBRANZA"
-          >
-            <span className="app-sidebar__icon">
-              <GestionIcon />
+        <div className="app-sidebar__user">
+          <div className="app-sidebar__avatar">
+            {initials}
+          </div>
+
+          <div className="app-sidebar__user-info">
+            <span className="app-sidebar__user-name">
+              {usuario?.perfil || 'Perfil no definido'}
             </span>
 
-            {isExpanded && (
-              <>
-                <span className="app-sidebar__text">GESTION COBRANZA</span>
+            <span className="app-sidebar__user-role">
+              {usuario?.id_usuario || 'Usuario no definido'}
+            </span>
+          </div>
+        </div>
 
-                <span className="app-sidebar__chevron">
-                  <ChevronIcon isOpen={isCobranzaOpen} />
-                </span>
-              </>
+        {clienteSeleccionada && (
+          <div className="app-sidebar__client">
+            <span className="app-sidebar__client-label">
+              Cliente activo
+            </span>
+
+            <span className="app-sidebar__client-name">
+              {clienteSeleccionada.nombre}
+            </span>
+          </div>
+        )}
+
+        <nav className="app-sidebar__nav">
+          <p className="app-sidebar__nav-label">Módulos</p>
+
+          <div className="app-sidebar__nav-list">
+            <button
+              type="button"
+              className={[
+                'app-sidebar__nav-item',
+                'app-sidebar__nav-item--parent',
+                isCobranzaOpen ? 'app-sidebar__nav-item--active' : '',
+              ].join(' ')}
+              onClick={() => setIsCobranzaOpen((current) => !current)}
+              aria-expanded={isCobranzaOpen}
+            >
+              <span className="app-sidebar__nav-icon">
+                <GestionIcon />
+              </span>
+
+              <span className="app-sidebar__nav-text">
+                Gestión de cobranzas
+              </span>
+
+              <ChevronIcon isOpen={isCobranzaOpen} />
+            </button>
+
+            {isCobranzaOpen && (
+              <div className="app-sidebar__submenu">
+                <NavLink
+                  to={GESTION_DEUDOR_ROUTE}
+                  className={({ isActive }) =>
+                    [
+                      'app-sidebar__sub-item',
+                      isActive ? 'app-sidebar__sub-item--active' : '',
+                    ].join(' ')
+                  }
+                >
+                  Gestión deudor
+                </NavLink>
+              </div>
             )}
-          </button>
-
-          {isExpanded && isCobranzaOpen && (
-            <div className="app-sidebar__submenu">
-              <NavLink
-                to="/dashboard"
-                className={({ isActive }) =>
-                  [
-                    'app-sidebar__subitem',
-                    isActive ? 'app-sidebar__subitem--active' : '',
-                  ].join(' ')
-                }
-              >
-                GESTION DEUDOR
-              </NavLink>
-            </div>
-          )}
+          </div>
         </nav>
       </div>
 
@@ -198,13 +228,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         type="button"
         className="app-sidebar__logout"
         onClick={handleLogout}
-        title="Cerrar sesión"
       >
-        <span className="app-sidebar__icon">
+        <span className="app-sidebar__nav-icon">
           <LogoutIcon />
         </span>
 
-        {isExpanded && <span className="app-sidebar__text">Cerrar sesión</span>}
+        <span>Cerrar sesión</span>
       </button>
     </aside>
   );
