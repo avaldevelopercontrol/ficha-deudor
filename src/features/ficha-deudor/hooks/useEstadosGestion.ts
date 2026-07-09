@@ -12,7 +12,7 @@ import type {
 import type {
   EstadoGestion,
   EstadoGestionCompleta,
-} from '../types/gestion.types';
+} from '../types';
 import type { FichaDeudorCarteraPanelParams } from '../types/fichaDeudor.types';
 import {
   ESTADOS_GESTION_ERROR_MESSAGES,

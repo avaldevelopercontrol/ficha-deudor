@@ -12,7 +12,7 @@ import {
   hasFichaGestionErrors,
   validateFichaGestion,
 } from '../validations/fichaGestionValidation';
-import type { DocumentoApi } from '../types/api.types';
+import type { DocumentoApi } from '../types';
 
 interface BuildGestionSaveRequestParams {
   form: GestionFormClaro;

@@ -8,7 +8,7 @@ import type {
   GestionRealizadaApi,
   GestionCompleta,
   GestionHistoricaApi,
-} from '../types/gestion.types';
+} from '../types';
 import {
   GESTIONES_HISTORICAS_DEFAULT_PAGE_NUMBER,
   GESTIONES_HISTORICAS_DEFAULT_PAGE_SIZE,

@@ -3,7 +3,7 @@ import { WrapCell } from '../../../shared/components/ui/WrapCell';
 import type {
   ColumnApi,
   DatoAdicionalApi,
-} from '../types/api.types';
+} from '../types';
 
 const ESTADOS_SERVICIO = {
   Activo: 'success',

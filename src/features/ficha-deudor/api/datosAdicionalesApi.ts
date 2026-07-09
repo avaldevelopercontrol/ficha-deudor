@@ -3,7 +3,7 @@ import type {
   CabeceraDatosAdicionalesApi,
   DatoAdicionalApi,
   ColumnApi,
-} from '../types/api.types';
+} from '../types';
 import type {
   ApiResponse,
   ApiResponseSimple

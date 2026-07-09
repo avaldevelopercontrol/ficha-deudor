@@ -1,7 +1,7 @@
 import type {
   ColumnApi,
   DocumentoApi,
-} from '../types/api.types';
+} from '../types';
 import {
   CELL_EXTRA_WIDTH_PX,
   CHAR_WIDTH_PX,

@@ -8,7 +8,7 @@ import {
   CompactInfoSection,
   InfoRow,
 } from '../../../../shared/components/ui/CompactInfoSection';
-import type { DeudorInfo } from '../../types/deudor.types';
+import type { DeudorInfo } from '../../types';
 import type { FichaDeudorHeaderParams } from '../../types/fichaDeudor.types';
 
 interface Props {

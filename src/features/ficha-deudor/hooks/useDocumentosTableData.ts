@@ -8,7 +8,7 @@ import {
 import type {
   ColumnApi,
   DocumentoApi,
-} from '../types/api.types';
+} from '../types';
 import { DOCUMENTOS_INITIAL_PAGE_SIZE } from '../constants/documentos.constants';
 import { enrichDocumentoWithDynamicColumns } from '../utils/documentosDynamicKeys';
 

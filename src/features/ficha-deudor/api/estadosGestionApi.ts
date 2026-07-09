@@ -8,7 +8,7 @@ import type {
   EstadoGestionApi,
   EstadoGestionCompleta,
   GestionHistoricaApi,
-} from '../types/gestion.types';
+} from '../types';
 import {
   ESTADOS_GESTION_ENDPOINTS,
   ESTADOS_GESTION_ERROR_MESSAGES,

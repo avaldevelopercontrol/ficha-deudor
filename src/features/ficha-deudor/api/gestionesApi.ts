@@ -10,7 +10,7 @@ import type {
   CabeceraPantallaApi,
   ColumnApi,
   BotonApi,
-} from '../types/api.types';
+} from '../types';
 
 import {
   DOCUMENTOS_ERROR_MESSAGES,

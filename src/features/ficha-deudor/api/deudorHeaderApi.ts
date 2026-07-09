@@ -7,7 +7,7 @@ import type {
   DeudorInfo,
   DeudorInfoApi,
   MejorRInfo,
-} from '../types/deudor.types';
+} from '../types';
 
 const BASE_GESTION = '/v1/Gestion';
 

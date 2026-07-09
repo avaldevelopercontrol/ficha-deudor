@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import type { BotonApi } from '../types/api.types';
-import type { DeudorInfo } from '../types/deudor.types';
+import type { BotonApi, DeudorInfo } from '../types';
 import {
   DOCUMENTOS_POPUP_HEIGHT,
   DOCUMENTOS_POPUP_WIDTH,

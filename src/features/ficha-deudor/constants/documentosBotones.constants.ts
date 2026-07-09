@@ -1,4 +1,4 @@
-import type { BotonApi } from '../types/api.types';
+import type { BotonApi } from '../types';
 import { buildFichaDeudorPopupPath } from './fichaDeudorRoutes.constants';
 import { CLIENTE_CLARO_ID } from './fichaGestion.constants';
 

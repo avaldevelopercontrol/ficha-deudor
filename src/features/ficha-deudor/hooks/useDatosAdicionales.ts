@@ -11,7 +11,7 @@ import type {
 import type {
   ColumnApi,
   DatoAdicionalApi,
-} from '../types/api.types';
+} from '../types';
 import {
   DATOS_ADICIONALES_ERROR_MESSAGES,
   DATOS_ADICIONALES_INITIAL_PAGE_SIZE,

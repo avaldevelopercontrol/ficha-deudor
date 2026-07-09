@@ -1,7 +1,6 @@
 import React from 'react';
 
-import type { DocumentoApi } from '../../types/api.types';
-import type { DeudorInfo } from '../../types/deudor.types';
+import type { DocumentoApi, DeudorInfo } from '../../types';
 import { useDocumentosTableViewModel } from '../../hooks/useDocumentosTableViewModel';
 import type { FichaDeudorDocumentosParams } from '../../types/fichaDeudor.types';
 import DocumentosErrorState from './documentos/DocumentosErrorState';

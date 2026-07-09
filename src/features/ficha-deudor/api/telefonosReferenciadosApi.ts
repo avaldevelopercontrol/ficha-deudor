@@ -11,7 +11,7 @@ import type {
   TelefonoReferenciadoApi,
   TelefonoResultadoApi,
   TelefonoUbicacionApi,
-} from '../types/telefono.types';
+} from '../types';
 import type {
   ApiResponse,
   ApiResponseSimple

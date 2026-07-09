@@ -7,7 +7,7 @@ import {
   toApiDateTimeOrNull,
 } from '../utils/date.utils';
 import { toDecimalNumber, toNumber } from '../utils/number.utils';
-import type { DocumentoApi } from '../types/api.types';
+import type { DocumentoApi } from '../types';
 
 interface BuildCreateGestionPayloadParams {
   form: GestionFormClaro;

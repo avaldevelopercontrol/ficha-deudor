@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { FichaDeudorIdentityParams } from '../types/fichaDeudor.types';
 import { ActionButton } from '../../../shared/components/ui/ActionButton';
 import { useAppLayout } from '../../../shared/components/layout/AppLayoutContext';
-import type { DocumentoApi } from '../types/api.types';
+import type { DocumentoApi } from '../types';
 import { useDeudorHeader } from './useDeudorHeader';
 
 type UseFichaDeudorPageParams = FichaDeudorIdentityParams;

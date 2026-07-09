@@ -12,7 +12,7 @@ import type {
 import type {
   GestionRealizada,
   GestionCompleta,
-} from '../types/gestion.types';
+} from '../types';
 import {
   GESTIONES_HISTORICAS_INITIAL_PAGE_SIZE,
   GESTIONES_REALIZADAS_ERROR_MESSAGES,

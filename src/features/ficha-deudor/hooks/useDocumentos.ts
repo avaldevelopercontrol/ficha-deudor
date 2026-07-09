@@ -2,7 +2,7 @@ import type {
   ColumnApi,
   DocumentoApi,
   BotonApi,
-} from '../types/api.types';
+} from '../types';
 import type { FichaDeudorDocumentosParams } from '../types/fichaDeudor.types';
 import { useDocumentosData } from './useDocumentosData';
 import { useDocumentosMetadata } from './useDocumentosMetadata';

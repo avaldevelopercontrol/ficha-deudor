@@ -4,7 +4,7 @@ import { fetchAllGestiones } from '../api/gestionesApi';
 import { DOCUMENTOS_ERROR_MESSAGES } from '../constants/documentos.constants';
 import type { FichaDeudorDocumentosParams } from '../types/fichaDeudor.types';
 import { getErrorMessage } from '../utils/errorMessage.utils';
-import type { DocumentoApi } from '../types/api.types';
+import type { DocumentoApi } from '../types';
 
 const hasRequiredDataParams = ({
   id_cliente,

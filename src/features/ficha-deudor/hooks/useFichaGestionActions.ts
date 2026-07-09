@@ -2,8 +2,7 @@ import type {
   GestionFormClaro,
   SetGestionField,
 } from '../types/fichaGestion.types';
-import type { DocumentoApi } from '../types/api.types';
-import type { FichaDeudorGestionFormParams } from '../types/fichaDeudor.types';
+import type { DocumentoApi, FichaDeudorGestionFormParams } from '../types';
 import { useFichaGestionAgendar } from './useFichaGestionAgendar';
 import { useFichaGestionGuardar } from './useFichaGestionGuardar';
 import { useFichaGestionWhatsapp } from './useFichaGestionWhatsapp';

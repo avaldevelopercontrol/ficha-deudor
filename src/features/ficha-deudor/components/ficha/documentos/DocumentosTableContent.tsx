@@ -2,7 +2,7 @@ import React from 'react';
 
 import Modal from '../../../../../shared/components/modals/Modal';
 import Table from '../../../../../shared/components/table/Table';
-import type { DocumentoApi } from '../../../types/api.types';
+import type { DocumentoApi } from '../../../types';
 import type { useDocumentosTableViewModel } from '../../../hooks/useDocumentosTableViewModel';
 import DocumentosActionsCarousel from './DocumentosActionsCarousel';
 import DocumentosHeader from './DocumentosHeader';

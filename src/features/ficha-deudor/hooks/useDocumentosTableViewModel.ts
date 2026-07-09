@@ -5,8 +5,7 @@ import { useDocumentosActions } from './useDocumentosActions';
 import { useDocumentosTableColumns } from './useDocumentosTableColumns';
 import { useHorizontalScroll } from './useHorizontalScroll';
 import type { FichaDeudorDocumentosParams } from '../types/fichaDeudor.types';
-import type { DocumentoApi } from '../types/api.types';
-import type { DeudorInfo } from '../types/deudor.types';
+import type { DocumentoApi, DeudorInfo } from '../types';
 
 interface UseDocumentosTableViewModelParams {
   params: FichaDeudorDocumentosParams;

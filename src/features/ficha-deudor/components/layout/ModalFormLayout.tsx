@@ -4,7 +4,7 @@ import Modal from '../../../../shared/components/modals/Modal';
 import DeudorHeaderBlock from '../ficha/DeudorHeaderBlock';
 import { ActionButton } from '../../../../shared/components/ui';
 import { useDeudor } from '../../contexts/deudorContextValue';
-import type { DeudorInfo } from '../../types/deudor.types';
+import type { DeudorInfo } from '../../types';
 
 interface ModalFormLayoutProps {
   isOpen: boolean;

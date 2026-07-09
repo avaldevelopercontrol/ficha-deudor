@@ -15,7 +15,7 @@ import type {
   Provincia,
   ProvinciaApi,
   UpdateDireccionResponse
-} from '../types/direccion.types';
+} from '../types';
 import type {
   ApiResponse,
   ApiResponseSimple

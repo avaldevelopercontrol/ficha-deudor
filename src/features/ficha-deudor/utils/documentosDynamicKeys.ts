@@ -1,7 +1,7 @@
 import type {
   ColumnApi,
   DocumentoApi,
-} from '../types/api.types';
+} from '../types';
 
 export const DOCUMENTO_STATIC_KEYS = [
   'nId_DocxCobrar',

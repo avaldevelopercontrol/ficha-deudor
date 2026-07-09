@@ -1,7 +1,7 @@
 import type {
   CabeceraDatosAdicionalesApi,
   ColumnApi,
-} from '../types/api.types';
+} from '../types';
 
 export const mapCabeceraDatosAdicionalesToColumns = (
   cabecera: CabeceraDatosAdicionalesApi

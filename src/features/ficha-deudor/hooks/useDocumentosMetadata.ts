@@ -7,7 +7,7 @@ import { getErrorMessage } from '../utils/errorMessage.utils';
 import type {
   BotonApi,
   ColumnApi,
-} from '../types/api.types';
+} from '../types';
 
 const hasRequiredMetaParams = ({
   id_cliente,

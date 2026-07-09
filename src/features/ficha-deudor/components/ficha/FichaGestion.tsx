@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { DocumentoApi } from '../../types/api.types';
+import type { DocumentoApi } from '../../types';
 import { useFichaGestionViewModel } from '../../hooks/useFichaGestionViewModel';
 import type { GestionFormClaro } from '../../types/fichaGestion.types';
 import type { FichaDeudorGestionFormParams } from '../../types/fichaDeudor.types';

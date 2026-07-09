@@ -7,7 +7,7 @@ import type {
   GestionFormClaro,
 } from '../types/fichaGestion.types';
 import { buildGestionSaveRequest } from '../utils/fichaGestionGuardar.utils';
-import type { DocumentoApi } from '../types/api.types';
+import type { DocumentoApi } from '../types';
 
 interface UseFichaGestionGuardarParams {
   form: GestionFormClaro;

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { DeudorInfo } from '../../types/deudor.types';
+import type { DeudorInfo } from '../../types';
 
 interface Props {
   data: DeudorInfo;

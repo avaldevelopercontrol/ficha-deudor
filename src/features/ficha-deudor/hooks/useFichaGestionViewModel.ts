@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useAuth } from '../../auth/contexts/authContextValue';
-import type { DocumentoApi } from '../types/api.types';
+import type { DocumentoApi } from '../types';
 import { useFichaGestionActions } from './useFichaGestionActions';
 import { useFichaGestionCatalogos } from './useFichaGestionCatalogos';
 import { useFichaGestionForm } from './useFichaGestionForm';

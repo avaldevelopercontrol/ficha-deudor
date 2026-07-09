@@ -1,6 +1,6 @@
 import React, { type ReactNode } from 'react';
 
-import type { DeudorInfo } from '../../../types/deudor.types';
+import type { DeudorInfo } from '../../../types';
 import { ModalFormLayout } from '../../layout/ModalFormLayout';
 import { ModalStatusMessage } from './ModalStatusMessage';
 

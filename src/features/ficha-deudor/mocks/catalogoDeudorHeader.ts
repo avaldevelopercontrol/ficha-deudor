@@ -1,4 +1,4 @@
-import type { MejorRInfo } from '../types/deudor.types';
+import type { MejorRInfo } from '../types';
 
 const mejorResultadoDefault: MejorRInfo = {
   mejorResultado: 'Ayala'
