@@ -1,18 +1,18 @@
 import React from 'react';
 
-import { useFichaDeudorParams } from '../hooks/useFichaDeudorParams';
-import { useFichaDeudorPage } from '../hooks/useFichaDeudorPage';
-import DeudorHeader from '../components/ficha/DeudorHeader';
-import AccionesRapidas from '../components/ficha/AccionesRapidas';
-import DocumentosTable from '../components/ficha/DocumentosTable';
-import FichaGestion from '../components/ficha/FichaGestion';
-import PanelDatosAdicionales from '../components/paneles/PanelDatosAdicionales';
-import PanelTelefonosReferenciados from '../components/paneles/PanelTelefonosReferenciados';
-import PanelDireccionesReferenciadas from '../components/paneles/PanelDireccionesReferenciadas';
-import PanelEstadoGestionRealizada from '../components/paneles/PanelEstadoGestionRealizada';
-import PanelGestionRealizada from '../components/paneles/PanelGestionRealizada';
-import { DeudorProvider } from '../contexts/DeudorContext';
-import { FICHA_DEUDOR_PANEL } from '../constants/fichaDeudorPanels.constants';
+import { useFichaDeudorParams } from '../shell/hooks/useFichaDeudorParams';
+import { useFichaDeudorPage } from '../shell/hooks/useFichaDeudorPage';
+import DeudorHeader from '../modules/deudor-header/components/DeudorHeader';
+import AccionesRapidas from '../shell/components/AccionesRapidas';
+import DocumentosTable from '../modules/documentos/components/DocumentosTable';
+import FichaGestion from '../modules/gestion/components/FichaGestion';
+import PanelDatosAdicionales from '../modules/datos-adicionales/components/PanelDatosAdicionales';
+import PanelTelefonosReferenciados from '../modules/telefonos-referenciados/components/PanelTelefonosReferenciados';
+import PanelDireccionesReferenciadas from '../modules/direcciones-referenciadas/components/PanelDireccionesReferenciadas';
+import PanelEstadoGestionRealizada from '../modules/estado-gestion-realizada/components/PanelEstadoGestionRealizada';
+import PanelGestionRealizada from '../modules/gestion-realizada/components/PanelGestionRealizada';
+import { DeudorProvider } from '../shared/contexts/DeudorContext';
+import { FICHA_DEUDOR_PANEL } from '../shell/constants/fichaDeudorPanels.constants';
 import type {
   FichaDeudorCarteraPanelParams,
   FichaDeudorDocumentosParams,
@@ -20,7 +20,7 @@ import type {
   FichaDeudorHeaderParams,
   FichaDeudorParams,
   FichaDeudorReferenciaPanelParams,
-} from '../types/fichaDeudor.types';
+} from '../shared/types/fichaDeudor.types';
 
 interface FichaContentProps {
   params: FichaDeudorParams;

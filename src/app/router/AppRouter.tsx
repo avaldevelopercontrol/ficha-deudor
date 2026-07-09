@@ -5,13 +5,13 @@ import {
   Route,
   Routes,
 } from 'react-router-dom';
-import { FICHA_DEUDOR_ROUTES } from '../../features/ficha-deudor/constants/fichaDeudorRoutes.constants';
+import { FICHA_DEUDOR_ROUTES } from '../../features/ficha-deudor/shared/constants/fichaDeudorRoutes.constants';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
-import EmailDeudorPopup from '../../features/ficha-deudor/components/popups/EmailDeudorPopup';
-import AgendaDeudorPopup from '../../features/ficha-deudor/components/popups/AgendaDeudorPopup';
-import PagoDeudorPopup from '../../features/ficha-deudor/components/popups/PagoDeudorPopup';
-import InfDeudorPopup from '../../features/ficha-deudor/components/popups/InfDeudorPopup';
-import ListaGestoresPopup from '../../features/ficha-deudor/components/popups/ListaGestoresPopup';
+import EmailDeudorPopup from '../../features/ficha-deudor/modules/emails/components/EmailDeudorPopup';
+import AgendaDeudorPopup from '../../features/ficha-deudor/modules/agenda/components/AgendaDeudorPopup';
+import PagoDeudorPopup from '../../features/ficha-deudor/modules/pago/components/PagoDeudorPopup';
+import InfDeudorPopup from '../../features/ficha-deudor/modules/inf-deudor/components/InfDeudorPopup';
+import ListaGestoresPopup from '../../features/ficha-deudor/modules/lista-gestores/components/ListaGestoresPopup';
 import AppLayout from '../../shared/components/layout/AppLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
