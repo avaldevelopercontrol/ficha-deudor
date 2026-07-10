@@ -16,6 +16,7 @@ export type MenuModuloIconName =
 export interface MenuModulo {
   key: string;
   label: string;
+  breadcrumbLabel?: string;
   descripcion: string;
   icon: MenuModuloIconName;
   path?: string;

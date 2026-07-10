@@ -5,18 +5,14 @@ import {
   Route,
   Routes,
 } from 'react-router-dom';
-
+import { getAppBreadcrumb } from './appBreadcrumbs';
 import { AUTH_ROUTES } from '../../features/auth/constants';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
-import AgendaDeudorPopup from '../../features/ficha-deudor/modules/agenda/components/AgendaDeudorPopup';
-import EmailDeudorPopup from '../../features/ficha-deudor/modules/emails/components/EmailDeudorPopup';
-import InfDeudorPopup from '../../features/ficha-deudor/modules/inf-deudor/components/InfDeudorPopup';
-import ListaGestoresPopup from '../../features/ficha-deudor/modules/lista-gestores/components/ListaGestoresPopup';
-import PagoDeudorPopup from '../../features/ficha-deudor/modules/pago/components/PagoDeudorPopup';
 import { FICHA_DEUDOR_ROUTES } from '../../features/ficha-deudor/shared/constants/fichaDeudorRoutes.constants';
 import AppLayout from '../../shared/components/layout/AppLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
+import { FichaDeudorPopupRoute } from '@features/ficha-deudor/shared/popups/FichaDeudorPopupRoute';
 
 const MenuModulosPage = lazy(
   () => import('../../features/menu-modulos/pages/MenuModulosPage')
@@ -49,6 +45,7 @@ export function AppRouter() {
             <Route
               element={
                 <AppLayout
+                  resolveBreadcrumb={getAppBreadcrumb}
                   withoutSidebarPaths={[
                     AUTH_ROUTES.MENU_MODULOS,
                     FICHA_DEUDOR_ROUTES.FICHA_DEUDOR,
@@ -73,28 +70,8 @@ export function AppRouter() {
             </Route>
 
             <Route
-              path={FICHA_DEUDOR_ROUTES.POPUP_EMAIL_DEUDOR}
-              element={<EmailDeudorPopup />}
-            />
-
-            <Route
-              path={FICHA_DEUDOR_ROUTES.POPUP_AGENDA_DEUDOR}
-              element={<AgendaDeudorPopup />}
-            />
-
-            <Route
-              path={FICHA_DEUDOR_ROUTES.POPUP_PAGO_DEUDOR}
-              element={<PagoDeudorPopup />}
-            />
-
-            <Route
-              path={FICHA_DEUDOR_ROUTES.POPUP_INF_DEUDOR}
-              element={<InfDeudorPopup />}
-            />
-
-            <Route
-              path={FICHA_DEUDOR_ROUTES.POPUP_LISTA_GESTORES}
-              element={<ListaGestoresPopup />}
+              path={FICHA_DEUDOR_ROUTES.POPUP}
+              element={<FichaDeudorPopupRoute />}
             />
           </Route>
 

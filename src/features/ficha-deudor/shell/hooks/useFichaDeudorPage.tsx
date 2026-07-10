@@ -1,26 +1,44 @@
 import type { FichaDeudorPanel } from '../constants/fichaDeudorPanels.constants';
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import type { FichaDeudorIdentityParams } from '../../shared/types/fichaDeudor.types';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { AUTH_ROUTES } from '@features/auth/constants';
 import { ActionButton } from '@shared/components/ui/ActionButton';
 import { useAppLayout } from '@shared/components/layout/AppLayoutContext';
+
+import type { FichaDeudorIdentityParams } from '../../shared/types/fichaDeudor.types';
 import type { DocumentoApi } from '../../shared/types';
+import { clearFichaDeudorSession } from '../../shared/utils/fichaDeudorSession.utils';
 import { useDeudorHeader } from '../../modules/deudor-header/hooks/useDeudorHeader';
 
 type UseFichaDeudorPageParams = FichaDeudorIdentityParams;
+
+const getReturnPath = (state: unknown): string | null => {
+  if (!state || typeof state !== 'object') {
+    return null;
+  }
+
+  const from = (state as { from?: unknown }).from;
+
+  return typeof from === 'string' ? from : null;
+};
 
 export const useFichaDeudorPage = ({
   id_cliente,
   id_cartera,
   id_deudor,
-  id_usuario,
 }: UseFichaDeudorPageParams) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setHeaderActions } = useAppLayout();
 
+  const returnPath = getReturnPath(location.state);
+
   const [contacto, setContacto] = useState('');
-  const [panelActivo, setPanelActivo] = useState<FichaDeudorPanel | null>(null);
-  const [telefonoSeleccionado, setTelefonoSeleccionado] = useState('');
+  const [panelActivo, setPanelActivo] =
+    useState<FichaDeudorPanel | null>(null);
+  const [telefonoSeleccionado, setTelefonoSeleccionado] =
+    useState('');
   const [documentosFiltrados, setDocumentosFiltrados] = useState<
     DocumentoApi[]
   >([]);
@@ -34,13 +52,17 @@ export const useFichaDeudorPage = ({
   );
 
   const goToGestionDeudor = useCallback(() => {
-    const queryParams = new URLSearchParams({
-      id_cliente,
-      id_usuario,
-    });
+    clearFichaDeudorSession();
 
-    navigate(`/gestion-deudor?${queryParams.toString()}`, { replace: true });
-  }, [id_cliente, id_usuario, navigate]);
+    if (returnPath === AUTH_ROUTES.GESTION_DEUDOR) {
+      navigate(-1);
+      return;
+    }
+
+    navigate(AUTH_ROUTES.GESTION_DEUDOR, {
+      replace: true,
+    });
+  }, [navigate, returnPath]);
 
   const handleCancelar = useCallback(() => {
     goToGestionDeudor();
@@ -67,16 +89,23 @@ export const useFichaDeudorPage = ({
 
   const handleGestionGuardada = useCallback(
     (gestionTerminada: boolean) => {
-      if (!gestionTerminada) return;
+      if (!gestionTerminada) {
+        return;
+      }
 
       goToGestionDeudor();
     },
     [goToGestionDeudor]
   );
 
-  const handleTogglePanel = useCallback((accion: FichaDeudorPanel) => {
-    setPanelActivo((actual: FichaDeudorPanel | null) => (actual === accion ? null : accion));
-  }, []);
+  const handleTogglePanel = useCallback(
+    (accion: FichaDeudorPanel) => {
+      setPanelActivo((actual) =>
+        actual === accion ? null : accion
+      );
+    },
+    []
+  );
 
   return {
     contacto,

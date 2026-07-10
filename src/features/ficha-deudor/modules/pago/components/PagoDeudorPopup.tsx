@@ -1,10 +1,8 @@
 import React from 'react';
 
-import { useParams } from 'react-router-dom';
 
 import { usePagosByDeudor } from '../hooks/usePagosByDeudor';
 import { usePagoDeudorColumns } from '../hooks/usePagoDeudorColumns';
-import { usePopupDeudorSearchParams } from '../../../shared/hooks/popups/usePopupDeudorSearchParams';
 import {
   PAGO_DEUDOR_POPUP_PAGE_SIZE_OPTIONS,
   PAGO_DEUDOR_POPUP_TEXTS,
@@ -16,15 +14,23 @@ import {
   PopupPaginatedTableSection,
 } from '../../../shared/components/popups/common';
 import { closePopupWindow } from '../../../shared/utils/popupWindow.utils';
+import { PopupContextBoundary } from '../../../shared/popups/PopupContextBoundary';
+import type { FichaDeudorPopupContext } from '../../../shared/popups/popupContext.types';
 
-const PagoDeudorPopup: React.FC = () => {
-  const { id_cliente, id_cartera, id_deudor } = useParams<{
-    id_cliente: string;
-    id_cartera: string;
-    id_deudor: string;
-  }>();
+interface PagoDeudorPopupContentProps {
+  context: FichaDeudorPopupContext<'pago-deudor'>;
+}
 
-  const { nombre, documento } = usePopupDeudorSearchParams();
+const PagoDeudorPopupContent: React.FC<
+  PagoDeudorPopupContentProps
+> = ({ context }) => {
+  const {
+    idCliente,
+    idCartera,
+    idDeudor,
+    nombre,
+    documento,
+  } = context;
 
   const {
     allData,
@@ -42,7 +48,11 @@ const PagoDeudorPopup: React.FC = () => {
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
-  } = usePagosByDeudor(id_cliente ?? '', id_cartera ?? '', id_deudor ?? '');
+  } = usePagosByDeudor(
+    idCliente,
+    idCartera,
+    idDeudor
+  );
 
   const columns = usePagoDeudorColumns();
 
@@ -91,6 +101,16 @@ const PagoDeudorPopup: React.FC = () => {
         onPageSizeChange={setPageSize}
       />
     </PopupPageLayout>
+  );
+};
+
+const PagoDeudorPopup: React.FC = () => {
+  return (
+    <PopupContextBoundary popupType="pago-deudor">
+      {(context) => (
+        <PagoDeudorPopupContent context={context} />
+      )}
+    </PopupContextBoundary>
   );
 };
 

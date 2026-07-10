@@ -14,6 +14,7 @@ export const MENU_MODULOS: MenuModulo[] = [
       {
         key: 'gestion-deudor',
         label: 'GESTIÓN DEUDOR',
+        breadcrumbLabel: 'GESTIÓN POR PERSONA/DEUDOR',
         descripcion: 'Busca deudores por RUC, DNI o teléfono y accede a su ficha.',
         icon: 'user',
         path: MENU_MODULOS_ROUTES.GESTION_DEUDOR,

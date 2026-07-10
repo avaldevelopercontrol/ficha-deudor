@@ -1,10 +1,7 @@
 import React from 'react';
 
-import { useParams } from 'react-router-dom';
-
 import { useAgendasByDeudor } from '../hooks/useAgendasByDeudor';
 import { useAgendaDeudorColumns } from '../hooks/useAgendaDeudorColumns';
-import { usePopupDeudorSearchParams } from '../../../shared/hooks/popups/usePopupDeudorSearchParams';
 import {
   AGENDA_DEUDOR_POPUP_PAGE_SIZE_OPTIONS,
   AGENDA_DEUDOR_POPUP_TEXTS,
@@ -16,16 +13,24 @@ import {
   PopupPaginatedTableSection,
 } from '../../../shared/components/popups/common';
 import { closePopupWindow } from '../../../shared/utils/popupWindow.utils';
+import type { FichaDeudorPopupContext } from '@features/ficha-deudor/shared/popups/popupContext.types';
+import { PopupContextBoundary } from '@features/ficha-deudor/shared/popups/PopupContextBoundary';
 
-const AgendaDeudorPopup: React.FC = () => {
-  const { id_cliente, id_cartera, id_deudor, id_usuario } = useParams<{
-    id_cliente: string;
-    id_cartera: string;
-    id_deudor: string;
-    id_usuario: string;
-  }>();
+interface AgendaDeudorPopupContentProps {
+  context: FichaDeudorPopupContext<'agenda-deudor'>;
+}
 
-  const { nombre, documento } = usePopupDeudorSearchParams();
+const AgendaDeudorPopupContent: React.FC<
+  AgendaDeudorPopupContentProps
+> = ({ context }) => {
+  const {
+    idCliente,
+    idCartera,
+    idDeudor,
+    idUsuario,
+    nombre,
+    documento,
+  } = context;
 
   const {
     allData,
@@ -44,10 +49,10 @@ const AgendaDeudorPopup: React.FC = () => {
     onTextFilterChange,
     onSelectedFilterChange,
   } = useAgendasByDeudor(
-    id_cliente ?? '',
-    id_cartera ?? '',
-    id_deudor ?? '',
-    id_usuario ?? ''
+    idCliente,
+    idCartera,
+    idDeudor,
+    idUsuario
   );
 
   const columns = useAgendaDeudorColumns();
@@ -97,6 +102,16 @@ const AgendaDeudorPopup: React.FC = () => {
         onPageSizeChange={setPageSize}
       />
     </PopupPageLayout>
+  );
+};
+
+const AgendaDeudorPopup: React.FC = () => {
+  return (
+    <PopupContextBoundary popupType="agenda-deudor">
+      {(context) => (
+        <AgendaDeudorPopupContent context={context} />
+      )}
+    </PopupContextBoundary>
   );
 };
 

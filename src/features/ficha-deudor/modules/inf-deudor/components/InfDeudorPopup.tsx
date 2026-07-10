@@ -1,10 +1,8 @@
 import React from 'react';
 
-import { useParams } from 'react-router-dom';
 
 import { useInfDeudor } from '../hooks/useInfDeudor';
 import { useInfDeudorColumns } from '../hooks/useInfDeudorColumns';
-import { usePopupDeudorSearchParams } from '../../../shared/hooks/popups/usePopupDeudorSearchParams';
 import { INF_DEUDOR_POPUP_TEXTS } from '../constants/infDeudorPopup.constants';
 import { POPUP_WIDE_MAIN_STYLE } from '../../../shared/constants/popupCommon.constants';
 import {
@@ -14,18 +12,19 @@ import {
   PopupWideDataTable,
 } from '../../../shared/components/popups/common';
 import { closePopupWindow } from '../../../shared/utils/popupWindow.utils';
+import { PopupContextBoundary } from '../../../shared/popups/PopupContextBoundary';
+import type { FichaDeudorPopupContext } from '../../../shared/popups/popupContext.types';
 
-const InfDeudorPopup: React.FC = () => {
-  const { id_deudor } = useParams<{
-    id_cliente: string;
-    id_cartera: string;
-    id_deudor: string;
-    id_usuario: string;
-  }>();
+interface InfDeudorPopupContentProps {
+  context: FichaDeudorPopupContext<'inf-deudor'>;
+}
 
-  const { nombre, documento } = usePopupDeudorSearchParams();
+const InfDeudorPopupContent: React.FC<
+  InfDeudorPopupContentProps
+> = ({ context }) => {
+  const { idDeudor, nombre, documento } = context;
 
-  const { rows, isLoading, error, refetch } = useInfDeudor(id_deudor ?? '');
+  const { rows, isLoading, error, refetch } = useInfDeudor(idDeudor);
 
   const { columns, totalWidth } = useInfDeudorColumns(rows);
 
@@ -64,6 +63,16 @@ const InfDeudorPopup: React.FC = () => {
         totalWidth={totalWidth}
       />
     </PopupPageLayout>
+  );
+};
+
+const InfDeudorPopup: React.FC = () => {
+  return (
+    <PopupContextBoundary popupType="inf-deudor">
+      {(context) => (
+        <InfDeudorPopupContent context={context} />
+      )}
+    </PopupContextBoundary>
   );
 };
 

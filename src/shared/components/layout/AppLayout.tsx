@@ -5,37 +5,26 @@ import AppHeader from './AppHeader';
 import { AppLayoutContext } from './AppLayoutContext';
 import '../../styles/components/app-layout.css';
 
-type HeaderConfig = {
-  breadcrumb: string;
-};
-
-const HEADER_BY_PATH: Record<string, HeaderConfig> = {
-  '/gestion-deudor': {
-    breadcrumb: 'GESTIÓN DE COBRANZAS › GESTIÓN POR PERSONA/DEUDOR',
-  },
-  '/ficha-deudor': {
-    breadcrumb: 'GESTIÓN DE COBRANZAS › FICHA DEUDOR',
-  },
-};
-
 interface AppLayoutProps {
   withoutSidebarPaths?: string[];
+  resolveBreadcrumb: (pathname: string) => string;
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({
   withoutSidebarPaths = [],
-}) => {  const location = useLocation();
+  resolveBreadcrumb,
+}) => {
+  const location = useLocation();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [headerActions, setHeaderActions] =
     useState<React.ReactNode>(null);
   const isSidebarHidden = withoutSidebarPaths.includes(location.pathname);
-  const headerConfig = useMemo(() => {
-    return HEADER_BY_PATH[location.pathname] ?? {
-      breadcrumb: 'GESTIÓN DE COBRANZAS',
-    };
-  }, [location.pathname]);
+  const breadcrumb = useMemo(
+    () => resolveBreadcrumb(location.pathname),
+    [location.pathname, resolveBreadcrumb]
+  );
 
   const handleToggleSidebar = () => {
     setIsSidebarCollapsed((current) => !current);
@@ -63,7 +52,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           ].join(' ')}
         >
           <AppHeader
-            breadcrumb={headerConfig.breadcrumb}
+            breadcrumb={breadcrumb}
             actions={headerActions}
             showClientInfo={isSidebarHidden}
             showLogoutButton={isSidebarHidden}

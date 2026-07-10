@@ -1,17 +1,25 @@
 import { useCallback, useState } from 'react';
 
-import type { BotonApi, DeudorInfo } from '../../../shared/types';
+import type {
+  BotonApi,
+  DeudorInfo,
+} from '../../../shared/types';
+import type {
+  FichaDeudorDocumentosParams,
+} from '../../../shared/types/fichaDeudor.types';
 import {
-  DOCUMENTOS_POPUP_HEIGHT,
-  DOCUMENTOS_POPUP_WIDTH,
-} from '../constants/documentosTable.constants';
-import { appendQueryParamsToUrl, openPopup } from '../../../shared/utils/popup.utils';
+  openFichaDeudorPopup,
+} from '../../../shared/popups/popupMessaging.utils';
 
 interface UseDocumentosActionsParams {
   data: DeudorInfo;
+  params: FichaDeudorDocumentosParams;
 }
 
-export const useDocumentosActions = ({ data }: UseDocumentosActionsParams) => {
+export const useDocumentosActions = ({
+  data,
+  params,
+}: UseDocumentosActionsParams) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
 
@@ -26,24 +34,78 @@ export const useDocumentosActions = ({ data }: UseDocumentosActionsParams) => {
 
   const handleBotonClick = useCallback(
     (boton: BotonApi) => {
-      if (boton.popupUrl) {
-        const url = appendQueryParamsToUrl(boton.popupUrl, {
-          nombre: data.nombreRazonSocial,
-          documento: data.dniRuc,
+      const {
+        id_cliente: idCliente,
+        id_cartera: idCartera,
+        id_deudor: idDeudor,
+        id_usuario: idUsuario,
+      } = params;
+
+      const nombre = data.nombreRazonSocial;
+      const documento = data.dniRuc;
+
+      switch (boton.action) {
+        case 'popup_estado_cuenta':
+        openFichaDeudorPopup('estado-cuenta', {
+          idCliente,
+          idCartera,
+          idDeudor,
+          nombre,
+          documento,
         });
-
-        openPopup(
-          url,
-          boton.label,
-          DOCUMENTOS_POPUP_WIDTH,
-          DOCUMENTOS_POPUP_HEIGHT
-        );
         return;
-      }
+        case 'popup_pago':
+          openFichaDeudorPopup('pago-deudor', {
+            idCliente,
+            idCartera,
+            idDeudor,
+            nombre,
+            documento,
+          });
+          return;
 
-      openModal(boton.label);
+        case 'popup_email':
+          openFichaDeudorPopup('email-deudor', {
+            idCliente,
+            idDeudor,
+            idUsuario,
+            nombre,
+            documento,
+          });
+          return;
+
+        case 'popup_agenda':
+          openFichaDeudorPopup('agenda-deudor', {
+            idCliente,
+            idCartera,
+            idDeudor,
+            idUsuario,
+            nombre,
+            documento,
+          });
+          return;
+
+        case 'popup_inf_deudor':
+          openFichaDeudorPopup('inf-deudor', {
+            idCliente,
+            idCartera,
+            idDeudor,
+            idUsuario,
+            nombre,
+            documento,
+          });
+          return;
+
+        default:
+          openModal(boton.label);
+      }
     },
-    [data.dniRuc, data.nombreRazonSocial, openModal]
+    [
+      data.dniRuc,
+      data.nombreRazonSocial,
+      openModal,
+      params,
+    ]
   );
 
   return {

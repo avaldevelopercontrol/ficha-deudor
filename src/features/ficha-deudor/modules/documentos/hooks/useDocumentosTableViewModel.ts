@@ -32,7 +32,10 @@ export const useDocumentosTableViewModel = ({
     modalTitle,
     closeModal,
     handleBotonClick,
-  } = useDocumentosActions({ data });
+  } = useDocumentosActions({
+    data,
+    params,
+  });
 
   useEffect(() => {
     onFilteredDocumentosChange?.(documentos.filteredData);

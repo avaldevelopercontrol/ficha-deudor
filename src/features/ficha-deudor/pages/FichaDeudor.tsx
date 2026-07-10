@@ -22,6 +22,10 @@ import type {
   FichaDeudorReferenciaPanelParams,
 } from '../shared/types/fichaDeudor.types';
 
+import { Navigate } from 'react-router-dom';
+
+import { AUTH_ROUTES } from '@features/auth/constants';
+
 interface FichaContentProps {
   params: FichaDeudorParams;
 }
@@ -161,48 +165,11 @@ const FichaContent: React.FC<FichaContentProps> = ({ params }) => {
 };
 
 const FichaDeudor: React.FC = () => {
-  const {
-    params,
-    hasRequiredParams,
-    missingParams,
-    exampleUrl,
-  } = useFichaDeudorParams();
+  
+  const { params, hasRequiredParams } = useFichaDeudorParams();
 
   if (!hasRequiredParams) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">
-            Error: Parámetros faltantes
-          </h1>
-
-          <p className="text-gray-700 mb-4">
-            No se puede cargar la ficha del deudor porque faltan parámetros
-            requeridos en la URL.
-          </p>
-
-          <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
-            <p className="text-sm text-red-700 font-semibold mb-2">
-              Parámetros faltantes:
-            </p>
-
-            <ul className="list-disc list-inside text-sm text-red-700">
-              {missingParams.map((param) => (
-                <li key={param}>{param}</li>
-              ))}
-            </ul>
-          </div>
-
-          <p className="text-sm text-gray-600 mb-2">
-            Ejemplo de URL válida:
-          </p>
-
-          <code className="block bg-gray-100 text-gray-800 text-xs p-3 rounded overflow-x-auto">
-            {exampleUrl}
-          </code>
-        </div>
-      </div>
-    );
+    return <Navigate to={AUTH_ROUTES.GESTION_DEUDOR} replace />;
   }
 
   return <FichaContent params={params} />;

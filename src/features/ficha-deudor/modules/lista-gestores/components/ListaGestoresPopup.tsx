@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import { useParams } from 'react-router-dom';
 import { useGestoresByCliente } from '../hooks/useGestoresByCliente';
 import { useListaGestoresColumns } from '../hooks/useListaGestoresColumns';
 import {
@@ -17,11 +16,17 @@ import type {
   Gestor,
   GestorSeleccionadoMessage,
 } from '../types/gestor.types';
+import { PopupContextBoundary } from '../../../shared/popups/PopupContextBoundary';
+import type { FichaDeudorPopupContext } from '../../../shared/popups/popupContext.types';
 
-const ListaGestoresPopup: React.FC = () => {
-  const { id_cliente } = useParams<{
-    id_cliente: string;
-  }>();
+interface ListaGestoresPopupContentProps {
+  context: FichaDeudorPopupContext<'lista-gestores'>;
+}
+
+const ListaGestoresPopupContent: React.FC<
+  ListaGestoresPopupContentProps
+> = ({ context }) => {
+  const { idCliente } = context;
 
   const {
     allData,
@@ -39,7 +44,7 @@ const ListaGestoresPopup: React.FC = () => {
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
-  } = useGestoresByCliente(id_cliente ?? '');
+  } = useGestoresByCliente(idCliente);
 
   const handleSelect = useCallback((gestor: Gestor) => {
     const message: GestorSeleccionadoMessage = {
@@ -105,6 +110,16 @@ const ListaGestoresPopup: React.FC = () => {
         onPageSizeChange={setPageSize}
       />
     </PopupPageLayout>
+  );
+};
+
+const ListaGestoresPopup: React.FC = () => {
+  return (
+    <PopupContextBoundary popupType="lista-gestores">
+      {(context) => (
+        <ListaGestoresPopupContent context={context} />
+      )}
+    </PopupContextBoundary>
   );
 };
 

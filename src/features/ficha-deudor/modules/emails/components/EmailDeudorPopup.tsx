@@ -1,9 +1,9 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
 
+import { PopupContextBoundary } from '../../../shared/popups/PopupContextBoundary';
+import type { FichaDeudorPopupContext } from '../../../shared/popups/popupContext.types';
 import { ActionButton } from '@shared/components/ui';
 import { useEmailsByDeudor } from '../hooks/useEmailsByDeudor';
-import { usePopupDeudorSearchParams } from '../../../shared/hooks/popups/usePopupDeudorSearchParams';
 import { useEmailDeudorColumns } from '../hooks/useEmailDeudorColumns';
 import { useEmailDeudorModalActions } from '../hooks/useEmailDeudorModalActions';
 import ModalRegistrarEmail from './ModalRegistrarEmail';
@@ -21,14 +21,20 @@ import {
 } from '../../../shared/components/popups/common';
 import { closePopupWindow } from '../../../shared/utils/popupWindow.utils';
 
-const EmailDeudorPopup: React.FC = () => {
-  const { id_cliente, id_deudor, id_usuario } = useParams<{
-    id_cliente: string;
-    id_deudor: string;
-    id_usuario: string;
-  }>();
+interface EmailDeudorPopupContentProps {
+  context: FichaDeudorPopupContext<'email-deudor'>;
+}
 
-  const { nombre, documento } = usePopupDeudorSearchParams();
+const EmailDeudorPopupContent: React.FC<
+  EmailDeudorPopupContentProps
+> = ({ context }) => {
+  const {
+    idCliente,
+    idDeudor,
+    idUsuario,
+    nombre,
+    documento,
+  } = context;
 
   const deudorData = buildEmailDeudorInfo(nombre, documento);
 
@@ -48,7 +54,7 @@ const EmailDeudorPopup: React.FC = () => {
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
-  } = useEmailsByDeudor(id_cliente ?? '', id_deudor ?? '');
+  } = useEmailsByDeudor(idCliente, idDeudor);
 
   const {
     showRegistrar,
@@ -61,9 +67,9 @@ const EmailDeudorPopup: React.FC = () => {
     handleRegistrar,
     handleGuardarEdicion,
   } = useEmailDeudorModalActions({
-    idCliente: id_cliente,
-    idDeudor: id_deudor,
-    idUsuario: id_usuario,
+    idCliente,
+    idDeudor,
+    idUsuario,
     refetch,
   });
 
@@ -142,6 +148,16 @@ const EmailDeudorPopup: React.FC = () => {
         deudorData={deudorData}
       />
     </>
+  );
+};
+
+const EmailDeudorPopup: React.FC = () => {
+  return (
+    <PopupContextBoundary popupType="email-deudor">
+      {(context) => (
+        <EmailDeudorPopupContent context={context} />
+      )}
+    </PopupContextBoundary>
   );
 };
 

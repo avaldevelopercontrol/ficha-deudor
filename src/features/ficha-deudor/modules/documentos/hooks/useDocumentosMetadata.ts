@@ -63,7 +63,7 @@ export const useDocumentosMetadata = (
       try {
         const [cols, btns] = await Promise.all([
           fetchColumnas(id_cliente, id_contrato),
-          fetchBotones(id_cliente, id_cartera, id_deudor, id_usuario),
+          fetchBotones(id_cliente),
         ]);
 
         if (cancelled) return;

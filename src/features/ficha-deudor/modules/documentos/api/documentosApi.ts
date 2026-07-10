@@ -46,10 +46,7 @@ export async function fetchColumnas(
 }
 
 export async function fetchBotones(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
-  id_usuario: string
+  id_cliente: string
 ): Promise<BotonApi[]> {
   const params = buildDocumentosBotonesParams(id_cliente);
 
@@ -59,9 +56,6 @@ export async function fetchBotones(
       mock: () =>
         buildDocumentosBotones({
           idCliente: id_cliente,
-          idCartera: id_cartera,
-          idDeudor: id_deudor,
-          idUsuario: id_usuario,
         }),
       useMock: env.useDocumentosMock,
     }
