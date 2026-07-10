@@ -68,6 +68,30 @@ export interface GestionMotivoNoPagoList {
   nombre: string;
 }
 
+export interface CreateAgendaPayload {
+  nid_agenda: number;
+  dFechNuevaGestion: string;
+  nid_PersDeudor: number;
+  nombre: string;
+  cartera: string;
+  nid_Cartera: number;
+  nid_Cliente: number;
+  nid_UsuOpe: number;
+  dFecRegistro: string;
+  cUsr_Login: string;
+  nId_TipoOpeCodCliOut: 1 | 2;
+  cRespuestaOpe: string;
+  nId_OpeCodCliOut: number;
+}
+
+export interface CreateAgendaResponse {
+  nid_Cliente: number;
+  nid_Cartera: number;
+  nid_UsuOpe: number;
+  nid_agenda: number;
+  nid_PersDeudor: number;
+}
+
 export interface CreateGestionOpeGesContratosPayload {
   nId_DocxCobrarOpe: number;
   nId_Cliente: number;
@@ -166,6 +190,10 @@ export interface FichaGestionAccionesTomarProps {
   setFields: SetGestionFields;
   usuarioActual: string;
   handleAgendar: () => void;
+  agendaValidationErrors?: FichaGestionValidationErrors;
+  agendaFeedback?: GestionFeedback | null;
+  onCloseAgendaFeedback?: () => void;
+  isScheduling?: boolean;
 }
 
 export interface FichaGestionResultadosLlamadaProps {

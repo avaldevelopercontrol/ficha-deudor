@@ -13,8 +13,13 @@ import type {
   GestionMotivoNoPagoList,
   CreateGestionOpeGesContratosPayload,
   CreateGestionOpeGesContratosResponse,
+  CreateAgendaPayload,
+  CreateAgendaResponse,
 } from '../types/fichaGestion.types';
-import type { ApiResponse } from '@shared/types/indexApi';
+import type {
+  ApiResponse,
+  ApiResponseSimple,
+} from '@shared/types/indexApi';
 import { TIPO_GESTION_PALETA } from '../constants/fichaGestion.constants';
 import {
   FICHA_GESTION_ENDPOINTS,
@@ -137,6 +142,32 @@ export async function createGestionOpeGesContratos(
   );
 
   assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.CREATE_GESTION);
+
+  return result;
+}
+
+export async function createAgenda(
+  payload: CreateAgendaPayload,
+  signal?: AbortSignal
+): Promise<
+  ApiResponseSimple<CreateAgendaResponse>
+> {
+  const result =
+    await apiClient<
+      ApiResponseSimple<CreateAgendaResponse>
+    >(
+      FICHA_GESTION_ENDPOINTS.CREATE_AGENDA,
+      {
+        method: 'POST',
+        body: payload,
+        signal,
+      }
+    );
+
+  assertApiSuccess(
+    result,
+    FICHA_GESTION_ERROR_MESSAGES.CREATE_AGENDA
+  );
 
   return result;
 }

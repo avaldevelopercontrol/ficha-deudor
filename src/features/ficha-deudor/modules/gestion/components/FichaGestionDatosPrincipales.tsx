@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+
 import { SelectField } from '@shared/components/ui';
 import type { FichaGestionDatosPrincipalesProps } from '../types/fichaGestion.types';
 import { useGestorSelectorPopup } from '../hooks/useGestorSelectorPopup';
@@ -10,7 +11,7 @@ const FichaGestionDatosPrincipales: React.FC<
   setField,
   handleNP0Change,
   handleNP1Change,
-  handleOpenWhatsApp,
+  //handleOpenWhatsApp,
   estadosOptions,
   isLoadingEstados,
   errorEstados,
@@ -37,9 +38,16 @@ const FichaGestionDatosPrincipales: React.FC<
   const np2Placeholder = useMemo(() => {
     if (!form.np1) return 'Primero seleccione NP1';
     if (isLoadingNP2) return 'Cargando NP2...';
+    if (np2Options.length === 0) {
+      return 'Sin opciones disponibles';
+    }
 
-    return 'Seleccionar NP2...';
-  }, [form.np1, isLoadingNP2]);
+    return '';
+  }, [
+    form.np1,
+    isLoadingNP2,
+    np2Options.length,
+  ]);
 
   const { handleOpenListaGestores } = useGestorSelectorPopup({
     idCliente,
@@ -110,7 +118,7 @@ const FichaGestionDatosPrincipales: React.FC<
                 value={form.telefono}
                 readOnly
               />
-
+{/* 
               <button
                 type="button"
                 className="btn btn-whatsapp btn-whatsapp--compact"
@@ -120,6 +128,7 @@ const FichaGestionDatosPrincipales: React.FC<
               >
                 WhatsApp
               </button>
+*/}
             </div>
           </div>
         </div>
@@ -151,6 +160,11 @@ const FichaGestionDatosPrincipales: React.FC<
             value={form.np2}
             onChange={handleNP2Change}
             placeholder={np2Placeholder}
+            hidePlaceholder={
+              Boolean(form.np1) &&
+              !isLoadingNP2 &&
+              np2Options.length > 0
+            }
             disabled={!form.np1 || isLoadingNP2}
             error={form.np1 ? errorNP2 || '' : ''}
           />

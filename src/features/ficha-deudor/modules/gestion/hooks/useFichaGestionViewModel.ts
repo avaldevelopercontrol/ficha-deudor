@@ -13,6 +13,8 @@ import type { FichaDeudorGestionFormParams } from '../../../shared/types/fichaDe
 import { useFichaGestionDerivedValues } from './useFichaGestionDerivedValues';
 import { useSyncTelefonoSeleccionado } from './useSyncTelefonoSeleccionado';
 import { buildFichaGestionViewModelProps } from '../mappers/fichaGestionViewModel.mapper';
+import { useSyncDefaultNP2Option } from './useSyncDefaultNP2Option';
+import { useAutoClearFeedback } from './useAutoClearFeedback';
 
 interface UseFichaGestionViewModelParams {
   params: FichaDeudorGestionFormParams;
@@ -22,9 +24,25 @@ interface UseFichaGestionViewModelParams {
   onSubmit?: (data: GestionFormClaro) => void;
 }
 
+interface UseFichaGestionViewModelParams {
+  params: FichaDeudorGestionFormParams;
+  documentosFiltrados: DocumentoApi[];
+  deudorNombre: string;
+  carteraNombre: string;
+  telefonoSeleccionado?: string;
+  onGestionGuardada?: (
+    gestionTerminada: boolean
+  ) => void;
+  onSubmit?: (
+    data: GestionFormClaro
+  ) => void;
+}
+
 export const useFichaGestionViewModel = ({
   params,
   documentosFiltrados,
+  deudorNombre,
+  carteraNombre,
   telefonoSeleccionado,
   onGestionGuardada,
   onSubmit,
@@ -61,7 +79,19 @@ export const useFichaGestionViewModel = ({
     form.np1
   );
 
-  const { np1Options } = catalogos;
+  const {
+    np1Options,
+    np2Options,
+    isLoadingNP2,
+  } = catalogos;
+
+  useSyncDefaultNP2Option({
+    np1: form.np1,
+    np2: form.np2,
+    np2Options,
+    isLoadingNP2,
+    setField,
+  });
 
   const {
     usuarioActual,
@@ -93,6 +123,11 @@ export const useFichaGestionViewModel = ({
   );
 
   const {
+    agendaValidationErrors,
+    agendaFeedback,
+    isScheduling,
+    handleCloseAgendaFeedback,
+    clearAgendaState,
     validationErrors,
     isSaving,
     handleAgendar,
@@ -101,23 +136,44 @@ export const useFichaGestionViewModel = ({
   } = useFichaGestionActions({
     form,
     setField,
-    usuarioActual,
     params,
+    deudorNombre,
+    carteraNombre,
+    np1Options,
+    np2Options,
     documentosFiltrados,
     np1TipoContacto,
-    requiereCamposClaro: mostrarCamposClaro,
+    requiereCamposClaro:
+      mostrarCamposClaro,
     onGestionGuardada,
-    onSubmit: handleGestionRegistrada,
+    onSubmit:
+      handleGestionRegistrada,
   });
+
+  const handleAgendarGestion =
+    useCallback(async () => {
+      setFeedback(null);
+      await handleAgendar();
+    }, [handleAgendar]);
+
+  const handleGuardarGestion =
+    useCallback(async () => {
+      setFeedback(null);
+      clearAgendaState();
+      await handleGuardar();
+    }, [
+      clearAgendaState,
+      handleGuardar,
+    ]);
 
   const handleCloseFeedback = useCallback(() => {
     setFeedback(null);
   }, []);
 
-  const handleGuardarGestion = useCallback(async () => {
-    setFeedback(null);
-    await handleGuardar();
-  }, [handleGuardar]);
+  useAutoClearFeedback({
+    feedback,
+    onClear: handleCloseFeedback,
+  });
 
   return buildFichaGestionViewModelProps({
     idCliente,
@@ -129,7 +185,15 @@ export const useFichaGestionViewModel = ({
     handleOpenWhatsApp,
     catalogos,
     usuarioActual,
-    handleAgendar,
+
+    handleAgendar:
+      handleAgendarGestion,
+
+    agendaValidationErrors,
+    agendaFeedback,
+    isScheduling,
+    handleCloseAgendaFeedback,
+
     validationErrors,
     feedback,
     handleCloseFeedback,

@@ -8,6 +8,7 @@ import type {
 } from '../types/fichaGestion.types';
 import { buildGestionSaveRequest } from '../services/fichaGestionGuardar.service';
 import type { DocumentoApi } from '../../../shared/types';
+import { useAutoClearValidationErrors } from './useAutoClearValidationErrors';
 
 interface UseFichaGestionGuardarParams {
   form: GestionFormClaro;
@@ -30,6 +31,16 @@ export const useFichaGestionGuardar = ({
 }: UseFichaGestionGuardarParams) => {
   const [validationErrors, setValidationErrors] =
     useState<FichaGestionValidationErrors>({});
+
+  const clearValidationErrors =
+    useCallback(() => {
+      clearValidationErrors();
+    }, []);
+
+  useAutoClearValidationErrors({
+    errors: validationErrors,
+    onClear: clearValidationErrors,
+  });
 
   const [isSaving, setIsSaving] = useState(false);
 

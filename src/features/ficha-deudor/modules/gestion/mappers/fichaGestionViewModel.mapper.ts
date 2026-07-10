@@ -13,15 +13,24 @@ interface BuildFichaGestionViewModelPropsParams {
   form: GestionFormClaro;
   setField: SetGestionField;
   setFields: SetGestionFields;
+
   handleNP0Change: (value: string) => void;
   handleNP1Change: (value: string) => void;
   handleOpenWhatsApp: () => void;
+
   catalogos: FichaGestionCatalogos;
   usuarioActual: string;
-  handleAgendar: () => void;
+
+  handleAgendar: () => void | Promise<void>;
+  agendaValidationErrors: FichaGestionValidationErrors;
+  agendaFeedback: GestionFeedback | null;
+  isScheduling: boolean;
+  handleCloseAgendaFeedback: () => void;
+
   validationErrors: FichaGestionValidationErrors;
   feedback: GestionFeedback | null;
   handleCloseFeedback: () => void;
+
   mostrarCamposClaro: boolean;
   handleGuardarGestion: () => void | Promise<void>;
   isSaving: boolean;
@@ -37,10 +46,17 @@ export const buildFichaGestionViewModelProps = ({
   handleOpenWhatsApp,
   catalogos,
   usuarioActual,
+
   handleAgendar,
+  agendaValidationErrors,
+  agendaFeedback,
+  isScheduling,
+  handleCloseAgendaFeedback,
+
   validationErrors,
   feedback,
   handleCloseFeedback,
+
   mostrarCamposClaro,
   handleGuardarGestion,
   isSaving,
@@ -49,21 +65,27 @@ export const buildFichaGestionViewModelProps = ({
     estadosOptions,
     isLoadingEstados,
     errorEstados,
+
     tiposOptions,
     isLoadingTipos,
     errorTipos,
+
     np0Options,
     isLoadingNP0,
     errorNP0,
+
     np1Options,
     isLoadingNP1,
     errorNP1,
+
     np2Options,
     isLoadingNP2,
     errorNP2,
+
     estadoGestionClaroOptions,
     isLoadingEstadoGestionClaro,
     errorEstadoGestionClaro,
+
     motivoNoPagoOptions,
     isLoadingMotivoNoPago,
     errorMotivoNoPago,
@@ -77,18 +99,23 @@ export const buildFichaGestionViewModelProps = ({
       handleNP0Change,
       handleNP1Change,
       handleOpenWhatsApp,
+
       estadosOptions,
       isLoadingEstados,
       errorEstados,
+
       tiposOptions,
       isLoadingTipos,
       errorTipos,
+
       np0Options,
       isLoadingNP0,
       errorNP0,
+
       np1Options,
       isLoadingNP1,
       errorNP1,
+
       np2Options,
       isLoadingNP2,
       errorNP2,
@@ -99,22 +126,33 @@ export const buildFichaGestionViewModelProps = ({
       setField,
       setFields,
       usuarioActual,
+
       handleAgendar,
+      agendaValidationErrors,
+      agendaFeedback,
+      onCloseAgendaFeedback:
+        handleCloseAgendaFeedback,
+      isScheduling,
     },
 
     resultadosLlamadaProps: {
       form,
       setField,
+
       validationErrors,
       feedback,
       onCloseFeedback: handleCloseFeedback,
+
       mostrarCamposClaro,
+
       estadoGestionClaroOptions,
       isLoadingEstadoGestionClaro,
       errorEstadoGestionClaro,
+
       motivoNoPagoOptions,
       isLoadingMotivoNoPago,
       errorMotivoNoPago,
+
       handleGuardar: handleGuardarGestion,
       isSaving,
     },

@@ -2,7 +2,11 @@ import type {
   GestionFormClaro,
   SetGestionField,
 } from '../types/fichaGestion.types';
-import type { DocumentoApi, FichaDeudorGestionFormParams } from '../../../shared/types';
+import type {
+  DocumentoApi,
+  FichaDeudorGestionFormParams,
+} from '../../../shared/types';
+import type { PaletaRespuestaOption } from '../../../shared/utils/selectOptions.utils';
 import { useFichaGestionAgendar } from './useFichaGestionAgendar';
 import { useFichaGestionGuardar } from './useFichaGestionGuardar';
 import { useFichaGestionWhatsapp } from './useFichaGestionWhatsapp';
@@ -10,36 +14,57 @@ import { useFichaGestionWhatsapp } from './useFichaGestionWhatsapp';
 interface UseFichaGestionActionsParams {
   form: GestionFormClaro;
   setField: SetGestionField;
-  usuarioActual: string;
   params: FichaDeudorGestionFormParams;
+  deudorNombre: string;
+  carteraNombre: string;
+  np1Options: PaletaRespuestaOption[];
+  np2Options: PaletaRespuestaOption[];
   documentosFiltrados: DocumentoApi[];
   np1TipoContacto: number;
   requiereCamposClaro: boolean;
-  onGestionGuardada?: (gestionTerminada: boolean) => void;
-  onSubmit?: (data: GestionFormClaro) => void;
+  onGestionGuardada?: (
+    gestionTerminada: boolean
+  ) => void;
+  onSubmit?: (
+    data: GestionFormClaro
+  ) => void;
 }
 
 export const useFichaGestionActions = ({
   form,
   setField,
-  usuarioActual,
   params,
+  deudorNombre,
+  carteraNombre,
+  np1Options,
+  np2Options,
   documentosFiltrados,
   np1TipoContacto,
   requiereCamposClaro,
   onGestionGuardada,
   onSubmit,
 }: UseFichaGestionActionsParams) => {
-
-  const { handleAgendar } = useFichaGestionAgendar({
+  const {
+    agendaValidationErrors,
+    agendaFeedback,
+    isScheduling,
+    handleCloseAgendaFeedback,
+    clearAgendaState,
+    handleAgendar,
+  } = useFichaGestionAgendar({
     form,
     setField,
-    usuarioActual,
+    params,
+    deudorNombre,
+    carteraNombre,
+    np1Options,
+    np2Options,
   });
 
-  const { handleOpenWhatsApp } = useFichaGestionWhatsapp({
-    telefono: form.telefono,
-  });
+  const { handleOpenWhatsApp } =
+    useFichaGestionWhatsapp({
+      telefono: form.telefono,
+    });
 
   const {
     validationErrors,
@@ -56,6 +81,11 @@ export const useFichaGestionActions = ({
   });
 
   return {
+    agendaValidationErrors,
+    agendaFeedback,
+    isScheduling,
+    handleCloseAgendaFeedback,
+    clearAgendaState,
     validationErrors,
     isSaving,
     handleAgendar,

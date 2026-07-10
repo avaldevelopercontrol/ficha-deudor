@@ -11,6 +11,8 @@ import FichaGestionResultadosLlamada from './FichaGestionResultadosLlamada';
 interface Props {
   params: FichaDeudorGestionFormParams;
   documentosFiltrados: DocumentoApi[];
+  deudorNombre: string;
+  carteraNombre: string;
   telefonoSeleccionado?: string;
   onGestionGuardada?: (gestionTerminada: boolean) => void;
   onSubmit?: (data: GestionFormClaro) => void;

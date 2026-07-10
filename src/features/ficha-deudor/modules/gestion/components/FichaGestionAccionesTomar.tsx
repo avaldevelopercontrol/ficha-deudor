@@ -3,6 +3,8 @@ import React from 'react';
 import { useFichaGestionAccionesTomar } from '../hooks/useFichaGestionAccionesTomar';
 import type { FichaGestionAccionesTomarProps } from '../types/fichaGestion.types';
 import GestionTimePicker from './shared/GestionTimePicker';
+import { FeedbackMessage } from '@shared/components/ui';
+import FichaGestionValidationSummary from './shared/FichaGestionValidationSummary';
 
 const FichaGestionAccionesTomar: React.FC<
   FichaGestionAccionesTomarProps
@@ -12,6 +14,10 @@ const FichaGestionAccionesTomar: React.FC<
   setFields,
   usuarioActual,
   handleAgendar,
+  agendaValidationErrors = {},
+  agendaFeedback,
+  onCloseAgendaFeedback,
+  isScheduling = false,
 }) => {
   const {
     puedeIngresarCompromiso,
@@ -126,11 +132,27 @@ const FichaGestionAccionesTomar: React.FC<
             className="btn btn-primary btn-xs agendar-btn"
             type="button"
             onClick={handleAgendar}
+            disabled={isScheduling}
           >
-            Agendar
+            {isScheduling
+              ? 'Agendando...'
+              : 'Agendar'}
           </button>
         </div>
+        
+        <FichaGestionValidationSummary
+          validationErrors={agendaValidationErrors}
+        />
 
+        {agendaFeedback && (
+          <FeedbackMessage
+            variant={agendaFeedback.variant}
+            title={agendaFeedback.title}
+            message={agendaFeedback.message}
+            onClose={onCloseAgendaFeedback}
+          />
+        )}
+        
         <div className="fecha-gestion-row fecha-gestion-row--compact fecha-gestion-row--inline">
           <div className="form-row-inline">
             <label className="form-label form-label--inline">

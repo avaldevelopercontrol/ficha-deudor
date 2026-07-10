@@ -1,9 +1,9 @@
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 
-import { useFichaDeudorParams } from '../shell/hooks/useFichaDeudorParams';
-import { useFichaDeudorPage } from '../shell/hooks/useFichaDeudorPage';
+import { AUTH_ROUTES } from '@features/auth/constants';
+
 import DeudorHeader from '../modules/deudor-header/components/DeudorHeader';
-import AccionesRapidas from '../shell/components/AccionesRapidas';
 import DocumentosTable from '../modules/documentos/components/DocumentosTable';
 import FichaGestion from '../modules/gestion/components/FichaGestion';
 import PanelDatosAdicionales from '../modules/datos-adicionales/components/PanelDatosAdicionales';
@@ -11,8 +11,13 @@ import PanelTelefonosReferenciados from '../modules/telefonos-referenciados/comp
 import PanelDireccionesReferenciadas from '../modules/direcciones-referenciadas/components/PanelDireccionesReferenciadas';
 import PanelEstadoGestionRealizada from '../modules/estado-gestion-realizada/components/PanelEstadoGestionRealizada';
 import PanelGestionRealizada from '../modules/gestion-realizada/components/PanelGestionRealizada';
-import { DeudorProvider } from '../shared/contexts/DeudorContext';
+
+import AccionesRapidas from '../shell/components/AccionesRapidas';
 import { FICHA_DEUDOR_PANEL } from '../shell/constants/fichaDeudorPanels.constants';
+import { useFichaDeudorPage } from '../shell/hooks/useFichaDeudorPage';
+import { useFichaDeudorParams } from '../shell/hooks/useFichaDeudorParams';
+
+import { DeudorProvider } from '../shared/contexts/DeudorContext';
 import type {
   FichaDeudorCarteraPanelParams,
   FichaDeudorDocumentosParams,
@@ -22,15 +27,13 @@ import type {
   FichaDeudorReferenciaPanelParams,
 } from '../shared/types/fichaDeudor.types';
 
-import { Navigate } from 'react-router-dom';
-
-import { AUTH_ROUTES } from '@features/auth/constants';
-
 interface FichaContentProps {
   params: FichaDeudorParams;
 }
 
-const FichaContent: React.FC<FichaContentProps> = ({ params }) => {
+const FichaContent: React.FC<FichaContentProps> = ({
+  params,
+}) => {
   const {
     id_cliente,
     id_cartera,
@@ -82,10 +85,19 @@ const FichaContent: React.FC<FichaContentProps> = ({ params }) => {
     setDocumentosFiltrados,
     gestionRealizadaRefreshKey,
     deudorData,
+    cabeceraData,
+    isLoadingCabecera,
+    cabeceraError,
     handleGestionSubmit,
     handleGestionGuardada,
     handleTogglePanel,
   } = useFichaDeudorPage(params);
+
+  const deudorNombre =
+    deudorData?.nombreRazonSocial ?? '';
+
+  const carteraNombre =
+    cabeceraData?.cartera ?? '';
 
   return (
     <DeudorProvider value={deudorData ?? null}>
@@ -96,9 +108,12 @@ const FichaContent: React.FC<FichaContentProps> = ({ params }) => {
               <DeudorHeader
                 params={headerParams}
                 deudorData={deudorData}
+                cabeceraData={cabeceraData}
+                isLoadingCabecera={isLoadingCabecera}
+                cabeceraError={cabeceraError}
                 contacto={contacto}
                 onContactoChange={setContacto}
-                compact={true}
+                compact
               />
             )}
 
@@ -113,48 +128,71 @@ const FichaContent: React.FC<FichaContentProps> = ({ params }) => {
               <DocumentosTable
                 params={documentosParams}
                 data={deudorData}
-                onFilteredDocumentosChange={setDocumentosFiltrados}
+                onFilteredDocumentosChange={
+                  setDocumentosFiltrados
+                }
               />
             )}
 
             <PanelDatosAdicionales
-              isActive={panelActivo === FICHA_DEUDOR_PANEL.DATOS_ADICIONALES}
+              isActive={
+                panelActivo ===
+                FICHA_DEUDOR_PANEL.DATOS_ADICIONALES
+              }
               params={carteraPanelParams}
             />
 
             <PanelTelefonosReferenciados
               isActive={
-                panelActivo === FICHA_DEUDOR_PANEL.TELEFONOS_REFERENCIADOS
+                panelActivo ===
+                FICHA_DEUDOR_PANEL.TELEFONOS_REFERENCIADOS
               }
               params={referenciaPanelParams}
-              onSelectTelefono={setTelefonoSeleccionado}
+              onSelectTelefono={
+                setTelefonoSeleccionado
+              }
             />
 
             <PanelDireccionesReferenciadas
               isActive={
-                panelActivo === FICHA_DEUDOR_PANEL.DIRECCIONES_REFERENCIADAS
+                panelActivo ===
+                FICHA_DEUDOR_PANEL.DIRECCIONES_REFERENCIADAS
               }
               params={referenciaPanelParams}
             />
 
             <PanelGestionRealizada
-              isActive={panelActivo === FICHA_DEUDOR_PANEL.GESTION_REALIZADA}
+              isActive={
+                panelActivo ===
+                FICHA_DEUDOR_PANEL.GESTION_REALIZADA
+              }
               params={gestionPanelParams}
-              refreshKey={gestionRealizadaRefreshKey}
+              refreshKey={
+                gestionRealizadaRefreshKey
+              }
             />
 
             <PanelEstadoGestionRealizada
               isActive={
-                panelActivo === FICHA_DEUDOR_PANEL.ESTADO_GESTION_REALIZADA
+                panelActivo ===
+                FICHA_DEUDOR_PANEL.ESTADO_GESTION_REALIZADA
               }
               params={carteraPanelParams}
             />
 
             <FichaGestion
               params={params}
-              documentosFiltrados={documentosFiltrados}
-              telefonoSeleccionado={telefonoSeleccionado}
-              onGestionGuardada={handleGestionGuardada}
+              documentosFiltrados={
+                documentosFiltrados
+              }
+              deudorNombre={deudorNombre}
+              carteraNombre={carteraNombre}
+              telefonoSeleccionado={
+                telefonoSeleccionado
+              }
+              onGestionGuardada={
+                handleGestionGuardada
+              }
               onSubmit={handleGestionSubmit}
             />
           </div>
@@ -165,11 +203,18 @@ const FichaContent: React.FC<FichaContentProps> = ({ params }) => {
 };
 
 const FichaDeudor: React.FC = () => {
-  
-  const { params, hasRequiredParams } = useFichaDeudorParams();
+  const {
+    params,
+    hasRequiredParams,
+  } = useFichaDeudorParams();
 
   if (!hasRequiredParams) {
-    return <Navigate to={AUTH_ROUTES.GESTION_DEUDOR} replace />;
+    return (
+      <Navigate
+        to={AUTH_ROUTES.GESTION_DEUDOR}
+        replace
+      />
+    );
   }
 
   return <FichaContent params={params} />;

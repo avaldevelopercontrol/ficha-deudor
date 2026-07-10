@@ -1,4 +1,5 @@
 const BASE_GESTION = '/v1/Gestion';
+const BASE_AGENDA = '/v1/Agenda';
 
 export const FICHA_GESTION_ENDPOINTS = {
   ESTADOS: `${BASE_GESTION}/GetGestionEstadoGestion`,
@@ -7,6 +8,7 @@ export const FICHA_GESTION_ENDPOINTS = {
   ESTADO_GESTION_CLARO: `${BASE_GESTION}/GetGestionEstadoGestionClaro`,
   MOTIVO_NO_PAGO: `${BASE_GESTION}/GetGestionMotivoNoPago`,
   CREATE_GESTION: `${BASE_GESTION}/CreateGestionOpeGesContratos`,
+  CREATE_AGENDA: BASE_AGENDA,
 } as const;
 
 export const FICHA_GESTION_ERROR_MESSAGES = {
@@ -16,4 +18,5 @@ export const FICHA_GESTION_ERROR_MESSAGES = {
   ESTADO_GESTION_CLARO: 'Error cargando Estado Gestión Claro',
   MOTIVO_NO_PAGO: 'Error cargando Motivo No Pago',
   CREATE_GESTION: 'Error guardando la gestión',
+  CREATE_AGENDA: 'Error registrando la agenda',
 } as const;

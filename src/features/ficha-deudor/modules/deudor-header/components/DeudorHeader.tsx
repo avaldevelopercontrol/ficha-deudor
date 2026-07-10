@@ -1,21 +1,24 @@
 import React from 'react';
 
-import {
-  useCabeceraHeader,
-  useMejorRHeader,
-} from '../hooks/useDeudorHeader';
+import { useMejorRHeader } from '../hooks/useDeudorHeader';
 import {
   CompactInfoSection,
   InfoRow,
 } from '@shared/components/ui/CompactInfoSection';
-import type { DeudorInfo } from '../../../shared/types';
+import type {
+  CabeceraInfo,
+  DeudorInfo,
+} from '../../../shared/types';
 import type { FichaDeudorHeaderParams } from '../../../shared/types/fichaDeudor.types';
 
 interface Props {
   params: FichaDeudorHeaderParams;
   deudorData: DeudorInfo;
+  cabeceraData: CabeceraInfo | null;
+  isLoadingCabecera: boolean;
+  cabeceraError: string | null;
   contacto: string;
-  onContactoChange: (v: string) => void;
+  onContactoChange: (value: string) => void;
   compact?: boolean;
   mejorResultado?: string;
 }
@@ -23,17 +26,14 @@ interface Props {
 const DeudorHeader: React.FC<Props> = ({
   params,
   deudorData,
+  cabeceraData,
+  isLoadingCabecera,
+  cabeceraError,
   contacto,
   onContactoChange,
   compact = false,
 }) => {
   const { id_cliente, id_cartera, id_deudor } = params;
-
-  const {
-    data: cabeceraData,
-    isLoading: isLoadingCabecera,
-    error: cabeceraError,
-  } = useCabeceraHeader(id_cliente, id_cartera);
 
   const {
     data: mejorRData,

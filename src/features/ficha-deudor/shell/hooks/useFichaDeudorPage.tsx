@@ -9,7 +9,10 @@ import { useAppLayout } from '@shared/components/layout/AppLayoutContext';
 import type { FichaDeudorIdentityParams } from '../../shared/types/fichaDeudor.types';
 import type { DocumentoApi } from '../../shared/types';
 import { clearFichaDeudorSession } from '../../shared/utils/fichaDeudorSession.utils';
-import { useDeudorHeader } from '../../modules/deudor-header/hooks/useDeudorHeader';
+import {
+  useCabeceraHeader,
+  useDeudorHeader,
+} from '../../modules/deudor-header/hooks/useDeudorHeader';
 
 type UseFichaDeudorPageParams = FichaDeudorIdentityParams;
 
@@ -49,6 +52,15 @@ export const useFichaDeudorPage = ({
     id_cliente,
     id_cartera,
     id_deudor
+  );
+
+  const {
+    data: cabeceraData,
+    isLoading: isLoadingCabecera,
+    error: cabeceraError,
+  } = useCabeceraHeader(
+    id_cliente,
+    id_cartera
   );
 
   const goToGestionDeudor = useCallback(() => {
@@ -117,6 +129,9 @@ export const useFichaDeudorPage = ({
     setDocumentosFiltrados,
     gestionRealizadaRefreshKey,
     deudorData,
+    cabeceraData,
+    isLoadingCabecera,
+    cabeceraError,
     handleGestionSubmit,
     handleGestionGuardada,
     handleTogglePanel,
