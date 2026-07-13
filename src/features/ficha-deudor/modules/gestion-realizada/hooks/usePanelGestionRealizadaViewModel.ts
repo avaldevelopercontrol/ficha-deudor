@@ -29,16 +29,16 @@ export const usePanelGestionRealizadaViewModel = ({
     onRefresh: handleRefreshPanel,
   });
 
-  const { handleVerMas, handleVolver, handleEliminar } =
+  const { handleVerMas, handleVolver } =
     usePanelGestionRealizadaActions({
       setVistaExpandida,
       setResumido: gestiones.setResumido,
     });
 
-  const { columnsResumidas, columnsExpandidas } =
-    usePanelGestionRealizadaColumns({
-      onEliminar: handleEliminar,
-    });
+  const {
+    columnsResumidas,
+    columnsExpandidas,
+  } = usePanelGestionRealizadaColumns();
 
   return {
     ...gestiones,

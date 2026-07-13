@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
-import { ActionButton } from '@shared/components/ui';
+
+import { SelectActionButton } from '@shared/components/ui';
 import type { Column } from '@shared/types';
-import type { Gestor } from '../types/gestor.types';
 
 import {
   LISTA_GESTORES_POPUP_COLUMNS,
   LISTA_GESTORES_POPUP_COLUMN_WIDTHS,
   LISTA_GESTORES_POPUP_TEXTS,
 } from '../constants/listaGestoresPopup.constants';
+import type { Gestor } from '../types/gestor.types';
 
 interface UseListaGestoresColumnsProps {
   onSelect: (row: Gestor) => void;
@@ -51,19 +52,21 @@ export const useListaGestoresColumns = ({
       {
         key: 'codRecaudacion',
         label: LISTA_GESTORES_POPUP_COLUMNS.codRecaudacion,
-        width: LISTA_GESTORES_POPUP_COLUMN_WIDTHS.codRecaudacion,
-        render: (row: Gestor) => row.codRecaudacion || '—',
+        width:
+          LISTA_GESTORES_POPUP_COLUMN_WIDTHS.codRecaudacion,
+        render: (row: Gestor) =>
+          row.codRecaudacion || '—',
       },
       {
         key: 'acciones',
         label: LISTA_GESTORES_POPUP_COLUMNS.acciones,
-        width: LISTA_GESTORES_POPUP_COLUMN_WIDTHS.acciones,
+        width:
+          LISTA_GESTORES_POPUP_COLUMN_WIDTHS.acciones,
         filterable: false,
         render: (row: Gestor) => (
-          <ActionButton
-            label={LISTA_GESTORES_POPUP_TEXTS.selectButton}
-            variant="primary"
-            size="sm"
+          <SelectActionButton
+            ariaLabel={`${LISTA_GESTORES_POPUP_TEXTS.selectButton}: ${row.nombre}`}
+            title={LISTA_GESTORES_POPUP_TEXTS.selectButton}
             onClick={() => onSelect(row)}
           />
         ),

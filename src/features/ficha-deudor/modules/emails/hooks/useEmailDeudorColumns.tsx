@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { ActionButton } from '@shared/components/ui';
+import { EditActionButton } from '@shared/components/ui';
 import { WrapCell } from '@shared/components/ui/WrapCell';
 import type { Column } from '@shared/types';
 import type { Email } from '../types/email.types';
@@ -9,7 +9,6 @@ import {
   EMAIL_DEUDOR_POPUP_COLUMNS,
   EMAIL_DEUDOR_POPUP_COLUMN_WIDTHS,
   EMAIL_DEUDOR_POPUP_FALLBACK_TEXT,
-  EMAIL_DEUDOR_POPUP_TEXTS,
 } from '../constants/emailDeudorPopup.constants';
 import {
   formatEmailPopupFecha,
@@ -108,11 +107,8 @@ export const useEmailDeudorColumns = ({
         width: EMAIL_DEUDOR_POPUP_COLUMN_WIDTHS.acciones,
         filterable: false,
         render: (row: Email) => (
-          <ActionButton
-            label=""
-            variant="primary"
-            size="sm"
-            icon={EMAIL_DEUDOR_POPUP_TEXTS.editButtonIcon}
+          <EditActionButton
+            ariaLabel={`Editar teléfono: ${row.id}`}
             onClick={() => onEdit(row)}
           />
         ),

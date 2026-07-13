@@ -1,5 +1,5 @@
 import type { KeyboardEvent, MouseEvent } from 'react';
-import { ActionButton } from '@shared/components/ui';
+import { EditActionButton } from '@shared/components/ui';
 import { Badge } from '@shared/components/ui/Badge';
 import { WrapCell } from '@shared/components/ui/WrapCell';
 import type { TelefonoReferenciado } from '../types/telefono.types';
@@ -71,11 +71,8 @@ export const renderTelefonoEditCell = (
   onEdit: (row: TelefonoReferenciado) => void
 ) => {
   return (
-    <ActionButton
-      label=""
-      variant="primary"
-      size="sm"
-      icon="✎"
+    <EditActionButton
+      ariaLabel={`Editar teléfono: ${row.numero}`}
       onClick={() => onEdit(row)}
     />
   );

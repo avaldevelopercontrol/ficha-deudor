@@ -20,3 +20,9 @@
 .btn-est { padding: 7px 14px; border: 1.5px solid var(--ap-red); border-radius: var(--radius); background: #fff; color: var(--ap-red); font-size: 11px; font-weight: 600; letter-spacing: .3px; cursor: pointer; transition: all .15s; text-transform: uppercase; font-family: inherit; }
 .btn-est:hover { background: var(--ap-red); color: #fff; }
 
+.select-action-button { width: 34px; height: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: var(--radius); background: var(--ap-navy); color: #ffffff; cursor: pointer; transition: background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; }
+.select-action-button:hover:not(:disabled) { background: var(--ap-red); box-shadow: 0 3px 8px rgba(26, 37, 64, 0.18); transform: translateY(-1px); }
+.select-action-button:active:not(:disabled) { transform: translateY(0); }
+.select-action-button:focus-visible { outline: 2px solid var(--ap-red); outline-offset: 2px; }
+.select-action-button:disabled { cursor: not-allowed; opacity: 0.5; }
+.select-action-button svg { width: 17px; height: 17px; pointer-events: none; }

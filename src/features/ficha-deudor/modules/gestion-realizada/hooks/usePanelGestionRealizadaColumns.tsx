@@ -2,12 +2,11 @@ import { useMemo } from 'react';
 
 import type { Column } from '@shared/types';
 import type {
-  GestionRealizada,
   GestionCompleta,
+  GestionRealizada,
 } from '../../../shared/types';
 import {
   renderComentarioCell,
-  renderEliminarGestionCell,
   renderGestionCompletaResultadoCell,
   renderGestionRealizadaResultadoCell,
   renderNroCell,
@@ -15,13 +14,7 @@ import {
   renderWrappedTextCell,
 } from '../utils/panelGestionRealizadaCells.utils';
 
-interface UsePanelGestionRealizadaColumnsParams {
-  onEliminar: (row: GestionRealizada) => void;
-}
-
-export const usePanelGestionRealizadaColumns = ({
-  onEliminar,
-}: UsePanelGestionRealizadaColumnsParams) => {
+export const usePanelGestionRealizadaColumns = () => {
   const columnsResumidas: Column<GestionRealizada>[] = useMemo(
     () => [
       {
@@ -57,15 +50,8 @@ export const usePanelGestionRealizadaColumns = ({
         label: 'Comentario',
         render: (row) => renderComentarioCell(row.comentario),
       },
-      {
-        key: 'acciones',
-        label: 'Borrar',
-        width: '55px',
-        filterable: false,
-        render: (row) => renderEliminarGestionCell(row, onEliminar),
-      },
     ],
-    [onEliminar]
+    []
   );
 
   const columnsExpandidas: Column<GestionCompleta>[] = useMemo(

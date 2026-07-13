@@ -166,6 +166,19 @@ export const MenuModuloIcon: React.FC<MenuModuloIconProps> = ({ name }) => {
     );
   }
 
+  if (name === 'key') {
+    return (
+      <span className="menu-modulos-icon">
+        <svg {...props}>
+          <circle cx="8" cy="15" r="4" />
+          <path d="m11 12 8-8" />
+          <path d="m15 8 3 3" />
+          <path d="m17 6 3 3" />
+        </svg>
+      </span>
+    );
+  }
+
   return (
     <span className="menu-modulos-icon">
       <svg {...props}>

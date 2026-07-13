@@ -27,8 +27,7 @@ export const useGestionDeudorPage = () => {
 
     /*
      * Compatibilidad con entradas antiguas del historial:
-     * /gestion-deudor?id_cliente=...&id_usuario=...
-     */
+     * /gestion-cobranzas/gestion-deudor?id_cliente=...&id_usuario=...     */
     if (location.search) {
       navigate(AUTH_ROUTES.GESTION_DEUDOR, {
         replace: true,
