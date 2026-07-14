@@ -2,7 +2,7 @@ const BASE_GESTION = '/v1/Gestion';
 
 export const GESTIONES_REALIZADAS_ENDPOINTS = {
   RESUMIDAS: `${BASE_GESTION}/GetGestionGestionesCarteraDeudor`,
-  HISTORICAS: `${BASE_GESTION}/GetGestionEstadosGestionesCarteraDeudorHistorica`,
+  HISTORICAS: `${BASE_GESTION}/GetGestionGestionesCarteraDeudorHistoricas`,
 } as const;
 
 export const GESTIONES_REALIZADAS_INITIAL_PAGE_SIZE = 10;

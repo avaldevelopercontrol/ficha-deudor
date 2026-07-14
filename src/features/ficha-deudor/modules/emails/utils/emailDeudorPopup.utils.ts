@@ -37,5 +37,8 @@ export const buildEmailDeudorInfo = (
     asesorComercial: '',
     correoApv: '',
     correoAc: '',
+    clienteConSinPe: '',
+    clienteListaBlanca: '',
+    clientePorVision: '',
   };
 };

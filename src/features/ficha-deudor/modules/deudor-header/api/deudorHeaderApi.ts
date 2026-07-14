@@ -70,6 +70,9 @@ export async function fetchDeudorHeader(
     asesorComercial: api.asesorComercial,
     correoApv: api.correoAsesorPostVenta,
     correoAc: api.correoAsesorComercial,
+    clientePorVision: api.clientePorVision,
+    clienteListaBlanca: api.clienteListaBlanca,
+    clienteConSinPe: api.clienteConSinPe
   };
 }
 
