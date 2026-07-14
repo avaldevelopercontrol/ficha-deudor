@@ -361,6 +361,20 @@
   color: var(--ap-navy);
 }
 
+.compact-row--danger .compact-label,
+.compact-row--danger .compact-value,
+.compact-row--danger .compact-value--highlight {
+  color: var(--ap-red);
+}
+
+.compact-row--danger .compact-label {
+  font-weight: 600;
+}
+
+.compact-row--danger .compact-value {
+  font-weight: 700;
+}
+
 .compact-value--link {
   font-size: 10px;
   color: var(--ap-info);

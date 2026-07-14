@@ -98,7 +98,6 @@ const DeudorHeader: React.FC<Props> = ({
 
               <div
                 className="compact-row compact-row--center"
-                style={{ marginTop: 2 }}
               >
                 <span className="compact-label">Contacto:</span>
                 <input
@@ -109,6 +108,7 @@ const DeudorHeader: React.FC<Props> = ({
                   className="compact-input"
                 />
               </div>
+
             </CompactInfoSection>
 
             <CompactInfoSection title="Asesores">
@@ -133,15 +133,34 @@ const DeudorHeader: React.FC<Props> = ({
                 value={deudorData.correoAc}
                 title={deudorData.correoAc}
               />
+
+              <InfoRow
+                label="Plazo Especial:"
+                value={deudorData.clienteConSinPe}
+                tone="danger"
+              />
+
+              <InfoRow
+                label="White List:"
+                value={deudorData.clienteListaBlanca}
+                tone="danger"
+              />
+
+              <InfoRow
+                label="Provision:"
+                value={deudorData.clientePorVision}
+                tone="danger"
+              />
+
             </CompactInfoSection>
 
-            <CompactInfoSection title="Mejor Resultado">
+            {/*<CompactInfoSection title="Mejor Resultado">
               <InfoRow
                 label="Resultado:"
                 value={mejorRData.mejorResultado}
                 highlight
               />
-            </CompactInfoSection>
+            </CompactInfoSection>*/}
           </div>
         </div>
       ) : (

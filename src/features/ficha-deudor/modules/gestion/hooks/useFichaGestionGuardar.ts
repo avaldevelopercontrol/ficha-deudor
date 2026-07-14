@@ -1,13 +1,14 @@
 import { useCallback, useState } from 'react';
-import { FICHA_GESTION_MESSAGES } from '../constants/fichaGestionMessages.constants';
-import { createGestionOpeGesContratos } from '../api/fichaGestionApi';
+
+import type { DocumentoApi } from '../../../shared/types';
 import type { FichaDeudorGestionFormParams } from '../../../shared/types/fichaDeudor.types';
+import { createGestionOpeGesContratos } from '../api/fichaGestionApi';
+import { FICHA_GESTION_MESSAGES } from '../constants/fichaGestionMessages.constants';
+import { buildGestionSaveRequest } from '../services/fichaGestionGuardar.service';
 import type {
   FichaGestionValidationErrors,
   GestionFormClaro,
 } from '../types/fichaGestion.types';
-import { buildGestionSaveRequest } from '../services/fichaGestionGuardar.service';
-import type { DocumentoApi } from '../../../shared/types';
 import { useAutoClearValidationErrors } from './useAutoClearValidationErrors';
 
 interface UseFichaGestionGuardarParams {
@@ -29,46 +30,63 @@ export const useFichaGestionGuardar = ({
   onGestionGuardada,
   onSubmit,
 }: UseFichaGestionGuardarParams) => {
-  const [validationErrors, setValidationErrors] =
-    useState<FichaGestionValidationErrors>({});
+  const [
+    validationErrors,
+    setValidationErrors,
+  ] = useState<FichaGestionValidationErrors>({});
 
-  const clearValidationErrors =
-    useCallback(() => {
-      clearValidationErrors();
-    }, []);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const clearValidationErrors = useCallback(() => {
+    setValidationErrors({});
+  }, []);
 
   useAutoClearValidationErrors({
     errors: validationErrors,
     onClear: clearValidationErrors,
   });
 
-  const [isSaving, setIsSaving] = useState(false);
-
   const handleGuardar = useCallback(async () => {
     const saveRequest = buildGestionSaveRequest({
-    form,
-    params,
-    documentosFiltrados,
-    np1TipoContacto,
-    requiereCamposClaro,
+      form,
+      params,
+      documentosFiltrados,
+      np1TipoContacto,
+      requiereCamposClaro,
     });
 
-    setValidationErrors(saveRequest.validationErrors);
+    setValidationErrors(
+      saveRequest.validationErrors
+    );
 
-    if (!saveRequest.isValid) return;
+    if (!saveRequest.isValid) {
+      return;
+    }
 
     setIsSaving(true);
 
     try {
-      await createGestionOpeGesContratos(saveRequest.payload);
+      await createGestionOpeGesContratos(
+        saveRequest.payload
+      );
 
       onSubmit?.(form);
-      onGestionGuardada?.(form.gestionTerminada);
+      onGestionGuardada?.(
+        form.gestionTerminada
+      );
 
-      alert(FICHA_GESTION_MESSAGES.SAVE_SUCCESS);
+      alert(
+        FICHA_GESTION_MESSAGES.SAVE_SUCCESS
+      );
     } catch (error) {
-      console.error('Error al guardar gestión:', error);
-      alert(FICHA_GESTION_MESSAGES.SAVE_ERROR);
+      console.error(
+        'Error al guardar gestión:',
+        error
+      );
+
+      alert(
+        FICHA_GESTION_MESSAGES.SAVE_ERROR
+      );
     } finally {
       setIsSaving(false);
     }

@@ -178,6 +178,7 @@ export const useFichaGestionAgendar = ({
       }
     }, [
       carteraNombre,
+      clearAgendaValidationErrors,
       deudorNombre,
       form,
       isScheduling,

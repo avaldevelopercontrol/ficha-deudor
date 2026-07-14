@@ -1,4 +1,4 @@
-import { ActionButton } from '@shared/components/ui';
+import { EditActionButton } from '@shared/components/ui';
 import { WrapCell } from '@shared/components/ui/WrapCell';
 import type { DireccionReferenciada } from '../types/direccion.types';
 
@@ -44,11 +44,8 @@ export const renderDireccionEditCell = (
   onEdit: (row: DireccionReferenciada) => void
 ) => {
   return (
-    <ActionButton
-      label=""
-      variant="primary"
-      size="sm"
-      icon="✎"
+    <EditActionButton
+      ariaLabel={`Editar teléfono: ${row.id}`}
       onClick={() => onEdit(row)}
     />
   );

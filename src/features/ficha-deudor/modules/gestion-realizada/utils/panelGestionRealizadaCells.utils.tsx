@@ -1,4 +1,3 @@
-import { ActionButton } from '@shared/components/ui';
 import ExpandableCell from '@shared/components/ui/ExpandableCell';
 import { WrapCell } from '@shared/components/ui/WrapCell';
 import type {
@@ -91,21 +90,6 @@ export const renderRespuestaCell = (respuesta: string) => {
 
 export const renderComentarioCell = (comentario: string) => {
   return <ExpandableCell text={comentario} maxLines={2} lineHeight={18} />;
-};
-
-export const renderEliminarGestionCell = (
-  row: GestionRealizada,
-  onEliminar: (row: GestionRealizada) => void
-) => {
-  return (
-    <ActionButton
-      label=""
-      variant="danger"
-      size="sm"
-      icon="🗑"
-      onClick={() => onEliminar(row)}
-    />
-  );
 };
 
 export const renderGestionRealizadaResultadoCell = (

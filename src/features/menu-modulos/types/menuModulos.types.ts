@@ -11,7 +11,8 @@ export type MenuModuloIconName =
   | 'target'
   | 'mail'
   | 'phone'
-  | 'user';
+  | 'user'
+  | 'key';
 
 export interface MenuModulo {
   key: string;

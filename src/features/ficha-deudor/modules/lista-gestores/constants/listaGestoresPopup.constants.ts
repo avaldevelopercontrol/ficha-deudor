@@ -19,7 +19,7 @@ export const LISTA_GESTORES_POPUP_COLUMNS = {
   login: 'Login',
   subZona: 'Sub Zonal',
   codRecaudacion: 'Codigo Rec.',
-  acciones: 'Acciones',
+  acciones: 'Escoger',
 } as const;
 
 export const LISTA_GESTORES_POPUP_COLUMN_WIDTHS = {
@@ -29,7 +29,7 @@ export const LISTA_GESTORES_POPUP_COLUMN_WIDTHS = {
   login: '120px',
   subZona: '140px',
   codRecaudacion: '120px',
-  acciones: '110px',
+  acciones: '47px',
 } as const;
 
 export const LISTA_GESTORES_POPUP_PAGE_SIZE_OPTIONS = [5, 10, 30, 50];

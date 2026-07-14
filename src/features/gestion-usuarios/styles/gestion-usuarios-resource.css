@@ -1,0 +1,56 @@
+/* =========================================================
+   GESTIÓN DE USUARIOS — ESTADOS DE RECURSOS
+   ========================================================= */
+
+.gestion-usuarios-resource-state {
+  min-height: 180px;
+  padding: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  color: var(--ap-text-muted);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.gestion-usuarios-resource-state__spinner {
+  width: 20px;
+  height: 20px;
+
+  display: inline-block;
+
+  border: 2px solid var(--ap-gray-200);
+  border-top-color: var(--ap-red);
+  border-radius: 50%;
+
+  animation:
+    gestion-usuarios-spinner
+    700ms linear infinite;
+}
+
+.gestion-usuarios-resource-error {
+  padding: 20px 24px 24px;
+}
+
+.gestion-usuarios-resource-error__actions {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: 10px;
+}
+
+@keyframes gestion-usuarios-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gestion-usuarios-resource-state__spinner {
+    animation: none;
+  }
+}

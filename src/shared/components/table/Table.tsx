@@ -280,13 +280,26 @@ function Table<TData>({
                         <ColumnFilter
                           label={col.label}
                           values={uniqueValuesMap[col.key] || []}
-                          selectedValues={selectedFilters[col.key] || []}
-                          onSelectedChange={(selected) =>
-                            onSelectedFilterChange?.(col.key, selected)
+                          selectedValues={
+                            selectedFilters[col.key] || []
                           }
-                          textFilter={textFilters[col.key] || ''}
+                          onSelectedChange={(selected) =>
+                            onSelectedFilterChange?.(
+                              col.key,
+                              selected
+                            )
+                          }
+                          textFilter={
+                            textFilters[col.key] || ''
+                          }
                           onTextFilterChange={(text) =>
-                            onTextFilterChange?.(col.key, text)
+                            onTextFilterChange?.(
+                              col.key,
+                              text
+                            )
+                          }
+                          getOptionLabel={
+                            col.filterOptionLabel
                           }
                         />
                       ) : (

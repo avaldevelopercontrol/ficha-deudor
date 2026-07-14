@@ -25,6 +25,7 @@ export interface DeudorInfoApi {
   agendas: boolean;
   llamadas: boolean;
   fechaConsulta: string;
+  codigo: string;
   asesorPostVenta: string;
   correoAsesorPostVenta: string;
   asesorComercial: string;
@@ -33,6 +34,7 @@ export interface DeudorInfoApi {
   clientePorVision: string;
   clienteListaBlanca: string;
   clienteConSinPe: string;
+  nGra_Instruccion: string;
 }
 
 export interface DeudorInfo {
@@ -45,6 +47,9 @@ export interface DeudorInfo {
   asesorComercial: string;
   correoApv: string;
   correoAc: string;
+  clientePorVision: string;
+  clienteListaBlanca: string;
+  clienteConSinPe: string;
 }
 
 export interface MejorRInfo {
