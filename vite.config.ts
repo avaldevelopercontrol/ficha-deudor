@@ -4,7 +4,7 @@ import path from 'node:path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const proxyTarget = env.VITE_PROXY_TARGET || 'http://192.168.100.91:7143';
+  const proxyTarget = env.VITE_API_BASE_URL || 'http://192.168.100.91:7143';
 
   return {
     plugins: [react()],
@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
-      },
+      }
     },
   };
 });
