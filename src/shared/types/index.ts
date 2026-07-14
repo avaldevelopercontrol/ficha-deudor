@@ -17,6 +17,7 @@ export interface Column<TData = unknown> {
   filterable?: boolean;
   group?: string;
   groupLabel?: string;
+  filterOptionLabel?: (value: string) => string;
 }
 
 export interface Ubigeo {

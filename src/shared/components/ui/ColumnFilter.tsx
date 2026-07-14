@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { createPortal } from 'react-dom';
 
 interface ColumnFilterProps {
@@ -8,6 +14,7 @@ interface ColumnFilterProps {
   textFilter: string;
   onTextFilterChange: (text: string) => void;
   label: string;
+  getOptionLabel?: (value: string) => string;
 }
 
 const ColumnFilter: React.FC<ColumnFilterProps> = ({
@@ -17,6 +24,7 @@ const ColumnFilter: React.FC<ColumnFilterProps> = ({
   textFilter,
   onTextFilterChange,
   label,
+  getOptionLabel,
 }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -79,9 +87,33 @@ const ColumnFilter: React.FC<ColumnFilterProps> = ({
     };
   }, [open, closeDropdown]);
 
-  const filteredValues = values.filter((value) =>
-    value.toLowerCase().includes(search.toLowerCase())
+  const getDisplayValue = useCallback(
+    (value: string) => {
+      return getOptionLabel?.(value) ?? value;
+    },
+    [getOptionLabel]
   );
+
+  const filteredValues = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return values;
+    }
+
+    return values.filter((value) => {
+      const displayValue =
+        getDisplayValue(value).toLowerCase();
+
+      return displayValue.includes(
+        normalizedSearch
+      );
+    });
+  }, [
+    getDisplayValue,
+    search,
+    values,
+  ]);
 
   const handleCheck = (value: string) => {
     if (selectedValues.includes(value)) {
@@ -91,20 +123,40 @@ const ColumnFilter: React.FC<ColumnFilterProps> = ({
     }
   };
 
+  const isAllSelected =
+    filteredValues.length > 0 &&
+    filteredValues.every((value) =>
+      selectedValues.includes(value)
+    );
+
   const handleSelectAll = () => {
-    if (filteredValues.length === selectedValues.length) {
-      onSelectedChange([]);
-    } else {
-      onSelectedChange([...filteredValues]);
+    if (isAllSelected) {
+      const filteredValueSet =
+        new Set(filteredValues);
+
+      onSelectedChange(
+        selectedValues.filter(
+          (value) =>
+            !filteredValueSet.has(value)
+        )
+      );
+
+      return;
     }
+
+    onSelectedChange(
+      Array.from(
+        new Set([
+          ...selectedValues,
+          ...filteredValues,
+        ])
+      )
+    );
   };
 
   const handleClear = () => {
     onSelectedChange([]);
   };
-
-  const isAllSelected =
-    filteredValues.length > 0 && filteredValues.length === selectedValues.length;
 
   const dropdownContent = (
     <div
@@ -211,7 +263,7 @@ const ColumnFilter: React.FC<ColumnFilterProps> = ({
               }}
             />
 
-            <span style={{ color: '#333' }}>{value}</span>
+            <span style={{ color: '#333' }}>{getDisplayValue(value)}</span>
           </label>
         ))}
 

@@ -6,7 +6,7 @@ import { useTelefonosReferenciados } from './useTelefonosReferenciados';
 
 interface UsePanelTelefonosReferenciadosViewModelParams {
   params: FichaDeudorReferenciaPanelParams;
-  onSelectTelefono?: (telefono: string) => void;
+  onSelectTelefono: (telefono: string) => void;
 }
 
 export const usePanelTelefonosReferenciadosViewModel = ({

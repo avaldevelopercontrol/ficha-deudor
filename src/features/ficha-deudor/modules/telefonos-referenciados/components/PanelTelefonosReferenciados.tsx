@@ -16,7 +16,7 @@ import PanelTablaResumen from '../../../shared/components/panels/PanelTablaResum
 interface Props {
   isActive: boolean;
   params: FichaDeudorReferenciaPanelParams;
-  onSelectTelefono?: (telefono: string) => void;
+  onSelectTelefono: (telefono: string) => void;
 }
 
 const PanelTelefonosReferenciados: React.FC<Props> = ({
