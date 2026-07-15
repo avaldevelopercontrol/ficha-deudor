@@ -11,7 +11,9 @@ function isValidTelefonoFormat(value: string): boolean {
   return /^[0-9+\-\s]+$/.test(value);
 }
 
-function validateTelefonoBase(data: TelefonoFormData): TelefonoFormErrors {
+function validateTelefonoBase(
+  data: TelefonoFormData
+): TelefonoFormErrors {
   const errors: TelefonoFormErrors = {};
   const numero = data.numero.trim();
 
@@ -35,15 +37,38 @@ function validateTelefonoBase(data: TelefonoFormData): TelefonoFormErrors {
     errors.ubicacion = 'La ubicación es obligatoria';
   }
 
-  if (!isEmptyValue(data.anexo) && data.anexo.length > MAX_ANEXO_LENGTH) {
-    errors.anexo = 'El anexo no puede tener más de 10 caracteres';
+  if (isEmptyValue(data.prioridad)) {
+    errors.prioridad = 'La prioridad es obligatoria';
+  }
+
+  if (isEmptyValue(data.horarioGestion)) {
+    errors.horarioGestion =
+      'El horario de gestión es obligatorio';
+  }
+
+  if (isEmptyValue(data.fuenteBusqueda)) {
+    errors.fuenteBusqueda =
+      'La fuente de búsqueda es obligatoria';
+  }
+
+  if (data.referencia <= 0) {
+    errors.referencia = 'La referencia es obligatoria';
+  }
+
+  if (
+    !isEmptyValue(data.anexo) &&
+    data.anexo.length > MAX_ANEXO_LENGTH
+  ) {
+    errors.anexo =
+      'El anexo no puede tener más de 10 caracteres';
   }
 
   if (
     !isEmptyValue(data.comentario) &&
     data.comentario.length > MAX_COMENTARIO_LENGTH
   ) {
-    errors.comentario = 'El comentario no puede exceder 500 caracteres';
+    errors.comentario =
+      'El comentario no puede exceder 500 caracteres';
   }
 
   return errors;

@@ -212,6 +212,7 @@ export const DireccionFormFields: React.FC<DireccionFormFieldsProps> = ({
         )}
         error={errors.refUbicacion || errorUbicaciones || ''}
         disabled={isLoadingUbicaciones}
+        hidePlaceholder
       />
 
       <TextAreaField
@@ -234,7 +235,7 @@ export const DireccionFormFields: React.FC<DireccionFormFieldsProps> = ({
           onChange={(v) => onChange('llegoDeBase', toBooleanValue(v))}
           placeholder={footerPlaceholder}
           error={errors.llegoDeBase}
-          hidePlaceholder={!placeholders.compactSelect}
+          hidePlaceholder
         />
 
         <SelectField
@@ -245,7 +246,7 @@ export const DireccionFormFields: React.FC<DireccionFormFieldsProps> = ({
           onChange={(v) => onChange('tipoDeudor', String(v))}
           placeholder={footerPlaceholder}
           error={errors.tipoDeudor}
-          hidePlaceholder={!placeholders.compactSelect}
+          hidePlaceholder
         />
       </FormGrid>
 
@@ -257,6 +258,7 @@ export const DireccionFormFields: React.FC<DireccionFormFieldsProps> = ({
           value={form.estado ?? true}
           onChange={(v) => onEstadoChange(toBooleanValue(v))}
           placeholder={footerPlaceholder}
+          hidePlaceholder
         />
       )}
     </>

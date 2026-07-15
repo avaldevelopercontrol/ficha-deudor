@@ -65,7 +65,7 @@ export const buildCreateTelefonoRequest = (
     nreferencia: toNumberValue(data.referencia),
     nid_usuarioupd: toNumberValue(id_usuario),
     nId_OperadorTelefonico: toNumberValue(data.operadorTelefonico),
-    bEstado: data.bEstado ?? true,
+    bEstado: true,
     dFecUlt_PerstelefOpe: nowIso,
     dFecCarga_PersTelef: nowIso,
     bReclamo: data.reclamoIndecopi ?? false,

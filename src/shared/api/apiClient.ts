@@ -136,13 +136,19 @@ export async function apiClient<T>(
     return await mock();
   }
 
+  const requestHeaders: Record<string, string> = {
+    Accept: "application/json",
+    ...headers,
+  };
+
+  if (body !== undefined) {
+    requestHeaders["Content-Type"] = "application/json";
+  }
+
   const response = await fetch(`${env.apiBaseUrl}${endpoint}`, {
     method,
     signal,
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
+    headers: requestHeaders,
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 

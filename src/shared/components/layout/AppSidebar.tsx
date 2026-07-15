@@ -6,6 +6,7 @@ import { GESTION_USUARIOS_ROUTES } from '../../../features/gestion-usuarios/cons
 import { AUTH_ROUTES } from '../../../features/auth/constants';
 import SidebarMenuSection from './SidebarMenuSection';
 import '../../styles/components/app-sidebar.css';
+import { GESTION_USUARIOS_FEATURE } from '../../../features/gestion-usuarios/constants/gestionUsuariosFeature.constants';
 
 interface AppSidebarProps {
   isCollapsed?: boolean;
@@ -251,36 +252,30 @@ export const AppSidebar: React.FC<AppSidebarProps> = () => {
               ]}
             />
 
-            <SidebarMenuSection
-              label="Gestión de usuarios"
-              icon={<UsersIcon />}
-              isOpen={isUsuariosOpen}
-              onToggle={() => {
-                setIsUsuariosOpen(
-                  (current) => !current
-                );
-              }}
-              items={[
-                {
-                  label: 'Cambiar clave',
-                  to:
-                    GESTION_USUARIOS_ROUTES
-                      .CAMBIAR_CLAVE,
-                },
-                {
-                  label: 'Asignar usuario',
-                  to:
-                    GESTION_USUARIOS_ROUTES
-                      .ASIGNAR_USUARIO,
-                },
-                {
-                  label: 'Mantener usuario',
-                  to:
-                    GESTION_USUARIOS_ROUTES
-                      .MANTENER_USUARIO,
-                },
-              ]}
-            />
+            {GESTION_USUARIOS_FEATURE.enabled && (
+              <SidebarMenuSection
+                label="Gestión de usuarios"
+                icon={<UsersIcon />}
+                isOpen={isUsuariosOpen}
+                onToggle={() => {
+                  setIsUsuariosOpen((current) => !current);
+                }}
+                items={[
+                  {
+                    label: 'Cambiar clave',
+                    to: GESTION_USUARIOS_ROUTES.CAMBIAR_CLAVE,
+                  },
+                  {
+                    label: 'Asignar usuario',
+                    to: GESTION_USUARIOS_ROUTES.ASIGNAR_USUARIO,
+                  },
+                  {
+                    label: 'Mantener usuario',
+                    to: GESTION_USUARIOS_ROUTES.MANTENER_USUARIO,
+                  },
+                ]}
+              />
+            )}
           </div>
         </nav>
       </div>

@@ -15,6 +15,7 @@ const BASE_GESTION = '/v1/Gestion';
 export async function fetchCabeceraHeader(
   id_cliente: string,
   id_cartera: string,
+  signal?: AbortSignal
 ): Promise<CabeceraInfo> {
   const params = new URLSearchParams({
     nId_Cliente: id_cliente,
@@ -23,10 +24,16 @@ export async function fetchCabeceraHeader(
 
   const result = await apiClient<ApiResponseSimple<CabeceraInfoApi>>(
     `${BASE_GESTION}/GetGestionZonaCarteraCampanna?${params.toString()}`,
+    {
+      signal,
+    }
   );
 
   if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando información de cabecera');
+    throw new Error(
+      result.message ||
+        'Error cargando información de cabecera'
+    );
   }
 
   const api = result.response;
@@ -43,6 +50,7 @@ export async function fetchDeudorHeader(
   id_cliente: string,
   id_cartera: string,
   id_deudor: string,
+  signal?: AbortSignal
 ): Promise<DeudorInfo> {
   const params = new URLSearchParams({
     nId_Cliente: id_cliente,
@@ -52,16 +60,24 @@ export async function fetchDeudorHeader(
 
   const result = await apiClient<ApiResponseSimple<DeudorInfoApi>>(
     `${BASE_GESTION}/GetGestionDeudor?${params.toString()}`,
+    {
+      signal,
+    }
   );
 
   if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando información del deudor');
+    throw new Error(
+      result.message ||
+        'Error cargando información del deudor'
+    );
   }
 
   const api = result.response;
 
   return {
-    nombreRazonSocial: api.nombreCompleto || `${api.nombre} ${api.ruc}`.trim(),
+    nombreRazonSocial:
+      api.nombreCompleto ||
+      `${api.nombre} ${api.ruc}`.trim(),
     dniRuc: api.ruc || api.dni || '',
     gradoInstruccion: api.gradoInstruccion,
     edad: api.edad,
@@ -72,7 +88,7 @@ export async function fetchDeudorHeader(
     correoAc: api.correoAsesorComercial,
     clientePorVision: api.clientePorVision,
     clienteListaBlanca: api.clienteListaBlanca,
-    clienteConSinPe: api.clienteConSinPe
+    clienteConSinPe: api.clienteConSinPe,
   };
 }
 
