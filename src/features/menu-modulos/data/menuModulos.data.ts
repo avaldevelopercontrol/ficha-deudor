@@ -1,6 +1,6 @@
 import { MENU_MODULOS_ROUTES } from '../constants/menuModulosRoutes.constants';
 import type { MenuModulo } from '../types';
-import { GESTION_USUARIOS_ROUTES } from '@features/gestion-usuarios/constants/gestionUsuariosRoutes.constants';
+import { GESTION_USUARIOS_FEATURE } from '@features/gestion-usuarios/constants/gestionUsuariosFeature.constants';
 
 const PROXIMAMENTE_BADGE = 'Próximamente';
 
@@ -66,41 +66,11 @@ export const MENU_MODULOS: MenuModulo[] = [
   {
     key: 'gestion-usuarios',
     label: 'GESTIÓN DE USUARIOS',
-    descripcion: 'Administración de usuarios, roles y seguridad de acceso.',
+    descripcion:
+      'Administración de usuarios, perfiles, asignaciones y seguridad de acceso.',
     icon: 'users',
-    badge: 'Disponible',
-    children: [
-      {
-        key: 'cambiar-clave',
-        label: 'CAMBIAR CLAVE',
-        descripcion: 'Actualiza la clave de acceso del usuario autenticado.',
-        icon: 'key',
-        path: GESTION_USUARIOS_ROUTES.CAMBIAR_CLAVE,
-        badge: 'Disponible',
-      },
-      {
-        key: 'asignar-usuario',
-        label: 'ASIGNAR USUARIO',
-        descripcion:
-          'Selecciona usuarios para gestionar la asignación de zonas.',
-        icon: 'user',
-        path:
-          GESTION_USUARIOS_ROUTES
-            .ASIGNAR_USUARIO,
-        badge: 'Disponible',
-      },
-      {
-        key: 'mantener-usuario',
-        label: 'MANTENER USUARIO',
-        descripcion:
-          'Consulta y mantenimiento de los usuarios registrados.',
-        icon: 'user',
-        path:
-          GESTION_USUARIOS_ROUTES
-            .MANTENER_USUARIO,
-        badge: 'Disponible',
-      },
-    ],
+    isEnabled: GESTION_USUARIOS_FEATURE.enabled,
+    badge: GESTION_USUARIOS_FEATURE.badge,
   },
   {
     key: 'reportes-generales',

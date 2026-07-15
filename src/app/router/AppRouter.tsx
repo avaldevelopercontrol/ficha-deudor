@@ -1,4 +1,8 @@
-import { lazy, Suspense } from 'react';
+import {
+  lazy,
+  Suspense,
+  type ReactNode,
+} from 'react';
 import {
   BrowserRouter,
   Navigate,
@@ -12,9 +16,8 @@ import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { FICHA_DEUDOR_ROUTES } from '../../features/ficha-deudor/shared/constants/fichaDeudorRoutes.constants';
 import { GESTION_USUARIOS_ROUTES } from '../../features/gestion-usuarios/constants/gestionUsuariosRoutes.constants';
 import AppLayout from '../../shared/components/layout/AppLayout';
-
+import { GESTION_USUARIOS_FEATURE } from '../../features/gestion-usuarios/constants/gestionUsuariosFeature.constants';
 import { FichaDeudorPopupRoute } from '@features/ficha-deudor/shared/popups/FichaDeudorPopupRoute';
-
 import { getAppBreadcrumb } from './appBreadcrumbs';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
@@ -60,6 +63,25 @@ const MantenerUsuarioPage = lazy(
       '../../features/gestion-usuarios/pages/MantenerUsuarioPage'
     )
 );
+
+interface GestionUsuariosFeatureRouteProps {
+  children: ReactNode;
+}
+
+function GestionUsuariosFeatureRoute({
+  children,
+}: GestionUsuariosFeatureRouteProps) {
+  if (!GESTION_USUARIOS_FEATURE.enabled) {
+    return (
+      <Navigate
+        to={AUTH_ROUTES.MENU_MODULOS}
+        replace
+      />
+    );
+  }
+
+  return <>{children}</>;
+}
 
 function PageLoader() {
   return <div>Cargando...</div>;
@@ -144,25 +166,30 @@ export function AppRouter() {
               />
 
               <Route
-                path={
-                  GESTION_USUARIOS_ROUTES.CAMBIAR_CLAVE
+                path={GESTION_USUARIOS_ROUTES.CAMBIAR_CLAVE}
+                element={
+                  <GestionUsuariosFeatureRoute>
+                    <CambiarClavePage />
+                  </GestionUsuariosFeatureRoute>
                 }
-                element={<CambiarClavePage />}
               />
 
               <Route
-                path={
-                  GESTION_USUARIOS_ROUTES.ASIGNAR_USUARIO
+                path={GESTION_USUARIOS_ROUTES.ASIGNAR_USUARIO}
+                element={
+                  <GestionUsuariosFeatureRoute>
+                    <AsignarUsuarioPage />
+                  </GestionUsuariosFeatureRoute>
                 }
-                element={<AsignarUsuarioPage />}
               />
 
               <Route
-                path={
-                  GESTION_USUARIOS_ROUTES
-                    .MANTENER_USUARIO
+                path={GESTION_USUARIOS_ROUTES.MANTENER_USUARIO}
+                element={
+                  <GestionUsuariosFeatureRoute>
+                    <MantenerUsuarioPage />
+                  </GestionUsuariosFeatureRoute>
                 }
-                element={<MantenerUsuarioPage />}
               />
 
             </Route>

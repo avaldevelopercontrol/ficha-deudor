@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type {
   TelefonoFormData,
   TelefonoReferenciado,
@@ -17,6 +17,7 @@ export const usePanelTelefonosReferenciadosActions = ({
   const [showRegistrar, setShowRegistrar] = useState(false);
   const [showEditar, setShowEditar] = useState(false);
   const [telefonoEditarId, setTelefonoEditarId] = useState<number | null>(null);
+  const registrandoRef = useRef(false);
 
   const handleOpenRegistrar = useCallback(() => {
     setShowRegistrar(true);
@@ -50,11 +51,19 @@ export const usePanelTelefonosReferenciadosActions = ({
 
   const handleRegistrar = useCallback(
     async (formData: TelefonoFormData) => {
+      if (registrandoRef.current) {
+        return;
+      }
+
+      registrandoRef.current = true;
+
       try {
         await create(formData);
         handleCloseRegistrar();
       } catch {
         alert(PANEL_TELEFONOS_REFERENCIADOS_ACTION_MESSAGES.CREATE_ERROR);
+      } finally {
+        registrandoRef.current = false;
       }
     },
     [create, handleCloseRegistrar]

@@ -13,7 +13,7 @@ export const MODAL_REGISTRAR_TELEFONO_INITIAL_FORM: TelefonoFormData = {
   fuenteBusqueda: '',
   referencia: 0,
   reclamoIndecopi: false,
-  bEstado: false,
+  bEstado: true,
   dFecCarga_PersTelef: '',
 };
 

@@ -22,7 +22,6 @@ import type {
   FichaDeudorCarteraPanelParams,
   FichaDeudorDocumentosParams,
   FichaDeudorGestionPanelParams,
-  FichaDeudorHeaderParams,
   FichaDeudorParams,
   FichaDeudorReferenciaPanelParams,
 } from '../shared/types/fichaDeudor.types';
@@ -41,12 +40,6 @@ const FichaContent: React.FC<FichaContentProps> = ({
     id_contrato,
     id_usuario,
   } = params;
-
-  const headerParams: FichaDeudorHeaderParams = {
-    id_cliente,
-    id_cartera,
-    id_deudor,
-  };
 
   const documentosParams: FichaDeudorDocumentosParams = {
     id_cliente,
@@ -106,7 +99,6 @@ const FichaContent: React.FC<FichaContentProps> = ({
           <aside className="ficha-sidebar">
             {deudorData && (
               <DeudorHeader
-                params={headerParams}
                 deudorData={deudorData}
                 cabeceraData={cabeceraData}
                 isLoadingCabecera={isLoadingCabecera}
