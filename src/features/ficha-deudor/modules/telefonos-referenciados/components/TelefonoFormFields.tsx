@@ -197,6 +197,7 @@ export const TelefonoFormFields: React.FC<TelefonoFormFieldsProps> = ({
           onChange={(v) => onChange('prioridad', String(v))}
           placeholder={placeholders.select}
           error={errors.prioridad}
+          required
         />
 
         <SelectField
@@ -212,6 +213,7 @@ export const TelefonoFormFields: React.FC<TelefonoFormFieldsProps> = ({
           )}
           error={errors.horarioGestion || errorHorarios || ''}
           disabled={isLoadingHorarios}
+          required
         />
 
         <SelectField
@@ -227,6 +229,7 @@ export const TelefonoFormFields: React.FC<TelefonoFormFieldsProps> = ({
           )}
           error={errors.fuenteBusqueda || errorFuentes || ''}
           disabled={isLoadingFuentes}
+          required
         />
       </FormGrid>
 
@@ -249,6 +252,7 @@ export const TelefonoFormFields: React.FC<TelefonoFormFieldsProps> = ({
           onChange={(v) => onChange('referencia', toNumberValue(v))}
           placeholder={placeholders.select}
           error={errors.referencia}
+          required
         />
 
         <SelectField

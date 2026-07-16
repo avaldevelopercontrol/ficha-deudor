@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { useMejorRHeader } from '../hooks/useDeudorHeader';
 import {
   CompactInfoSection,
   InfoRow,
@@ -9,10 +8,8 @@ import type {
   CabeceraInfo,
   DeudorInfo,
 } from '../../../shared/types';
-import type { FichaDeudorHeaderParams } from '../../../shared/types/fichaDeudor.types';
 
 interface Props {
-  params: FichaDeudorHeaderParams;
   deudorData: DeudorInfo;
   cabeceraData: CabeceraInfo | null;
   isLoadingCabecera: boolean;
@@ -24,7 +21,6 @@ interface Props {
 }
 
 const DeudorHeader: React.FC<Props> = ({
-  params,
   deudorData,
   cabeceraData,
   isLoadingCabecera,
@@ -33,23 +29,18 @@ const DeudorHeader: React.FC<Props> = ({
   onContactoChange,
   compact = false,
 }) => {
-  const { id_cliente, id_cartera, id_deudor } = params;
 
-  const {
-    data: mejorRData,
-    isLoading: isLoadingMejorR,
-    error: mejorRError,
-  } = useMejorRHeader(id_cliente, id_cartera, id_deudor);
-
-  if (isLoadingCabecera || isLoadingMejorR) {
+  if (isLoadingCabecera) {
     return <div className="ficha-card">Cargando...</div>;
   }
 
-  if (cabeceraError || mejorRError) {
-    return <div className="ficha-card">Error: {cabeceraError || mejorRError}</div>;
+  if (cabeceraError) {
+    return <div className="ficha-card">Error: {cabeceraError}</div>;
   }
 
-  if (!cabeceraData || !mejorRData) return null;
+  if (!cabeceraData) {
+    return null;
+  }
 
   return (
     <div className={`ficha-card ${compact ? 'deudor-header--compact' : ''}`}>
