@@ -4,10 +4,17 @@ import path from 'node:path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const proxyTarget = env.VITE_API_BASE_URL || 'http://192.168.100.92:7143';
+  const proxyTarget = env.VITE_API_BASE_URL;
+
+  if (!proxyTarget) {
+    throw new Error(
+      'La variable VITE_API_BASE_URL no está configurada.'
+    );
+  }
 
   return {
     plugins: [react()],
+
     resolve: {
       alias: {
         '@app': path.resolve(__dirname, './src/app'),
@@ -16,6 +23,7 @@ export default defineConfig(({ mode }) => {
         '@assets': path.resolve(__dirname, './src/assets'),
       },
     },
+
     server: {
       proxy: {
         '/v1': {
@@ -23,7 +31,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
-      }
+      },
     },
   };
 });
