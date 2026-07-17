@@ -15,42 +15,49 @@ const POPUP_COMPONENTS = {
   'email-deudor': lazy(
     () =>
       import(
-        '../../modules/emails/components/EmailDeudorPopup'
+        '@features/ficha-deudor/modules/emails/components/EmailDeudorPopup'
       )
   ),
 
   'agenda-deudor': lazy(
     () =>
       import(
-        '../../modules/agenda/components/AgendaDeudorPopup'
+        '@features/ficha-deudor/modules/agenda/components/AgendaDeudorPopup'
       )
   ),
 
   'pago-deudor': lazy(
     () =>
       import(
-        '../../modules/pago/components/PagoDeudorPopup'
+        '@features/ficha-deudor/modules/pago/components/PagoDeudorPopup'
       )
   ),
 
   'inf-deudor': lazy(
     () =>
       import(
-        '../../modules/inf-deudor/components/InfDeudorPopup'
+        '@features/ficha-deudor/modules/inf-deudor/components/InfDeudorPopup'
       )
   ),
 
   'lista-gestores': lazy(
     () =>
       import(
-        '../../modules/lista-gestores/components/ListaGestoresPopup'
+        '@features/ficha-deudor/modules/lista-gestores/components/ListaGestoresPopup'
       )
   ),
 
   'estado-cuenta': lazy(
     () =>
       import(
-        '../../modules/estado-cuenta/components/EstadoCuentaPopup'
+        '@features/ficha-deudor/modules/estado-cuenta/components/EstadoCuentaPopup'
+      )
+  ),
+
+  'produccion-gestor-hoy': lazy(
+    () =>
+      import(
+        '@features/gestion-deudor/modules/produccion-gestor-hoy/components/ProduccionGestorHoyPopup'
       )
   ),
 } satisfies Record<

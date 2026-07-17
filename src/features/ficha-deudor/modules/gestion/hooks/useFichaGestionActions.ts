@@ -26,7 +26,8 @@ interface UseFichaGestionActionsParams {
     gestionTerminada: boolean
   ) => void;
   onSubmit?: (
-    data: GestionFormClaro
+    data: GestionFormClaro,
+    fechaFinGestion: string
   ) => void;
 }
 

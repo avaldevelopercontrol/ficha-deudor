@@ -1,7 +1,9 @@
 import React from 'react';
 
-import { PopupContextBoundary } from '../../../shared/popups/PopupContextBoundary';
-import type { FichaDeudorPopupContext } from '../../../shared/popups/popupContext.types';
+import {
+  PopupContextBoundary,
+  type FichaDeudorPopupContext,
+} from '@app/popups';
 import { ActionButton } from '@shared/components/ui';
 import { useEmailsByDeudor } from '../hooks/useEmailsByDeudor';
 import { useEmailDeudorColumns } from '../hooks/useEmailDeudorColumns';

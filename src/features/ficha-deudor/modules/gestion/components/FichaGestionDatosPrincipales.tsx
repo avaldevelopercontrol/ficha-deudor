@@ -1,43 +1,68 @@
 import React, { useMemo } from 'react';
 
-import { SelectField } from '@shared/components/ui';
-import type { FichaGestionDatosPrincipalesProps } from '../types/fichaGestion.types';
+import {
+  ActionButton,
+  SelectField,
+} from '@shared/components/ui';
+
 import { useGestorSelectorPopup } from '../hooks/useGestorSelectorPopup';
+import type { FichaGestionDatosPrincipalesProps } from '../types/fichaGestion.types';
+
+import FichaGestionValidationSummary from './shared/FichaGestionValidationSummary';
+import ModalBuscarTelefonoDeudor from './ModalBuscarTelefonoDeudor';
 
 const FichaGestionDatosPrincipales: React.FC<
   FichaGestionDatosPrincipalesProps
-> = ({  idCliente,
+> = ({
+  idCliente,
   form,
   setField,
   handleNP0Change,
   handleNP1Change,
-  //handleOpenWhatsApp,
+  // handleOpenWhatsApp,
+  telefonoSearch,
+
   estadosOptions,
   isLoadingEstados,
   errorEstados,
+
   tiposOptions,
   isLoadingTipos,
   errorTipos,
+
   np0Options,
   isLoadingNP0,
   errorNP0,
+
   np1Options,
   isLoadingNP1,
   errorNP1,
+
   np2Options,
   isLoadingNP2,
   errorNP2,
 }) => {
   const np1Placeholder = useMemo(() => {
-    if (!form.np0) return 'Primero seleccione NP0';
-    if (isLoadingNP1) return 'Cargando NP1...';
+    if (!form.np0) {
+      return 'Primero seleccione NP0';
+    }
+
+    if (isLoadingNP1) {
+      return 'Cargando NP1...';
+    }
 
     return 'Seleccionar NP1...';
   }, [form.np0, isLoadingNP1]);
 
   const np2Placeholder = useMemo(() => {
-    if (!form.np1) return 'Primero seleccione NP1';
-    if (isLoadingNP2) return 'Cargando NP2...';
+    if (!form.np1) {
+      return 'Primero seleccione NP1';
+    }
+
+    if (isLoadingNP2) {
+      return 'Cargando NP2...';
+    }
+
     if (np2Options.length === 0) {
       return 'Sin opciones disponibles';
     }
@@ -49,18 +74,36 @@ const FichaGestionDatosPrincipales: React.FC<
     np2Options.length,
   ]);
 
-  const { handleOpenListaGestores } = useGestorSelectorPopup({
-    idCliente,
-    setField,
-  });
+  const { handleOpenListaGestores } =
+    useGestorSelectorPopup({
+      idCliente,
+      setField,
+    });
+
+  const {
+    isOpen: isTelefonoSearchOpen,
+    telefonoIngresado,
+    validationErrors: telefonoValidationErrors,
+    isSearchDisabled: isTelefonoSearchDisabled,
+    handleOpen: handleOpenTelefonoSearch,
+    handleClose: handleCloseTelefonoSearch,
+    handleTelefonoChange,
+    handleValidate: handleValidateTelefono,
+    handleClear: handleClearTelefonoSearch,
+  } = telefonoSearch;
 
   const handleNombreContactoChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setField('nombreContacto', event.target.value);
+    setField(
+      'nombreContacto',
+      event.target.value
+    );
   };
 
-  const handleCargoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCargoChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setField('cargo', event.target.value);
   };
 
@@ -68,18 +111,33 @@ const FichaGestionDatosPrincipales: React.FC<
     setField('np2', value);
   };
 
-  const handleEstadoGestionChange = (value: string) => {
+  const handleEstadoGestionChange = (
+    value: string
+  ) => {
     setField('estadoGestion', value);
   };
 
-  const handleTipoGestionChange = (value: string) => {
+  const handleTipoGestionChange = (
+    value: string
+  ) => {
     setField('tipoGestion', value);
+  };
+
+  const handleClearTelefono = () => {
+    /*
+     * Limpia el valor del formulario y también el teléfono
+     * seleccionado que se mantiene en el componente padre.
+     */
+    setField('telefono', '');
+    handleClearTelefonoSearch();
   };
 
   return (
     <div className="ficha-block ficha-block--with-side-title ficha-block--compact-gestion">
       <div className="block-side-title-wrapper">
-        <div className="block-side-title">DATOS PRINCIPALES</div>
+        <div className="block-side-title">
+          DATOS PRINCIPALES
+        </div>
       </div>
 
       <div className="block-content block-content--compact-gestion">
@@ -88,17 +146,23 @@ const FichaGestionDatosPrincipales: React.FC<
             <label className="form-label form-label--inline">
               Nombre Contacto:
             </label>
+
             <input
               type="text"
               className="form-input form-input--inline-field"
               placeholder="Ingresar nombre..."
               value={form.nombreContacto}
-              onChange={handleNombreContactoChange}
+              onChange={
+                handleNombreContactoChange
+              }
             />
           </div>
 
           <div className="form-row-inline">
-            <label className="form-label form-label--inline">Cargo:</label>
+            <label className="form-label form-label--inline">
+              Cargo:
+            </label>
+
             <input
               type="text"
               className="form-input form-input--inline-field"
@@ -109,29 +173,51 @@ const FichaGestionDatosPrincipales: React.FC<
           </div>
 
           <div className="form-group">
-            <label className="form-label">Teléfono</label>
+            <label className="form-label">
+              Teléfono
+            </label>
+
             <div className="tel-input-group tel-input-group--compact">
               <input
                 type="tel"
                 className="form-input"
-                placeholder="Ingresar teléfono..."
+                placeholder="Seleccione o busque un teléfono..."
                 value={form.telefono}
                 readOnly
               />
-{/* 
-              <button
-                type="button"
-                className="btn btn-whatsapp btn-whatsapp--compact"
-                onClick={handleOpenWhatsApp}
+
+              <ActionButton
+                label="Limpiar"
+                variant="secondary"
+                size="xs"
+                ariaLabel="Limpiar teléfono seleccionado"
+                title="Limpiar teléfono seleccionado"
                 disabled={!form.telefono}
-                title="Abrir WhatsApp"
-              >
-                WhatsApp
-              </button>
-*/}
+                onClick={handleClearTelefono}
+              />
+
+              <ActionButton
+                label="Buscar"
+                variant="info"
+                size="xs"
+                ariaLabel="Buscar teléfono del deudor"
+                title="Buscar teléfono del deudor"
+                disabled={
+                  isTelefonoSearchDisabled
+                }
+                onClick={
+                  handleOpenTelefonoSearch
+                }
+              />
             </div>
           </div>
         </div>
+
+        <FichaGestionValidationSummary
+          validationErrors={
+            telefonoValidationErrors
+          }
+        />
 
         <div className="gestion-compact-grid gestion-compact-grid--np">
           <SelectField
@@ -139,7 +225,11 @@ const FichaGestionDatosPrincipales: React.FC<
             options={np0Options}
             value={form.np0}
             onChange={handleNP0Change}
-            placeholder={isLoadingNP0 ? 'Cargando NP0...' : 'Seleccionar NP0...'}
+            placeholder={
+              isLoadingNP0
+                ? 'Cargando NP0...'
+                : 'Seleccionar NP0...'
+            }
             disabled={isLoadingNP0}
             error={errorNP0 || ''}
           />
@@ -150,8 +240,14 @@ const FichaGestionDatosPrincipales: React.FC<
             value={form.np1}
             onChange={handleNP1Change}
             placeholder={np1Placeholder}
-            disabled={!form.np0 || isLoadingNP1}
-            error={form.np0 ? errorNP1 || '' : ''}
+            disabled={
+              !form.np0 || isLoadingNP1
+            }
+            error={
+              form.np0
+                ? errorNP1 || ''
+                : ''
+            }
           />
 
           <SelectField
@@ -165,8 +261,14 @@ const FichaGestionDatosPrincipales: React.FC<
               !isLoadingNP2 &&
               np2Options.length > 0
             }
-            disabled={!form.np1 || isLoadingNP2}
-            error={form.np1 ? errorNP2 || '' : ''}
+            disabled={
+              !form.np1 || isLoadingNP2
+            }
+            error={
+              form.np1
+                ? errorNP2 || ''
+                : ''
+            }
           />
         </div>
 
@@ -175,9 +277,13 @@ const FichaGestionDatosPrincipales: React.FC<
             label="Estado de Gestión"
             options={estadosOptions}
             value={form.estadoGestion}
-            onChange={handleEstadoGestionChange}
+            onChange={
+              handleEstadoGestionChange
+            }
             placeholder={
-              isLoadingEstados ? 'Cargando...' : 'Seleccionar estado...'
+              isLoadingEstados
+                ? 'Cargando...'
+                : 'Seleccionar estado...'
             }
             disabled={isLoadingEstados}
             error={errorEstados || ''}
@@ -188,18 +294,27 @@ const FichaGestionDatosPrincipales: React.FC<
             options={tiposOptions}
             value={form.tipoGestion}
             onChange={handleTipoGestionChange}
-            placeholder={isLoadingTipos ? 'Cargando...' : 'Seleccionar tipo...'}
+            placeholder={
+              isLoadingTipos
+                ? 'Cargando...'
+                : 'Seleccionar tipo...'
+            }
             disabled={isLoadingTipos}
             error={errorTipos || ''}
           />
 
           <div className="form-group gestor-field">
-            <label className="form-label">Gestor</label>
+            <label className="form-label">
+              Gestor
+            </label>
+
             <div className="gestor-row gestor-row--compact gestor-row--inline">
               <button
                 className="btn btn-info btn-xs"
                 type="button"
-                onClick={handleOpenListaGestores}
+                onClick={
+                  handleOpenListaGestores
+                }
                 disabled={!idCliente}
               >
                 Buscar Gestor
@@ -224,6 +339,22 @@ const FichaGestionDatosPrincipales: React.FC<
           </div>
         </div>
       </div>
+
+      <ModalBuscarTelefonoDeudor
+        isOpen={isTelefonoSearchOpen}
+        telefonoIngresado={
+          telefonoIngresado
+        }
+        onTelefonoChange={
+          handleTelefonoChange
+        }
+        onClose={
+          handleCloseTelefonoSearch
+        }
+        onValidate={
+          handleValidateTelefono
+        }
+      />
     </div>
   );
 };

@@ -1,4 +1,7 @@
-import React from 'react';
+import React, {
+  useCallback,
+  useState,
+} from 'react';
 import { Navigate } from 'react-router-dom';
 
 import { AUTH_ROUTES } from '@features/auth/constants';
@@ -11,7 +14,7 @@ import PanelTelefonosReferenciados from '../modules/telefonos-referenciados/comp
 import PanelDireccionesReferenciadas from '../modules/direcciones-referenciadas/components/PanelDireccionesReferenciadas';
 import PanelEstadoGestionRealizada from '../modules/estado-gestion-realizada/components/PanelEstadoGestionRealizada';
 import PanelGestionRealizada from '../modules/gestion-realizada/components/PanelGestionRealizada';
-
+import type { TelefonosReferenciadosResourceState } from '../modules/telefonos-referenciados/types/telefono.types';
 import AccionesRapidas from '../shell/components/AccionesRapidas';
 import { FICHA_DEUDOR_PANEL } from '../shell/constants/fichaDeudorPanels.constants';
 import { useFichaDeudorPage } from '../shell/hooks/useFichaDeudorPage';
@@ -28,10 +31,16 @@ import type {
 
 interface FichaContentProps {
   params: FichaDeudorParams;
+  onGestionRegistrada: (
+    fechaFinGestion: string
+  ) => void;
 }
 
-const FichaContent: React.FC<FichaContentProps> = ({
+const FichaContent: React.FC<
+  FichaContentProps
+> = ({
   params,
+  onGestionRegistrada,
 }) => {
   const {
     id_cliente,
@@ -68,6 +77,25 @@ const FichaContent: React.FC<FichaContentProps> = ({
     id_usuario,
   };
 
+  const [
+    telefonosReferenciadosResource,
+    setTelefonosReferenciadosResource,
+  ] = useState<TelefonosReferenciadosResourceState>({
+    telefonos: [],
+    isLoading: true,
+    error: null,
+  });
+
+  const handleTelefonosReferenciadosResourceChange =
+    useCallback(
+      (
+        resource: TelefonosReferenciadosResourceState
+      ) => {
+        setTelefonosReferenciadosResource(resource);
+      },
+      []
+    );
+  
   const {
     contacto,
     setContacto,
@@ -84,7 +112,10 @@ const FichaContent: React.FC<FichaContentProps> = ({
     handleGestionSubmit,
     handleGestionGuardada,
     handleTogglePanel,
-  } = useFichaDeudorPage(params);
+  } = useFichaDeudorPage({
+    ...params,
+    onGestionRegistrada,
+  });
 
   const deudorNombre =
     deudorData?.nombreRazonSocial ?? '';
@@ -140,8 +171,9 @@ const FichaContent: React.FC<FichaContentProps> = ({
                 FICHA_DEUDOR_PANEL.TELEFONOS_REFERENCIADOS
               }
               params={referenciaPanelParams}
-              onSelectTelefono={
-                setTelefonoSeleccionado
+              onSelectTelefono={setTelefonoSeleccionado}
+              onResourceChange={
+                handleTelefonosReferenciadosResourceChange
               }
             />
 
@@ -174,17 +206,21 @@ const FichaContent: React.FC<FichaContentProps> = ({
 
             <FichaGestion
               params={params}
-              documentosFiltrados={
-                documentosFiltrados
-              }
+              documentosFiltrados={documentosFiltrados}
               deudorNombre={deudorNombre}
               carteraNombre={carteraNombre}
-              telefonoSeleccionado={
-                telefonoSeleccionado
+              telefonoSeleccionado={telefonoSeleccionado}
+              telefonosReferenciados={
+                telefonosReferenciadosResource.telefonos
               }
-              onGestionGuardada={
-                handleGestionGuardada
+              isLoadingTelefonosReferenciados={
+                telefonosReferenciadosResource.isLoading
               }
+              telefonosReferenciadosError={
+                telefonosReferenciadosResource.error
+              }
+              onSelectTelefono={setTelefonoSeleccionado}
+              onGestionGuardada={handleGestionGuardada}
               onSubmit={handleGestionSubmit}
             />
           </div>
@@ -198,6 +234,7 @@ const FichaDeudor: React.FC = () => {
   const {
     params,
     hasRequiredParams,
+    actualizarFechaInicioGestion,
   } = useFichaDeudorParams();
 
   if (!hasRequiredParams) {
@@ -209,7 +246,14 @@ const FichaDeudor: React.FC = () => {
     );
   }
 
-  return <FichaContent params={params} />;
+  return (
+    <FichaContent
+      params={params}
+      onGestionRegistrada={
+        actualizarFechaInicioGestion
+      }
+    />
+  );
 };
 
 export default FichaDeudor;

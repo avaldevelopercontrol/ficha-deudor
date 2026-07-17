@@ -1,7 +1,7 @@
 import type { FichaDeudorPanel } from '../constants/fichaDeudorPanels.constants';
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
+import type { GestionFormClaro } from '../../modules/gestion/types/fichaGestion.types';
 import { AUTH_ROUTES } from '@features/auth/constants';
 import { ActionButton } from '@shared/components/ui/ActionButton';
 import { useAppLayout } from '@shared/components/layout/AppLayoutContext';
@@ -14,8 +14,13 @@ import {
   useDeudorHeader,
 } from '../../modules/deudor-header/hooks/useDeudorHeader';
 
-type UseFichaDeudorPageParams = FichaDeudorIdentityParams;
-
+type UseFichaDeudorPageParams =
+  FichaDeudorIdentityParams & {
+    onGestionRegistrada: (
+      fechaFinGestion: string
+    ) => void;
+  };
+  
 const getReturnPath = (state: unknown): string | null => {
   if (!state || typeof state !== 'object') {
     return null;
@@ -30,6 +35,7 @@ export const useFichaDeudorPage = ({
   id_cliente,
   id_cartera,
   id_deudor,
+  onGestionRegistrada,
 }: UseFichaDeudorPageParams) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -94,10 +100,22 @@ export const useFichaDeudorPage = ({
     };
   }, [handleCancelar, setHeaderActions]);
 
-  const handleGestionSubmit = useCallback(() => {
-    setGestionRealizadaRefreshKey((current) => current + 1);
-    setTelefonoSeleccionado('');
-  }, []);
+  const handleGestionSubmit = useCallback(
+    (
+      _data: GestionFormClaro,
+      fechaFinGestion: string
+    ) => {
+      setGestionRealizadaRefreshKey(
+        (current) => current + 1
+      );
+
+      setTelefonoSeleccionado('');
+      onGestionRegistrada(
+        fechaFinGestion
+      );
+    },
+    [onGestionRegistrada]
+  );
 
   const handleGestionGuardada = useCallback(
     (gestionTerminada: boolean) => {

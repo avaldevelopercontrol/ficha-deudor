@@ -8,7 +8,8 @@ import FichaGestionValidationSummary from './shared/FichaGestionValidationSummar
 
 const FichaGestionResultadosLlamada: React.FC<
   FichaGestionResultadosLlamadaProps
-> = ({  form,
+> = ({
+  form,
   setField,
   validationErrors = {},
   feedback,
@@ -23,30 +24,54 @@ const FichaGestionResultadosLlamada: React.FC<
   handleGuardar,
   isSaving = false,
 }) => {
+  const layoutClassName = mostrarCamposClaro
+    ? 'resultados-llamada-layout'
+    : 'resultados-llamada-layout resultados-llamada-layout--single';
 
   return (
     <div className="ficha-block ficha-block--with-side-title ficha-block--compact-gestion">
       <div className="block-side-title-wrapper">
-        <div className="block-side-title">RESULTADOS DE LA LLAMADA</div>
+        <div className="block-side-title">
+          RESULTADOS DE LA LLAMADA
+        </div>
       </div>
 
       <div className="block-content block-content--compact-gestion">
-        <FichaGestionResultadoFields form={form} setField={setField} />
-
-        {mostrarCamposClaro && (
-          <FichaGestionCamposClaro
+        <div className={layoutClassName}>
+          <FichaGestionResultadoFields
             form={form}
             setField={setField}
-            estadoGestionClaroOptions={estadoGestionClaroOptions}
-            isLoadingEstadoGestionClaro={isLoadingEstadoGestionClaro}
-            errorEstadoGestionClaro={errorEstadoGestionClaro}
-            motivoNoPagoOptions={motivoNoPagoOptions}
-            isLoadingMotivoNoPago={isLoadingMotivoNoPago}
-            errorMotivoNoPago={errorMotivoNoPago}
           />
-        )}
 
-        <FichaGestionValidationSummary validationErrors={validationErrors} />
+          {mostrarCamposClaro && (
+            <FichaGestionCamposClaro
+              form={form}
+              setField={setField}
+              estadoGestionClaroOptions={
+                estadoGestionClaroOptions
+              }
+              isLoadingEstadoGestionClaro={
+                isLoadingEstadoGestionClaro
+              }
+              errorEstadoGestionClaro={
+                errorEstadoGestionClaro
+              }
+              motivoNoPagoOptions={
+                motivoNoPagoOptions
+              }
+              isLoadingMotivoNoPago={
+                isLoadingMotivoNoPago
+              }
+              errorMotivoNoPago={
+                errorMotivoNoPago
+              }
+            />
+          )}
+        </div>
+
+        <FichaGestionValidationSummary
+          validationErrors={validationErrors}
+        />
 
         <FichaGestionSubmitSection
           feedback={feedback}

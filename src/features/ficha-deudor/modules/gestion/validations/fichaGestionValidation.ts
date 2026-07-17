@@ -4,6 +4,7 @@ import type {
   GestionFormClaro,
 } from '../types/fichaGestion.types';
 import { toDecimalNumber, toNumber } from '../../../shared/utils/number.utils';
+import { normalizeTelefonoForComparison } from '../../telefonos-referenciados/utils/telefonoNormalization.utils';
 
 interface ValidateFichaGestionParams {
   form: GestionFormClaro;
@@ -94,10 +95,20 @@ export const validateFichaGestion = ({
   }
 
   const tipoGestion = toNumber(form.tipoGestion);
-  const telefono = form.telefono.trim();
 
-  if (tipoGestion !== TIPO_GESTION.EMAIL && telefono.length > 10) {
-    errors.telefono = 'Sólo se puede ingresar un Nro de Teléfono';
+  const telefonoNormalizado =
+    normalizeTelefonoForComparison(
+      form.telefono
+    );
+
+  if (tipoGestion !== TIPO_GESTION.EMAIL) {
+    if (!telefonoNormalizado) {
+      errors.telefono =
+        'Seleccione o busque un teléfono válido.';
+    } else if (telefonoNormalizado.length > 10) {
+      errors.telefono =
+        'Sólo se puede ingresar un Nro de Teléfono válido.';
+    }
   }
 
   return errors;

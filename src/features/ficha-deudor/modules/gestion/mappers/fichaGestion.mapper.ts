@@ -5,6 +5,7 @@ import {
   splitTime,
   toApiDateTimeOrCurrent,
   toApiDateTimeOrNull,
+  toRequiredPeruApiDateTime,
 } from '../../../shared/utils/date.utils';
 import { toDecimalNumber, toNumber } from '../../../shared/utils/number.utils';
 import type { DocumentoApi } from '../../../shared/types';
@@ -17,6 +18,7 @@ interface BuildCreateGestionPayloadParams {
   idDeudor: string;
   idUsuario: string;
   fechaInicioGestion: string;
+  fechaFinGestion: string;
   nIdDocxCobrars: string;
   incluyeCamposClaro: boolean;
 }
@@ -67,7 +69,10 @@ type GestionClaroPayload = Pick<
 
 type GestionAuditPayload = Pick<
   CreateGestionOpeGesContratosPayload,
-  'cSISTEMA' | 'dFechaInicioGestion' | 'bEstado'
+  | 'cSISTEMA'
+  | 'dFechaInicioGestion'
+  | 'dFechaFinGestion'
+  | 'bEstado'
 >;
 
 export const buildDocxCobrars = (documentos: DocumentoApi[]) => {
@@ -174,11 +179,24 @@ const buildGestionClaroPayload = (
 };
 
 const buildGestionAuditPayload = (
-  fechaInicioGestion: string
+  fechaInicioGestion: string,
+  fechaFinGestion: string
 ): GestionAuditPayload => {
   return {
     cSISTEMA: SISTEMA_GESTION,
-    dFechaInicioGestion: toApiDateTimeOrCurrent(fechaInicioGestion),
+
+    dFechaInicioGestion:
+      toRequiredPeruApiDateTime(
+        fechaInicioGestion,
+        'dFechaInicioGestion'
+      ),
+
+    dFechaFinGestion:
+      toRequiredPeruApiDateTime(
+        fechaFinGestion,
+        'dFechaFinGestion'
+      ),
+
     bEstado: true,
   };
 };
@@ -191,6 +209,7 @@ export const buildCreateGestionPayload = ({
   idDeudor,
   idUsuario,
   fechaInicioGestion,
+  fechaFinGestion,
   nIdDocxCobrars,
   incluyeCamposClaro,
 }: BuildCreateGestionPayloadParams): CreateGestionOpeGesContratosPayload => {
@@ -208,6 +227,6 @@ export const buildCreateGestionPayload = ({
     ...buildGestionAgendaPayload(form),
     ...buildGestionActualPayload(form),
     ...buildGestionClaroPayload(form, incluyeCamposClaro),
-    ...buildGestionAuditPayload(fechaInicioGestion),
+    ...buildGestionAuditPayload(fechaInicioGestion, fechaFinGestion),
   };
 };

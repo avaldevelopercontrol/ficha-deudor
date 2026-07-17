@@ -12,8 +12,10 @@ import {
   PopupWideDataTable,
 } from '../../../shared/components/popups/common';
 import { closePopupWindow } from '../../../shared/utils/popupWindow.utils';
-import { PopupContextBoundary } from '../../../shared/popups/PopupContextBoundary';
-import type { FichaDeudorPopupContext } from '../../../shared/popups/popupContext.types';
+import {
+  PopupContextBoundary,
+  type FichaDeudorPopupContext,
+} from '@app/popups';
 
 interface InfDeudorPopupContentProps {
   context: FichaDeudorPopupContext<'inf-deudor'>;

@@ -5,17 +5,22 @@
   .form-grid--3 { grid-template-columns: 1fr 1fr; }
 }
 
-@media (max-width: 768px) {
+@media (
+  max-width: 768px
+) and (
+  hover: none
+) and (
+  pointer: coarse
+) {
   .ficha-main--two-columns {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
   }
-  
+
   .ficha-sidebar {
-    flex: auto;
     width: 100%;
     position: static;
   }
-  
+
   .ficha-content {
     width: 100%;
   }
@@ -29,27 +34,6 @@
   .ficha-main { padding: 12px; }
 }
 
-/* Ajustes para pantallas grandes - sidebar se mantiene compacto */
-@media (min-width: 1400px) {
-  .ficha-sidebar {
-    flex: 0 0 280px; /* Se mantiene en 280px */
-  }
-  
-  .ficha-content {
-    flex: 1;
-    min-width: 0;
-  }
-}
-
-@media (min-width: 1600px) {
-  .ficha-main--two-columns {
-    width: 100%;
-  }
-  
-  .ficha-sidebar {
-    flex: 0 0 280px; /* Se mantiene compacto incluso en pantallas grandes */
-  }
-}
 
 /* Acciones Rápidas en el sidebar - Versión vertical */
 .acciones-rapidas {
@@ -248,3 +232,223 @@
   overflow-wrap: break-word;
 }
 
+/* ═══════════════════════════════════════════════════
+   CONTENIDO RESPONSIVE DEL SIDEBAR
+   ═══════════════════════════════════════════════════ */
+
+/*
+ * Información del deudor y asesores siempre apilados.
+ *
+ * El sidebar es una columna compacta; no conviene colocar
+ * ambas secciones una al lado de la otra.
+ */
+.ficha-sidebar .compact-layout {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  box-sizing: border-box;
+}
+
+.ficha-sidebar .compact-layout__grid {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.ficha-sidebar .compact-section {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Filas de etiqueta y valor */
+.ficha-sidebar .compact-row {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns:
+    minmax(64px, 38%)
+    minmax(0, 1fr);
+
+  align-items: start;
+  gap: 5px;
+
+  box-sizing: border-box;
+}
+
+.ficha-sidebar .compact-row--center {
+  align-items: center;
+}
+
+.ficha-sidebar .compact-label {
+  min-width: 0;
+  width: auto;
+
+  font-size: 9px;
+  line-height: 1.3;
+
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.ficha-sidebar .compact-value,
+.ficha-sidebar .compact-value--highlight {
+  min-width: 0;
+  max-width: 100%;
+
+  line-height: 1.35;
+
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+/*
+ * Los correos sí pueden contener una cadena larga sin espacios.
+ * Solo en estos valores se permite cortar en cualquier punto.
+ */
+.ficha-sidebar .compact-value--link {
+  min-width: 0;
+  max-width: 100%;
+
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.ficha-sidebar .compact-input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  box-sizing: border-box;
+}
+
+/* ── Cabecera de zona, cartera y campaña ──────────── */
+
+.ficha-sidebar .header-meta-strip {
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  gap: 5px;
+  padding: 8px 10px;
+
+  box-sizing: border-box;
+}
+
+.ficha-sidebar .meta-item {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: start;
+  gap: 6px;
+}
+
+.ficha-sidebar .meta-label {
+  min-width: 0;
+  font-size: 8px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.ficha-sidebar .meta-value {
+  min-width: 0;
+  max-width: 100%;
+
+  font-size: 10px;
+  line-height: 1.3;
+
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+/* ── Acciones rápidas ─────────────────────────────── */
+
+.acciones-rapidas .botones-estaticos {
+  width: 100%;
+  min-width: 0;
+
+  padding: 10px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  white-space: normal;
+  box-sizing: border-box;
+}
+
+.acciones-rapidas .btn-est {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 30px;
+
+  padding: 6px 5px;
+
+  font-size: 10px;
+  line-height: 1.2;
+  text-align: center;
+
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+
+  box-sizing: border-box;
+}
+
+/*
+ * Ajuste adicional cuando el sidebar queda especialmente
+ * angosto por monitor pequeño o zoom elevado.
+ */
+@container ficha-sidebar (max-width: 190px) {
+  .ficha-sidebar .compact-layout {
+    padding: 7px 8px;
+  }
+
+  .ficha-sidebar .compact-row {
+    grid-template-columns:
+      minmax(58px, 38%)
+      minmax(0, 1fr);
+
+    gap: 4px;
+  }
+
+  .ficha-sidebar .compact-section__header {
+    font-size: 9px;
+    letter-spacing: 0.3px;
+  }
+
+  .ficha-sidebar .compact-label {
+    font-size: 8px;
+  }
+
+  .ficha-sidebar .compact-value {
+    font-size: 9px;
+  }
+
+  .acciones-rapidas .botones-estaticos {
+    padding: 8px;
+  }
+
+  .acciones-rapidas .btn-est {
+    padding: 6px 4px;
+    font-size: 9px;
+    letter-spacing: 0.1px;
+  }
+}

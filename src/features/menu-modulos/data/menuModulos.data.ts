@@ -64,13 +64,14 @@ export const MENU_MODULOS: MenuModulo[] = [
     badge: PROXIMAMENTE_BADGE,
   },
   {
-    key: 'gestion-usuarios',
+  key: 'gestion-usuarios',
     label: 'GESTIÓN DE USUARIOS',
     descripcion:
       'Administración de usuarios, perfiles, asignaciones y seguridad de acceso.',
     icon: 'users',
     isEnabled: GESTION_USUARIOS_FEATURE.enabled,
     badge: GESTION_USUARIOS_FEATURE.badge,
+    
   },
   {
     key: 'reportes-generales',

@@ -13,8 +13,10 @@ import {
   PopupPaginatedTableSection,
 } from '../../../shared/components/popups/common';
 import { closePopupWindow } from '../../../shared/utils/popupWindow.utils';
-import type { FichaDeudorPopupContext } from '@features/ficha-deudor/shared/popups/popupContext.types';
-import { PopupContextBoundary } from '@features/ficha-deudor/shared/popups/PopupContextBoundary';
+import {
+  PopupContextBoundary,
+  type FichaDeudorPopupContext,
+} from '@app/popups';
 
 interface AgendaDeudorPopupContentProps {
   context: FichaDeudorPopupContext<'agenda-deudor'>;

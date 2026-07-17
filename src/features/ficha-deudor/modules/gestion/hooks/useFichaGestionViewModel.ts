@@ -15,14 +15,8 @@ import { useSyncTelefonoSeleccionado } from './useSyncTelefonoSeleccionado';
 import { buildFichaGestionViewModelProps } from '../mappers/fichaGestionViewModel.mapper';
 import { useSyncDefaultNP2Option } from './useSyncDefaultNP2Option';
 import { useAutoClearFeedback } from './useAutoClearFeedback';
-
-interface UseFichaGestionViewModelParams {
-  params: FichaDeudorGestionFormParams;
-  documentosFiltrados: DocumentoApi[];
-  telefonoSeleccionado?: string;
-  onGestionGuardada?: (gestionTerminada: boolean) => void;
-  onSubmit?: (data: GestionFormClaro) => void;
-}
+import type { TelefonoReferenciado } from '../../telefonos-referenciados/types/telefono.types';
+import { useBuscarTelefonoDeudor } from './useBuscarTelefonoDeudor';
 
 interface UseFichaGestionViewModelParams {
   params: FichaDeudorGestionFormParams;
@@ -30,11 +24,16 @@ interface UseFichaGestionViewModelParams {
   deudorNombre: string;
   carteraNombre: string;
   telefonoSeleccionado?: string;
+  telefonosReferenciados: TelefonoReferenciado[];
+  isLoadingTelefonosReferenciados: boolean;
+  telefonosReferenciadosError: string | null;
+  onSelectTelefono: (telefono: string) => void;
   onGestionGuardada?: (
     gestionTerminada: boolean
   ) => void;
   onSubmit?: (
-    data: GestionFormClaro
+    data: GestionFormClaro,
+    fechaFinGestion: string
   ) => void;
 }
 
@@ -44,6 +43,10 @@ export const useFichaGestionViewModel = ({
   deudorNombre,
   carteraNombre,
   telefonoSeleccionado,
+  telefonosReferenciados,
+  isLoadingTelefonosReferenciados,
+  telefonosReferenciadosError,
+  onSelectTelefono,
   onGestionGuardada,
   onSubmit,
 }: UseFichaGestionViewModelParams): FichaGestionViewModel => {
@@ -69,6 +72,14 @@ export const useFichaGestionViewModel = ({
     telefonoSeleccionado,
     telefonoActual: form.telefono,
     setField,
+  });
+
+  const telefonoSearch = useBuscarTelefonoDeudor({
+    telefonosReferenciados,
+    isLoadingTelefonosReferenciados,
+    telefonosReferenciadosError,
+    telefonoSeleccionado,
+    onSelectTelefono,
   });
 
   const catalogos = useFichaGestionCatalogos(
@@ -107,7 +118,10 @@ export const useFichaGestionViewModel = ({
   });
 
   const handleGestionRegistrada = useCallback(
-    (data: GestionFormClaro) => {
+    (
+      data: GestionFormClaro,
+      fechaFinGestion: string
+    ) => {
       resetForm();
 
       setFeedback({
@@ -117,7 +131,10 @@ export const useFichaGestionViewModel = ({
           'La nueva gestión fue guardada y la tabla de Gestión Realizada se actualizó.',
       });
 
-      onSubmit?.(data);
+      onSubmit?.(
+        data,
+        fechaFinGestion
+      );
     },
     [onSubmit, resetForm]
   );
@@ -183,9 +200,10 @@ export const useFichaGestionViewModel = ({
     handleNP0Change,
     handleNP1Change,
     handleOpenWhatsApp,
+    telefonoSearch,
     catalogos,
     usuarioActual,
-
+    
     handleAgendar:
       handleAgendarGestion,
 

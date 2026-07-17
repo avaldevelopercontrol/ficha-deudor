@@ -20,10 +20,7 @@ const DocumentosActionsCarousel: React.FC<Props> = ({
   onBotonClick,
 }) => {
   return (
-    <div
-      className="ficha-block botones-carrusel-wrapper"
-      style={{ marginTop: 12, paddingBottom: 12 }}
-    >
+    <div className="ficha-block botones-carrusel-wrapper">
       {puedeScrollIzq && (
         <button
           type="button"

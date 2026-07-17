@@ -4,7 +4,7 @@ import type { TipoBusquedaGestionDeudor } from '../types/gestionDeudor.types';
 export const TIPO_BUSQUEDA_GESTION_DEUDOR_OPTIONS: SelectOption<TipoBusquedaGestionDeudor>[] = [
   { id: 'R', label: 'RUC' },
   { id: 'D', label: 'DNI' },
-  { id: 'T', label: 'TELÉFONO' },
+  { id: 'F', label: 'TELÉFONO' },
 ];
 
 export const GESTION_DEUDOR_SEARCH_TAGS = ['RUC', 'DNI', 'Teléfono'] as const;

@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 import {
   PopupErrorState,
   PopupLoadingState,
-} from '../components/popups/common';
-import { closePopupWindow } from '../utils/popupWindow.utils';
+} from '@features/ficha-deudor/shared/components/popups/common';
+import { closePopupWindow } from '@features/ficha-deudor/shared/utils/popupWindow.utils';
 import type {
   FichaDeudorPopupContext,
   FichaDeudorPopupType,

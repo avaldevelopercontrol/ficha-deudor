@@ -1,5 +1,6 @@
 import type {
   FichaGestionCatalogos,
+  FichaGestionTelefonoSearchProps,
   FichaGestionValidationErrors,
   FichaGestionViewModel,
   GestionFeedback,
@@ -10,40 +11,67 @@ import type {
 
 interface BuildFichaGestionViewModelPropsParams {
   idCliente: string;
+
   form: GestionFormClaro;
   setField: SetGestionField;
   setFields: SetGestionFields;
 
-  handleNP0Change: (value: string) => void;
-  handleNP1Change: (value: string) => void;
+  handleNP0Change: (
+    value: string
+  ) => void;
+
+  handleNP1Change: (
+    value: string
+  ) => void;
+
   handleOpenWhatsApp: () => void;
+
+  telefonoSearch: FichaGestionTelefonoSearchProps;
 
   catalogos: FichaGestionCatalogos;
   usuarioActual: string;
 
   handleAgendar: () => void | Promise<void>;
-  agendaValidationErrors: FichaGestionValidationErrors;
-  agendaFeedback: GestionFeedback | null;
-  isScheduling: boolean;
-  handleCloseAgendaFeedback: () => void;
 
-  validationErrors: FichaGestionValidationErrors;
-  feedback: GestionFeedback | null;
+  agendaValidationErrors:
+    FichaGestionValidationErrors;
+
+  agendaFeedback:
+    GestionFeedback | null;
+
+  isScheduling: boolean;
+
+  handleCloseAgendaFeedback:
+    () => void;
+
+  validationErrors:
+    FichaGestionValidationErrors;
+
+  feedback:
+    GestionFeedback | null;
+
   handleCloseFeedback: () => void;
 
   mostrarCamposClaro: boolean;
-  handleGuardarGestion: () => void | Promise<void>;
+
+  handleGuardarGestion:
+    () => void | Promise<void>;
+
   isSaving: boolean;
 }
 
 export const buildFichaGestionViewModelProps = ({
   idCliente,
+
   form,
   setField,
   setFields,
+
   handleNP0Change,
   handleNP1Change,
   handleOpenWhatsApp,
+  telefonoSearch,
+
   catalogos,
   usuarioActual,
 
@@ -94,11 +122,14 @@ export const buildFichaGestionViewModelProps = ({
   return {
     datosPrincipalesProps: {
       idCliente,
+
       form,
       setField,
+
       handleNP0Change,
       handleNP1Change,
       handleOpenWhatsApp,
+      telefonoSearch,
 
       estadosOptions,
       isLoadingEstados,
@@ -130,8 +161,10 @@ export const buildFichaGestionViewModelProps = ({
       handleAgendar,
       agendaValidationErrors,
       agendaFeedback,
+
       onCloseAgendaFeedback:
         handleCloseAgendaFeedback,
+
       isScheduling,
     },
 
@@ -141,7 +174,9 @@ export const buildFichaGestionViewModelProps = ({
 
       validationErrors,
       feedback,
-      onCloseFeedback: handleCloseFeedback,
+
+      onCloseFeedback:
+        handleCloseFeedback,
 
       mostrarCamposClaro,
 
@@ -153,7 +188,9 @@ export const buildFichaGestionViewModelProps = ({
       isLoadingMotivoNoPago,
       errorMotivoNoPago,
 
-      handleGuardar: handleGuardarGestion,
+      handleGuardar:
+        handleGuardarGestion,
+
       isSaving,
     },
   };

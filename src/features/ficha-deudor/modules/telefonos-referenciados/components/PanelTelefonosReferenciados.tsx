@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
   PANEL_TELEFONOS_REFERENCIADOS_MESSAGES,
@@ -12,17 +12,22 @@ import { PanelLayout } from '../../../shared/components/panels/PanelLayout';
 import PanelResumenEstado from '../../../shared/components/panels/PanelResumenEstado';
 import PanelTablaHeaderActions from '../../../shared/components/panels/PanelTablaHeaderActions';
 import PanelTablaResumen from '../../../shared/components/panels/PanelTablaResumen';
+import type { TelefonosReferenciadosResourceState } from '../types/telefono.types';
 
 interface Props {
   isActive: boolean;
   params: FichaDeudorReferenciaPanelParams;
   onSelectTelefono: (telefono: string) => void;
+  onResourceChange?: (
+    state: TelefonosReferenciadosResourceState
+  ) => void;
 }
 
 const PanelTelefonosReferenciados: React.FC<Props> = ({
   isActive,
   params,
   onSelectTelefono,
+  onResourceChange,
 }) => {
   const {
     allData,
@@ -53,6 +58,19 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({
     params,
     onSelectTelefono,
   });
+
+  useEffect(() => {
+    onResourceChange?.({
+      telefonos: allData,
+      isLoading,
+      error,
+    });
+  }, [
+    allData,
+    error,
+    isLoading,
+    onResourceChange,
+  ]);
 
   if (!isActive) return null;
 

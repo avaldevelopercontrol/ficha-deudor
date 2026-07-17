@@ -123,6 +123,7 @@ export interface CreateGestionOpeGesContratosPayload {
   nESTADOGESTIONCLARO: number;
   nMOTIVONOPAGO: number;
   dFechaInicioGestion: string;
+  dFechaFinGestion: string;
   bEstado: boolean;
 }
 
@@ -160,6 +161,21 @@ export type FichaGestionValidationErrors = Partial<
   Record<keyof GestionFormClaro | 'montoCompromiso' | 'documentos', string>
 >;
 
+export interface FichaGestionTelefonoSearchProps {
+  isOpen: boolean;
+  telefonoIngresado: string;
+  validationErrors: FichaGestionValidationErrors;
+  isSearchDisabled: boolean;
+
+  handleOpen: () => void;
+  handleClose: () => void;
+  handleTelefonoChange: (
+    value: string
+  ) => void;
+  handleValidate: () => void;
+  handleClear: () => void;
+}
+
 export interface FichaGestionDatosPrincipalesProps {
   idCliente: string;
   form: GestionFormClaro;
@@ -167,6 +183,7 @@ export interface FichaGestionDatosPrincipalesProps {
   handleNP0Change: (value: string) => void;
   handleNP1Change: (value: string) => void;
   handleOpenWhatsApp: () => void;
+  telefonoSearch: FichaGestionTelefonoSearchProps;
   estadosOptions: SelectOption[];
   isLoadingEstados: boolean;
   errorEstados?: string | null;

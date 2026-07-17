@@ -9,7 +9,7 @@ import type {
 } from '../../../shared/types/fichaDeudor.types';
 import {
   openFichaDeudorPopup,
-} from '../../../shared/popups/popupMessaging.utils';
+} from '@app/popups';
 
 interface UseDocumentosActionsParams {
   data: DeudorInfo;

@@ -1,4 +1,4 @@
-export type TipoBusquedaGestionDeudor = 'R' | 'D' | 'T';
+export type TipoBusquedaGestionDeudor = 'R' | 'D' | 'F';
 
 export interface DeudorGestionDeudorApi {
   nId_PersDeudor: number;

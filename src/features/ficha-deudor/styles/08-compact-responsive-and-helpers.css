@@ -58,23 +58,6 @@
   color: var(--ap-text-muted); 
 }
 
-/* NUEVO: Responsive para styles.css */
-@media (max-width: 768px) {
-  .ficha-main--two-columns {
-    flex-direction: column;
-  }
-  
-  .ficha-sidebar {
-    flex: auto;
-    width: 100%;
-    position: static;
-  }
-  
-  .ficha-content {
-    width: 100%;
-  }
-}
-
 .modal-container .field-row {
   padding: 3px 0;
   min-height: 22px;
@@ -149,7 +132,11 @@
 
 .botones-carrusel-wrapper {
   position: relative;
-  padding: 0 32px; 
+
+  margin-top: 4px;
+  padding: 4px 32px 10px;
+
+  border-bottom: 0;
 }
 
 .botones-scroll-container {
@@ -976,4 +963,116 @@
   align-self: center;
   height: 145px;
   min-height: 145px;
+}
+
+/* Búsqueda manual de teléfono en Ficha de Gestión */
+.telefono-search-modal__help {
+  display: block;
+  margin-top: 6px;
+  color: var(--ap-gray-500);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* ═══════════════════════════════════════════════════
+   RESULTADOS DE LA LLAMADA
+   ═══════════════════════════════════════════════════ */
+
+/*
+ * Columna izquierda:
+ * - Gestión terminada
+ * - Observaciones
+ *
+ * Columna derecha:
+ * - Estado Gestión Claro
+ * - Motivo No Pago
+ */
+.resultados-llamada-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.65fr)
+    minmax(240px, 0.75fr);
+
+  align-items: start;
+  gap: 12px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+/*
+ * Cuando los campos de Claro no se muestran,
+ * la sección principal utiliza todo el ancho.
+ */
+.resultados-llamada-layout--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ── Columna izquierda ────────────────────────────── */
+
+.resultados-llamada__principal {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+.resultados-llamada__terminada {
+  display: flex;
+  align-items: center;
+
+  min-height: 24px;
+}
+
+/*
+ * Tres líneas visibles aproximadamente.
+ *
+ * Se declara height porque el estilo compacto general
+ * establece una altura reducida para todos los campos.
+ */
+.ficha-gestion--compact
+.resultados-llamada__observaciones
+.form-textarea {
+  width: 100%;
+  height: 72px;
+  min-height: 72px;
+  max-height: 160px;
+
+  padding: 6px 8px;
+
+  line-height: 1.35;
+  resize: vertical;
+
+  box-sizing: border-box;
+}
+
+/* ── Columna derecha ──────────────────────────────── */
+
+.resultados-llamada__campos-claro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 8px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+.resultados-llamada__campos-claro .form-group {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+/*
+ * Cuando el espacio disponible ya no permite mantener
+ * campos utilizables, las dos columnas se apilan.
+ */
+@media (max-width: 850px) {
+  .resultados-llamada-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

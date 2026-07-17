@@ -66,7 +66,7 @@ export function validateGestionDeudorSearch({
   }
 
   if (
-    tipoBusqueda === 'T' &&
+    tipoBusqueda === 'F' &&
     (valorNormalizado.length < 6 || valorNormalizado.length > 15)
   ) {
     return {

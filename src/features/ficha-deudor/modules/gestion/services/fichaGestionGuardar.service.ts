@@ -20,6 +20,7 @@ interface BuildGestionSaveRequestParams {
   documentosFiltrados: DocumentoApi[];
   np1TipoContacto: number;
   requiereCamposClaro: boolean;
+  fechaFinGestion: string;
 }
 
 interface GestionSaveRequestValid {
@@ -44,6 +45,7 @@ export const buildGestionSaveRequest = ({
   documentosFiltrados,
   np1TipoContacto,
   requiereCamposClaro,
+  fechaFinGestion,
 }: BuildGestionSaveRequestParams): GestionSaveRequest => {
   const nIdDocxCobrars = buildDocxCobrars(documentosFiltrados);
 
@@ -70,17 +72,20 @@ export const buildGestionSaveRequest = ({
     fecha_inicio_gestion: fechaInicioGestion,
   } = params;
 
-  const payload = buildCreateGestionPayload({
-    form,
-    idCliente,
-    idCartera,
-    idContrato,
-    idDeudor,
-    idUsuario,
-    fechaInicioGestion,
-    nIdDocxCobrars,
-    incluyeCamposClaro: requiereCamposClaro,
-  });
+  const payload =
+    buildCreateGestionPayload({
+      form,
+      idCliente,
+      idCartera,
+      idContrato,
+      idDeudor,
+      idUsuario,
+      fechaInicioGestion,
+      fechaFinGestion,
+      nIdDocxCobrars,
+      incluyeCamposClaro:
+        requiereCamposClaro,
+    });
 
   return {
     isValid: true,

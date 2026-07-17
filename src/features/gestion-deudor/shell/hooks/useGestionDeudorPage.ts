@@ -8,6 +8,9 @@ import { clearFichaDeudorSession } from '@features/ficha-deudor/shared/utils/fic
 import { useGestionDeudores } from '../../hooks/useGestionDeudores';
 import { useGestionDeudorColumns } from '../../modules/listado/hooks/useGestionDeudorColumns';
 import { useGestionDeudorNavigation } from './useGestionDeudorNavigation';
+import {
+  useProduccionGestorHoyPopup,
+} from '../../modules/produccion-gestor-hoy/hooks/useProduccionGestorHoyPopup';
 
 export const useGestionDeudorPage = () => {
   const location = useLocation();
@@ -39,6 +42,16 @@ export const useGestionDeudorPage = () => {
   const columns = useGestionDeudorColumns();
 
   const { goToFichaDeudor } = useGestionDeudorNavigation({
+    idCliente,
+    idUsuario,
+  });
+
+  const {
+    isDisabled:
+      isProduccionGestorHoyDisabled,
+
+    handleOpenProduccionGestorHoy,
+  } = useProduccionGestorHoyPopup({
     idCliente,
     idUsuario,
   });
@@ -75,6 +88,10 @@ export const useGestionDeudorPage = () => {
       onRowClick: goToFichaDeudor,
       onPageNumberChange: deudores.setPageNumber,
       onPageSizeChange: deudores.setPageSize,
+      onOpenProduccionGestorHoy:
+        handleOpenProduccionGestorHoy,
+
+      isProduccionGestorHoyDisabled,
     },
   };
 };

@@ -3,8 +3,10 @@ import React from 'react';
 import { FeedbackMessage } from '@shared/components/ui';
 
 import { PopupPageLayout } from '../../../shared/components/popups/common';
-import { PopupContextBoundary } from '../../../shared/popups/PopupContextBoundary';
-import type { FichaDeudorPopupContext } from '../../../shared/popups/popupContext.types';
+import {
+  PopupContextBoundary,
+  type FichaDeudorPopupContext,
+} from '@app/popups';
 import { closePopupWindow } from '../../../shared/utils/popupWindow.utils';
 
 import { ESTADO_CUENTA_POPUP_TEXTS } from '../constants/estadoCuentaPopup.constants';

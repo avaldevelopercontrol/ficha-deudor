@@ -17,7 +17,9 @@ import { FICHA_DEUDOR_ROUTES } from '../../features/ficha-deudor/shared/constant
 import { GESTION_USUARIOS_ROUTES } from '../../features/gestion-usuarios/constants/gestionUsuariosRoutes.constants';
 import AppLayout from '../../shared/components/layout/AppLayout';
 import { GESTION_USUARIOS_FEATURE } from '../../features/gestion-usuarios/constants/gestionUsuariosFeature.constants';
-import { FichaDeudorPopupRoute } from '@features/ficha-deudor/shared/popups/FichaDeudorPopupRoute';
+import {
+  FichaDeudorPopupRoute,
+} from '@app/popups';
 import { getAppBreadcrumb } from './appBreadcrumbs';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';

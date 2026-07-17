@@ -10,6 +10,7 @@ import type {
   GestionFormClaro,
 } from '../types/fichaGestion.types';
 import { useAutoClearValidationErrors } from './useAutoClearValidationErrors';
+import { getCurrentPeruDateTime } from '../../../shared/utils/date.utils';
 
 interface UseFichaGestionGuardarParams {
   form: GestionFormClaro;
@@ -18,7 +19,10 @@ interface UseFichaGestionGuardarParams {
   np1TipoContacto: number;
   requiereCamposClaro: boolean;
   onGestionGuardada?: (gestionTerminada: boolean) => void;
-  onSubmit?: (data: GestionFormClaro) => void;
+  onSubmit?: (
+    data: GestionFormClaro,
+    fechaFinGestion: string
+  ) => void;
 }
 
 export const useFichaGestionGuardar = ({
@@ -46,59 +50,65 @@ export const useFichaGestionGuardar = ({
     onClear: clearValidationErrors,
   });
 
-  const handleGuardar = useCallback(async () => {
-    const saveRequest = buildGestionSaveRequest({
-      form,
-      params,
+  const handleGuardar =
+    useCallback(async () => {
+      const fechaFinGestion =
+        getCurrentPeruDateTime();
+
+      const saveRequest =
+        buildGestionSaveRequest({
+          form,
+          params,
+          documentosFiltrados,
+          np1TipoContacto,
+          requiereCamposClaro,
+          fechaFinGestion,
+        });
+
+      setValidationErrors(
+        saveRequest.validationErrors
+      );
+
+      if (!saveRequest.isValid) {
+        return;
+      }
+
+      setIsSaving(true);
+
+      try {
+        await createGestionOpeGesContratos(
+          saveRequest.payload
+        );
+
+        onSubmit?.(
+          form,
+          fechaFinGestion
+        );
+
+        onGestionGuardada?.(
+          form.gestionTerminada
+        );
+      } catch (error) {
+        console.error(
+          'Error al guardar gestión:',
+          error
+        );
+
+        alert(
+          FICHA_GESTION_MESSAGES.SAVE_ERROR
+        );
+      } finally {
+        setIsSaving(false);
+      }
+    }, [
       documentosFiltrados,
+      form,
       np1TipoContacto,
+      onGestionGuardada,
+      onSubmit,
+      params,
       requiereCamposClaro,
-    });
-
-    setValidationErrors(
-      saveRequest.validationErrors
-    );
-
-    if (!saveRequest.isValid) {
-      return;
-    }
-
-    setIsSaving(true);
-
-    try {
-      await createGestionOpeGesContratos(
-        saveRequest.payload
-      );
-
-      onSubmit?.(form);
-      onGestionGuardada?.(
-        form.gestionTerminada
-      );
-
-      alert(
-        FICHA_GESTION_MESSAGES.SAVE_SUCCESS
-      );
-    } catch (error) {
-      console.error(
-        'Error al guardar gestión:',
-        error
-      );
-
-      alert(
-        FICHA_GESTION_MESSAGES.SAVE_ERROR
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  }, [
-    documentosFiltrados,
-    form,
-    np1TipoContacto,
-    onGestionGuardada,
-    onSubmit,
-    params,
-    requiereCamposClaro,
-  ]);
+    ]);
 
   return {
     validationErrors,

@@ -7,6 +7,7 @@ import type { FichaDeudorGestionFormParams } from '../../../shared/types/fichaDe
 import FichaGestionDatosPrincipales from './FichaGestionDatosPrincipales';
 import FichaGestionAccionesTomar from './FichaGestionAccionesTomar';
 import FichaGestionResultadosLlamada from './FichaGestionResultadosLlamada';
+import type { TelefonoReferenciado } from '../../telefonos-referenciados/types/telefono.types';
 
 interface Props {
   params: FichaDeudorGestionFormParams;
@@ -14,8 +15,17 @@ interface Props {
   deudorNombre: string;
   carteraNombre: string;
   telefonoSeleccionado?: string;
-  onGestionGuardada?: (gestionTerminada: boolean) => void;
-  onSubmit?: (data: GestionFormClaro) => void;
+  telefonosReferenciados: TelefonoReferenciado[];
+  isLoadingTelefonosReferenciados: boolean;
+  telefonosReferenciadosError: string | null;
+  onSelectTelefono: (telefono: string) => void;
+  onGestionGuardada?: (
+    gestionTerminada: boolean
+  ) => void;
+  onSubmit?: (
+    data: GestionFormClaro,
+    fechaFinGestion: string
+  ) => void;
 }
 
 const FichaGestion: React.FC<Props> = (props) => {

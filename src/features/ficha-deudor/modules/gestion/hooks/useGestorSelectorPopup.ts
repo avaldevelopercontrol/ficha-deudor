@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react';
 
 import {
   openFichaDeudorPopup,
-} from '../../../shared/popups/popupMessaging.utils';
+} from '@app/popups';
 import type {
   SetGestionField,
 } from '../types/fichaGestion.types';

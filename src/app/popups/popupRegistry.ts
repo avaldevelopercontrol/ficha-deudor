@@ -52,6 +52,17 @@ export const FICHA_DEUDOR_POPUP_REGISTRY = {
     height: 650,
   },
 
+  'produccion-gestor-hoy': {
+    path:
+      '/popup/produccion-gestor-hoy',
+
+    windowName:
+      'produccion-gestor-hoy',
+
+    width: 1100,
+    height: 560,
+  },
+
 } satisfies Record<
   FichaDeudorPopupType,
   PopupConfig
