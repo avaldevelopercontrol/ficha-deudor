@@ -17,7 +17,14 @@ export const MODAL_EDITAR_DIRECCION_INITIAL_FORM: DireccionEditFormData = {
 export const MODAL_EDITAR_DIRECCION_TEXTS = {
   title: 'EDITAR DIRECCIÓN',
   submitLabel: 'Guardar Cambios',
-  validationSummary: 'Por favor, corrija los siguientes errores:',
+  validationSummary:
+    'Por favor, corrija los siguientes errores:',
+  loadingDireccion:
+    'Cargando información de la dirección...',
+  errorDireccionPrefix:
+    'No se pudo cargar la dirección:',
+  emptyDireccion:
+    'No se encontró información de la dirección seleccionada.',
 } as const;
 
 export const MODAL_EDITAR_DIRECCION_LABELS = {

@@ -72,7 +72,7 @@
 
 .data-table td {
   padding: 7px 10px;
-  color: var(--ap-text);
+  color: #000000;
   white-space: nowrap;
   border-right: 1px solid var(--ap-gray-100);
 }
@@ -102,4 +102,27 @@
 
 .data-table__group-header {
   font-weight: 700;
+}
+
+.table-wrapper--fit .table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.table-wrapper--fit .data-table {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+@media (max-width: 1440px) {
+  .table-wrapper--fit .data-table th {
+    padding: 7px 5px;
+  }
+
+  .table-wrapper--fit .data-table td {
+    padding: 6px 5px;
+  }
 }

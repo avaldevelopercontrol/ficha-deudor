@@ -373,13 +373,21 @@
   width: 100%;
 }
 
-.gestion-deudor-card--results .table-scroll {
+.gestion-deudor-card--results
+  .table-wrapper--fit
+  .table-scroll {
   width: 100%;
-  overflow-x: auto;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
-.gestion-deudor-card--results .data-table {
-  min-width: 2050px;
+.gestion-deudor-card--results
+  .table-wrapper--fit
+  .data-table {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  table-layout: fixed;
 }
 
 .gestion-deudor-card--results .data-table th,

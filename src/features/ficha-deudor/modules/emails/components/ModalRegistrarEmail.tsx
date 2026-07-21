@@ -23,7 +23,9 @@ import { EmailFormFields } from './EmailFormFields';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onRegistrar?: (data: EmailFormData) => void;
+  onRegistrar?: (
+    data: EmailFormData
+  ) => Promise<void> | void;
   deudorData?: DeudorInfo | null;
 }
 
@@ -36,16 +38,26 @@ const ModalRegistrarEmail: React.FC<Props> = ({
   const { statusesOptions, isLoadingStatuses, errorStatuses } =
     useEmailCatalogosForm();
 
-  const { form, errors, handleChange, handleSubmit, handleCancel } =
-    useModalForm<EmailFormData>({
-      initialForm: MODAL_REGISTRAR_EMAIL_INITIAL_FORM,
-      onClose,
-      onSubmit: (data) => {
-        onRegistrar?.(data);
-      },
-      validate: validateEmailForm,
-      resetOnClose: true,
-    });
+  const {
+    form,
+    errors,
+    isSubmitting,
+    submitError,
+    handleChange,
+    handleSubmit,
+    handleCancel,
+  } = useModalForm<EmailFormData>({
+    initialForm:
+      MODAL_REGISTRAR_EMAIL_INITIAL_FORM,
+
+    onClose,
+
+    onSubmit: (data) =>
+      onRegistrar?.(data),
+
+    validate: validateEmailForm,
+    resetOnClose: true,
+  });
 
   if (!isOpen) return null;
 
@@ -58,6 +70,8 @@ const ModalRegistrarEmail: React.FC<Props> = ({
       onSubmit={handleSubmit}
       minHeight={MODAL_REGISTRAR_EMAIL_LAYOUT.minHeight}
       deudorData={deudorData}
+      isSubmitting={isSubmitting}
+      submitError={submitError}
     >
       <EmailFormFields
         form={form}

@@ -40,12 +40,17 @@ const PanelGestionRealizada: React.FC<Props> = ({
     onTextFilterChange,
     onSelectedFilterChange,
     completo,
+    completoAllData,
     completoLoading,
     completoError,
     completoPageNumber,
     completoPageSize,
     completoTotalRecords,
     completoTotalPages,
+    completoTextFilters,
+    completoSelectedFilters,
+    onCompletoTextFilterChange,
+    onCompletoSelectedFilterChange,
     setCompletoPageNumber,
     setCompletoPageSize,
     refetchCompleto,
@@ -102,21 +107,46 @@ const PanelGestionRealizada: React.FC<Props> = ({
         <PanelTablaExpandida
           columns={columnsExpandidas}
           data={completo}
+          allData={completoAllData}
           isLoading={completoLoading}
           error={completoError}
           pageNumber={completoPageNumber}
           pageSize={completoPageSize}
           totalRecords={completoTotalRecords}
           totalPages={completoTotalPages}
-          emptyMessage={PANEL_GESTION_REALIZADA_MESSAGES.EMPTY}
-          itemLabel={PANEL_GESTION_REALIZADA_MESSAGES.ITEM_LABEL}
-          loadingMessage={PANEL_GESTION_REALIZADA_MESSAGES.LOADING}
-          errorTitle={PANEL_GESTION_REALIZADA_MESSAGES.ERROR_TITLE}
-          pageSizeOptions={PANEL_GESTION_REALIZADA_PAGE_SIZE_OPTIONS.EXPANDIDA}
+          textFilters={completoTextFilters}
+          selectedFilters={
+            completoSelectedFilters
+          }
+          emptyMessage={
+            PANEL_GESTION_REALIZADA_MESSAGES.EMPTY
+          }
+          itemLabel={
+            PANEL_GESTION_REALIZADA_MESSAGES.ITEM_LABEL
+          }
+          loadingMessage={
+            PANEL_GESTION_REALIZADA_MESSAGES.LOADING
+          }
+          errorTitle={
+            PANEL_GESTION_REALIZADA_MESSAGES.ERROR_TITLE
+          }
+          pageSizeOptions={
+            PANEL_GESTION_REALIZADA_PAGE_SIZE_OPTIONS.EXPANDIDA
+          }
           showPageSizeSelector
           fitToPanel
-          setPageNumber={setCompletoPageNumber}
-          setPageSize={setCompletoPageSize}
+          setPageNumber={
+            setCompletoPageNumber
+          }
+          setPageSize={
+            setCompletoPageSize
+          }
+          onTextFilterChange={
+            onCompletoTextFilterChange
+          }
+          onSelectedFilterChange={
+            onCompletoSelectedFilterChange
+          }
           onRetry={refetchCompleto}
           onVolver={handleVolver}
         />

@@ -28,7 +28,9 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   emailId: string | null;
-  onGuardar?: (data: EmailEditFormData) => void;
+  onGuardar?: (
+    data: EmailEditFormData
+  ) => Promise<void> | void;
   deudorData?: DeudorInfo | null;
 }
 
@@ -48,18 +50,34 @@ const ModalEditarEmail: React.FC<Props> = ({
   const { statusesOptions, isLoadingStatuses, errorStatuses } =
     useEmailCatalogosForm();
 
-  const { form, errors, handleChange, handleSubmit, handleCancel } =
-    useModalForm<EmailEditFormData, EmailByIdApi>({
-      initialForm: MODAL_EDITAR_EMAIL_INITIAL_FORM,
-      entity: emailApi,
-      mapEntityToForm: mapEmailByIdApiToEditFormData,
-      onClose,
-      onSubmit: (data) => {
-        onGuardar?.(data);
-      },
-      validate: validateEmailEditForm,
-      resetOnClose: true,
-    });
+  const {
+    form,
+    errors,
+    isSubmitting,
+    submitError,
+    handleChange,
+    handleSubmit,
+    handleCancel,
+  } = useModalForm<
+    EmailEditFormData,
+    EmailByIdApi
+  >({
+    initialForm:
+      MODAL_EDITAR_EMAIL_INITIAL_FORM,
+
+    entity: emailApi,
+
+    mapEntityToForm:
+      mapEmailByIdApiToEditFormData,
+
+    onClose,
+
+    onSubmit: (data) =>
+      onGuardar?.(data),
+
+    validate: validateEmailEditForm,
+    resetOnClose: true,
+  });
 
   if (!isOpen || !emailId) return null;
 
@@ -117,6 +135,8 @@ const ModalEditarEmail: React.FC<Props> = ({
       submitLabel={MODAL_EDITAR_EMAIL_TEXTS.submitLabel}
       onSubmit={handleSubmit}
       minHeight={MODAL_EDITAR_EMAIL_LAYOUT.minHeight}
+      isSubmitting={isSubmitting}
+      submitError={submitError}
     >
       <EmailFormFields
         form={form}

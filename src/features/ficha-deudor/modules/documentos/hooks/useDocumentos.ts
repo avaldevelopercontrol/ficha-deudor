@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import type {
   ColumnApi,
   DocumentoApi,
@@ -50,13 +51,14 @@ export function useDocumentos(
     botones,
     isLoading: metaLoading,
     error: metaError,
+    refetch: refetchMetadata,
   } = useDocumentosMetadata(params);
 
   const {
     rawData,
     isLoading: dataLoading,
     error: dataError,
-    refetch,
+    refetch: refetchData,
   } = useDocumentosData(params);
 
   const documentosTable = useDocumentosTableData({
@@ -67,6 +69,14 @@ export function useDocumentos(
 
   const isLoading = metaLoading || dataLoading;
   const error = metaError || dataError;
+
+  const refetch = useCallback(() => {
+    refetchMetadata();
+    refetchData();
+  }, [
+    refetchMetadata,
+    refetchData,
+  ]);
 
   return {
     columns,

@@ -1,13 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useCallback } from 'react';
 
-import { fetchBotones, fetchColumnas } from '../api/documentosApi';
+import { useApiResource } from '@shared/hooks/useApiResource';
+
+import {
+  fetchBotones,
+  fetchColumnas,
+} from '../api/documentosApi';
+
 import { DOCUMENTOS_ERROR_MESSAGES } from '../constants/documentos.constants';
+
 import type { FichaDeudorDocumentosParams } from '../../../shared/types/fichaDeudor.types';
-import { getErrorMessage } from '../../../shared/utils/errorMessage.utils';
+
+import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
+
 import type {
   BotonApi,
   ColumnApi,
 } from '../../../shared/types';
+
+interface DocumentosMetadata {
+  columns: ColumnApi[];
+  botones: BotonApi[];
+}
+
+const EMPTY_METADATA: DocumentosMetadata = {
+  columns: [],
+  botones: [],
+};
 
 const hasRequiredMetaParams = ({
   id_cliente,
@@ -36,68 +55,84 @@ export const useDocumentosMetadata = (
     id_usuario,
   } = params;
 
-  const [columns, setColumns] = useState<ColumnApi[]>([]);
-  const [botones, setBotones] = useState<BotonApi[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const canLoadMetadata =
+    hasRequiredMetaParams({
+      id_cliente,
+      id_cartera,
+      id_deudor,
+      id_contrato,
+      id_usuario,
+    });
 
-  useEffect(() => {
-    if (
-    !hasRequiredMetaParams({
-        id_cliente,
-        id_cartera,
-        id_deudor,
-        id_contrato,
-        id_usuario,
-    })
-    ) {
-    return;
-    }
-
-    let cancelled = false;
-
-    const loadMetadata = async () => {
-      setIsLoading(true);
-      setError(null);
+  const fetchMetadata = useCallback(
+    async (
+      signal: AbortSignal
+    ): Promise<DocumentosMetadata> => {
+      if (!canLoadMetadata) {
+        return EMPTY_METADATA;
+      }
 
       try {
-        const [cols, btns] = await Promise.all([
-          fetchColumnas(id_cliente, id_contrato),
-          fetchBotones(id_cliente),
-        ]);
+        const [columns, botones] =
+          await Promise.all([
+            fetchColumnas(
+              id_cliente,
+              id_contrato,
+              signal
+            ),
+            fetchBotones(
+              id_cliente,
+              signal
+            ),
+          ]);
 
-        if (cancelled) return;
-
-        setColumns(cols);
-        setBotones(btns);
+        return {
+          columns,
+          botones,
+        };
       } catch (error) {
-        if (cancelled) return;
-
-        setError(getErrorMessage(error, DOCUMENTOS_ERROR_MESSAGES.META));
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
+        throw new Error(
+          getErrorMessage(
+            error,
+            DOCUMENTOS_ERROR_MESSAGES.META
+          )
+        );
       }
-    };
+    },
+    [
+      canLoadMetadata,
+      id_cliente,
+      id_contrato,
+    ]
+  );
 
-    void loadMetadata();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    id_cliente,
-    id_cartera,
-    id_deudor,
-    id_contrato,
-    id_usuario,
-  ]);
-
-  return {
-    columns,
-    botones,
+  const {
+    data,
     isLoading,
     error,
+    refetch,
+  } = useApiResource<DocumentosMetadata>(
+    fetchMetadata,
+    [
+      id_cliente,
+      id_cartera,
+      id_deudor,
+      id_contrato,
+      id_usuario,
+    ]
+  );
+
+  return {
+    columns:
+      data?.columns ??
+      EMPTY_METADATA.columns,
+
+    botones:
+      data?.botones ??
+      EMPTY_METADATA.botones,
+
+    isLoading,
+    error,
+    refetch,
   };
 };

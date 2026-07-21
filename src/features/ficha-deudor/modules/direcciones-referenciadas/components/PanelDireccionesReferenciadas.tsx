@@ -41,7 +41,6 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
     showRegistrar,
     showEditar,
     direccionEditarId,
-    direccionByIdData,
     handleOpenRegistrar,
     handleCloseRegistrar,
     handleCloseEditar,
@@ -109,7 +108,6 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
         isOpen={showEditar}
         onClose={handleCloseEditar}
         direccionId={direccionEditarId}
-        direccionData={direccionByIdData}
         onGuardar={handleGuardarEdicion}
       />
     </>

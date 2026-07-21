@@ -1,4 +1,8 @@
-import { useCallback, useState } from 'react';
+import {
+  useCallback,
+  useRef,
+  useState,
+} from 'react';
 
 import type { DocumentoApi } from '../../../shared/types';
 import type { FichaDeudorGestionFormParams } from '../../../shared/types/fichaDeudor.types';
@@ -11,6 +15,7 @@ import type {
 } from '../types/fichaGestion.types';
 import { useAutoClearValidationErrors } from './useAutoClearValidationErrors';
 import { getCurrentPeruDateTime } from '../../../shared/utils/date.utils';
+import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
 
 interface UseFichaGestionGuardarParams {
   form: GestionFormClaro;
@@ -19,6 +24,7 @@ interface UseFichaGestionGuardarParams {
   np1TipoContacto: number;
   requiereCamposClaro: boolean;
   onGestionGuardada?: (gestionTerminada: boolean) => void;
+  onError?: (message: string) => void;
   onSubmit?: (
     data: GestionFormClaro,
     fechaFinGestion: string
@@ -32,6 +38,7 @@ export const useFichaGestionGuardar = ({
   np1TipoContacto,
   requiereCamposClaro,
   onGestionGuardada,
+  onError,
   onSubmit,
 }: UseFichaGestionGuardarParams) => {
   const [
@@ -40,6 +47,8 @@ export const useFichaGestionGuardar = ({
   ] = useState<FichaGestionValidationErrors>({});
 
   const [isSaving, setIsSaving] = useState(false);
+
+  const isSavingRef = useRef(false);
 
   const clearValidationErrors = useCallback(() => {
     setValidationErrors({});
@@ -52,6 +61,10 @@ export const useFichaGestionGuardar = ({
 
   const handleGuardar =
     useCallback(async () => {
+      if (isSavingRef.current) {
+        return;
+      }
+
       const fechaFinGestion =
         getCurrentPeruDateTime();
 
@@ -73,37 +86,46 @@ export const useFichaGestionGuardar = ({
         return;
       }
 
+      isSavingRef.current = true;
       setIsSaving(true);
+
+      let gestionGuardada = false;
 
       try {
         await createGestionOpeGesContratos(
           saveRequest.payload
         );
 
-        onSubmit?.(
-          form,
-          fechaFinGestion
-        );
-
-        onGestionGuardada?.(
-          form.gestionTerminada
-        );
+        gestionGuardada = true;
       } catch (error) {
-        console.error(
-          'Error al guardar gestión:',
-          error
-        );
-
-        alert(
-          FICHA_GESTION_MESSAGES.SAVE_ERROR
+        onError?.(
+          getErrorMessage(
+            error,
+            FICHA_GESTION_MESSAGES.SAVE_ERROR
+          )
         );
       } finally {
+        isSavingRef.current = false;
         setIsSaving(false);
       }
+
+      if (!gestionGuardada) {
+        return;
+      }
+
+      onSubmit?.(
+        form,
+        fechaFinGestion
+      );
+
+      onGestionGuardada?.(
+        form.gestionTerminada
+      );
     }, [
       documentosFiltrados,
       form,
       np1TipoContacto,
+      onError,
       onGestionGuardada,
       onSubmit,
       params,

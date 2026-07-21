@@ -4,12 +4,27 @@ interface ApiResponseStatus {
   messageUser?: string;
 }
 
+const isSuccessfulStatusCode = (
+  statusCode: number
+): boolean => {
+  return statusCode >= 200 && statusCode < 300;
+};
+
 export const assertApiSuccess = (
   result: ApiResponseStatus,
   fallbackMessage: string
-) => {
-  if (result.statusCode !== 200) {
-    throw new Error(result.messageUser || result.message || fallbackMessage);
+): void => {
+  if (
+    isSuccessfulStatusCode(
+      result.statusCode
+    )
+  ) {
+    return;
   }
-};
 
+  throw new Error(
+    result.messageUser?.trim() ||
+      result.message?.trim() ||
+      fallbackMessage
+  );
+};

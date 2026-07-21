@@ -75,12 +75,6 @@ export interface TelefonoReferenciado {
   reclamoIndecopi: boolean;
 }
 
-export interface TelefonosReferenciadosResourceState {
-  telefonos: TelefonoReferenciado[];
-  isLoading: boolean;
-  error: string | null;
-}
-
 export interface TelefonoFormData {
   id: number;
   numero: string;

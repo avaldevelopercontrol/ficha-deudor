@@ -16,6 +16,7 @@ import type {
 } from '../types/fichaGestion.types';
 import { useAutoClearValidationErrors } from './useAutoClearValidationErrors';
 import { useAutoClearFeedback } from './useAutoClearFeedback';
+import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
 
 interface UseFichaGestionAgendarParams {
   form: GestionFormClaro;
@@ -26,19 +27,6 @@ interface UseFichaGestionAgendarParams {
   np1Options: PaletaRespuestaOption[];
   np2Options: PaletaRespuestaOption[];
 }
-
-const getErrorMessage = (
-  error: unknown
-): string => {
-  if (
-    error instanceof Error &&
-    error.message.trim()
-  ) {
-    return error.message;
-  }
-
-  return FICHA_GESTION_MESSAGES.AGENDA_ERROR;
-};
 
 export const useFichaGestionAgendar = ({
   form,
@@ -122,7 +110,10 @@ export const useFichaGestionAgendar = ({
           title:
             'No se pudo preparar la agenda',
           message:
-            getErrorMessage(error),
+            getErrorMessage(
+              error,
+              FICHA_GESTION_MESSAGES.AGENDA_ERROR
+            )
         });
 
         return;
@@ -171,7 +162,10 @@ export const useFichaGestionAgendar = ({
           title:
             'No se pudo registrar la agenda',
           message:
-            getErrorMessage(error),
+            getErrorMessage(
+              error,
+              FICHA_GESTION_MESSAGES.AGENDA_ERROR
+            )
         });
       } finally {
         setIsScheduling(false);

@@ -15,8 +15,8 @@ export const ASIGNAR_USUARIO_COLUMNS = {
 } as const;
 
 export const ASIGNAR_USUARIO_COLUMN_WIDTHS = {
-  id: '10%',
-  nombre: '44%',
+  id: '9%',
+  nombre: '45',
   perfil: '20%',
   login: '20%',
   acciones: '7%',

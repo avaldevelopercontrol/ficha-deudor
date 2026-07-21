@@ -1,4 +1,9 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+} from 'react';
 
 import {
   useClientSideTable,
@@ -18,7 +23,10 @@ type PopupTableResourceAction<T> =
   | { type: 'LOAD_START' }
   | { type: 'LOAD_SUCCESS'; data: T[] }
   | { type: 'LOAD_ERROR'; error: string }
-  | { type: 'RESET_WITH_ERROR'; error: string };
+  | {
+      type: 'RESET_WITH_ERROR';
+      error: string;
+    };
 
 export interface UsePopupTableResourceReturn<T> {
   allData: T[];
@@ -35,8 +43,17 @@ export interface UsePopupTableResourceReturn<T> {
   refetch: () => void;
   textFilters: TextFilters;
   selectedFilters: SelectedFilters;
-  onTextFilterChange: (columnKey: string, value: string) => void;
-  onSelectedFilterChange: (columnKey: string, values: string[]) => void;
+
+  onTextFilterChange: (
+    columnKey: string,
+    value: string
+  ) => void;
+
+  onSelectedFilterChange: (
+    columnKey: string,
+    values: string[]
+  ) => void;
+
   resetFilters: () => void;
 }
 
@@ -45,17 +62,22 @@ interface UsePopupTableResourceParams<T> {
   missingParamsError: string;
   loadError: string;
   resetDeps: readonly unknown[];
-  fetcher: (signal?: AbortSignal) => Promise<T[]>;
+
+  fetcher: (
+    signal?: AbortSignal
+  ) => Promise<T[]>;
+
   initialPageSize?: number;
 }
 
-const createInitialState = <T>(): PopupTableResourceState<T> => ({
-  allData: [],
-  isLoading: false,
-  error: null,
-});
+const createInitialState =
+  <T,>(): PopupTableResourceState<T> => ({
+    allData: [],
+    isLoading: false,
+    error: null,
+  });
 
-const popupTableResourceReducer = <T>(
+const popupTableResourceReducer = <T,>(
   state: PopupTableResourceState<T>,
   action: PopupTableResourceAction<T>
 ): PopupTableResourceState<T> => {
@@ -87,7 +109,7 @@ const popupTableResourceReducer = <T>(
   }
 };
 
-export const usePopupTableResource = <T>({
+export const usePopupTableResource = <T,>({
   areParamsReady,
   missingParamsError,
   loadError,
@@ -100,24 +122,123 @@ export const usePopupTableResource = <T>({
     createInitialState<T>()
   );
 
-  const { allData, isLoading, error } = state;
+  const {
+    allData,
+    isLoading,
+    error,
+  } = state;
 
-  const table = useClientSideTable(allData, resetDeps, {
-    initialPageSize,
-  });
+  const table = useClientSideTable(
+    allData,
+    resetDeps,
+    {
+      initialPageSize,
+    }
+  );
 
   const isMountedRef = useRef(true);
+
+  const activeControllerRef =
+    useRef<AbortController | null>(null);
+
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
     isMountedRef.current = true;
 
     return () => {
       isMountedRef.current = false;
+      requestIdRef.current += 1;
+
+      activeControllerRef.current?.abort();
+      activeControllerRef.current = null;
     };
   }, []);
 
+  const executeRequest =
+    useCallback(async () => {
+      if (!areParamsReady) {
+        return;
+      }
+
+      /*
+       * Cancela la consulta anterior antes de
+       * iniciar una nueva.
+       */
+      activeControllerRef.current?.abort();
+
+      const controller =
+        new AbortController();
+
+      const requestId =
+        ++requestIdRef.current;
+
+      activeControllerRef.current =
+        controller;
+
+      dispatch({
+        type: 'LOAD_START',
+      });
+
+      try {
+        const result = await fetcher(
+          controller.signal
+        );
+
+        if (
+          !isMountedRef.current ||
+          controller.signal.aborted ||
+          requestId !==
+            requestIdRef.current
+        ) {
+          return;
+        }
+
+        dispatch({
+          type: 'LOAD_SUCCESS',
+          data: result,
+        });
+      } catch (err) {
+        if (
+          !isMountedRef.current ||
+          controller.signal.aborted ||
+          requestId !==
+            requestIdRef.current
+        ) {
+          return;
+        }
+
+        dispatch({
+          type: 'LOAD_ERROR',
+
+          error:
+            err instanceof Error
+              ? err.message
+              : loadError,
+        });
+      } finally {
+        if (
+          requestId ===
+            requestIdRef.current &&
+          activeControllerRef.current ===
+            controller
+        ) {
+          activeControllerRef.current =
+            null;
+        }
+      }
+    }, [
+      areParamsReady,
+      fetcher,
+      loadError,
+    ]);
+
   useEffect(() => {
     if (!areParamsReady) {
+      activeControllerRef.current?.abort();
+      activeControllerRef.current = null;
+      requestIdRef.current += 1;
+
       dispatch({
         type: 'RESET_WITH_ERROR',
         error: missingParamsError,
@@ -126,64 +247,22 @@ export const usePopupTableResource = <T>({
       return;
     }
 
-    const controller = new AbortController();
-
-    const loadData = async () => {
-      dispatch({
-        type: 'LOAD_START',
-      });
-
-      try {
-        const result = await fetcher(controller.signal);
-
-        if (controller.signal.aborted) return;
-
-        dispatch({
-          type: 'LOAD_SUCCESS',
-          data: result,
-        });
-      } catch (err) {
-        if (!controller.signal.aborted) {
-          dispatch({
-            type: 'LOAD_ERROR',
-            error: err instanceof Error ? err.message : loadError,
-          });
-        }
-      }
-    };
-
-    void loadData();
+    void executeRequest();
 
     return () => {
-      controller.abort();
+      activeControllerRef.current?.abort();
+      activeControllerRef.current = null;
+      requestIdRef.current += 1;
     };
-  }, [areParamsReady, fetcher, loadError, missingParamsError]);
+  }, [
+    areParamsReady,
+    executeRequest,
+    missingParamsError,
+  ]);
 
   const refetch = useCallback(() => {
-    if (!areParamsReady) return;
-
-    dispatch({
-      type: 'LOAD_START',
-    });
-
-    fetcher()
-      .then((result) => {
-        if (!isMountedRef.current) return;
-
-        dispatch({
-          type: 'LOAD_SUCCESS',
-          data: result,
-        });
-      })
-      .catch((err) => {
-        if (!isMountedRef.current) return;
-
-        dispatch({
-          type: 'LOAD_ERROR',
-          error: err instanceof Error ? err.message : loadError,
-        });
-      });
-  }, [areParamsReady, fetcher, loadError]);
+    void executeRequest();
+  }, [executeRequest]);
 
   return {
     allData,
@@ -199,9 +278,15 @@ export const usePopupTableResource = <T>({
     setPageSize: table.setPageSize,
     refetch,
     textFilters: table.textFilters,
-    selectedFilters: table.selectedFilters,
-    onTextFilterChange: table.onTextFilterChange,
-    onSelectedFilterChange: table.onSelectedFilterChange,
+    selectedFilters:
+      table.selectedFilters,
+
+    onTextFilterChange:
+      table.onTextFilterChange,
+
+    onSelectedFilterChange:
+      table.onSelectedFilterChange,
+
     resetFilters: table.resetFilters,
   };
 };

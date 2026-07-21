@@ -138,6 +138,16 @@ export const useFichaGestionViewModel = ({
     },
     [onSubmit, resetForm]
   );
+  
+  const handleGestionError =
+  useCallback((message: string) => {
+    setFeedback({
+      variant: 'error',
+      title:
+        'No se pudo registrar la gestión',
+      message,
+    });
+  }, []);
 
   const {
     agendaValidationErrors,
@@ -165,6 +175,8 @@ export const useFichaGestionViewModel = ({
     onGestionGuardada,
     onSubmit:
       handleGestionRegistrada,
+    onSaveError:
+      handleGestionError,
   });
 
   const handleAgendarGestion =

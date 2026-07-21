@@ -51,7 +51,3 @@ export interface DeudorInfo {
   clienteListaBlanca: string;
   clienteConSinPe: string;
 }
-
-export interface MejorRInfo {
-  mejorResultado: string;
-}

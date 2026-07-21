@@ -23,34 +23,58 @@ const GestionTimePicker: React.FC<GestionTimePickerProps> = ({
   disabled = false,
   onChange,
 }) => {
+
+  const hour = getTimeHour(value);
+  const minute = getTimeMinute(value);
+
   return (
     <div className="form-row-inline form-row-inline--time">
       <label className="form-label form-label--inline">Hora:</label>
 
       <select
-        className="form-input form-input--inline-field"
-        value={getTimeHour(value)}
+        className={`form-input form-input--inline-field ${
+          hour
+            ? 'form-select--has-value'
+            : 'form-select--placeholder'
+        }`}
+        value={hour}
         disabled={disabled}
-        onChange={(event) => onChange('hour', event.target.value)}
+        onChange={(event) =>
+          onChange('hour', event.target.value)
+        }
       >
         <option value="">HH</option>
-        {HOURS.map((hour) => (
-          <option key={hour} value={hour}>
-            {hour}
+
+        {HOURS.map((hourOption) => (
+          <option
+            key={hourOption}
+            value={hourOption}
+          >
+            {hourOption}
           </option>
         ))}
       </select>
 
       <select
-        className="form-input form-input--inline-field"
-        value={getTimeMinute(value)}
+        className={`form-input form-input--inline-field ${
+          minute
+            ? 'form-select--has-value'
+            : 'form-select--placeholder'
+        }`}
+        value={minute}
         disabled={disabled}
-        onChange={(event) => onChange('minute', event.target.value)}
+        onChange={(event) =>
+          onChange('minute', event.target.value)
+        }
       >
         <option value="">MM</option>
-        {MINUTES.map((minute) => (
-          <option key={minute} value={minute}>
-            {minute}
+
+        {MINUTES.map((minuteOption) => (
+          <option
+            key={minuteOption}
+            value={minuteOption}
+          >
+            {minuteOption}
           </option>
         ))}
       </select>

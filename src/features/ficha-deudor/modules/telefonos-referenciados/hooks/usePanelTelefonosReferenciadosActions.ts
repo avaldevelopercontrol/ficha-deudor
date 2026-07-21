@@ -1,83 +1,122 @@
-import { useCallback, useRef, useState } from 'react';
+import {
+  useCallback,
+  useState,
+} from 'react';
+
 import type {
   TelefonoFormData,
   TelefonoReferenciado,
 } from '../types/telefono.types';
+
 import { PANEL_TELEFONOS_REFERENCIADOS_ACTION_MESSAGES } from '../constants/panelTelefonosReferenciados.constants';
 
+import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
+
 interface Params {
-  create: (formData: TelefonoFormData) => Promise<void>;
-  update: (id: number, formData: TelefonoFormData) => Promise<void>;
+  create: (
+    formData: TelefonoFormData
+  ) => Promise<void>;
+
+  update: (
+    id: number,
+    formData: TelefonoFormData
+  ) => Promise<void>;
 }
 
-export const usePanelTelefonosReferenciadosActions = ({
-  create,
-  update,
-}: Params) => {
-  const [showRegistrar, setShowRegistrar] = useState(false);
-  const [showEditar, setShowEditar] = useState(false);
-  const [telefonoEditarId, setTelefonoEditarId] = useState<number | null>(null);
-  const registrandoRef = useRef(false);
+export const usePanelTelefonosReferenciadosActions =
+  ({
+    create,
+    update,
+  }: Params) => {
+    const [
+      showRegistrar,
+      setShowRegistrar,
+    ] = useState(false);
 
-  const handleOpenRegistrar = useCallback(() => {
-    setShowRegistrar(true);
-  }, []);
+    const [
+      showEditar,
+      setShowEditar,
+    ] = useState(false);
 
-  const handleCloseRegistrar = useCallback(() => {
-    setShowRegistrar(false);
-  }, []);
+    const [
+      telefonoEditarId,
+      setTelefonoEditarId,
+    ] = useState<number | null>(null);
 
-  const handleEdit = useCallback((row: TelefonoReferenciado) => {
-    setTelefonoEditarId(row.id);
-    setShowEditar(true);
-  }, []);
+    const handleOpenRegistrar =
+      useCallback(() => {
+        setShowRegistrar(true);
+      }, []);
 
-  const handleCloseEditar = useCallback(() => {
-    setShowEditar(false);
-    setTelefonoEditarId(null);
-  }, []);
+    const handleCloseRegistrar =
+      useCallback(() => {
+        setShowRegistrar(false);
+      }, []);
 
-  const handleGuardarEdicion = useCallback(
-    async (formData: TelefonoFormData) => {
-      try {
-        await update(formData.id, formData);
-        handleCloseEditar();
-      } catch {
-        alert(PANEL_TELEFONOS_REFERENCIADOS_ACTION_MESSAGES.UPDATE_ERROR);
-      }
-    },
-    [update, handleCloseEditar]
-  );
+    const handleEdit = useCallback(
+      (row: TelefonoReferenciado) => {
+        setTelefonoEditarId(row.id);
+        setShowEditar(true);
+      },
+      []
+    );
 
-  const handleRegistrar = useCallback(
-    async (formData: TelefonoFormData) => {
-      if (registrandoRef.current) {
-        return;
-      }
+    const handleCloseEditar =
+      useCallback(() => {
+        setShowEditar(false);
+        setTelefonoEditarId(null);
+      }, []);
 
-      registrandoRef.current = true;
+    const handleGuardarEdicion =
+      useCallback(
+        async (
+          formData: TelefonoFormData
+        ): Promise<void> => {
+          try {
+            await update(
+              formData.id,
+              formData
+            );
+          } catch (error) {
+            throw new Error(
+              getErrorMessage(
+                error,
+                PANEL_TELEFONOS_REFERENCIADOS_ACTION_MESSAGES.UPDATE_ERROR
+              )
+            );
+          }
+        },
+        [update]
+      );
 
-      try {
-        await create(formData);
-        handleCloseRegistrar();
-      } catch {
-        alert(PANEL_TELEFONOS_REFERENCIADOS_ACTION_MESSAGES.CREATE_ERROR);
-      } finally {
-        registrandoRef.current = false;
-      }
-    },
-    [create, handleCloseRegistrar]
-  );
+    const handleRegistrar =
+      useCallback(
+        async (
+          formData: TelefonoFormData
+        ): Promise<void> => {
+          try {
+            await create(formData);
+          } catch (error) {
+            throw new Error(
+              getErrorMessage(
+                error,
+                PANEL_TELEFONOS_REFERENCIADOS_ACTION_MESSAGES.CREATE_ERROR
+              )
+            );
+          }
+        },
+        [create]
+      );
 
-  return {
-    showRegistrar,
-    showEditar,
-    telefonoEditarId,
-    handleOpenRegistrar,
-    handleCloseRegistrar,
-    handleEdit,
-    handleCloseEditar,
-    handleGuardarEdicion,
-    handleRegistrar,
+    return {
+      showRegistrar,
+      showEditar,
+      telefonoEditarId,
+      handleOpenRegistrar,
+      handleCloseRegistrar,
+      handleEdit,
+      handleCloseEditar,
+      handleGuardarEdicion,
+      handleRegistrar,
+    };
   };
-};

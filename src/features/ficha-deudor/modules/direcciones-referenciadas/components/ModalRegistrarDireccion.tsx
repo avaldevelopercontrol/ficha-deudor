@@ -26,7 +26,9 @@ import { DireccionFormFields } from './DireccionFormFields';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onRegistrar?: (data: DireccionFormData) => void;
+  onRegistrar?: (
+    data: DireccionFormData
+  ) => Promise<void> | void;
 }
 
 const ModalRegistrarDireccion: React.FC<Props> = ({
@@ -34,16 +36,26 @@ const ModalRegistrarDireccion: React.FC<Props> = ({
   onClose,
   onRegistrar,
 }) => {
-  const { form, errors, handleChange, handleSubmit, handleCancel } =
-    useModalForm<DireccionFormData>({
-      initialForm: MODAL_REGISTRAR_DIRECCION_INITIAL_FORM,
-      onClose,
-      onSubmit: (data) => {
-        onRegistrar?.(data);
-      },
-      validate: validateDireccionForm,
-      resetOnClose: true,
-    });
+  const {
+    form,
+    errors,
+    isSubmitting,
+    submitError,
+    handleChange,
+    handleSubmit,
+    handleCancel,
+  } = useModalForm<DireccionFormData>({
+    initialForm:
+      MODAL_REGISTRAR_DIRECCION_INITIAL_FORM,
+
+    onClose,
+
+    onSubmit: (data) =>
+      onRegistrar?.(data),
+
+    validate: validateDireccionForm,
+    resetOnClose: true,
+  });
 
   const {
     handleDepartamentoChange,
@@ -82,6 +94,8 @@ const ModalRegistrarDireccion: React.FC<Props> = ({
       submitLabel={MODAL_REGISTRAR_DIRECCION_TEXTS.submitLabel}
       onSubmit={handleSubmit}
       minHeight={MODAL_REGISTRAR_DIRECCION_LAYOUT.minHeight}
+      isSubmitting={isSubmitting}
+      submitError={submitError}
     >
       <DireccionFormFields
         form={form}

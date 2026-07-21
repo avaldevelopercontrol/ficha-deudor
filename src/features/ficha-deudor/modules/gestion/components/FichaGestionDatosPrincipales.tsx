@@ -21,27 +21,45 @@ const FichaGestionDatosPrincipales: React.FC<
   handleNP1Change,
   // handleOpenWhatsApp,
   telefonoSearch,
-
-  estadosOptions,
-  isLoadingEstados,
-  errorEstados,
-
-  tiposOptions,
-  isLoadingTipos,
-  errorTipos,
-
-  np0Options,
-  isLoadingNP0,
-  errorNP0,
-
-  np1Options,
-  isLoadingNP1,
-  errorNP1,
-
-  np2Options,
-  isLoadingNP2,
-  errorNP2,
+  catalogos,
 }) => {
+  const {
+    estados,
+    tipos,
+    np0,
+    np1,
+    np2,
+  } = catalogos;
+
+  const {
+    options: estadosOptions,
+    isLoading: isLoadingEstados,
+    error: errorEstados,
+  } = estados;
+
+  const {
+    options: tiposOptions,
+    isLoading: isLoadingTipos,
+    error: errorTipos,
+  } = tipos;
+
+  const {
+    options: np0Options,
+    isLoading: isLoadingNP0,
+    error: errorNP0,
+  } = np0;
+
+  const {
+    options: np1Options,
+    isLoading: isLoadingNP1,
+    error: errorNP1,
+  } = np1;
+
+  const {
+    options: np2Options,
+    isLoading: isLoadingNP2,
+    error: errorNP2,
+  } = np2;
   const np1Placeholder = useMemo(() => {
     if (!form.np0) {
       return 'Primero seleccione NP0';

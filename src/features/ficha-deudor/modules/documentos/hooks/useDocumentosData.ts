@@ -1,9 +1,15 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
+
+import { useApiResource } from '@shared/hooks/useApiResource';
 
 import { fetchAllGestiones } from '../api/documentosApi';
+
 import { DOCUMENTOS_ERROR_MESSAGES } from '../constants/documentos.constants';
+
 import type { FichaDeudorDocumentosParams } from '../../../shared/types/fichaDeudor.types';
-import { getErrorMessage } from '../../../shared/utils/errorMessage.utils';
+
+import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
+
 import type { DocumentoApi } from '../../../shared/types';
 
 const hasRequiredDataParams = ({
@@ -12,92 +18,82 @@ const hasRequiredDataParams = ({
   id_deudor,
 }: Pick<
   FichaDeudorDocumentosParams,
-  'id_cliente' | 'id_cartera' | 'id_deudor'
+  | 'id_cliente'
+  | 'id_cartera'
+  | 'id_deudor'
 >) => {
-  return Boolean(id_cliente && id_cartera && id_deudor);
+  return Boolean(
+    id_cliente &&
+      id_cartera &&
+      id_deudor
+  );
 };
 
 export const useDocumentosData = (
   params: FichaDeudorDocumentosParams
 ) => {
-  const { id_cliente, id_cartera, id_deudor } = params;
+  const {
+    id_cliente,
+    id_cartera,
+    id_deudor,
+  } = params;
 
-  const [rawData, setRawData] = useState<DocumentoApi[]>([]);
-  const [isLoading, setIsLoading] = useState(() =>
+  const canLoadData =
     hasRequiredDataParams({
       id_cliente,
       id_cartera,
       id_deudor,
-    })
-  );
-  const [error, setError] = useState<string | null>(null);
+    });
 
-  const fetchDocumentosData = useCallback(async () => {
-    if (
-      !hasRequiredDataParams({
+  const fetchDocumentosData =
+    useCallback(
+      async (
+        signal: AbortSignal
+      ): Promise<DocumentoApi[]> => {
+        if (!canLoadData) {
+          return [];
+        }
+
+        try {
+          return await fetchAllGestiones(
+            id_cliente,
+            id_cartera,
+            id_deudor,
+            signal
+          );
+        } catch (error) {
+          throw new Error(
+            getErrorMessage(
+              error,
+              DOCUMENTOS_ERROR_MESSAGES.DATA
+            )
+          );
+        }
+      },
+      [
+        canLoadData,
         id_cliente,
         id_cartera,
         id_deudor,
-      })
-    ) {
-      return [];
-    }
+      ]
+    );
 
-    return fetchAllGestiones(id_cliente, id_cartera, id_deudor);
-  }, [id_cliente, id_cartera, id_deudor]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadInitialData = async () => {
-      try {
-        const result = await fetchDocumentosData();
-
-        if (cancelled) return;
-
-        setRawData(result);
-        setError(null);
-      } catch (error) {
-        if (cancelled) return;
-
-        setError(getErrorMessage(error, DOCUMENTOS_ERROR_MESSAGES.DATA));
-        setRawData([]);
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    void loadInitialData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [fetchDocumentosData]);
-
-  const refetch = useCallback(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const result = await fetchDocumentosData();
-
-        setRawData(result);
-      } catch (error) {
-        setError(getErrorMessage(error, DOCUMENTOS_ERROR_MESSAGES.DATA));
-        setRawData([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void loadData();
-  }, [fetchDocumentosData]);
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+  } = useApiResource<DocumentoApi[]>(
+    fetchDocumentosData,
+    [
+      id_cliente,
+      id_cartera,
+      id_deudor,
+    ]
+  );
 
   return {
-    rawData,
+    rawData: data ?? [],
     isLoading,
     error,
     refetch,
