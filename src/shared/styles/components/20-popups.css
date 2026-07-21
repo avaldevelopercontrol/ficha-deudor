@@ -254,3 +254,15 @@
     width: 100%;
   }
 }
+
+.popup-main {
+  padding: 16px 20px;
+  background: #f8fafc;
+  min-height: calc(100vh - 52px);
+
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  overflow-x: auto;
+}

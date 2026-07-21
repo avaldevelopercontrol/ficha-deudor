@@ -29,6 +29,9 @@ interface UseFichaGestionActionsParams {
     data: GestionFormClaro,
     fechaFinGestion: string
   ) => void;
+  onSaveError?: (
+  message: string
+) => void;
 }
 
 export const useFichaGestionActions = ({
@@ -43,6 +46,7 @@ export const useFichaGestionActions = ({
   np1TipoContacto,
   requiereCamposClaro,
   onGestionGuardada,
+  onSaveError,
   onSubmit,
 }: UseFichaGestionActionsParams) => {
   const {
@@ -78,6 +82,7 @@ export const useFichaGestionActions = ({
     np1TipoContacto,
     requiereCamposClaro,
     onGestionGuardada,
+    onError: onSaveError,
     onSubmit,
   });
 

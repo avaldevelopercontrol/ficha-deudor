@@ -131,25 +131,37 @@ export const buildFichaGestionViewModelProps = ({
       handleOpenWhatsApp,
       telefonoSearch,
 
-      estadosOptions,
-      isLoadingEstados,
-      errorEstados,
+      catalogos: {
+        estados: {
+          options: estadosOptions,
+          isLoading: isLoadingEstados,
+          error: errorEstados,
+        },
 
-      tiposOptions,
-      isLoadingTipos,
-      errorTipos,
+        tipos: {
+          options: tiposOptions,
+          isLoading: isLoadingTipos,
+          error: errorTipos,
+        },
 
-      np0Options,
-      isLoadingNP0,
-      errorNP0,
+        np0: {
+          options: np0Options,
+          isLoading: isLoadingNP0,
+          error: errorNP0,
+        },
 
-      np1Options,
-      isLoadingNP1,
-      errorNP1,
+        np1: {
+          options: np1Options,
+          isLoading: isLoadingNP1,
+          error: errorNP1,
+        },
 
-      np2Options,
-      isLoadingNP2,
-      errorNP2,
+        np2: {
+          options: np2Options,
+          isLoading: isLoadingNP2,
+          error: errorNP2,
+        },
+      },
     },
 
     accionesTomarProps: {

@@ -26,7 +26,9 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   telefonoId: number | null;
-  onGuardar?: (data: TelefonoFormData) => void;
+  onGuardar?: (
+    data: TelefonoFormData
+  ) => Promise<void> | void;
 }
 
 const ModalEditarTelefono: React.FC<Props> = ({
@@ -61,18 +63,36 @@ const ModalEditarTelefono: React.FC<Props> = ({
 
   const telefonoEntity = telefonoApi as TelefonoEditarApi | null;
 
-  const { form, errors, handleChange, handleSubmit, handleCancel } =
-    useModalForm<TelefonoFormData, TelefonoEditarApi>({
-      initialForm: MODAL_EDITAR_TELEFONO_INITIAL_FORM,
-      entity: telefonoEntity,
-      mapEntityToForm: mapTelefonoEditarApiToFormData,
-      onClose,
-      onSubmit: (data) => {
-        onGuardar?.(data);
-      },
-      validate: validateModalEditarTelefono,
-      resetOnClose: true,
-    });
+  const {
+    form,
+    errors,
+    isSubmitting,
+    submitError,
+    handleChange,
+    handleSubmit,
+    handleCancel,
+  } = useModalForm<
+    TelefonoFormData,
+    TelefonoEditarApi
+  >({
+    initialForm:
+      MODAL_EDITAR_TELEFONO_INITIAL_FORM,
+
+    entity: telefonoEntity,
+
+    mapEntityToForm:
+      mapTelefonoEditarApiToFormData,
+
+    onClose,
+
+    onSubmit: (data) =>
+      onGuardar?.(data),
+
+    validate:
+      validateModalEditarTelefono,
+
+    resetOnClose: true,
+  });
 
   if (!isOpen || !telefonoId) return null;
 
@@ -125,11 +145,19 @@ const ModalEditarTelefono: React.FC<Props> = ({
   return (
     <ModalFormLayout
       isOpen={isOpen}
-      title={MODAL_EDITAR_TELEFONO_TEXTS.title}
+      title={
+        MODAL_EDITAR_TELEFONO_TEXTS.title
+      }
       onClose={handleCancel}
-      submitLabel={MODAL_EDITAR_TELEFONO_TEXTS.submitLabel}
+      submitLabel={
+        MODAL_EDITAR_TELEFONO_TEXTS.submitLabel
+      }
       onSubmit={handleSubmit}
-      minHeight={MODAL_EDITAR_TELEFONO_LAYOUT.minHeight}
+      isSubmitting={isSubmitting}
+      submitError={submitError}
+      minHeight={
+        MODAL_EDITAR_TELEFONO_LAYOUT.minHeight
+      }
     >
       <TelefonoFormFields
         form={form}

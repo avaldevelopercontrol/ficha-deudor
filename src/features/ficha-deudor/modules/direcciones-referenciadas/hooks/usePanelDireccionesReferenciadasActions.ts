@@ -1,81 +1,123 @@
-import { useCallback, useState } from 'react';
-import { useDireccionById } from './useDireccionesReferenciadas';
+import {
+  useCallback,
+  useState,
+} from 'react';
+
 import type {
   DireccionEditFormData,
   DireccionFormData,
   DireccionReferenciada,
 } from '../types/direccion.types';
+
 import { PANEL_DIRECCIONES_REFERENCIADAS_ACTION_MESSAGES } from '../constants/panelDireccionesReferenciadas.constants';
 
+import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
+
 interface Params {
-  create: (formData: DireccionFormData) => Promise<void>;
-  update: (id: string, formData: DireccionEditFormData) => Promise<void>;
+  create: (
+    formData: DireccionFormData
+  ) => Promise<void>;
+
+  update: (
+    id: string,
+    formData: DireccionEditFormData
+  ) => Promise<void>;
 }
 
-export const usePanelDireccionesReferenciadasActions = ({
-  create,
-  update,
-}: Params) => {
-  const [showRegistrar, setShowRegistrar] = useState(false);
-  const [showEditar, setShowEditar] = useState(false);
-  const [direccionEditarId, setDireccionEditarId] = useState<string | null>(
-    null
-  );
+export const usePanelDireccionesReferenciadasActions =
+  ({
+    create,
+    update,
+  }: Params) => {
+    const [
+      showRegistrar,
+      setShowRegistrar,
+    ] = useState(false);
 
-  const { data: direccionByIdData } = useDireccionById(direccionEditarId);
+    const [
+      showEditar,
+      setShowEditar,
+    ] = useState(false);
 
-  const handleOpenRegistrar = useCallback(() => {
-    setShowRegistrar(true);
-  }, []);
+    const [
+      direccionEditarId,
+      setDireccionEditarId,
+    ] = useState<string | null>(null);
 
-  const handleCloseRegistrar = useCallback(() => {
-    setShowRegistrar(false);
-  }, []);
+    const handleOpenRegistrar =
+      useCallback(() => {
+        setShowRegistrar(true);
+      }, []);
 
-  const handleEdit = useCallback((row: DireccionReferenciada) => {
-    setDireccionEditarId(row.id);
-    setShowEditar(true);
-  }, []);
+    const handleCloseRegistrar =
+      useCallback(() => {
+        setShowRegistrar(false);
+      }, []);
 
-  const handleCloseEditar = useCallback(() => {
-    setShowEditar(false);
-    setDireccionEditarId(null);
-  }, []);
+    const handleEdit = useCallback(
+      (row: DireccionReferenciada) => {
+        setDireccionEditarId(row.id);
+        setShowEditar(true);
+      },
+      []
+    );
 
-  const handleGuardarEdicion = useCallback(
-    async (formData: DireccionEditFormData) => {
-      try {
-        await update(formData.id, formData);
-        handleCloseEditar();
-      } catch {
-        alert(PANEL_DIRECCIONES_REFERENCIADAS_ACTION_MESSAGES.UPDATE_ERROR);
-      }
-    },
-    [update, handleCloseEditar]
-  );
+    const handleCloseEditar =
+      useCallback(() => {
+        setShowEditar(false);
+        setDireccionEditarId(null);
+      }, []);
 
-  const handleRegistrar = useCallback(
-    async (formData: DireccionFormData) => {
-      try {
-        await create(formData);
-        handleCloseRegistrar();
-      } catch {
-        alert(PANEL_DIRECCIONES_REFERENCIADAS_ACTION_MESSAGES.CREATE_ERROR);
-      }
-    },
-    [create, handleCloseRegistrar]
-  );
+    const handleGuardarEdicion =
+      useCallback(
+        async (
+          formData: DireccionEditFormData
+        ): Promise<void> => {
+          try {
+            await update(
+              formData.id,
+              formData
+            );
+          } catch (error) {
+            throw new Error(
+              getErrorMessage(
+                error,
+                PANEL_DIRECCIONES_REFERENCIADAS_ACTION_MESSAGES.UPDATE_ERROR
+              )
+            );
+          }
+        },
+        [update]
+      );
 
-  return {
-    showRegistrar,
-    showEditar,
-    direccionEditarId,
-    direccionByIdData,
-    handleOpenRegistrar,
-    handleCloseRegistrar,
-    handleEdit,
-    handleCloseEditar,
-    handleGuardarEdicion,
-    handleRegistrar,
+    const handleRegistrar =
+      useCallback(
+        async (
+          formData: DireccionFormData
+        ): Promise<void> => {
+          try {
+            await create(formData);
+          } catch (error) {
+            throw new Error(
+              getErrorMessage(
+                error,
+                PANEL_DIRECCIONES_REFERENCIADAS_ACTION_MESSAGES.CREATE_ERROR
+              )
+            );
+          }
+        },
+        [create]
+      );
+
+    return {
+      showRegistrar,
+      showEditar,
+      direccionEditarId,
+      handleOpenRegistrar,
+      handleCloseRegistrar,
+      handleEdit,
+      handleCloseEditar,
+      handleGuardarEdicion,
+      handleRegistrar,
+    };
   };
-};

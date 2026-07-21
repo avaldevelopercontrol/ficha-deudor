@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
+import React from 'react';
+
 import Table from '@shared/components/table/Table';
 import { ActionButton } from '@shared/components/ui';
 import Paginacion from '@shared/components/ui/Paginacion';
@@ -11,23 +12,54 @@ const DEFAULT_PAGE_SIZE_OPTIONS = [5, 10, 30, 50];
 
 interface Props<TData> {
   columns: Column<TData>[];
+
+  /**
+   * Registros filtrados y paginados que se muestran
+   * en la página actual.
+   */
   data: TData[];
+
+  /**
+   * Todos los registros obtenidos de la API.
+   * Se utilizan para generar correctamente las opciones
+   * de los filtros.
+   */
+  allData: TData[];
+
   isLoading: boolean;
   error?: string | null;
+
   pageNumber: number;
   pageSize: number;
   totalRecords: number;
   totalPages: number;
+
+  textFilters: TextFilters;
+  selectedFilters: SelectedFilters;
+
   emptyMessage: string;
   itemLabel: string;
   loadingMessage: string;
   errorTitle: string;
+
   pageSizeOptions?: number[];
   showPageSizeSelector?: boolean;
   enableColumnFilters?: boolean;
   fitToPanel?: boolean;
+
   setPageNumber: (page: number) => void;
   setPageSize: (pageSize: number) => void;
+
+  onTextFilterChange: (
+    columnKey: string,
+    value: string
+  ) => void;
+
+  onSelectedFilterChange: (
+    columnKey: string,
+    values: string[]
+  ) => void;
+
   onRetry: () => void;
   onVolver: () => void;
 }
@@ -40,13 +72,18 @@ interface PanelTablaExpandidaHeaderProps {
   onVolver: () => void;
 }
 
-const PanelTablaExpandidaHeader: React.FC<PanelTablaExpandidaHeaderProps> = ({
+const PanelTablaExpandidaHeader: React.FC<
+  PanelTablaExpandidaHeaderProps
+> = ({
   indiceInicio,
   indiceFin,
   totalRecords,
   itemLabel,
   onVolver,
 }) => {
+  const primerRegistro =
+    totalRecords === 0 ? 0 : indiceInicio + 1;
+
   return (
     <div
       style={{
@@ -54,10 +91,18 @@ const PanelTablaExpandidaHeader: React.FC<PanelTablaExpandidaHeaderProps> = ({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: '12px',
+        gap: '12px',
+        flexWrap: 'wrap',
       }}
     >
-      <span style={{ fontSize: '12px', color: '#6b7a99' }}>
-        Mostrando {indiceInicio}-{indiceFin} de {totalRecords} {itemLabel}
+      <span
+        style={{
+          fontSize: '12px',
+          color: '#6b7a99',
+        }}
+      >
+        Mostrando {primerRegistro}-{indiceFin} de{' '}
+        {totalRecords} {itemLabel}
       </span>
 
       <ActionButton
@@ -75,11 +120,17 @@ interface PanelTablaExpandidaLoadingProps {
   message: string;
 }
 
-const PanelTablaExpandidaLoading: React.FC<PanelTablaExpandidaLoadingProps> = ({
-  message,
-}) => {
+const PanelTablaExpandidaLoading: React.FC<
+  PanelTablaExpandidaLoadingProps
+> = ({ message }) => {
   return (
-    <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+    <div
+      style={{
+        padding: '2rem',
+        textAlign: 'center',
+        color: '#666',
+      }}
+    >
       {message}
     </div>
   );
@@ -91,23 +142,41 @@ interface PanelTablaExpandidaErrorProps {
   onRetry: () => void;
 }
 
-const PanelTablaExpandidaError: React.FC<PanelTablaExpandidaErrorProps> = ({
+const PanelTablaExpandidaError: React.FC<
+  PanelTablaExpandidaErrorProps
+> = ({
   title,
   error,
   onRetry,
 }) => {
   return (
-    <div style={{ padding: '2rem', color: '#c00' }}>
-      <p style={{ marginBottom: 12 }}>{title}</p>
+    <div
+      style={{
+        padding: '2rem',
+        color: '#c00',
+      }}
+    >
+      <p style={{ marginBottom: 12 }}>
+        {title}
+      </p>
 
-      <p style={{ fontSize: '0.9em', color: '#666', marginBottom: 16 }}>
+      <p
+        style={{
+          fontSize: '0.9em',
+          color: '#666',
+          marginBottom: 16,
+        }}
+      >
         {error}
       </p>
 
       <button
-        onClick={onRetry}
-        style={{ padding: '8px 16px', cursor: 'pointer' }}
         type="button"
+        onClick={onRetry}
+        style={{
+          padding: '8px 16px',
+          cursor: 'pointer',
+        }}
       >
         Reintentar
       </button>
@@ -115,23 +184,18 @@ const PanelTablaExpandidaError: React.FC<PanelTablaExpandidaErrorProps> = ({
   );
 };
 
-function getRowValue(row: unknown, key: string): unknown {
-  if (typeof row !== 'object' || row === null) {
-    return undefined;
-  }
-
-  return (row as Record<string, unknown>)[key];
-}
-
 const PanelTablaExpandida = <TData,>({
   columns,
   data,
+  allData,
   isLoading,
   error,
   pageNumber,
   pageSize,
   totalRecords,
   totalPages,
+  textFilters,
+  selectedFilters,
   emptyMessage,
   itemLabel,
   loadingMessage,
@@ -142,73 +206,36 @@ const PanelTablaExpandida = <TData,>({
   fitToPanel = true,
   setPageNumber,
   setPageSize,
+  onTextFilterChange,
+  onSelectedFilterChange,
   onRetry,
   onVolver,
 }: Props<TData>) => {
-  const [textFilters, setTextFilters] = useState<TextFilters>({});
-  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
+  /*
+   * Paginacion trabaja con un índice inicial basado en cero.
+   * Antes se enviaba un índice basado en uno y por eso podía
+   * aparecer "Mostrando 2-10" en la parte inferior.
+   */
+  const indiceInicio =
+    totalRecords === 0
+      ? 0
+      : (pageNumber - 1) * pageSize;
 
-  const handleTextFilterChange = useCallback(
-    (columnKey: string, value: string) => {
-      setTextFilters((prev) => ({
-        ...prev,
-        [columnKey]: value,
-      }));
-    },
-    []
+  const indiceFin = Math.min(
+    indiceInicio + pageSize,
+    totalRecords
   );
-
-  const handleSelectedFilterChange = useCallback(
-    (columnKey: string, values: string[]) => {
-      setSelectedFilters((prev) => ({
-        ...prev,
-        [columnKey]: values,
-      }));
-    },
-    []
-  );
-
-  const filteredData = useMemo(() => {
-    return data.filter((row) => {
-      const matchesTextFilters = Object.entries(textFilters).every(
-        ([key, text]) => {
-          if (!text) return true;
-
-          const value = getRowValue(row, key);
-
-          return (
-            value !== undefined &&
-            value !== null &&
-            String(value).toLowerCase().includes(text.toLowerCase())
-          );
-        }
-      );
-
-      const matchesSelectedFilters = Object.entries(selectedFilters).every(
-        ([key, values]) => {
-          if (values.length === 0) return true;
-
-          const value = getRowValue(row, key);
-
-          return value !== undefined && value !== null
-            ? values.includes(String(value))
-            : false;
-        }
-      );
-
-      return matchesTextFilters && matchesSelectedFilters;
-    });
-  }, [data, textFilters, selectedFilters]);
-
-  const indiceInicio = totalRecords === 0 ? 0 : (pageNumber - 1) * pageSize + 1;
-  const indiceFin = Math.min(pageNumber * pageSize, totalRecords);
 
   const handlePaginaAnterior = () => {
-    setPageNumber(Math.max(1, pageNumber - 1));
+    setPageNumber(
+      Math.max(1, pageNumber - 1)
+    );
   };
 
   const handlePaginaSiguiente = () => {
-    setPageNumber(Math.min(totalPages, pageNumber + 1));
+    setPageNumber(
+      Math.min(totalPages, pageNumber + 1)
+    );
   };
 
   return (
@@ -222,7 +249,9 @@ const PanelTablaExpandida = <TData,>({
       />
 
       {isLoading ? (
-        <PanelTablaExpandidaLoading message={loadingMessage} />
+        <PanelTablaExpandidaLoading
+          message={loadingMessage}
+        />
       ) : error ? (
         <PanelTablaExpandidaError
           title={errorTitle}
@@ -233,33 +262,52 @@ const PanelTablaExpandida = <TData,>({
         <>
           <Table
             columns={columns}
-            data={filteredData}
-            allData={data}
+            data={data}
+            allData={allData}
             emptyMessage={emptyMessage}
-            enableColumnFilters={enableColumnFilters}
+            enableColumnFilters={
+              enableColumnFilters
+            }
             textFilters={textFilters}
-            selectedFilters={selectedFilters}
-            onTextFilterChange={handleTextFilterChange}
-            onSelectedFilterChange={handleSelectedFilterChange}
+            selectedFilters={
+              selectedFilters
+            }
+            onTextFilterChange={
+              onTextFilterChange
+            }
+            onSelectedFilterChange={
+              onSelectedFilterChange
+            }
             fitToPanel={fitToPanel}
           />
 
-          {totalPages > 0 && (
-            <Paginacion
-              paginaActual={pageNumber}
-              totalPaginas={totalPages}
-              totalRegistros={totalRecords}
-              indiceInicio={indiceInicio}
-              indiceFin={indiceFin}
-              onPaginaAnterior={handlePaginaAnterior}
-              onPaginaSiguiente={handlePaginaSiguiente}
-              onIrAPagina={setPageNumber}
-              showPageSizeSelector={showPageSizeSelector}
-              pageSize={pageSize}
-              pageSizeOptions={pageSizeOptions}
-              onPageSizeChange={setPageSize}
-            />
-          )}
+          {totalRecords > 0 &&
+            totalPages > 0 && (
+              <Paginacion
+                paginaActual={pageNumber}
+                totalPaginas={totalPages}
+                totalRegistros={totalRecords}
+                indiceInicio={indiceInicio}
+                indiceFin={indiceFin}
+                onPaginaAnterior={
+                  handlePaginaAnterior
+                }
+                onPaginaSiguiente={
+                  handlePaginaSiguiente
+                }
+                onIrAPagina={setPageNumber}
+                showPageSizeSelector={
+                  showPageSizeSelector
+                }
+                pageSize={pageSize}
+                pageSizeOptions={
+                  pageSizeOptions
+                }
+                onPageSizeChange={
+                  setPageSize
+                }
+              />
+            )}
         </>
       )}
     </div>

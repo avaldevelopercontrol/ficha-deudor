@@ -1,12 +1,11 @@
 import { apiClient } from '@shared/api/apiClient';
-import { mockMejorRHeader } from '../constants/catalogoDeudorHeader.constants';
 import type { ApiResponseSimple } from '@shared/types/indexApi';
+import { assertApiSuccess } from '../../../shared/utils/apiResponse.utils';
 import type {
   CabeceraInfoApi,
   CabeceraInfo,
   DeudorInfo,
   DeudorInfoApi,
-  MejorRInfo,
 } from '../../../shared/types';
 
 const BASE_GESTION = '/v1/Gestion';
@@ -29,12 +28,10 @@ export async function fetchCabeceraHeader(
     }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(
-      result.message ||
-        'Error cargando información de cabecera'
-    );
-  }
+  assertApiSuccess(
+    result,
+    'Error cargando información de cabecera'
+  );
 
   const api = result.response;
 
@@ -65,12 +62,10 @@ export async function fetchDeudorHeader(
     }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(
-      result.message ||
-        'Error cargando información del deudor'
-    );
-  }
+  assertApiSuccess(
+    result,
+    'Error cargando información del deudor'
+  );
 
   const api = result.response;
 
@@ -90,19 +85,4 @@ export async function fetchDeudorHeader(
     clienteListaBlanca: api.clienteListaBlanca,
     clienteConSinPe: api.clienteConSinPe,
   };
-}
-
-// ─── GET: Mejor Resultado ───
-export async function fetchMejorRHeader(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
-): Promise<MejorRInfo> {
-  // Este endpoint aún no está definido en la API, mantener mock por ahora
-  return apiClient<MejorRInfo>(
-    `/mejorR-header?id_cliente=${id_cliente}&id_cartera=${id_cartera}&id_deudor=${id_deudor}`,
-    {
-      mock: () => mockMejorRHeader[id_cliente] ?? mockMejorRHeader['default'],
-    }
-  );
 }

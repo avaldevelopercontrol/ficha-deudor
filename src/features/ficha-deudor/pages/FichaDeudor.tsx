@@ -1,7 +1,4 @@
-import React, {
-  useCallback,
-  useState,
-} from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 
 import { AUTH_ROUTES } from '@features/auth/constants';
@@ -14,8 +11,8 @@ import PanelTelefonosReferenciados from '../modules/telefonos-referenciados/comp
 import PanelDireccionesReferenciadas from '../modules/direcciones-referenciadas/components/PanelDireccionesReferenciadas';
 import PanelEstadoGestionRealizada from '../modules/estado-gestion-realizada/components/PanelEstadoGestionRealizada';
 import PanelGestionRealizada from '../modules/gestion-realizada/components/PanelGestionRealizada';
-import type { TelefonosReferenciadosResourceState } from '../modules/telefonos-referenciados/types/telefono.types';
 import AccionesRapidas from '../shell/components/AccionesRapidas';
+import FichaDeudorPageState from '../shell/components/FichaDeudorPageState';
 import { FICHA_DEUDOR_PANEL } from '../shell/constants/fichaDeudorPanels.constants';
 import { useFichaDeudorPage } from '../shell/hooks/useFichaDeudorPage';
 import { useFichaDeudorParams } from '../shell/hooks/useFichaDeudorParams';
@@ -76,36 +73,22 @@ const FichaContent: React.FC<
     id_deudor,
     id_usuario,
   };
-
-  const [
-    telefonosReferenciadosResource,
-    setTelefonosReferenciadosResource,
-  ] = useState<TelefonosReferenciadosResourceState>({
-    telefonos: [],
-    isLoading: true,
-    error: null,
-  });
-
-  const handleTelefonosReferenciadosResourceChange =
-    useCallback(
-      (
-        resource: TelefonosReferenciadosResourceState
-      ) => {
-        setTelefonosReferenciadosResource(resource);
-      },
-      []
-    );
   
   const {
     contacto,
     setContacto,
     panelActivo,
+    panelesInicializados,
     telefonoSeleccionado,
     setTelefonoSeleccionado,
     documentosFiltrados,
     setDocumentosFiltrados,
     gestionRealizadaRefreshKey,
+    telefonosReferenciadosResource,
     deudorData,
+    isLoadingDeudor,
+    deudorError,
+    refetchDeudor,
     cabeceraData,
     isLoadingCabecera,
     cabeceraError,
@@ -117,8 +100,37 @@ const FichaContent: React.FC<
     onGestionRegistrada,
   });
 
+  if (isLoadingDeudor) {
+    return (
+      <FichaDeudorPageState
+        variant="loading"
+        message="Cargando información del deudor..."
+      />
+    );
+  }
+
+  if (deudorError) {
+    return (
+      <FichaDeudorPageState
+        variant="error"
+        message={deudorError}
+        onRetry={refetchDeudor}
+      />
+    );
+  }
+
+  if (!deudorData) {
+    return (
+      <FichaDeudorPageState
+        variant="error"
+        message="No se encontró información del deudor seleccionado."
+        onRetry={refetchDeudor}
+      />
+    );
+  }
+
   const deudorNombre =
-    deudorData?.nombreRazonSocial ?? '';
+    deudorData.nombreRazonSocial;
 
   const carteraNombre =
     cabeceraData?.cartera ?? '';
@@ -157,52 +169,69 @@ const FichaContent: React.FC<
               />
             )}
 
-            <PanelDatosAdicionales
-              isActive={
-                panelActivo ===
-                FICHA_DEUDOR_PANEL.DATOS_ADICIONALES
-              }
-              params={carteraPanelParams}
-            />
+            {panelesInicializados.has(
+              FICHA_DEUDOR_PANEL.DATOS_ADICIONALES
+            ) && (
+              <PanelDatosAdicionales
+                isActive={
+                  panelActivo ===
+                  FICHA_DEUDOR_PANEL.DATOS_ADICIONALES
+                }
+                params={carteraPanelParams}
+              />
+            )}
 
             <PanelTelefonosReferenciados
               isActive={
                 panelActivo ===
                 FICHA_DEUDOR_PANEL.TELEFONOS_REFERENCIADOS
               }
-              params={referenciaPanelParams}
-              onSelectTelefono={setTelefonoSeleccionado}
-              onResourceChange={
-                handleTelefonosReferenciadosResourceChange
+              resource={
+                telefonosReferenciadosResource
+              }
+              onSelectTelefono={
+                setTelefonoSeleccionado
               }
             />
 
-            <PanelDireccionesReferenciadas
-              isActive={
-                panelActivo ===
-                FICHA_DEUDOR_PANEL.DIRECCIONES_REFERENCIADAS
-              }
-              params={referenciaPanelParams}
-            />
+            {panelesInicializados.has(
+              FICHA_DEUDOR_PANEL.DIRECCIONES_REFERENCIADAS
+            ) && (
+              <PanelDireccionesReferenciadas
+                isActive={
+                  panelActivo ===
+                  FICHA_DEUDOR_PANEL.DIRECCIONES_REFERENCIADAS
+                }
+                params={referenciaPanelParams}
+              />
+            )}
 
-            <PanelGestionRealizada
-              isActive={
-                panelActivo ===
-                FICHA_DEUDOR_PANEL.GESTION_REALIZADA
-              }
-              params={gestionPanelParams}
-              refreshKey={
-                gestionRealizadaRefreshKey
-              }
-            />
+            {panelesInicializados.has(
+              FICHA_DEUDOR_PANEL.GESTION_REALIZADA
+            ) && (
+              <PanelGestionRealizada
+                isActive={
+                  panelActivo ===
+                  FICHA_DEUDOR_PANEL.GESTION_REALIZADA
+                }
+                params={gestionPanelParams}
+                refreshKey={
+                  gestionRealizadaRefreshKey
+                }
+              />
+            )}
 
-            <PanelEstadoGestionRealizada
-              isActive={
-                panelActivo ===
-                FICHA_DEUDOR_PANEL.ESTADO_GESTION_REALIZADA
-              }
-              params={carteraPanelParams}
-            />
+            {panelesInicializados.has(
+              FICHA_DEUDOR_PANEL.ESTADO_GESTION_REALIZADA
+            ) && (
+              <PanelEstadoGestionRealizada
+                isActive={
+                  panelActivo ===
+                  FICHA_DEUDOR_PANEL.ESTADO_GESTION_REALIZADA
+                }
+                params={carteraPanelParams}
+              />
+            )}
 
             <FichaGestion
               params={params}
@@ -211,7 +240,7 @@ const FichaContent: React.FC<
               carteraNombre={carteraNombre}
               telefonoSeleccionado={telefonoSeleccionado}
               telefonosReferenciados={
-                telefonosReferenciadosResource.telefonos
+                telefonosReferenciadosResource.allData
               }
               isLoadingTelefonosReferenciados={
                 telefonosReferenciadosResource.isLoading

@@ -268,10 +268,3 @@ export function useFichaDeudorParams() {
     actualizarFechaInicioGestion,
   };
 }
-
-export function useUrlParams(): FichaDeudorParams {
-  const { params } =
-    useFichaDeudorParams();
-
-  return params;
-} 

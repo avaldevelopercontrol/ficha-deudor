@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import {
   useGestionEstados,
   useGestionTipos,
@@ -7,10 +9,12 @@ import {
 } from './useFichaGestion';
 
 import { TIPO_GESTION_PALETA } from '../constants/fichaGestion.constants';
+
 import {
   mapCatalogToOptions,
   mapPaletaRespuestaToOptions,
 } from '../../../shared/utils/selectOptions.utils';
+
 import type { FichaGestionCatalogos } from '../types/fichaGestion.types';
 
 export const useFichaGestionCatalogos = (
@@ -26,7 +30,10 @@ export const useFichaGestionCatalogos = (
     error: errorEstados,
   } = useGestionEstados(idCliente);
 
-  const estadosOptions = mapCatalogToOptions(estadosData);
+  const estadosOptions = useMemo(
+    () => mapCatalogToOptions(estadosData),
+    [estadosData]
+  );
 
   const {
     data: tiposData,
@@ -34,7 +41,10 @@ export const useFichaGestionCatalogos = (
     error: errorTipos,
   } = useGestionTipos();
 
-  const tiposOptions = mapCatalogToOptions(tiposData);
+  const tiposOptions = useMemo(
+    () => mapCatalogToOptions(tiposData),
+    [tiposData]
+  );
 
   const {
     data: np0Data,
@@ -72,27 +82,65 @@ export const useFichaGestionCatalogos = (
     TIPO_GESTION_PALETA
   );
 
-  const np0Options = mapPaletaRespuestaToOptions(np0Data);
-  const np1Options = mapPaletaRespuestaToOptions(np1Data);
-  const np2Options = mapPaletaRespuestaToOptions(np2Data);
+  const np0Options = useMemo(
+    () =>
+      mapPaletaRespuestaToOptions(
+        np0Data
+      ),
+    [np0Data]
+  );
+
+  const np1Options = useMemo(
+    () =>
+      mapPaletaRespuestaToOptions(
+        np1Data
+      ),
+    [np1Data]
+  );
+
+  const np2Options = useMemo(
+    () =>
+      mapPaletaRespuestaToOptions(
+        np2Data
+      ),
+    [np2Data]
+  );
 
   const {
     data: estadoGestionClaroData,
-    isLoading: isLoadingEstadoGestionClaro,
+    isLoading:
+      isLoadingEstadoGestionClaro,
     error: errorEstadoGestionClaro,
-  } = useGestionEstadoGestionClaro(idCliente, idCartera);
-
-  const estadoGestionClaroOptions = mapCatalogToOptions(
-    estadoGestionClaroData
+  } = useGestionEstadoGestionClaro(
+    idCliente,
+    idCartera
   );
+
+  const estadoGestionClaroOptions =
+    useMemo(
+      () =>
+        mapCatalogToOptions(
+          estadoGestionClaroData
+        ),
+      [estadoGestionClaroData]
+    );
 
   const {
     data: motivoNoPagoData,
     isLoading: isLoadingMotivoNoPago,
     error: errorMotivoNoPago,
-  } = useGestionMotivoNoPago(idCliente, idCartera);
+  } = useGestionMotivoNoPago(
+    idCliente,
+    idCartera
+  );
 
-  const motivoNoPagoOptions = mapCatalogToOptions(motivoNoPagoData);
+  const motivoNoPagoOptions = useMemo(
+    () =>
+      mapCatalogToOptions(
+        motivoNoPagoData
+      ),
+    [motivoNoPagoData]
+  );
 
   return {
     estadosOptions,

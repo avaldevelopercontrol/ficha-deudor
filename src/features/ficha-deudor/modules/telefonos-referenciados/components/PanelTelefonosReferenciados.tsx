@@ -1,33 +1,33 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import {
   PANEL_TELEFONOS_REFERENCIADOS_MESSAGES,
   PANEL_TELEFONOS_REFERENCIADOS_TITLE,
 } from '../constants/panelTelefonosReferenciados.constants';
 import { usePanelTelefonosReferenciadosViewModel } from '../hooks/usePanelTelefonosReferenciadosViewModel';
-import type { FichaDeudorReferenciaPanelParams } from '../../../shared/types/fichaDeudor.types';
 import ModalEditarTelefono from './ModalEditarTelefono';
 import ModalRegistrarTelefono from './ModalRegistrarTelefono';
 import { PanelLayout } from '../../../shared/components/panels/PanelLayout';
 import PanelResumenEstado from '../../../shared/components/panels/PanelResumenEstado';
 import PanelTablaHeaderActions from '../../../shared/components/panels/PanelTablaHeaderActions';
 import PanelTablaResumen from '../../../shared/components/panels/PanelTablaResumen';
-import type { TelefonosReferenciadosResourceState } from '../types/telefono.types';
+import type { UseTelefonosReferenciadosReturn } from '../hooks/useTelefonosReferenciados';
 
 interface Props {
   isActive: boolean;
-  params: FichaDeudorReferenciaPanelParams;
-  onSelectTelefono: (telefono: string) => void;
-  onResourceChange?: (
-    state: TelefonosReferenciadosResourceState
+  resource:
+    UseTelefonosReferenciadosReturn;
+  onSelectTelefono: (
+    telefono: string
   ) => void;
 }
 
-const PanelTelefonosReferenciados: React.FC<Props> = ({
+const PanelTelefonosReferenciados: React.FC<
+  Props
+> = ({
   isActive,
-  params,
+  resource,
   onSelectTelefono,
-  onResourceChange,
 }) => {
   const {
     allData,
@@ -55,22 +55,9 @@ const PanelTelefonosReferenciados: React.FC<Props> = ({
     handleRegistrar,
     columns,
   } = usePanelTelefonosReferenciadosViewModel({
-    params,
+    resource,
     onSelectTelefono,
   });
-
-  useEffect(() => {
-    onResourceChange?.({
-      telefonos: allData,
-      isLoading,
-      error,
-    });
-  }, [
-    allData,
-    error,
-    isLoading,
-    onResourceChange,
-  ]);
 
   if (!isActive) return null;
 

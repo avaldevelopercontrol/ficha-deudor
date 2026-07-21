@@ -1,174 +1,61 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
-import { fetchGestoresByCliente } from '../api/gestoresApi';
-import type { Gestor } from '../types/gestor.types';
 import {
-  useClientSideTable,
+  useCallback,
+  useMemo,
+} from 'react';
+
+import { fetchGestoresByCliente } from '../api/gestoresApi';
+
+import type { Gestor } from '../types/gestor.types';
+
+import {
+  usePopupTableResource,
   type SelectedFilters,
   type TextFilters,
-} from '@shared/hooks/useClientSideTable';
+} from '../../../shared/hooks/popups/usePopupTableResource';
 
-export type { TextFilters, SelectedFilters };
-
-interface GestoresState {
-  allData: Gestor[];
-  isLoading: boolean;
-  error: string | null;
-}
-
-type GestoresAction =
-  | { type: 'LOAD_START' }
-  | { type: 'LOAD_SUCCESS'; data: Gestor[] }
-  | { type: 'LOAD_ERROR'; error: string }
-  | { type: 'RESET_WITH_ERROR'; error: string };
-
-const initialState: GestoresState = {
-  allData: [],
-  isLoading: false,
-  error: null,
+export type {
+  TextFilters,
+  SelectedFilters,
 };
 
-function gestoresReducer(
-  state: GestoresState,
-  action: GestoresAction
-): GestoresState {
-  switch (action.type) {
-    case 'LOAD_START':
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
+const GESTORES_MISSING_PARAMS_ERROR =
+  'Falta el parámetro id_cliente';
 
-    case 'LOAD_SUCCESS':
-      return {
-        allData: action.data,
-        isLoading: false,
-        error: null,
-      };
+const GESTORES_LOAD_ERROR =
+  'Error cargando gestores';
 
-    case 'LOAD_ERROR':
-    case 'RESET_WITH_ERROR':
-      return {
-        allData: [],
-        isLoading: false,
-        error: action.error,
-      };
+const GESTORES_INITIAL_PAGE_SIZE = 10;
 
-    default:
-      return state;
-  }
-}
+export function useGestoresByCliente(
+  idCliente: string
+) {
+  const resetDeps = useMemo(
+    () => [idCliente] as const,
+    [idCliente]
+  );
 
-export function useGestoresByCliente(idCliente: string) {
-  const [state, dispatch] = useReducer(gestoresReducer, initialState);
-  const { allData, isLoading, error } = state;
+  const fetcher = useCallback(
+    (signal?: AbortSignal) =>
+      fetchGestoresByCliente(
+        idCliente,
+        signal
+      ),
+    [idCliente]
+  );
 
-  const resetDeps = useMemo(() => [idCliente] as const, [idCliente]);
+  return usePopupTableResource<Gestor>({
+    areParamsReady: Boolean(idCliente),
 
-  const table = useClientSideTable(allData, resetDeps, {
-    initialPageSize: 10,
+    missingParamsError:
+      GESTORES_MISSING_PARAMS_ERROR,
+
+    loadError:
+      GESTORES_LOAD_ERROR,
+
+    resetDeps,
+    fetcher,
+
+    initialPageSize:
+      GESTORES_INITIAL_PAGE_SIZE,
   });
-
-  const isMountedRef = useRef(true);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!idCliente) {
-      dispatch({
-        type: 'RESET_WITH_ERROR',
-        error: 'Falta el parámetro id_cliente',
-      });
-      return;
-    }
-
-    const controller = new AbortController();
-
-    const loadData = async () => {
-      dispatch({ type: 'LOAD_START' });
-
-      try {
-        const result = await fetchGestoresByCliente(
-          idCliente,
-          controller.signal
-        );
-
-        if (controller.signal.aborted) return;
-
-        dispatch({
-          type: 'LOAD_SUCCESS',
-          data: result,
-        });
-      } catch (err) {
-        if (!controller.signal.aborted) {
-          dispatch({
-            type: 'LOAD_ERROR',
-            error:
-              err instanceof Error
-                ? err.message
-                : 'Error cargando gestores',
-          });
-        }
-      }
-    };
-
-    void loadData();
-
-    return () => {
-      controller.abort();
-    };
-  }, [idCliente]);
-
-  const refetch = useCallback(() => {
-    if (!idCliente) return;
-
-    dispatch({ type: 'LOAD_START' });
-
-    fetchGestoresByCliente(idCliente)
-      .then((result) => {
-        if (!isMountedRef.current) return;
-
-        dispatch({
-          type: 'LOAD_SUCCESS',
-          data: result,
-        });
-      })
-      .catch((err) => {
-        if (!isMountedRef.current) return;
-
-        dispatch({
-          type: 'LOAD_ERROR',
-          error:
-            err instanceof Error
-              ? err.message
-              : 'Error cargando gestores',
-        });
-      });
-  }, [idCliente]);
-
-  return {
-    allData,
-    filteredData: table.filteredData,
-    paginatedData: table.paginatedData,
-    isLoading,
-    error,
-    pageNumber: table.pageNumber,
-    pageSize: table.pageSize,
-    totalRecords: table.totalRecords,
-    totalPages: table.totalPages,
-    setPageNumber: table.setPageNumber,
-    setPageSize: table.setPageSize,
-    refetch,
-    textFilters: table.textFilters,
-    selectedFilters: table.selectedFilters,
-    onTextFilterChange: table.onTextFilterChange,
-    onSelectedFilterChange: table.onSelectedFilterChange,
-    resetFilters: table.resetFilters,
-  };
 }

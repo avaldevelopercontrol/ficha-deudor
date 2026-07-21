@@ -28,7 +28,7 @@ import {
   TELEFONOS_REFERENCIADOS_INITIAL_PAGE_SIZE,
 } from '../constants/telefonosReferenciados.constants';
 import type { FichaDeudorReferenciaPanelParams } from '../../../shared/types/fichaDeudor.types';
-import { getErrorMessage } from '../../../shared/utils/errorMessage.utils';
+import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
 import { hasRequiredValues } from '../../../shared/utils/requiredValues.utils';
 
 export type { TextFilters, SelectedFilters };

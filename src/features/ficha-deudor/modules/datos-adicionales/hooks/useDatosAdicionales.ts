@@ -16,6 +16,7 @@ import {
   DATOS_ADICIONALES_ERROR_MESSAGES,
   DATOS_ADICIONALES_INITIAL_PAGE_SIZE,
 } from '../constants/datosAdicionales.constants';
+import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
 
 export type { TextFilters, SelectedFilters };
 
@@ -41,10 +42,6 @@ interface UseDatosAdicionalesReturn {
 
 const hasRequiredValues = (...values: string[]) => {
   return values.every((value) => value.trim() !== '');
-};
-
-const getErrorMessage = (error: unknown, fallbackMessage: string) => {
-  return error instanceof Error ? error.message : fallbackMessage;
 };
 
 export function useDatosAdicionales(

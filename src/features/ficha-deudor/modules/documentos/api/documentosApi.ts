@@ -29,26 +29,40 @@ import {
 
 export async function fetchColumnas(
   id_cliente: string,
-  id_contrato: string
+  id_contrato: string,
+  signal?: AbortSignal
 ): Promise<ColumnApi[]> {
   const params = buildDocumentosCabeceraParams({
     idCliente: id_cliente,
     idContrato: id_contrato,
   });
 
-  const result = await apiClient<ApiResponseSimple<CabeceraPantallaApi[]>>(
-    `${DOCUMENTOS_API_ENDPOINTS.CABECERA}?${params.toString()}`
+  const result =
+    await apiClient<
+      ApiResponseSimple<CabeceraPantallaApi[]>
+    >(
+      `${DOCUMENTOS_API_ENDPOINTS.CABECERA}?${params.toString()}`,
+      { signal }
+    );
+
+  assertApiSuccess(
+    result,
+    DOCUMENTOS_ERROR_MESSAGES.HEADERS
   );
 
-  assertApiSuccess(result, DOCUMENTOS_ERROR_MESSAGES.HEADERS);
-
-  return mapCabecerasToColumns(result.response);
+  return mapCabecerasToColumns(
+    result.response
+  );
 }
 
 export async function fetchBotones(
-  id_cliente: string
+  id_cliente: string,
+  signal?: AbortSignal
 ): Promise<BotonApi[]> {
-  const params = buildDocumentosBotonesParams(id_cliente);
+  const params =
+    buildDocumentosBotonesParams(
+      id_cliente
+    );
 
   return apiClient<BotonApi[]>(
     `${DOCUMENTOS_API_ENDPOINTS.BOTONES}?${params.toString()}`,
@@ -58,6 +72,7 @@ export async function fetchBotones(
           idCliente: id_cliente,
         }),
       useMock: env.useDocumentosMock,
+      signal,
     }
   );
 }
@@ -65,23 +80,36 @@ export async function fetchBotones(
 export async function fetchAllGestiones(
   id_cliente: string,
   id_cartera: string,
-  id_deudor: string
+  id_deudor: string,
+  signal?: AbortSignal
 ): Promise<DocumentoApi[]> {
-  const params = buildGestionDocumentosParams({
-    idCliente: id_cliente,
-    idCartera: id_cartera,
-    idDeudor: id_deudor,
-    pageNumber: DOCUMENTOS_FETCH_ALL_PAGE_NUMBER,
-    pageSize: DOCUMENTOS_FETCH_ALL_PAGE_SIZE,
-  });
+  const params =
+    buildGestionDocumentosParams({
+      idCliente: id_cliente,
+      idCartera: id_cartera,
+      idDeudor: id_deudor,
+      pageNumber:
+        DOCUMENTOS_FETCH_ALL_PAGE_NUMBER,
+      pageSize:
+        DOCUMENTOS_FETCH_ALL_PAGE_SIZE,
+    });
 
-  const result = await apiClient<ApiResponse<DocumentoApi[]>>(
-    `${DOCUMENTOS_API_ENDPOINTS.DOCUMENTOS}?${params.toString()}`
+  const result =
+    await apiClient<
+      ApiResponse<DocumentoApi[]>
+    >(
+      `${DOCUMENTOS_API_ENDPOINTS.DOCUMENTOS}?${params.toString()}`,
+      { signal }
+    );
+
+  assertApiSuccess(
+    result,
+    DOCUMENTOS_ERROR_MESSAGES.DATA
   );
 
-  assertApiSuccess(result, DOCUMENTOS_ERROR_MESSAGES.DATA);
-
-  return Array.isArray(result.response) ? result.response : [];
+  return Array.isArray(result.response)
+    ? result.response
+    : [];
 }
 
 export async function fetchGestiones(

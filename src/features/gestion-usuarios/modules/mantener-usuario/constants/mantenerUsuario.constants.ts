@@ -22,13 +22,13 @@ export const MANTENER_USUARIO_COLUMNS = {
 } as const;
 
 export const MANTENER_USUARIO_COLUMN_WIDTHS = {
-  id: '7%',
+  id: '9%',
   nombre: '26%',
   estado: '11%',
   perfil: '20%',
-  codigoRecaudacion: '14%',
+  codigoRecaudacion: '13%',
   login: '14%',
-  editar: '8%',
+  editar: '7%',
 } as const;
 
 export const MANTENER_USUARIO_PAGE_SIZE_OPTIONS = [

@@ -1,8 +1,10 @@
-// src/components/modals/ModalFormLayout.tsx
 import React from 'react';
+
 import Modal from '@shared/components/modals/Modal';
-import DeudorHeaderBlock from '../../../modules/deudor-header/components/DeudorHeaderBlock';
 import { ActionButton } from '@shared/components/ui';
+
+import DeudorHeaderBlock from '../../../modules/deudor-header/components/DeudorHeaderBlock';
+
 import { useDeudor } from '../../contexts/deudorContextValue';
 import type { DeudorInfo } from '../../types';
 
@@ -12,14 +14,18 @@ interface ModalFormLayoutProps {
   onClose: () => void;
   children: React.ReactNode;
   submitLabel: string;
-  onSubmit: () => void;
+  onSubmit: () => Promise<void> | void;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   minHeight?: string;
   showDeudorHeader?: boolean;
-  deudorData?: DeudorInfo | null; 
+  deudorData?: DeudorInfo | null;
+  isSubmitting?: boolean;
+  submitError?: string | null;
 }
 
-export const ModalFormLayout: React.FC<ModalFormLayoutProps> = ({
+export const ModalFormLayout: React.FC<
+  ModalFormLayoutProps
+> = ({
   isOpen,
   title,
   onClose,
@@ -30,22 +36,43 @@ export const ModalFormLayout: React.FC<ModalFormLayoutProps> = ({
   minHeight = '400px',
   showDeudorHeader = true,
   deudorData: deudorDataProp,
+  isSubmitting = false,
+  submitError = null,
 }) => {
   const deudorDataContext = useDeudor();
 
-  const deudorData = deudorDataProp ?? deudorDataContext;
+  const deudorData =
+    deudorDataProp ?? deudorDataContext;
 
   return (
-    <Modal isOpen={isOpen} title={title} onClose={onClose} size={size}>
-      <div className="modal-form-layout" style={{ minHeight }}>
+    <Modal
+      isOpen={isOpen}
+      title={title}
+      onClose={onClose}
+      size={size}
+    >
+      <div
+        className="modal-form-layout"
+        style={{ minHeight }}
+        aria-busy={isSubmitting}
+      >
         {showDeudorHeader && deudorData && (
           <DeudorHeaderBlock data={deudorData} />
         )}
-        
+
         <div className="modal-form-layout__body">
           {children}
+
+          {submitError && (
+            <div
+              className="error-summary"
+              role="alert"
+            >
+              <strong>{submitError}</strong>
+            </div>
+          )}
         </div>
-        
+
         <div className="modal-form-layout__footer">
           <ActionButton
             label={submitLabel}
@@ -53,6 +80,7 @@ export const ModalFormLayout: React.FC<ModalFormLayoutProps> = ({
             size="md"
             icon="✓"
             onClick={onSubmit}
+            disabled={isSubmitting}
           />
         </div>
       </div>

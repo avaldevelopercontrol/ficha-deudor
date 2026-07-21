@@ -13,6 +13,7 @@ import {
   useCabeceraHeader,
   useDeudorHeader,
 } from '../../modules/deudor-header/hooks/useDeudorHeader';
+import { useTelefonosReferenciados } from '../../modules/telefonos-referenciados/hooks/useTelefonosReferenciados';
 
 type UseFichaDeudorPageParams =
   FichaDeudorIdentityParams & {
@@ -35,26 +36,45 @@ export const useFichaDeudorPage = ({
   id_cliente,
   id_cartera,
   id_deudor,
+  id_usuario,
   onGestionRegistrada,
 }: UseFichaDeudorPageParams) => {
   const navigate = useNavigate();
+
   const location = useLocation();
+  
   const { setHeaderActions } = useAppLayout();
 
   const returnPath = getReturnPath(location.state);
 
   const [contacto, setContacto] = useState('');
+
   const [panelActivo, setPanelActivo] =
     useState<FichaDeudorPanel | null>(null);
+
+  const [
+    panelesInicializados,
+    setPanelesInicializados,
+  ] = useState<Set<FichaDeudorPanel>>(
+    () => new Set()
+  );
+
   const [telefonoSeleccionado, setTelefonoSeleccionado] =
     useState('');
+
   const [documentosFiltrados, setDocumentosFiltrados] = useState<
     DocumentoApi[]
   >([]);
+
   const [gestionRealizadaRefreshKey, setGestionRealizadaRefreshKey] =
     useState(0);
 
-  const { data: deudorData } = useDeudorHeader(
+  const {
+    data: deudorData,
+    isLoading: isLoadingDeudor,
+    error: deudorError,
+    refetch: refetchDeudor,
+  } = useDeudorHeader(
     id_cliente,
     id_cartera,
     id_deudor
@@ -68,6 +88,13 @@ export const useFichaDeudorPage = ({
     id_cliente,
     id_cartera
   );
+
+  const telefonosReferenciadosResource =
+  useTelefonosReferenciados({
+    id_cliente,
+    id_deudor,
+    id_usuario,
+  });
 
   const goToGestionDeudor = useCallback(() => {
     clearFichaDeudorSession();
@@ -130,6 +157,19 @@ export const useFichaDeudorPage = ({
 
   const handleTogglePanel = useCallback(
     (accion: FichaDeudorPanel) => {
+      setPanelesInicializados((actuales) => {
+        if (actuales.has(accion)) {
+          return actuales;
+        }
+
+        const siguientes =
+          new Set(actuales);
+
+        siguientes.add(accion);
+
+        return siguientes;
+      });
+
       setPanelActivo((actual) =>
         actual === accion ? null : accion
       );
@@ -141,12 +181,17 @@ export const useFichaDeudorPage = ({
     contacto,
     setContacto,
     panelActivo,
+    panelesInicializados,
     telefonoSeleccionado,
     setTelefonoSeleccionado,
     documentosFiltrados,
     setDocumentosFiltrados,
     gestionRealizadaRefreshKey,
+    telefonosReferenciadosResource,
     deudorData,
+    isLoadingDeudor,
+    deudorError,
+    refetchDeudor,
     cabeceraData,
     isLoadingCabecera,
     cabeceraError,

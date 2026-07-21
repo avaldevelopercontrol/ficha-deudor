@@ -81,28 +81,74 @@ export const getPopupIdFromWindowName = (
   return popupId || null;
 };
 
+const POPUP_MAX_WIDTH_RATIO = 0.92;
+const POPUP_MAX_HEIGHT_RATIO = 0.88;
+const POPUP_EDGE_MARGIN = 24;
+
 const buildPopupFeatures = (
-  width: number,
-  height: number
+  preferredWidth: number,
+  preferredHeight: number
 ): string => {
-  const left = Math.max(
-    0,
-    Math.round((window.screen.width - width) / 2)
+  const availableWidth =
+    window.screen.availWidth || window.screen.width;
+
+  const availableHeight =
+    window.screen.availHeight || window.screen.height;
+
+  /*
+   * Se aplica tanto un límite porcentual como un margen mínimo.
+   * Así el popup no queda pegado a los bordes de la pantalla.
+   */
+  const maximumWidth = Math.max(
+    100,
+    Math.min(
+      Math.floor(availableWidth * POPUP_MAX_WIDTH_RATIO),
+      availableWidth - POPUP_EDGE_MARGIN * 2
+    )
   );
 
-  const top = Math.max(
-    0,
-    Math.round((window.screen.height - height) / 2)
+  const maximumHeight = Math.max(
+    100,
+    Math.min(
+      Math.floor(availableHeight * POPUP_MAX_HEIGHT_RATIO),
+      availableHeight - POPUP_EDGE_MARGIN * 2
+    )
+  );
+
+  const width = Math.min(
+    preferredWidth,
+    maximumWidth
+  );
+
+  const height = Math.min(
+    preferredHeight,
+    maximumHeight
+  );
+
+  /*
+   * Se centra respecto de la ventana principal.
+   * Funciona mejor cuando el usuario utiliza más de un monitor
+   * que calcular siempre desde la coordenada 0.
+   */
+  const left = Math.round(
+    window.screenX +
+    (window.outerWidth - width) / 2
+  );
+
+  const top = Math.round(
+    window.screenY +
+    (window.outerHeight - height) / 2
   );
 
   return [
+    'popup=yes',
     `width=${width}`,
     `height=${height}`,
     `left=${left}`,
     `top=${top}`,
     'resizable=yes',
     'scrollbars=yes',
-    'status=yes',
+    'status=no',
     'toolbar=no',
     'menubar=no',
     'location=no',

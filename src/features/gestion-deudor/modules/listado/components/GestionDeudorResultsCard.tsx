@@ -114,7 +114,7 @@ export const GestionDeudorResultsCard:
               data={data}
               onRowClick={onRowClick}
               emptyMessage="Sin registros para mostrar"
-              fitToPanel={false}
+              fitToPanel
             />
 
             {totalRecords > 0 && (

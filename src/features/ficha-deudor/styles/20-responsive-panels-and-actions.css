@@ -452,3 +452,67 @@
     letter-spacing: 0.1px;
   }
 }
+
+/* ── Legibilidad específica de Ficha de Gestión ───── */
+
+/* Títulos de los campos, incluida Gestión Terminada */
+.ficha-gestion--compact .form-label,
+.ficha-gestion--compact .checkbox-label {
+  color: #000;
+}
+
+/*
+ * Texto realmente ingresado en controles habilitados.
+ * No se incluyen fechas ni controles deshabilitados.
+ */
+.ficha-gestion--compact
+  input.form-input:not(:disabled):not([type='date']),
+.ficha-gestion--compact
+  textarea.form-input:not(:disabled) {
+  color: #000;
+  -webkit-text-fill-color: #000;
+}
+
+/* Los placeholders conservan el color tenue */
+.ficha-gestion--compact
+  input.form-input:not(:disabled):not([type='date'])::placeholder,
+.ficha-gestion--compact
+  textarea.form-input:not(:disabled)::placeholder {
+  color: var(--ap-text-muted);
+  -webkit-text-fill-color: var(--ap-text-muted);
+  opacity: 1;
+}
+
+/* Valor real seleccionado en un desplegable habilitado */
+.ficha-gestion--compact
+  .form-select--has-value:not(:disabled) {
+  color: #000;
+  -webkit-text-fill-color: #000;
+}
+
+/* Placeholder del desplegable */
+.ficha-gestion--compact
+  .form-select--placeholder:not(:disabled) {
+  color: var(--ap-text-muted);
+  -webkit-text-fill-color: var(--ap-text-muted);
+}
+
+/* Opciones de los desplegables habilitados */
+.ficha-gestion--compact select.form-select:enabled {
+  color-scheme: light;
+}
+
+/* Opciones reales: negro nítido */
+.ficha-gestion--compact select.form-select:enabled option {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000;
+  background-color: #ffffff;
+}
+
+/* Placeholder: Seleccionar..., HH, MM, etc. */
+.ficha-gestion--compact
+  select.form-select:enabled
+  option[value=''] {
+  color: var(--ap-text-muted) !important;
+  -webkit-text-fill-color: var(--ap-text-muted);
+}

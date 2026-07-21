@@ -1,27 +1,44 @@
 import { apiClient } from '@shared/api/apiClient';
-import type { ApiResponseSimple } from '@shared/types/indexApi';
 
 import type {
-  EmailApi,
-  Email,
-  EmailStatusApi,
-  EmailStatus,
+  ApiResponse,
+  ApiResponseSimple,
+} from '@shared/types/indexApi';
+
+import { assertApiSuccess } from '../../../shared/utils/apiResponse.utils';
+
+import type {
   CreateEmailRequest,
   CreateEmailResponse,
-  EmailFormData,
-  EmailEditFormData,
-  UpdateEmailResponse,
-  UpdateEmailRequest,
+  Email,
+  EmailApi,
   EmailByIdApi,
+  EmailEditFormData,
+  EmailFormData,
+  EmailStatus,
+  EmailStatusApi,
+  UpdateEmailRequest,
+  UpdateEmailResponse,
 } from '../types/email.types';
-
-import type {
-  ApiResponse
-} from '@shared/types/indexApi';
 
 const BASE_EMAIL = '/v1/Email';
 
-// ─── GET: Lista de emails (ya existente) ───
+const EMAIL_API_ERROR_MESSAGES = {
+  list: 'Error cargando emails',
+
+  statuses:
+    'Error cargando estados de email',
+
+  create:
+    'Error al crear email',
+
+  byId:
+    'Error cargando email para editar',
+
+  update:
+    'Error al actualizar email',
+} as const;
+
 export async function fetchEmailsByDeudor(
   id_cliente: string,
   id_deudor: string,
@@ -34,19 +51,32 @@ export async function fetchEmailsByDeudor(
     PageSize: '1000',
   });
 
-  const result = await apiClient<ApiResponse<EmailApi[]>>(
-    `${BASE_EMAIL}/GetEmailsByIdDeudor?${params.toString()}`,
-    { signal }
+  const result =
+    await apiClient<
+      ApiResponse<EmailApi[]>
+    >(
+      `${BASE_EMAIL}/GetEmailsByIdDeudor?${params.toString()}`,
+      {
+        signal,
+      }
+    );
+
+  assertApiSuccess(
+    result,
+    EMAIL_API_ERROR_MESSAGES.list
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando emails');
-  }
+  const emails = Array.isArray(
+    result.response
+  )
+    ? result.response
+    : [];
 
-  return result.response.map((item) => ({
+  return emails.map((item) => ({
     id: String(item.nId_PersEmail),
     email: item.email,
-    fechaActivacion: item.fechaActivacion,
+    fechaActivacion:
+      item.fechaActivacion,
     estado: item.estado,
     status: item.status,
     fuente: item.fuente,
@@ -57,113 +87,193 @@ export async function fetchEmailsByDeudor(
   }));
 }
 
-// ─── GET: Status de email ───
-export async function fetchEmailStatuses(signal?: AbortSignal): Promise<EmailStatus[]> {
-  const result = await apiClient<ApiResponseSimple<EmailStatusApi[]>>(
-    `${BASE_EMAIL}/GetStatus`,
-    { signal }
+export async function fetchEmailStatuses(
+  signal?: AbortSignal
+): Promise<EmailStatus[]> {
+  const result =
+    await apiClient<
+      ApiResponseSimple<
+        EmailStatusApi[]
+      >
+    >(
+      `${BASE_EMAIL}/GetStatus`,
+      {
+        signal,
+      }
+    );
+
+  assertApiSuccess(
+    result,
+    EMAIL_API_ERROR_MESSAGES.statuses
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando estados de email');
-  }
+  const statuses = Array.isArray(
+    result.response
+  )
+    ? result.response
+    : [];
 
-  return result.response.map((item) => ({
-    id: String(item.nId_PersTelefOpe),
-    nombre: item.cNombre_PersTelefOpe,
+  return statuses.map((item) => ({
+    id: String(
+      item.nId_PersTelefOpe
+    ),
+
+    nombre:
+      item.cNombre_PersTelefOpe,
   }));
 }
 
-// ─── POST: Crear email ───
 export async function createEmail(
   id_cliente: string,
   id_deudor: string,
   id_usuario: string,
   data: EmailFormData
 ): Promise<CreateEmailResponse> {
+  const now = new Date().toISOString();
+
   const body: CreateEmailRequest = {
-    nId_PersDeudor: Number(id_deudor) || 0,
-    cPers_Email: data.email,
-    bEstado: data.estado,
-    cEmail_Coment: data.comentario,
-    cEmail_Contacto: data.contacto,
-    nId_Cliente: Number(id_cliente) || 0,
-    bBaseCliente: false,
-    nId_UsuarioAct: Number(id_usuario) || 0,
-    dFecRegistro: new Date().toISOString(),
-    dFecActualizacion: new Date().toISOString(),
-    nEmail_Prioridad: Number(data.prioridad) || 0,
-    nId_PersEmailOpe: Number(data.status) || 0,
+    nId_PersDeudor:
+      Number(id_deudor) || 0,
+
+    cPers_Email:
+      data.email,
+
+    bEstado:
+      data.estado,
+
+    cEmail_Coment:
+      data.comentario,
+
+    cEmail_Contacto:
+      data.contacto,
+
+    nId_Cliente:
+      Number(id_cliente) || 0,
+
+    bBaseCliente:
+      false,
+
+    nId_UsuarioAct:
+      Number(id_usuario) || 0,
+
+    dFecRegistro:
+      now,
+
+    dFecActualizacion:
+      now,
+
+    nEmail_Prioridad:
+      Number(data.prioridad) || 0,
+
+    nId_PersEmailOpe:
+      Number(data.status) || 0,
   };
 
-  const result = await apiClient<ApiResponse<CreateEmailResponse>>(
-    `${BASE_EMAIL}`,
-    {
-      method: 'POST',
-      body,
-    }
-  );
+  const result =
+    await apiClient<
+      ApiResponse<CreateEmailResponse>
+    >(
+      BASE_EMAIL,
+      {
+        method: 'POST',
+        body,
+      }
+    );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error al crear email');
-  }
+  assertApiSuccess(
+    result,
+    EMAIL_API_ERROR_MESSAGES.create
+  );
 
   return result.response;
 }
 
-// ─── GET: Email por ID ───
 export async function fetchEmailById(
   idEmail: string,
   signal?: AbortSignal
 ): Promise<EmailByIdApi> {
-  const result = await apiClient<ApiResponse<EmailByIdApi>>(
-    `${BASE_EMAIL}/${idEmail}`,
-    { signal }
-  );
+  const result =
+    await apiClient<
+      ApiResponse<EmailByIdApi>
+    >(
+      `${BASE_EMAIL}/${idEmail}`,
+      {
+        signal,
+      }
+    );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando email para editar');
-  }
+  assertApiSuccess(
+    result,
+    EMAIL_API_ERROR_MESSAGES.byId
+  );
 
   return result.response;
 }
 
-// ─── PUT: Actualizar email ───
 export async function updateEmail(
   id_cliente: string,
   id_deudor: string,
   id_usuario: string,
   id_email: string,
   data: EmailEditFormData,
-  dFecRegistroOriginal: string  // ← Nuevo parámetro
+  dFecRegistroOriginal: string
 ): Promise<UpdateEmailResponse> {
   const body: UpdateEmailRequest = {
-    nId_PersEmail: Number(id_email) || 0,
-    nId_PersDeudor: Number(id_deudor) || 0,
-    cPers_Email: data.email,
-    bEstado: data.estado,
-    cEmail_Coment: data.comentario,
-    cEmail_Contacto: data.contacto,
-    nId_Cliente: Number(id_cliente) || 0,
-    bBaseCliente: false,
-    nId_UsuarioAct: Number(id_usuario) || 0,
-    dFecRegistro: dFecRegistroOriginal,  // ← Usa la fecha original del GET
-    dFecActualizacion: new Date().toISOString(),
-    nEmail_Prioridad: Number(data.prioridad) || 0,
-    nId_PersEmailOpe: Number(data.status) || 0,
+    nId_PersEmail:
+      Number(id_email) || 0,
+
+    nId_PersDeudor:
+      Number(id_deudor) || 0,
+
+    cPers_Email:
+      data.email,
+
+    bEstado:
+      data.estado,
+
+    cEmail_Coment:
+      data.comentario,
+
+    cEmail_Contacto:
+      data.contacto,
+
+    nId_Cliente:
+      Number(id_cliente) || 0,
+
+    bBaseCliente:
+      false,
+
+    nId_UsuarioAct:
+      Number(id_usuario) || 0,
+
+    dFecRegistro:
+      dFecRegistroOriginal,
+
+    dFecActualizacion:
+      new Date().toISOString(),
+
+    nEmail_Prioridad:
+      Number(data.prioridad) || 0,
+
+    nId_PersEmailOpe:
+      Number(data.status) || 0,
   };
 
-  const result = await apiClient<ApiResponse<UpdateEmailResponse>>(
-    `${BASE_EMAIL}`,
-    {
-      method: 'PUT',
-      body,
-    }
-  );
+  const result =
+    await apiClient<
+      ApiResponse<UpdateEmailResponse>
+    >(
+      BASE_EMAIL,
+      {
+        method: 'PUT',
+        body,
+      }
+    );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error al actualizar email');
-  }
+  assertApiSuccess(
+    result,
+    EMAIL_API_ERROR_MESSAGES.update
+  );
 
   return result.response;
 }

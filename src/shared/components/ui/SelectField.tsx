@@ -27,9 +27,19 @@ export const SelectField = <T extends string | number | boolean = string>({
   layout = 'vertical',
   hidePlaceholder = false,
 }: SelectFieldProps<T>) => {
+  const hasValue = String(value) !== '';
+
   const select = (
     <select
-      className={`form-select ${layout === 'inline' ? 'form-input--inline-field' : ''} ${error ? 'form-select--error' : ''}`}
+      className={`form-select ${
+        hasValue
+          ? 'form-select--has-value'
+          : 'form-select--placeholder'
+      } ${
+        layout === 'inline'
+          ? 'form-input--inline-field'
+          : ''
+      } ${error ? 'form-select--error' : ''}`}
       value={String(value)}
       onChange={(e) => {
         const rawValue = e.target.value;
