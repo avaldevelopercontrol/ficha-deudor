@@ -1,4 +1,4 @@
 export const GESTION_USUARIOS_FEATURE = {
-  enabled: true,
-  badge: 'Disponible',
+  enabled: false,
+  badge: 'Proximamente',
 } as const;
