@@ -1,4 +1,3 @@
-import { GESTION_USUARIOS_ROUTES } from '@features/gestion-usuarios/constants/gestionUsuariosRoutes.constants';
 import { MENU_MODULOS_ROUTES } from '../constants/menuModulosRoutes.constants';
 import type { MenuModulo } from '../types';
 import { GESTION_USUARIOS_FEATURE } from '@features/gestion-usuarios/constants/gestionUsuariosFeature.constants';
@@ -72,35 +71,7 @@ export const MENU_MODULOS: MenuModulo[] = [
     icon: 'users',
     isEnabled: GESTION_USUARIOS_FEATURE.enabled,
     badge: GESTION_USUARIOS_FEATURE.badge,
-    children: [
-      {
-        key: 'cambiar-clave',
-        label: 'CAMBIAR CLAVE',
-        descripcion:
-          'Actualiza la contraseña de acceso de un usuario.',
-        icon: 'key',
-        path: GESTION_USUARIOS_ROUTES.CAMBIAR_CLAVE,
-        badge: 'Disponible',
-      },
-      {
-        key: 'asignar-usuario',
-        label: 'ASIGNAR USUARIO',
-        descripcion:
-          'Asigna usuarios según cliente, perfil o responsabilidad.',
-        icon: 'users',
-        path: GESTION_USUARIOS_ROUTES.ASIGNAR_USUARIO,
-        badge: 'Disponible',
-      },
-      {
-        key: 'mantener-usuario',
-        label: 'MANTENER USUARIO',
-        descripcion:
-          'Consulta y administra los usuarios registrados.',
-        icon: 'user',
-        path: GESTION_USUARIOS_ROUTES.MANTENER_USUARIO,
-        badge: 'Disponible',
-      },
-    ],
+    
   },
   {
     key: 'reportes-generales',
