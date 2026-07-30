@@ -1,40 +1,202 @@
-import { apiClient } from '@shared/api/apiClient';
+import {
+  ApiError,
+  apiClient,
+} from '@shared/api/apiClient';
 
-import { GESTION_USUARIOS_API_ENDPOINTS } from '../constants/gestionUsuariosRoutes.constants';
-import { mapUsuariosListadoResponse } from '../mappers/usuarioListado.mapper';
+import {
+  GESTION_USUARIOS_API_ENDPOINTS,
+} from '../constants/gestionUsuariosRoutes.constants';
+
+import {
+  buildCreateUsuarioRequest,
+} from '../mappers/crearUsuario.mapper';
+
+import {
+  mapUsuariosListadoResponse,
+} from '../mappers/usuarioListado.mapper';
+
+import type {
+  RegistrarUsuarioFormData,
+} from '../modules/mantener-usuario/types/registrarUsuario.types';
+
+import type {
+  CreateUsuarioApiResponse,
+  CreateUsuarioResponseApi,
+} from '../types/crearUsuario.types';
+
 import type {
   GetUsuariosListResponse,
   UsuarioListado,
 } from '../types/usuarioListado.types';
 
+const USUARIOS_ERROR_MESSAGES = {
+  list:
+    'No se pudo obtener la lista de usuarios.',
+
+  create:
+    'No se pudo registrar el usuario.',
+} as const;
+
+const isRecord = (
+  value: unknown
+): value is Record<
+  string,
+  unknown
+> =>
+  typeof value === 'object' &&
+  value !== null;
+
+const getStringProperty = (
+  value:
+    Record<string, unknown>,
+  property: string
+): string | null => {
+  const propertyValue =
+    value[property];
+
+  if (
+    typeof propertyValue !==
+      'string' ||
+    !propertyValue.trim()
+  ) {
+    return null;
+  }
+
+  return propertyValue.trim();
+};
+
+const resolveUsuarioApiError = (
+  error: unknown,
+  fallbackMessage: string
+): string => {
+  /*
+   * apiClient crea ApiError para respuestas
+   * HTTP 400 o 500. Se prioriza messageUser
+   * porque es el texto pensado para la interfaz.
+   */
+  if (
+    error instanceof ApiError &&
+    isRecord(error.data)
+  ) {
+    return (
+      getStringProperty(
+        error.data,
+        'messageUser'
+      ) ??
+      getStringProperty(
+        error.data,
+        'message'
+      ) ??
+      error.message.trim() ??
+      fallbackMessage
+    );
+  }
+
+  if (
+    error instanceof Error &&
+    error.message.trim()
+  ) {
+    return error.message.trim();
+  }
+
+  return fallbackMessage;
+};
+
+const isSuccessfulResponse = (
+  result: {
+    code: string;
+    statusCode: number;
+  }
+): boolean =>
+  (
+    result.statusCode >= 200 &&
+    result.statusCode < 300
+  ) ||
+  result.code === '00' ||
+  result.code === '200';
+
 export const fetchUsuariosList = async (
   signal?: AbortSignal
 ): Promise<UsuarioListado[]> => {
   const result =
-    await apiClient<GetUsuariosListResponse>(
-      GESTION_USUARIOS_API_ENDPOINTS.getUsuariosList,
+    await apiClient<
+      GetUsuariosListResponse
+    >(
+      GESTION_USUARIOS_API_ENDPOINTS
+        .getUsuariosList,
       {
         method: 'GET',
         signal,
-        headers: {
-          Accept: 'application/json',
-        },
       }
     );
 
-  const isSuccessfulResponse =
-    result.statusCode === 200 ||
-    result.code === '200';
-
-  if (!isSuccessfulResponse) {
+  if (
+    !isSuccessfulResponse(
+      result
+    )
+  ) {
     throw new Error(
       result.messageUser?.trim() ||
         result.message?.trim() ||
-        'No se pudo obtener la lista de usuarios.'
+        USUARIOS_ERROR_MESSAGES.list
     );
   }
 
   return mapUsuariosListadoResponse(
     result.response
   );
+};
+
+export const createUsuario = async (
+  form:
+    RegistrarUsuarioFormData,
+  authenticatedUserId: string
+): Promise<
+  CreateUsuarioResponseApi
+> => {
+  const body =
+    buildCreateUsuarioRequest(
+      form,
+      authenticatedUserId
+    );
+
+  try {
+    const result =
+      await apiClient<
+        CreateUsuarioApiResponse
+      >(
+        GESTION_USUARIOS_API_ENDPOINTS
+          .createUsuario,
+        {
+          method: 'POST',
+          body,
+        }
+      );
+
+    /*
+     * También se valida la respuesta interna,
+     * porque algunas APIs pueden responder
+     * HTTP 200 con un statusCode de error.
+     */
+    if (
+      !isSuccessfulResponse(
+        result
+      )
+    ) {
+      throw new Error(
+        result.messageUser?.trim() ||
+          result.message?.trim() ||
+          USUARIOS_ERROR_MESSAGES.create
+      );
+    }
+
+    return result.response;
+  } catch (error) {
+    throw new Error(
+      resolveUsuarioApiError(
+        error,
+        USUARIOS_ERROR_MESSAGES.create
+      )
+    );
+  }
 };

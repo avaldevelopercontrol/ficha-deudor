@@ -1,8 +1,9 @@
 import { apiClient } from '@shared/api/apiClient';
+import {
+  fetchDepartamentos as fetchDepartamentosCatalogo,
+} from '@shared/catalogos/departamentos/api/departamentosApi';
 import type {
   CreateDireccionResponse,
-  Departamento,
-  DepartamentoApi,
   DireccionByIdApi,
   DireccionEditFormData,
   DireccionFormData,
@@ -29,7 +30,6 @@ import {
 import {
   buildCreateDireccionRequest,
   buildUpdateDireccionRequest,
-  mapDepartamentos,
   mapDireccionUbicaciones,
   mapDireccionesReferenciadas,
   mapDistritos,
@@ -138,21 +138,8 @@ export async function updateDireccion(
   return result.response;
 }
 
-export async function fetchDepartamentos(
-  signal?: AbortSignal
-): Promise<Departamento[]> {
-  const result = await apiClient<ApiResponseSimple<DepartamentoApi[]>>(
-    DIRECCIONES_REFERENCIADAS_ENDPOINTS.DEPARTAMENTOS,
-    { signal }
-  );
-
-  assertApiSuccess(
-    result,
-    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.DEPARTAMENTOS
-  );
-
-  return mapDepartamentos(result.response);
-}
+export const fetchDepartamentos =
+  fetchDepartamentosCatalogo;
 
 export async function fetchProvincias(
   idDepartamento: string,

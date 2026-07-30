@@ -1,9 +1,20 @@
-import type { TelefonoFormData } from '../types/telefono.types';
+import type {
+  TelefonoFormData,
+  TelefonoReferenciado,
+} from '../types/telefono.types';
+
 import { validateTelefonoEditForm } from './telefonoValidations';
 
 export const validateModalEditarTelefono = (
-  data: TelefonoFormData
+  data: TelefonoFormData,
+  telefonosExistentes:
+    readonly TelefonoReferenciado[] = [],
+  telefonoIdActual: number | null =
+    data.id || null
 ): Record<string, string> => {
-  const errors = validateTelefonoEditForm(data);
-  return errors;
+  return validateTelefonoEditForm(
+    data,
+    telefonosExistentes,
+    telefonoIdActual
+  );
 };

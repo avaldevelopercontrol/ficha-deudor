@@ -111,6 +111,7 @@ const PanelTelefonosReferenciados: React.FC<
       <ModalRegistrarTelefono
         isOpen={showRegistrar}
         onClose={handleCloseRegistrar}
+        telefonosExistentes={allData}
         onRegistrar={handleRegistrar}
       />
 
@@ -118,6 +119,7 @@ const PanelTelefonosReferenciados: React.FC<
         isOpen={showEditar}
         onClose={handleCloseEditar}
         telefonoId={telefonoEditarId}
+        telefonosExistentes={allData}
         onGuardar={handleGuardarEdicion}
       />
     </>

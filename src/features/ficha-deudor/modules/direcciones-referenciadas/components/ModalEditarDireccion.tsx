@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {
+  useCallback,
+} from 'react';
 
 import { useModalForm } from '@shared/hooks/ui/useModalForm';
 
@@ -19,6 +21,7 @@ import { useDireccionCascadeFields } from '../hooks/useDireccionCascadeFields';
 import type {
   DireccionEditFormData,
   DireccionByIdApi,
+  DireccionReferenciada,
 } from '../types/direccion.types';
 
 import { estadosDireccionOptions } from '../constants/catalogosDireccion.constants';
@@ -42,6 +45,9 @@ interface Props {
   onClose: () => void;
   direccionId: string | null;
 
+  direccionesExistentes:
+    readonly DireccionReferenciada[];
+
   onGuardar?: (
     data: DireccionEditFormData & {
       id: string;
@@ -49,17 +55,32 @@ interface Props {
   ) => Promise<void> | void;
 }
 
-const ModalEditarDireccion: React.FC<Props> = ({
-  isOpen,
-  onClose,
-  direccionId,
-  onGuardar,
-}) => {
+const ModalEditarDireccion:
+  React.FC<Props> = ({
+    isOpen,
+    onClose,
+    direccionId,
+    direccionesExistentes,
+    onGuardar,
+  }) => {
   const {
     data: direccionData,
     isLoading: isLoadingDireccion,
     error: errorDireccion,
   } = useDireccionById(direccionId);
+
+  const validate = useCallback(
+    (data: DireccionEditFormData) =>
+      validateDireccionEditForm(
+        data,
+        direccionesExistentes,
+        direccionId
+      ),
+    [
+      direccionesExistentes,
+      direccionId,
+    ]
+  );
 
   const {
     form,
@@ -96,8 +117,7 @@ const ModalEditarDireccion: React.FC<Props> = ({
       });
     },
 
-    validate:
-      validateDireccionEditForm,
+    validate,
 
     resetOnClose: true,
   });

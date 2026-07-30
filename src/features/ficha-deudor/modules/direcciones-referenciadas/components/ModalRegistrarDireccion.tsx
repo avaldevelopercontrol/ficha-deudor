@@ -1,10 +1,15 @@
-import React from 'react';
+import React, {
+  useCallback,
+} from 'react';
 
 import { ModalFormLayout } from '../../../shared/components/modals/ModalFormLayout';
 
 import { useModalForm } from '@shared/hooks/ui/useModalForm';
 
-import type { DireccionFormData } from '../types/direccion.types';
+import type {
+  DireccionFormData,
+  DireccionReferenciada,
+} from '../types/direccion.types';
 
 import { toStringValue } from '@shared/utils/formValueMappers';
 
@@ -26,16 +31,32 @@ import { DireccionFormFields } from './DireccionFormFields';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+
+  direccionesExistentes:
+    readonly DireccionReferenciada[];
+
   onRegistrar?: (
     data: DireccionFormData
   ) => Promise<void> | void;
 }
 
-const ModalRegistrarDireccion: React.FC<Props> = ({
-  isOpen,
-  onClose,
-  onRegistrar,
-}) => {
+const ModalRegistrarDireccion:
+  React.FC<Props> = ({
+    isOpen,
+    onClose,
+    direccionesExistentes,
+    onRegistrar,
+  }) => {
+
+  const validate = useCallback(
+    (data: DireccionFormData) =>
+      validateDireccionForm(
+        data,
+        direccionesExistentes
+      ),
+    [direccionesExistentes]
+  );  
+
   const {
     form,
     errors,
@@ -53,7 +74,7 @@ const ModalRegistrarDireccion: React.FC<Props> = ({
     onSubmit: (data) =>
       onRegistrar?.(data),
 
-    validate: validateDireccionForm,
+    validate,
     resetOnClose: true,
   });
 

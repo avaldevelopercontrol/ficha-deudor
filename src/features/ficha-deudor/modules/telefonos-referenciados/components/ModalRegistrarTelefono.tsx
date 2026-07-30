@@ -1,9 +1,11 @@
-import React from 'react';
+import React, {
+  useCallback,
+} from 'react';
 
 import { ModalFormLayout } from '../../../shared/components/modals/ModalFormLayout';
 import { useModalForm } from '@shared/hooks/ui/useModalForm';
 import { useTelefonoCatalogosForm } from '../hooks/useTelefonoCatalogosForm';
-import type { TelefonoFormData } from '../types/telefono.types';
+import type { TelefonoFormData, TelefonoReferenciado } from '../types/telefono.types';
 import { validateTelefonoForm } from '../validations/telefonoValidations';
 import {
   MODAL_REGISTRAR_TELEFONO_INITIAL_FORM,
@@ -19,16 +21,22 @@ import { TelefonoFormFields } from './TelefonoFormFields';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+
+  telefonosExistentes:
+    readonly TelefonoReferenciado[];
+
   onRegistrar?: (
-  data: TelefonoFormData
-) => Promise<void> | void;
+    data: TelefonoFormData
+  ) => Promise<void> | void;
 }
 
-const ModalRegistrarTelefono: React.FC<Props> = ({
-  isOpen,
-  onClose,
-  onRegistrar,
-}) => {
+const ModalRegistrarTelefono:
+  React.FC<Props> = ({
+    isOpen,
+    onClose,
+    telefonosExistentes,
+    onRegistrar,
+  }) => {
   const {
     resultadosOptions,
     operadoresOptions,
@@ -44,6 +52,15 @@ const ModalRegistrarTelefono: React.FC<Props> = ({
     errorOperadores,
     errorUbicaciones,
   } = useTelefonoCatalogosForm();
+
+  const validate = useCallback(
+    (data: TelefonoFormData) =>
+      validateTelefonoForm(
+        data,
+        telefonosExistentes
+      ),
+    [telefonosExistentes]
+  );
 
   const {
     form,
@@ -61,7 +78,7 @@ const ModalRegistrarTelefono: React.FC<Props> = ({
     onSubmit: (data) =>
       onRegistrar?.(data),
 
-    validate: validateTelefonoForm,
+    validate,
     resetOnClose: true,
   });
 

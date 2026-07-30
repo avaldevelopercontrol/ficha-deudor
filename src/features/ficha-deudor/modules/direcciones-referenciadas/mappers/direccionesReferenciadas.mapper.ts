@@ -1,8 +1,6 @@
 import { toNumberValue, toStringValue } from '@shared/utils/formValueMappers';
 import type {
   CreateDireccionRequest,
-  Departamento,
-  DepartamentoApi,
   DireccionByIdApi,
   DireccionEditFormData,
   DireccionFormData,
@@ -93,12 +91,9 @@ export const buildUpdateDireccionRequest = (
   };
 };
 
-export const mapDepartamentos = (data: DepartamentoApi[]): Departamento[] => {
-  return data.map((item) => ({
-    id: toStringValue(item.nId_Departamento),
-    nombre: toStringValue(item.cNombre_Departamento),
-  }));
-};
+export {
+  mapDepartamentos,
+} from '@shared/catalogos/departamentos/mappers/departamento.mapper';
 
 export const mapProvincias = (data: ProvinciaApi[]): Provincia[] => {
   return data.map((item) => ({

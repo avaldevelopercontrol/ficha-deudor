@@ -21,6 +21,7 @@ interface ModalProps {
   children?: React.ReactNode;
   size?: ModalSize;
   closeOnEsc?: boolean;
+  disableClose?: boolean;
 }
 
 const sizeMap: Record<ModalSize, React.CSSProperties> = {
@@ -47,6 +48,7 @@ const Modal: React.FC<ModalProps> = ({
   children,
   size = 'md',
   closeOnEsc = true,
+  disableClose = false,
 }) => {
   const modalIdRef = useRef<number>(0);
   const scrollYRef = useRef<number>(0);
@@ -99,25 +101,50 @@ const Modal: React.FC<ModalProps> = ({
   }, [isOpen]);
 
   useEffect(() => {
-    if (!closeOnEsc || !isOpen) return;
+    if (
+      !closeOnEsc ||
+      disableClose ||
+      !isOpen
+    ) {
+      return;
+    }
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        const lastModalId = modalStack[modalStack.length - 1];
+    const handleKeyDown = (
+      event: KeyboardEvent
+    ) => {
+      if (event.key === 'Escape') {
+        const lastModalId =
+          modalStack[
+            modalStack.length - 1
+          ];
 
-        if (lastModalId === modalIdRef.current) {
-          e.stopPropagation();
+        if (
+          lastModalId ===
+          modalIdRef.current
+        ) {
+          event.stopPropagation();
           onClose();
         }
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener(
+      'keydown',
+      handleKeyDown
+    );
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener(
+        'keydown',
+        handleKeyDown
+      );
     };
-  }, [isOpen, onClose, closeOnEsc]);
+  }, [
+    isOpen,
+    onClose,
+    closeOnEsc,
+    disableClose,
+  ]);
 
   if (!isOpen) return null;
 
@@ -126,7 +153,11 @@ const Modal: React.FC<ModalProps> = ({
       ref={overlayRef}
       className="modal-overlay open"
       style={{ zIndex: 9999 }}
-      onClick={onClose}
+      onClick={
+        disableClose
+          ? undefined
+          : onClose
+      }
     >
       <div
         ref={containerRef}
@@ -137,7 +168,13 @@ const Modal: React.FC<ModalProps> = ({
         <div className="modal-header">
           <span className="modal-title">{title}</span>
 
-          <button className="modal-close" onClick={onClose} type="button">
+          <button
+            className="modal-close"
+            onClick={onClose}
+            type="button"
+            disabled={disableClose}
+            aria-label="Cerrar"
+          >
             ✕
           </button>
         </div>

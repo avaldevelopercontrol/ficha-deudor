@@ -9,6 +9,9 @@ export const MANTENER_USUARIO_TEXTS = {
 
   editAction:
     'Editar',
+
+  addAction:
+    'Agregar usuario',
 } as const;
 
 export const MANTENER_USUARIO_COLUMNS = {

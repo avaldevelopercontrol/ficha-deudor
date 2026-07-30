@@ -138,6 +138,7 @@ const EmailDeudorPopupContent: React.FC<
       <ModalRegistrarEmail
         isOpen={showRegistrar}
         onClose={handleCloseRegistrar}
+        emailsExistentes={allData}
         onRegistrar={handleRegistrar}
         deudorData={deudorData}
       />
@@ -146,6 +147,7 @@ const EmailDeudorPopupContent: React.FC<
         isOpen={showEditar}
         onClose={handleCloseEditar}
         emailId={emailEditarId}
+        emailsExistentes={allData}
         onGuardar={handleGuardarEdicion}
         deudorData={deudorData}
       />
