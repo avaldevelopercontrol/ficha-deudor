@@ -60,6 +60,7 @@ export const useAsignarUsuarioColumns = ({
           ASIGNAR_USUARIO_COLUMNS.acciones,
         width:
           ASIGNAR_USUARIO_COLUMN_WIDTHS.acciones,
+        align: 'center',  
         filterable: false,
         render: (row) => (
           <SelectActionButton

@@ -105,6 +105,7 @@ export const useEmailDeudorColumns = ({
         key: 'acciones',
         label: EMAIL_DEUDOR_POPUP_COLUMNS.acciones,
         width: EMAIL_DEUDOR_POPUP_COLUMN_WIDTHS.acciones,
+        align: 'center',
         filterable: false,
         render: (row: Email) => (
           <EditActionButton

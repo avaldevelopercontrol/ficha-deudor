@@ -3,6 +3,7 @@ import {
   Suspense,
   type ReactNode,
 } from 'react';
+
 import {
   BrowserRouter,
   Navigate,
@@ -11,25 +12,51 @@ import {
   useLocation,
 } from 'react-router-dom';
 
-import { AUTH_ROUTES } from '../../features/auth/constants';
-import { LoginPage } from '../../features/auth/pages/LoginPage';
-import { FICHA_DEUDOR_ROUTES } from '../../features/ficha-deudor/shared/constants/fichaDeudorRoutes.constants';
-import { GESTION_USUARIOS_ROUTES } from '../../features/gestion-usuarios/constants/gestionUsuariosRoutes.constants';
-import AppLayout from '../../shared/components/layout/AppLayout';
-import { GESTION_USUARIOS_FEATURE } from '../../features/gestion-usuarios/constants/gestionUsuariosFeature.constants';
 import {
   FichaDeudorPopupRoute,
 } from '@app/popups';
-import { getAppBreadcrumb } from './appBreadcrumbs';
-import { ProtectedRoute } from './ProtectedRoute';
-import { PublicRoute } from './PublicRoute';
 
-const AsignarUsuarioPage = lazy(
-  () =>
-    import(
-      '../../features/gestion-usuarios/pages/AsignarUsuarioPage'
-    )
-);
+import {
+  AUTH_ROUTES,
+} from '../../features/auth/constants';
+
+import {
+  LoginPage,
+} from '../../features/auth/pages/LoginPage';
+
+import {
+  FICHA_DEUDOR_ROUTES,
+} from '../../features/ficha-deudor/shared/constants/fichaDeudorRoutes.constants';
+
+import {
+  GESTION_USUARIOS_FEATURE,
+} from '../../features/gestion-usuarios/constants/gestionUsuariosFeature.constants';
+
+import {
+  GESTION_USUARIOS_ROUTES,
+} from '../../features/gestion-usuarios/constants/gestionUsuariosRoutes.constants';
+
+import {
+  SEGURIDAD_FEATURE,
+} from '../../features/seguridad/constants/seguridadFeature.constants';
+
+import {
+  SEGURIDAD_ROUTES,
+} from '../../features/seguridad/constants/seguridadRoutes.constants';
+
+import AppLayout from '../../shared/components/layout/AppLayout';
+
+import {
+  getAppBreadcrumb,
+} from './appBreadcrumbs';
+
+import {
+  ProtectedRoute,
+} from './ProtectedRoute';
+
+import {
+  PublicRoute,
+} from './PublicRoute';
 
 const MenuModulosPage = lazy(
   () =>
@@ -59,6 +86,13 @@ const CambiarClavePage = lazy(
     )
 );
 
+const AsignarUsuarioPage = lazy(
+  () =>
+    import(
+      '../../features/gestion-usuarios/pages/AsignarUsuarioPage'
+    )
+);
+
 const MantenerUsuarioPage = lazy(
   () =>
     import(
@@ -66,14 +100,23 @@ const MantenerUsuarioPage = lazy(
     )
 );
 
-interface GestionUsuariosFeatureRouteProps {
+const MantenerPerfilPage = lazy(
+  () =>
+    import(
+      '../../features/seguridad/pages/MantenerPerfilPage'
+    )
+);
+
+interface FeatureRouteProps {
+  enabled: boolean;
   children: ReactNode;
 }
 
-function GestionUsuariosFeatureRoute({
+function FeatureRoute({
+  enabled,
   children,
-}: GestionUsuariosFeatureRouteProps) {
-  if (!GESTION_USUARIOS_FEATURE.enabled) {
+}: FeatureRouteProps) {
+  if (!enabled) {
     return (
       <Navigate
         to={AUTH_ROUTES.MENU_MODULOS}
@@ -86,7 +129,11 @@ function GestionUsuariosFeatureRoute({
 }
 
 function PageLoader() {
-  return <div>Cargando...</div>;
+  return (
+    <div role="status">
+      Cargando...
+    </div>
+  );
 }
 
 function LegacyFichaDeudorRedirect() {
@@ -98,7 +145,9 @@ function LegacyFichaDeudorRedirect() {
         pathname:
           FICHA_DEUDOR_ROUTES
             .FICHA_DEUDOR,
-        search: location.search,
+
+        search:
+          location.search,
       }}
       state={location.state}
       replace
@@ -132,22 +181,37 @@ export function AppRouter() {
             <Route
               element={
                 <AppLayout
-                  resolveBreadcrumb={getAppBreadcrumb}
+                  resolveBreadcrumb={
+                    getAppBreadcrumb
+                  }
                   withoutSidebarPaths={[
-                    AUTH_ROUTES.MENU_MODULOS,
-                    FICHA_DEUDOR_ROUTES.FICHA_DEUDOR,
+                    AUTH_ROUTES
+                      .MENU_MODULOS,
+
+                    FICHA_DEUDOR_ROUTES
+                      .FICHA_DEUDOR,
                   ]}
                 />
               }
             >
               <Route
-                path={AUTH_ROUTES.MENU_MODULOS}
-                element={<MenuModulosPage />}
+                path={
+                  AUTH_ROUTES
+                    .MENU_MODULOS
+                }
+                element={
+                  <MenuModulosPage />
+                }
               />
 
               <Route
-                path={AUTH_ROUTES.GESTION_DEUDOR}
-                element={<GestionDeudorPage />}
+                path={
+                  AUTH_ROUTES
+                    .GESTION_DEUDOR
+                }
+                element={
+                  <GestionDeudorPage />
+                }
               />
 
               <Route
@@ -162,43 +226,96 @@ export function AppRouter() {
 
               <Route
                 path={
-                  FICHA_DEUDOR_ROUTES.FICHA_DEUDOR
+                  FICHA_DEUDOR_ROUTES
+                    .FICHA_DEUDOR
                 }
-                element={<FichaDeudor />}
+                element={
+                  <FichaDeudor />
+                }
               />
 
               <Route
-                path={GESTION_USUARIOS_ROUTES.CAMBIAR_CLAVE}
+                path={
+                  GESTION_USUARIOS_ROUTES
+                    .CAMBIAR_CLAVE
+                }
                 element={
-                  <GestionUsuariosFeatureRoute>
+                  <FeatureRoute
+                    enabled={
+                      GESTION_USUARIOS_FEATURE
+                        .enabled
+                    }
+                  >
                     <CambiarClavePage />
-                  </GestionUsuariosFeatureRoute>
+                  </FeatureRoute>
                 }
               />
 
               <Route
-                path={GESTION_USUARIOS_ROUTES.ASIGNAR_USUARIO}
+                path={
+                  GESTION_USUARIOS_ROUTES
+                    .ASIGNAR_USUARIO
+                }
                 element={
-                  <GestionUsuariosFeatureRoute>
+                  <FeatureRoute
+                    enabled={
+                      GESTION_USUARIOS_FEATURE
+                        .enabled
+                    }
+                  >
                     <AsignarUsuarioPage />
-                  </GestionUsuariosFeatureRoute>
+                  </FeatureRoute>
                 }
               />
 
               <Route
-                path={GESTION_USUARIOS_ROUTES.MANTENER_USUARIO}
+                path={
+                  GESTION_USUARIOS_ROUTES
+                    .MANTENER_USUARIO
+                }
                 element={
-                  <GestionUsuariosFeatureRoute>
+                  <FeatureRoute
+                    enabled={
+                      GESTION_USUARIOS_FEATURE
+                        .enabled
+                    }
+                  >
                     <MantenerUsuarioPage />
-                  </GestionUsuariosFeatureRoute>
+                  </FeatureRoute>
                 }
               />
 
+              {/* Seguridad debe estar dentro de AppLayout */}
+              <Route
+                path={
+                  SEGURIDAD_ROUTES
+                    .MANTENER_PERFIL
+                }
+                element={
+                  <FeatureRoute
+                    enabled={
+                      SEGURIDAD_FEATURE
+                        .enabled
+                    }
+                  >
+                    <MantenerPerfilPage />
+                  </FeatureRoute>
+                }
+              />
             </Route>
 
+            {/*
+              Los popups se mantienen fuera de AppLayout
+              porque no deben mostrar cabecera ni sidebar.
+            */}
             <Route
-              path={FICHA_DEUDOR_ROUTES.POPUP}
-              element={<FichaDeudorPopupRoute />}
+              path={
+                FICHA_DEUDOR_ROUTES
+                  .POPUP
+              }
+              element={
+                <FichaDeudorPopupRoute />
+              }
             />
           </Route>
 
@@ -206,7 +323,10 @@ export function AppRouter() {
             path="*"
             element={
               <Navigate
-                to={AUTH_ROUTES.MENU_MODULOS}
+                to={
+                  AUTH_ROUTES
+                    .MENU_MODULOS
+                }
                 replace
               />
             }

@@ -3,7 +3,7 @@ import type React from 'react';
 import Table from '@shared/components/table/Table';
 import Paginacion from '@shared/components/ui/Paginacion';
 
-import UsuariosTableResourceState from '../../../components/UsuariosTableResourceState';
+import TableResourceState from '@shared/components/table/TableResourceState';
 import {
   ASIGNAR_USUARIO_PAGE_SIZE_OPTIONS,
   ASIGNAR_USUARIO_TEXTS,
@@ -84,10 +84,12 @@ export const AsignarUsuarioTableCard: React.FC<
         </span>
       </header>
 
-      <UsuariosTableResourceState
+      <TableResourceState
         isLoading={isLoading}
         error={error}
         onRetry={refetch}
+        loadingMessage="Cargando usuarios disponibles..."
+        errorTitle="No se pudieron cargar los usuarios"
       >
         <>
           <div className="asignar-usuario-table">
@@ -157,7 +159,7 @@ export const AsignarUsuarioTableCard: React.FC<
             </div>
           )}
         </>
-      </UsuariosTableResourceState>
+      </TableResourceState>
     </section>
   );
 };

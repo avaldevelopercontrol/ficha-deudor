@@ -37,28 +37,30 @@ function getRowValue(row: unknown, key: string): unknown {
 function getCellStyle<TData>(
   column: Column<TData> | undefined,
   fitToPanel: boolean
-): CSSProperties | undefined {
+): CSSProperties {
+  const style: CSSProperties = {
+    textAlign: column?.align,
+  };
+
   if (!column?.width) {
-    return fitToPanel
-      ? {
-          maxWidth: 0,
-          overflow: 'hidden',
-        }
-      : undefined;
+    if (fitToPanel) {
+      style.maxWidth = 0;
+      style.overflow = 'hidden';
+    }
+
+    return style;
   }
+
+  style.width = column.width;
 
   if (fitToPanel) {
-    return {
-      width: column.width,
-      maxWidth: column.width,
-      overflow: 'hidden',
-    };
+    style.maxWidth = column.width;
+    style.overflow = 'hidden';
+  } else {
+    style.minWidth = column.width;
   }
 
-  return {
-    width: column.width,
-    minWidth: column.width,
-  };
+  return style;
 }
 
 function Table<TData>({

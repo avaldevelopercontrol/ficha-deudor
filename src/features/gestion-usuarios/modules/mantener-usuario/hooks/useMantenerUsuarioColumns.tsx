@@ -118,6 +118,7 @@ export const useMantenerUsuarioColumns = ({
           MANTENER_USUARIO_COLUMNS.editar,
         width:
           MANTENER_USUARIO_COLUMN_WIDTHS.editar,
+        align: 'center',
         filterable: false,
         render: (row) => (
           <EditActionButton

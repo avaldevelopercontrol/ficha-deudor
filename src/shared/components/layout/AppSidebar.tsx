@@ -7,6 +7,13 @@ import { AUTH_ROUTES } from '../../../features/auth/constants';
 import SidebarMenuSection from './SidebarMenuSection';
 import '../../styles/components/app-sidebar.css';
 import { GESTION_USUARIOS_FEATURE } from '../../../features/gestion-usuarios/constants/gestionUsuariosFeature.constants';
+import {
+  SEGURIDAD_FEATURE,
+} from '../../../features/seguridad/constants/seguridadFeature.constants';
+
+import {
+  SEGURIDAD_ROUTES,
+} from '../../../features/seguridad/constants/seguridadRoutes.constants';
 
 interface AppSidebarProps {
   isCollapsed?: boolean;
@@ -120,6 +127,31 @@ const UsersIcon = () => (
   </svg>
 );
 
+const ShieldIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path
+      d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+
+    <path
+      d="m9 12 2 2 4-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const LogoutIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path
@@ -152,7 +184,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = () => {
 
   const [isCobranzaOpen, setIsCobranzaOpen] = useState(true);
   const [isUsuariosOpen, setIsUsuariosOpen] = useState(true);
-
+  const [isSeguridadOpen, setIsSeguridadOpen] = useState(true);
   const initials = getRoleInitials(usuario?.perfil);
 
   const handleLogout = () => {
@@ -237,6 +269,30 @@ export const AppSidebar: React.FC<AppSidebarProps> = () => {
           </p>
 
           <div className="app-sidebar__nav-list">
+
+            {SEGURIDAD_FEATURE.enabled && (
+              <SidebarMenuSection
+                label="Seguridad"
+                icon={<ShieldIcon />}
+                isOpen={isSeguridadOpen}
+                onToggle={() => {
+                  setIsSeguridadOpen(
+                    (current) => !current
+                  );
+                }}
+                items={[
+                  {
+                    label:
+                      'Mantener perfil',
+
+                    to:
+                      SEGURIDAD_ROUTES
+                        .MANTENER_PERFIL,
+                  },
+                ]}
+              />
+            )}
+
             <SidebarMenuSection
               label="Gestión de cobranzas"
               icon={<GestionIcon />}

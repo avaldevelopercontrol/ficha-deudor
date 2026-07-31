@@ -1,8 +1,8 @@
 /* =========================================================
-   GESTIÓN DE USUARIOS — ESTADOS DE RECURSOS
+   ESTADOS DE RECURSOS PARA TABLAS
    ========================================================= */
 
-.gestion-usuarios-resource-state {
+.table-resource-state {
   min-height: 180px;
   padding: 32px;
 
@@ -17,7 +17,7 @@
   font-weight: 600;
 }
 
-.gestion-usuarios-resource-state__spinner {
+.table-resource-state__spinner {
   width: 20px;
   height: 20px;
 
@@ -28,29 +28,29 @@
   border-radius: 50%;
 
   animation:
-    gestion-usuarios-spinner
+    table-resource-spinner
     700ms linear infinite;
 }
 
-.gestion-usuarios-resource-error {
+.table-resource-error {
   padding: 20px 24px 24px;
 }
 
-.gestion-usuarios-resource-error__actions {
+.table-resource-error__actions {
   display: flex;
   justify-content: flex-end;
 
   margin-top: 10px;
 }
 
-@keyframes gestion-usuarios-spinner {
+@keyframes table-resource-spinner {
   to {
     transform: rotate(360deg);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gestion-usuarios-resource-state__spinner {
+  .table-resource-state__spinner {
     animation: none;
   }
 }

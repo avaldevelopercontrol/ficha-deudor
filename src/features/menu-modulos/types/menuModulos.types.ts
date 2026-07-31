@@ -6,13 +6,13 @@ export type MenuModuloIconName =
   | 'file-text'
   | 'smartphone'
   | 'monitor'
-  | 'sliders'
   | 'briefcase'
   | 'target'
   | 'mail'
   | 'phone'
   | 'user'
-  | 'key';
+  | 'key'
+  | 'shield';
 
 export interface MenuModulo {
   key: string;

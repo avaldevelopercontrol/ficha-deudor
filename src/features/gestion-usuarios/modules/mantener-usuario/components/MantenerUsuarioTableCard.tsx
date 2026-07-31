@@ -12,7 +12,7 @@ import {
 
 import Paginacion from '@shared/components/ui/Paginacion';
 
-import UsuariosTableResourceState from '../../../components/UsuariosTableResourceState';
+import TableResourceState from '@shared/components/table/TableResourceState';
 
 import {
   MANTENER_USUARIO_PAGE_SIZE_OPTIONS,
@@ -136,10 +136,9 @@ export const MantenerUsuarioTableCard = ({
           />
         </header>
 
-        <UsuariosTableResourceState
-          isLoading={
-            isLoading
-          }
+        <TableResourceState
+          loadingMessage="Cargando usuarios..."
+          isLoading={isLoading}
           error={error}
           onRetry={refetch}
         >
@@ -226,7 +225,7 @@ export const MantenerUsuarioTableCard = ({
               </div>
             )}
           </>
-        </UsuariosTableResourceState>
+        </TableResourceState>
       </section>
 
       <ModalRegistrarUsuario

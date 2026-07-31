@@ -109,6 +109,7 @@ export const usePanelTelefonosReferenciadosColumns = ({
           key: 'acciones',
           label: 'Editar',
           width: '55px',
+          align: 'center',
           filterable: false,
           render: (row) =>
             renderTelefonoEditCell(
