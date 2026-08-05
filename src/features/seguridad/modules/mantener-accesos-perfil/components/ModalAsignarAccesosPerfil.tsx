@@ -27,8 +27,14 @@ import AccesosPerfilTree from './AccesosPerfilTree';
 
 import AsignarAccesosPerfilErrorSummary from './AsignarAccesosPerfilErrorSummary';
 
+import {
+  getMantenerAccesosPerfilPermissionMessage,
+} from '../utils/mantenerAccesosPerfilPermissions';
+
 interface ModalAsignarAccesosPerfilProps {
   isOpen: boolean;
+  canInsert: boolean;
+  assignedPerfilIds: readonly number[];
   onClose: () => void;
   onRegistrar: (
     data: RegistrarPerfilOpcionesData
@@ -37,6 +43,8 @@ interface ModalAsignarAccesosPerfilProps {
 
 export const ModalAsignarAccesosPerfil = ({
   isOpen,
+  canInsert,
+  assignedPerfilIds,
   onClose,
   onRegistrar,
 }: ModalAsignarAccesosPerfilProps): ReactNode => {
@@ -63,6 +71,7 @@ export const ModalAsignarAccesosPerfil = ({
     handleClose,
   } = useAsignarAccesosPerfilModal({
     isOpen,
+    assignedPerfilIds,
     onClose,
     onRegistrar,
   });
@@ -286,7 +295,18 @@ export const ModalAsignarAccesosPerfil = ({
             onClick={() => {
               void handleSubmit();
             }}
-            disabled={!isReady}
+            disabled={
+              !isReady ||
+              isSubmitting ||
+              !canInsert
+            }
+            title={
+              !canInsert
+                ? getMantenerAccesosPerfilPermissionMessage(
+                    'insertar'
+                  )
+                : undefined
+            }
             className="asignar-accesos-perfil-modal__submit-button"
           />
         </footer>

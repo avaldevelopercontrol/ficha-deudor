@@ -55,7 +55,7 @@ export const MODAL_REGISTRAR_MODULO_PLACEHOLDERS = {
     'Ingrese el código del módulo',
 
   icono:
-    'Seleccionar',
+    'Seleccionar icono',
 } as const;
 
 export const MODAL_REGISTRAR_MODULO_VISIBLE_OPTIONS:

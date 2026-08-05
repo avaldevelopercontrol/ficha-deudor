@@ -8,6 +8,11 @@ import {
 } from '@features/auth/hooks/useAuth';
 
 import {
+  useAccessControl,
+  useOptionPermissions,
+} from '@features/access-control';
+
+import {
   useApiResource,
 } from '@shared/hooks/useApiResource';
 
@@ -34,10 +39,29 @@ import type {
   RegistrarModuloFormData,
 } from '../types/registrarModulo.types';
 
+import {
+  assertMantenerModulosPermission,
+} from '../utils/mantenerModulosPermissions';
+
 export const useMantenerModulosTable = () => {
   const {
     usuario,
   } = useAuth();
+
+  const {
+    refresh: refreshAccessControl,
+  } = useAccessControl();
+
+  const permissions =
+    useOptionPermissions(
+      'mMantenerModulo'
+    );
+
+  const canInsert =
+    permissions.insertar;
+
+  const canEdit =
+    permissions.editar;
 
   const {
     data,
@@ -81,6 +105,11 @@ export const useMantenerModulosTable = () => {
         form:
           RegistrarModuloFormData
       ): Promise<void> => {
+        assertMantenerModulosPermission(
+          'insertar',
+          canInsert
+        );
+
         const authenticatedUserId =
           usuario?.id_usuario;
 
@@ -101,10 +130,13 @@ export const useMantenerModulosTable = () => {
         );
 
         refetch();
+        await refreshAccessControl();
       },
       [
         allData,
+        canInsert,
         refetch,
+        refreshAccessControl,
         setPageNumber,
         usuario?.id_usuario,
       ]
@@ -119,6 +151,11 @@ export const useMantenerModulosTable = () => {
         form:
           EditarModuloFormData
       ): Promise<void> => {
+        assertMantenerModulosPermission(
+          'editar',
+          canEdit
+        );
+
         const authenticatedUserId =
           usuario?.id_usuario;
 
@@ -136,10 +173,13 @@ export const useMantenerModulosTable = () => {
         );
 
         refetch();
+        await refreshAccessControl();
       },
       [
         allData,
+        canEdit,
         refetch,
+        refreshAccessControl,
         usuario?.id_usuario,
       ]
     );
@@ -161,6 +201,9 @@ export const useMantenerModulosTable = () => {
 
   return {
     allData,
+
+    canInsert,
+    canEdit,
 
     paginatedData:
       table.paginatedData,

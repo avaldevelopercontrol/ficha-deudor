@@ -59,8 +59,13 @@ import ModuloFormFields from './ModuloFormFields';
 
 import ModuloOrderControl from './ModuloOrderControl';
 
+import {
+  getMantenerModulosPermissionMessage,
+} from '../utils/mantenerModulosPermissions';
+
 interface ModalEditarModuloProps {
   isOpen: boolean;
+  canEdit: boolean;
   moduloId: number;
   modulosExistentes: readonly Modulo[];
   onClose: () => void;
@@ -84,6 +89,7 @@ const EMPTY_EDIT_FORM:
 
 export const ModalEditarModulo = ({
   isOpen,
+  canEdit,
   moduloId,
   modulosExistentes,
   onClose,
@@ -367,9 +373,6 @@ export const ModalEditarModulo = ({
                 <ModuloFormFields
                   form={form}
                   errors={errors}
-                  modulos={
-                    modulosExistentes
-                  }
                   parentOptions={
                     parentOptions
                   }
@@ -480,7 +483,15 @@ export const ModalEditarModulo = ({
                   onClick={handleSubmit}
                   disabled={
                     isSubmitting ||
-                    !isDirty
+                    !isDirty ||
+                    !canEdit
+                  }
+                  title={
+                    !canEdit
+                      ? getMantenerModulosPermissionMessage(
+                          'editar'
+                        )
+                      : undefined
                   }
                   className="registrar-modulo-modal__submit-button"
                 />

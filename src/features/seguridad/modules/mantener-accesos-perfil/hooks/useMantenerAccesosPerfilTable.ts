@@ -8,6 +8,11 @@ import {
 } from '@features/auth/hooks/useAuth';
 
 import {
+  useAccessControl,
+  useOptionPermissions,
+} from '@features/access-control';
+
+import {
   useApiResource,
 } from '@shared/hooks/useApiResource';
 
@@ -30,10 +35,29 @@ import type {
   RegistrarPerfilOpcionesData,
 } from '../types/asignarAccesosPerfil.types';
 
+import {
+  assertMantenerAccesosPerfilPermission,
+} from '../utils/mantenerAccesosPerfilPermissions';
+
 export const useMantenerAccesosPerfilTable = () => {
   const {
     usuario,
   } = useAuth();
+
+  const {
+    refresh: refreshAccessControl,
+  } = useAccessControl();
+
+  const permissions =
+    useOptionPermissions(
+      'mMantenerAccesosPorPerfil'
+    );
+
+  const canInsert =
+    permissions.insertar;
+
+  const canEdit =
+    permissions.editar;
 
   const {
     data,
@@ -68,6 +92,11 @@ export const useMantenerAccesosPerfilTable = () => {
       async (
         form: RegistrarPerfilOpcionesData
       ): Promise<void> => {
+        assertMantenerAccesosPerfilPermission(
+          'insertar',
+          canInsert
+        );
+
         const authenticatedUserId =
           usuario?.id_usuario;
 
@@ -76,6 +105,18 @@ export const useMantenerAccesosPerfilTable = () => {
             'No se pudo identificar al usuario autenticado que registra los accesos.'
           );
         }
+
+        const refreshAffectedState =
+          async (): Promise<void> => {
+            refetch();
+
+            if (
+              form.perfilId ===
+              usuario?.perfilId
+            ) {
+              await refreshAccessControl();
+            }
+          };
 
         try {
           await createPerfilOpciones(
@@ -88,17 +129,20 @@ export const useMantenerAccesosPerfilTable = () => {
            * opciones anteriores antes de fallar. Se
            * actualiza el conteo para reflejar ese estado.
            */
-          refetch();
+          await refreshAffectedState();
           throw error;
         }
 
         setPageNumber(1);
-        refetch();
+        await refreshAffectedState();
       },
       [
+        canInsert,
         refetch,
+        refreshAccessControl,
         setPageNumber,
         usuario?.id_usuario,
+        usuario?.perfilId,
       ]
     );
 
@@ -110,6 +154,11 @@ export const useMantenerAccesosPerfilTable = () => {
           readonly PerfilOpcionDetalle[],
         form: RegistrarPerfilOpcionesData
       ): Promise<void> => {
+        assertMantenerAccesosPerfilPermission(
+          'editar',
+          canEdit
+        );
+
         const authenticatedUserId =
           usuario?.id_usuario;
 
@@ -118,6 +167,18 @@ export const useMantenerAccesosPerfilTable = () => {
             'No se pudo identificar al usuario autenticado que actualiza los accesos.'
           );
         }
+
+        const refreshAffectedState =
+          async (): Promise<void> => {
+            refetch();
+
+            if (
+              form.perfilId ===
+              usuario?.perfilId
+            ) {
+              await refreshAccessControl();
+            }
+          };
 
         try {
           await updatePerfilOpciones(
@@ -130,15 +191,18 @@ export const useMantenerAccesosPerfilTable = () => {
            * La actualización puede procesar cambios
            * anteriores antes de que una operación falle.
            */
-          refetch();
+          await refreshAffectedState();
           throw error;
         }
 
-        refetch();
+        await refreshAffectedState();
       },
       [
+        canEdit,
         refetch,
+        refreshAccessControl,
         usuario?.id_usuario,
+        usuario?.perfilId,
       ]
     );
 
@@ -153,6 +217,10 @@ export const useMantenerAccesosPerfilTable = () => {
 
   return {
     allData,
+
+    canInsert,
+    canEdit,
+
     paginatedData:
       table.paginatedData,
 

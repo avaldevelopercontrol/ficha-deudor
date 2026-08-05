@@ -5,6 +5,7 @@ import {
 import type {
   AsignarAccesosPerfilFormData,
   OpcionTreeItem,
+  PerfilAccesoOption,
   PerfilOpcionCheckState,
   PerfilOpcionPermissionKey,
   PerfilOpcionPermissions,
@@ -63,6 +64,26 @@ export const ASIGNAR_ACCESOS_PERFIL_INITIAL_FORM:
     activeOptionId: null,
     permissionsByOptionId: {},
   };
+
+export const filterUnassignedPerfilOptions = (
+  perfiles: readonly PerfilAccesoOption[],
+  assignedPerfilIds: readonly number[]
+): PerfilAccesoOption[] => {
+  const assignedPerfilIdSet = new Set(
+    assignedPerfilIds.filter(
+      (perfilId) =>
+        Number.isSafeInteger(perfilId) &&
+        perfilId > 0
+    )
+  );
+
+  return perfiles.filter(
+    (perfil) =>
+      !assignedPerfilIdSet.has(
+        perfil.idPerfil
+      )
+  );
+};
 
 export const createEmptyPerfilOpcionPermissions =
   (): PerfilOpcionPermissions => ({

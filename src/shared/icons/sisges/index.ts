@@ -1,4 +1,5 @@
 export { SisgesIcon } from './SisgesIcon';
+export { SisgesIconPicker } from './SisgesIconPicker';
 export {
   SISGES_ICON_BY_NAME,
   SISGES_ICON_CATALOG,
@@ -9,6 +10,7 @@ export {
   LEGACY_SISGES_ICON_ALIASES,
   getSisgesIconDefinition,
   isSisgesIconName,
+  isSupportedSisgesIconValue,
   normalizeSisgesIconName,
   searchSisgesIcons,
 } from './sisgesIcon.utils';

@@ -1,6 +1,5 @@
-import {
-  useMemo,
-  type ReactNode,
+import type {
+  ReactNode,
 } from 'react';
 
 import {
@@ -9,13 +8,13 @@ import {
   TextAreaField,
 } from '@shared/components/ui';
 
+import {
+  SisgesIconPicker,
+} from '@shared/icons/sisges';
+
 import type {
   SelectOption,
 } from '@shared/types';
-
-import type {
-  Modulo,
-} from '../../../types/opcion.types';
 
 import {
   MODAL_REGISTRAR_MODULO_ESTADO_OPTIONS,
@@ -32,7 +31,6 @@ import type {
 interface ModuloFormFieldsProps {
   form: ModuloFormData;
   errors: Record<string, string>;
-  modulos: readonly Modulo[];
   parentOptions: SelectOption<number>[];
   parentDisabled?: boolean;
   visibleDisabled?: boolean;
@@ -63,7 +61,6 @@ interface ModuloFormFieldsProps {
 export const ModuloFormFields = ({
   form,
   errors,
-  modulos,
   parentOptions,
   parentDisabled = false,
   visibleDisabled = false,
@@ -76,41 +73,6 @@ export const ModuloFormFields = ({
   onVisibleChange,
   onEstadoChange,
 }: ModuloFormFieldsProps): ReactNode => {
-  const iconOptions =
-    useMemo<
-      SelectOption<string>[]
-    >(
-      () => {
-        const uniqueIcons =
-          new Set(
-            modulos
-              .map(
-                (modulo) =>
-                  modulo.icono.trim()
-              )
-              .filter(Boolean)
-          );
-
-        return [
-          ...uniqueIcons,
-        ]
-          .sort(
-            (left, right) =>
-              left.localeCompare(
-                right,
-                'es-PE'
-              )
-          )
-          .map(
-            (icono) => ({
-              id: icono,
-              label: icono,
-            })
-          );
-      },
-      [modulos]
-    );
-
   return (
     <div className="registrar-modulo-form">
       <section className="registrar-modulo-form__section">
@@ -187,14 +149,14 @@ export const ModuloFormFields = ({
             rows={3}
           />
 
-          <SelectField<string>
+          <SisgesIconPicker
+            id="modulo-icono"
             label={
               MODAL_REGISTRAR_MODULO_LABELS
                 .icono
             }
             layout="inline"
             value={form.icono}
-            options={iconOptions}
             placeholder={
               MODAL_REGISTRAR_MODULO_PLACEHOLDERS
                 .icono

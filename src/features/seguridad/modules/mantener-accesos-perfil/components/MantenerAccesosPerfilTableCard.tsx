@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useMemo,
   useState,
   type ReactNode,
 } from 'react';
@@ -35,6 +36,10 @@ import ModalAsignarAccesosPerfil from './ModalAsignarAccesosPerfil';
 
 import ModalEditarAccesosPerfil from './ModalEditarAccesosPerfil';
 
+import {
+  getMantenerAccesosPerfilPermissionMessage,
+} from '../utils/mantenerAccesosPerfilPermissions';
+
 export const MantenerAccesosPerfilTableCard =
   (): ReactNode => {
     const [
@@ -52,6 +57,10 @@ export const MantenerAccesosPerfilTableCard =
     const {
       allData,
       paginatedData,
+
+      canInsert,
+      canEdit,
+
       isLoading,
       error,
       refetch,
@@ -86,8 +95,12 @@ export const MantenerAccesosPerfilTableCard =
 
     const handleOpenAssignModal =
       useCallback(() => {
+        if (!canInsert) {
+          return;
+        }
+
         setIsAssignModalOpen(true);
-      }, []);
+      }, [canInsert]);
 
     const handleCloseAssignModal =
       useCallback(() => {
@@ -98,6 +111,14 @@ export const MantenerAccesosPerfilTableCard =
       useCallback(() => {
         setSelectedPerfil(null);
       }, []);
+
+    const assignedPerfilIds = useMemo(
+      () =>
+        allData.map(
+          (perfil) => perfil.idPerfil
+        ),
+      [allData]
+    );
 
     return (
       <>
@@ -134,6 +155,14 @@ export const MantenerAccesosPerfilTableCard =
               size="sm"
               icon="+"
               onClick={handleOpenAssignModal}
+              disabled={!canInsert}
+              title={
+                !canInsert
+                  ? getMantenerAccesosPerfilPermissionMessage(
+                      'insertar'
+                    )
+                  : undefined
+              }
               className="mantener-accesos-perfil-card__add-button"
             />
           </header>
@@ -216,6 +245,10 @@ export const MantenerAccesosPerfilTableCard =
 
         <ModalAsignarAccesosPerfil
           isOpen={isAssignModalOpen}
+          canInsert={canInsert}
+          assignedPerfilIds={
+            assignedPerfilIds
+          }
           onClose={handleCloseAssignModal}
           onRegistrar={
             registrarAccesosPerfil
@@ -226,6 +259,7 @@ export const MantenerAccesosPerfilTableCard =
           <ModalEditarAccesosPerfil
             key={selectedPerfil.idPerfil}
             isOpen
+            canEdit={canEdit}
             perfil={selectedPerfil}
             onClose={handleCloseEditModal}
             onGuardar={

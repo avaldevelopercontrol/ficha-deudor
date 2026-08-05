@@ -31,6 +31,11 @@ export const MenuModuloCard: React.FC<MenuModuloCardProps> = ({
       onClick={() => onSelect(modulo)}
       disabled={!enabled}
       aria-disabled={!enabled}
+      title={
+        !enabled
+          ? modulo.badge
+          : undefined
+      }
     >
       <div className="menu-modulos-card__top">
         <div className="menu-modulos-card__icon">

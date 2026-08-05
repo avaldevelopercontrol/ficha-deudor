@@ -17,6 +17,10 @@ import {
 } from '@app/popups';
 
 import {
+  OptionAccessRoute,
+} from '../../features/access-control';
+
+import {
   AUTH_ROUTES,
 } from '../../features/auth/constants';
 
@@ -224,7 +228,9 @@ export function AppRouter() {
                     .GESTION_DEUDOR
                 }
                 element={
-                  <GestionDeudorPage />
+                  <OptionAccessRoute optionCode="mGestionDeudor">
+                    <GestionDeudorPage />
+                  </OptionAccessRoute>
                 }
               />
 
@@ -234,7 +240,9 @@ export function AppRouter() {
                     .LEGACY_FICHA_DEUDOR
                 }
                 element={
-                  <LegacyFichaDeudorRedirect />
+                  <OptionAccessRoute optionCode="mGestionDeudor">
+                    <LegacyFichaDeudorRedirect />
+                  </OptionAccessRoute>
                 }
               />
 
@@ -244,7 +252,9 @@ export function AppRouter() {
                     .FICHA_DEUDOR
                 }
                 element={
-                  <FichaDeudor />
+                  <OptionAccessRoute optionCode="mGestionDeudor">
+                    <FichaDeudor />
+                  </OptionAccessRoute>
                 }
               />
 
@@ -260,7 +270,9 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <CambiarClavePage />
+                    <OptionAccessRoute optionCode="mCambiarClave">
+                      <CambiarClavePage />
+                    </OptionAccessRoute>
                   </FeatureRoute>
                 }
               />
@@ -277,7 +289,9 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <AsignarUsuarioPage />
+                    <OptionAccessRoute optionCode="mAsignarUsuario">
+                      <AsignarUsuarioPage />
+                    </OptionAccessRoute>
                   </FeatureRoute>
                 }
               />
@@ -294,12 +308,13 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <MantenerUsuarioPage />
+                    <OptionAccessRoute optionCode="mMantenerUsuario">
+                      <MantenerUsuarioPage />
+                    </OptionAccessRoute>
                   </FeatureRoute>
                 }
               />
 
-              {/* Seguridad debe estar dentro de AppLayout */}
               <Route
                 path={
                   SEGURIDAD_ROUTES
@@ -312,7 +327,9 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <MantenerPerfilPage />
+                    <OptionAccessRoute optionCode="mMantenerPerfil">
+                      <MantenerPerfilPage />
+                    </OptionAccessRoute>
                   </FeatureRoute>
                 }
               />
@@ -329,7 +346,9 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <MantenerModulosPage />
+                    <OptionAccessRoute optionCode="mMantenerModulo">
+                      <MantenerModulosPage />
+                    </OptionAccessRoute>
                   </FeatureRoute>
                 }
               />
@@ -346,23 +365,23 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <MantenerAccesosPerfilPage />
+                    <OptionAccessRoute optionCode="mMantenerAccesosPorPerfil">
+                      <MantenerAccesosPerfilPage />
+                    </OptionAccessRoute>
                   </FeatureRoute>
                 }
               />
             </Route>
 
-            {/*
-              Los popups se mantienen fuera de AppLayout
-              porque no deben mostrar cabecera ni sidebar.
-            */}
             <Route
               path={
                 FICHA_DEUDOR_ROUTES
                   .POPUP
               }
               element={
-                <FichaDeudorPopupRoute />
+                <OptionAccessRoute optionCode="mGestionDeudor">
+                  <FichaDeudorPopupRoute />
+                </OptionAccessRoute>
               }
             />
           </Route>

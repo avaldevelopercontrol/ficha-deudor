@@ -4,6 +4,10 @@ import {
 } from 'react';
 
 import {
+  useOptionPermissions,
+} from '@features/access-control';
+
+import {
   useApiResource,
 } from '@shared/hooks/useApiResource';
 
@@ -26,7 +30,22 @@ import type {
   RegistrarPerfilFormData,
 } from '../types/registrarPerfil.types';
 
+import {
+  assertMantenerPerfilPermission,
+} from '../utils/mantenerPerfilPermissions';
+
 export const useMantenerPerfilTable = () => {
+  const permissions =
+    useOptionPermissions(
+      'mMantenerPerfil'
+    );
+
+  const canInsert =
+    permissions.insertar;
+
+  const canEdit =
+    permissions.editar;
+
   const {
     data,
     isLoading,
@@ -71,6 +90,11 @@ export const useMantenerPerfilTable = () => {
         form:
           RegistrarPerfilFormData
       ): Promise<void> => {
+        assertMantenerPerfilPermission(
+          'insertar',
+          canInsert
+        );
+
         await createPerfil(
           form
         );
@@ -82,6 +106,7 @@ export const useMantenerPerfilTable = () => {
         refetch();
       },
       [
+        canInsert,
         refetch,
         setPageNumber,
       ]
@@ -96,6 +121,11 @@ export const useMantenerPerfilTable = () => {
         form:
           RegistrarPerfilFormData
       ): Promise<void> => {
+        assertMantenerPerfilPermission(
+          'editar',
+          canEdit
+        );
+
         await updatePerfil(
           perfil,
           form
@@ -108,6 +138,7 @@ export const useMantenerPerfilTable = () => {
         refetch();
       },
       [
+        canEdit,
         refetch,
       ]
     );
@@ -129,6 +160,9 @@ export const useMantenerPerfilTable = () => {
 
   return {
     allData,
+
+    canInsert,
+    canEdit,
 
     paginatedData:
       table.paginatedData,

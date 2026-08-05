@@ -9,29 +9,7 @@ import {
   test,
 } from '../../../../../test/testHarness';
 
-import type {
-  Modulo,
-} from '../../../types/opcion.types';
-
 import ModuloFormFields from './ModuloFormFields';
-
-const root: Modulo = {
-  idModulo: 1,
-  nombre: 'Root',
-  descripcion: '',
-  codigo: 'Root',
-  ruta: 'root/',
-  icono: '',
-  tipo: 1,
-  idPadre: 0,
-  codigoPadre: '',
-  padre: '',
-  orden: 0,
-  visibleActivo: true,
-  visible: 'Sí',
-  estadoActivo: true,
-  estado: 'Activo',
-};
 
 export const suite = defineSuite(
   'campos de mantener módulo',
@@ -47,13 +25,12 @@ export const suite = defineSuite(
                 descripcion:
                   'Descripción del módulo',
                 codigo: 'mModulo',
-                icono: '',
+                icono: 'database-upload',
                 padreId: 1,
                 visible: false,
                 estado: false,
               }}
               errors={{}}
-              modulos={[root]}
               parentOptions={[
                 {
                   id: 1,
@@ -82,6 +59,14 @@ export const suite = defineSuite(
         assert.match(
           html,
           /Descripción[\s\S]*?<textarea[^>]*>Descripción del módulo<\/textarea>/
+        );
+        assert.match(
+          html,
+          /Carga de base/
+        );
+        assert.match(
+          html,
+          /aria-haspopup="listbox"/
         );
       }
     ),

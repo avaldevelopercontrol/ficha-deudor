@@ -12,6 +12,7 @@ import type {
 import {
   ASIGNAR_ACCESOS_PERFIL_INITIAL_FORM,
   createAsignarAccesosPerfilFormFromAssignments,
+  filterUnassignedPerfilOptions,
   getPerfilOpcionBranchAllPermissionsState,
   getPerfilOpcionBranchPermissionStates,
   getPerfilOpcionBranchSelectionState,
@@ -107,6 +108,46 @@ const treeItems: OpcionTreeItem[] = [
 export const suite = defineSuite(
   'asignarAccesosPerfil.utils',
   [
+    test(
+      'excluye del selector los perfiles que ya tienen accesos registrados',
+      () => {
+        const perfiles = [
+          {
+            idPerfil: 9,
+            nombrePerfil: 'Administrador',
+          },
+          {
+            idPerfil: 10,
+            nombrePerfil: 'Gestor',
+          },
+          {
+            idPerfil: 11,
+            nombrePerfil: 'Supervisor',
+          },
+        ];
+
+        assert.deepEqual(
+          filterUnassignedPerfilOptions(
+            perfiles,
+            [9, 11, 11, 0]
+          ),
+          [
+            {
+              idPerfil: 10,
+              nombrePerfil: 'Gestor',
+            },
+          ]
+        );
+
+        assert.deepEqual(
+          filterUnassignedPerfilOptions(
+            perfiles,
+            []
+          ),
+          perfiles
+        );
+      }
+    ),
     test(
       'seleccionar un contenedor marca sus hojas y agrega el padre automáticamente',
       () => {

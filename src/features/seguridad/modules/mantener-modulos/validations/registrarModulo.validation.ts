@@ -1,3 +1,7 @@
+import {
+  isSupportedSisgesIconValue,
+} from '@shared/icons/sisges';
+
 import type {
   Modulo,
 } from '../../../types/opcion.types';
@@ -108,6 +112,16 @@ const validateCommonModuloFields = (
   ) {
     errors.nombre =
       'Ya existe un módulo con el mismo nombre.';
+  }
+
+  if (
+    normalizedForm.icono &&
+    !isSupportedSisgesIconValue(
+      normalizedForm.icono
+    )
+  ) {
+    errors.icono =
+      'Seleccione un icono válido del catálogo SISGES.';
   }
 
   if (!normalizedForm.codigo) {
@@ -257,6 +271,22 @@ export const validateEditarModuloForm = (
     errors.orden =
       'No se pudo identificar el módulo a ordenar.';
 
+    return errors;
+  }
+
+  const currentModule =
+    modulosExistentes.find(
+      (modulo) =>
+        modulo.idModulo ===
+        moduloIdActual
+    );
+
+  /*
+   * Root no participa del orden de hermanos. Su posición siempre se
+   * normaliza a 0 al construir el request, por lo que no corresponde
+   * exigir ni validar una posición editable para esta opción.
+   */
+  if (currentModule?.idPadre === 0) {
     return errors;
   }
 

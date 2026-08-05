@@ -35,6 +35,10 @@ import ModalEditarModulo from './ModalEditarModulo';
 
 import ModalRegistrarModulo from './ModalRegistrarModulo';
 
+import {
+  getMantenerModulosPermissionMessage,
+} from '../utils/mantenerModulosPermissions';
+
 export const MantenerModulosTableCard =
   (): ReactNode => {
     const [
@@ -58,6 +62,9 @@ export const MantenerModulosTableCard =
     const {
       allData,
       paginatedData,
+
+      canInsert,
+      canEdit,
 
       isLoading,
       error,
@@ -106,11 +113,15 @@ export const MantenerModulosTableCard =
     const handleOpenRegisterModal =
       useCallback(
         () => {
+          if (!canInsert) {
+            return;
+          }
+
           setIsRegisterModalOpen(
             true
           );
         },
-        []
+        [canInsert]
       );
 
     const handleCloseRegisterModal =
@@ -171,8 +182,16 @@ export const MantenerModulosTableCard =
                 handleOpenRegisterModal
               }
               disabled={
+                !canInsert ||
                 isLoading ||
                 allData.length === 0
+              }
+              title={
+                !canInsert
+                  ? getMantenerModulosPermissionMessage(
+                      'insertar'
+                    )
+                  : undefined
               }
               className="mantener-modulos-card__add-button"
             />
@@ -285,6 +304,9 @@ export const MantenerModulosTableCard =
         {isRegisterModalOpen && (
           <ModalRegistrarModulo
             isOpen
+            canInsert={
+              canInsert
+            }
             modulosExistentes={
               allData
             }
@@ -304,6 +326,9 @@ export const MantenerModulosTableCard =
               selectedModuloId
             }
             isOpen
+            canEdit={
+              canEdit
+            }
             moduloId={
               selectedModuloId
             }

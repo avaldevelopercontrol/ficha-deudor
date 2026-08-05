@@ -35,6 +35,10 @@ import ModalEditarPerfil from './ModalEditarPerfil';
 
 import ModalRegistrarPerfil from './ModalRegistrarPerfil';
 
+import {
+  getMantenerPerfilPermissionMessage,
+} from '../utils/mantenerPerfilPermissions';
+
 export const MantenerPerfilTableCard =
   (): ReactNode => {
     const [
@@ -58,6 +62,9 @@ export const MantenerPerfilTableCard =
     const {
       allData,
       paginatedData,
+
+      canInsert,
+      canEdit,
 
       isLoading,
       error,
@@ -107,11 +114,15 @@ export const MantenerPerfilTableCard =
     const handleOpenRegisterModal =
       useCallback(
         () => {
+          if (!canInsert) {
+            return;
+          }
+
           setIsRegisterModalOpen(
             true
           );
         },
-        []
+        [canInsert]
       );
 
     const handleCloseRegisterModal =
@@ -170,6 +181,16 @@ export const MantenerPerfilTableCard =
               icon="+"
               onClick={
                 handleOpenRegisterModal
+              }
+              disabled={
+                !canInsert
+              }
+              title={
+                !canInsert
+                  ? getMantenerPerfilPermissionMessage(
+                      'insertar'
+                    )
+                  : undefined
               }
               className="mantener-perfil-card__add-button"
             />
@@ -283,6 +304,9 @@ export const MantenerPerfilTableCard =
           isOpen={
             isRegisterModalOpen
           }
+          canInsert={
+            canInsert
+          }
           perfilesExistentes={
             allData
           }
@@ -301,6 +325,9 @@ export const MantenerPerfilTableCard =
               selectedPerfilId
             }
             isOpen
+            canEdit={
+              canEdit
+            }
             perfilId={
               selectedPerfilId
             }

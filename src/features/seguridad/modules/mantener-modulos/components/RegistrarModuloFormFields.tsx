@@ -8,6 +8,10 @@ import {
   SelectField,
 } from '@shared/components/ui';
 
+import {
+  SisgesIconPicker,
+} from '@shared/icons/sisges';
+
 import type {
   SelectOption,
 } from '@shared/types';
@@ -78,40 +82,6 @@ export const RegistrarModuloFormFields = ({
       [modulos]
     );
 
-  const iconOptions =
-    useMemo<
-      SelectOption<string>[]
-    >(
-      () => {
-        const uniqueIcons =
-          new Set(
-            modulos
-              .map(
-                (modulo) =>
-                  modulo.icono.trim()
-              )
-              .filter(Boolean)
-          );
-
-        return [
-          ...uniqueIcons,
-        ]
-          .sort(
-            (left, right) =>
-              left.localeCompare(
-                right,
-                'es-PE'
-              )
-          )
-          .map(
-            (icono) => ({
-              id: icono,
-              label: icono,
-            })
-          );
-      },
-      [modulos]
-    );
 
   return (
     <div className="registrar-modulo-form">
@@ -180,33 +150,25 @@ export const RegistrarModuloFormFields = ({
             required
           />
 
-          <SelectField<string>
+          <SisgesIconPicker
+            id="registrar-modulo-icono"
             label={
               MODAL_REGISTRAR_MODULO_LABELS
                 .icono
             }
             layout="inline"
-            value={
-              form.icono
-            }
-            options={
-              iconOptions
-            }
+            value={form.icono}
             placeholder={
               MODAL_REGISTRAR_MODULO_PLACEHOLDERS
                 .icono
             }
-            onChange={(
-              value
-            ) => {
+            onChange={(value) => {
               onChange(
                 'icono',
                 value
               );
             }}
-            error={
-              errors.icono
-            }
+            error={errors.icono}
           />
 
           <SelectField<number>

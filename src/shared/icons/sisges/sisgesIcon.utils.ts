@@ -30,6 +30,21 @@ export const isSisgesIconName = (
   typeof value === 'string' &&
   SISGES_ICON_BY_NAME.has(value as SisgesIconName);
 
+export const isSupportedSisgesIconValue = (
+  value: string | null | undefined
+): boolean => {
+  const normalizedValue = value?.trim() ?? '';
+
+  return (
+    !normalizedValue ||
+    isSisgesIconName(normalizedValue) ||
+    Object.hasOwn(
+      LEGACY_SISGES_ICON_ALIASES,
+      normalizedValue
+    )
+  );
+};
+
 export const normalizeSisgesIconName = (
   value: string | null | undefined
 ): SisgesIconName => {

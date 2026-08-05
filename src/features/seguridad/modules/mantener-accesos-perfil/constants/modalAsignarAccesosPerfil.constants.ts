@@ -27,6 +27,10 @@ export const MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS = {
     'Cargando perfiles y opciones...',
   emptyProfiles:
     'No existen perfiles disponibles para asignar accesos.',
+  allProfilesAssigned:
+    'Todos los perfiles disponibles ya tienen accesos asignados. Utilice la opción Editar para modificarlos.',
+  alreadyAssignedProfile:
+    'El perfil seleccionado ya tiene accesos asignados. Utilice la opción Editar para modificarlos.',
   emptyOptions:
     'No existen opciones disponibles para asignar.',
   retry:

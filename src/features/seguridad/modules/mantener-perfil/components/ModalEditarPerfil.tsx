@@ -52,8 +52,15 @@ import PerfilFormErrorSummary from './PerfilFormErrorSummary';
 
 import RegistrarPerfilFormFields from './RegistrarPerfilFormFields';
 
+import {
+  getMantenerPerfilPermissionMessage,
+} from '../utils/mantenerPerfilPermissions';
+
 interface ModalEditarPerfilProps {
   isOpen:
+    boolean;
+
+  canEdit:
     boolean;
 
   perfilId:
@@ -76,6 +83,7 @@ interface ModalEditarPerfilProps {
 
 export const ModalEditarPerfil = ({
   isOpen,
+  canEdit,
   perfilId,
   perfilesExistentes,
   onClose,
@@ -326,7 +334,15 @@ export const ModalEditarPerfil = ({
                   }
                   disabled={
                     isSubmitting ||
-                    !isDirty
+                    !isDirty ||
+                    !canEdit
+                  }
+                  title={
+                    !canEdit
+                      ? getMantenerPerfilPermissionMessage(
+                          'editar'
+                        )
+                      : undefined
                   }
                   className="registrar-perfil-modal__submit-button"
                 />

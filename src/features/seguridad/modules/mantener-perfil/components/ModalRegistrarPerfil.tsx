@@ -35,8 +35,14 @@ import PerfilFormErrorSummary from './PerfilFormErrorSummary';
 
 import RegistrarPerfilFormFields from './RegistrarPerfilFormFields';
 
+import {
+  getMantenerPerfilPermissionMessage,
+} from '../utils/mantenerPerfilPermissions';
+
 interface ModalRegistrarPerfilProps {
   isOpen: boolean;
+
+  canInsert: boolean;
 
   perfilesExistentes:
     readonly Perfil[];
@@ -51,6 +57,7 @@ interface ModalRegistrarPerfilProps {
 
 export const ModalRegistrarPerfil = ({
   isOpen,
+  canInsert,
   perfilesExistentes,
   onClose,
   onRegistrar,
@@ -189,7 +196,15 @@ export const ModalRegistrarPerfil = ({
               handleSubmit
             }
             disabled={
-              isSubmitting
+              isSubmitting ||
+              !canInsert
+            }
+            title={
+              !canInsert
+                ? getMantenerPerfilPermissionMessage(
+                    'insertar'
+                  )
+                : undefined
             }
             className="registrar-perfil-modal__submit-button"
           />

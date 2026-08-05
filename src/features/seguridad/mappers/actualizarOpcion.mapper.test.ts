@@ -93,6 +93,20 @@ const inactiveChild: Modulo = {
   estado: 'Inactivo',
 };
 
+
+const grandchild = createModule({
+  idModulo: 9,
+  nombre: 'Permisos especiales',
+  codigo: 'mPermisosEspeciales',
+  ruta:
+    'root/mSeguridad/mMantenerPerfil/mPermisosEspeciales/',
+  tipo: 4,
+  idPadre: 6,
+  codigoPadre: 'mMantenerPerfil',
+  padre: 'Mantener perfil',
+  orden: 1,
+});
+
 const inactiveForm = {
   nombre: 'Seguridad',
   descripcion:
@@ -167,6 +181,148 @@ export const suite = defineSuite(
         assert.equal(
           parentRequest.dFechaModifica,
           '2026-08-05T11:18:55.053'
+        );
+      }
+    ),
+    test(
+      'actualiza las rutas de todos los descendientes cuando cambia el código del padre',
+      () => {
+        const requests =
+          buildUpdateOpcionRequests(
+            detail,
+            {
+              nombre: 'Seguridad',
+              descripcion:
+                'Módulo de seguridad',
+              codigo:
+                'mSeguridadAdministrativa',
+              icono: '/candado.ico',
+              padreId: 1,
+              orden: 1,
+              visible: true,
+              estado: true,
+            },
+            [
+              root,
+              parent,
+              child,
+              grandchild,
+            ],
+            '16068',
+            new Date(
+              '2026-08-05T16:18:55.053Z'
+            )
+          );
+
+        assert.deepEqual(
+          requests.map(
+            (request) =>
+              request.nId_Opcion
+          ),
+          [2, 6, 9]
+        );
+
+        const parentRequest =
+          requests[0];
+        const childRequest =
+          requests[1];
+        const grandchildRequest =
+          requests[2];
+
+        assert.equal(
+          parentRequest.sUrlOpcion,
+          'root/mSeguridadAdministrativa/'
+        );
+        assert.equal(
+          childRequest.sUrlOpcion,
+          'root/mSeguridadAdministrativa/mMantenerPerfil/'
+        );
+        assert.equal(
+          grandchildRequest.sUrlOpcion,
+          'root/mSeguridadAdministrativa/mMantenerPerfil/mPermisosEspeciales/'
+        );
+        assert.equal(
+          childRequest.nId_OpcionPadre,
+          2
+        );
+        assert.equal(
+          grandchildRequest.nId_OpcionPadre,
+          6
+        );
+      }
+    ),
+    test(
+      'fuerza orden 0 para Root aunque el formulario contenga una posición residual',
+      () => {
+        const rootDetail: OpcionApi = {
+          nId_Opcion: 1,
+          sCodigoOpcion: 'Root',
+          sNombreOpcion: 'Root',
+          sDescripcionOpcion: '',
+          sUrlOpcion: 'root/',
+          sIcono: '',
+          nTipo: 1,
+          nId_OpcionPadre: 0,
+          nOrden: 0,
+          bVisible: true,
+          bEstado: true,
+          nCrea: 14931,
+          dFechaCrea:
+            '2026-07-31 10:18:23',
+          nModifica: 0,
+          dFechaModifica: '',
+        };
+
+        const requests =
+          buildUpdateOpcionRequests(
+            rootDetail,
+            {
+              nombre: 'Root SISGES',
+              descripcion: '',
+              codigo: 'RootSisges',
+              icono: '',
+              padreId: 0,
+              orden: 999,
+              visible: true,
+              estado: true,
+            },
+            [
+              root,
+              parent,
+              child,
+            ],
+            '16068',
+            new Date(
+              '2026-08-05T16:18:55.053Z'
+            )
+          );
+
+        const rootRequest =
+          requests.find(
+            (request) =>
+              request.nId_Opcion === 1
+          );
+
+        assert.ok(rootRequest);
+        assert.equal(
+          rootRequest.nOrden,
+          0
+        );
+        assert.equal(
+          rootRequest.sUrlOpcion,
+          'RootSisges/'
+        );
+
+        const childRouteRequest =
+          requests.find(
+            (request) =>
+              request.nId_Opcion === 6
+          );
+
+        assert.ok(childRouteRequest);
+        assert.equal(
+          childRouteRequest.sUrlOpcion,
+          'RootSisges/mSeguridad/mMantenerPerfil/'
         );
       }
     ),

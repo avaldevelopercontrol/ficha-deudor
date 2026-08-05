@@ -1,18 +1,9 @@
+import type {
+  SisgesIconName,
+} from '@shared/icons/sisges';
+
 export type MenuModuloIconName =
-  | 'database'
-  | 'dollar-sign'
-  | 'users'
-  | 'bar-chart'
-  | 'file-text'
-  | 'smartphone'
-  | 'monitor'
-  | 'briefcase'
-  | 'target'
-  | 'mail'
-  | 'phone'
-  | 'user'
-  | 'key'
-  | 'shield';
+  SisgesIconName;
 
 export interface MenuModulo {
   key: string;

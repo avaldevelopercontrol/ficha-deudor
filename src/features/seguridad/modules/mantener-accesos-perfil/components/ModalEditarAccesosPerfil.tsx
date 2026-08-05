@@ -32,8 +32,13 @@ import AccesosPerfilTree from './AccesosPerfilTree';
 
 import AsignarAccesosPerfilErrorSummary from './AsignarAccesosPerfilErrorSummary';
 
+import {
+  getMantenerAccesosPerfilPermissionMessage,
+} from '../utils/mantenerAccesosPerfilPermissions';
+
 interface ModalEditarAccesosPerfilProps {
   isOpen: boolean;
+  canEdit: boolean;
   perfil: PerfilOpcionCount;
   onClose: () => void;
   onGuardar: (
@@ -45,6 +50,7 @@ interface ModalEditarAccesosPerfilProps {
 
 export const ModalEditarAccesosPerfil = ({
   isOpen,
+  canEdit,
   perfil,
   onClose,
   onGuardar,
@@ -291,7 +297,15 @@ export const ModalEditarAccesosPerfil = ({
             disabled={
               !isReady ||
               !isDirty ||
-              isSubmitting
+              isSubmitting ||
+              !canEdit
+            }
+            title={
+              !canEdit
+                ? getMantenerAccesosPerfilPermissionMessage(
+                    'editar'
+                  )
+                : undefined
             }
             className="asignar-accesos-perfil-modal__submit-button"
           />

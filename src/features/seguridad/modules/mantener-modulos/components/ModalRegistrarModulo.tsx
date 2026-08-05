@@ -49,8 +49,14 @@ import ModuloFormErrorSummary from './ModuloFormErrorSummary';
 
 import ModuloFormFields from './ModuloFormFields';
 
+import {
+  getMantenerModulosPermissionMessage,
+} from '../utils/mantenerModulosPermissions';
+
 interface ModalRegistrarModuloProps {
   isOpen: boolean;
+
+  canInsert: boolean;
 
   modulosExistentes:
     readonly Modulo[];
@@ -65,6 +71,7 @@ interface ModalRegistrarModuloProps {
 
 export const ModalRegistrarModulo = ({
   isOpen,
+  canInsert,
   modulosExistentes,
   onClose,
   onRegistrar,
@@ -239,9 +246,6 @@ export const ModalRegistrarModulo = ({
           <ModuloFormFields
             form={form}
             errors={errors}
-            modulos={
-              modulosExistentes
-            }
             parentOptions={
               parentOptions
             }
@@ -320,7 +324,15 @@ export const ModalRegistrarModulo = ({
               handleSubmit
             }
             disabled={
-              isSubmitting
+              isSubmitting ||
+              !canInsert
+            }
+            title={
+              !canInsert
+                ? getMantenerModulosPermissionMessage(
+                    'insertar'
+                  )
+                : undefined
             }
             className="registrar-modulo-modal__submit-button"
           />

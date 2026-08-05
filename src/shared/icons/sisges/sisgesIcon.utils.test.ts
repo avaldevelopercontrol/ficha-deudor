@@ -5,6 +5,7 @@ import {
   SISGES_ICON_NAMES,
   getSisgesIconDefinition,
   normalizeSisgesIconName,
+  isSupportedSisgesIconValue,
   searchSisgesIcons,
 } from './index';
 
@@ -37,6 +38,12 @@ export const suite = defineSuite('sisgesIcon.utils', [
     assert.equal(normalizeSisgesIconName('/datos.ico'), 'database');
     assert.equal(normalizeSisgesIconName('ICONO'), 'module-default');
     assert.equal(normalizeSisgesIconName('no-existe'), 'module-default');
+  }),
+  test('acepta claves del catálogo y aliases de migración', () => {
+    assert.equal(isSupportedSisgesIconValue('database-upload'), true);
+    assert.equal(isSupportedSisgesIconValue('/candado.ico'), true);
+    assert.equal(isSupportedSisgesIconValue(''), true);
+    assert.equal(isSupportedSisgesIconValue('icono-inventado'), false);
   }),
   test('no contiene claves duplicadas', () => {
     assert.equal(

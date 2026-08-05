@@ -38,6 +38,7 @@ import {
 
 import {
   ASIGNAR_ACCESOS_PERFIL_INITIAL_FORM,
+  filterUnassignedPerfilOptions,
   getPerfilOpcionBranchAllPermissionsState,
   getPerfilOpcionBranchPermissionStates,
   normalizeAsignarAccesosPerfilForm,
@@ -49,6 +50,7 @@ import {
 
 interface UseAsignarAccesosPerfilModalParams {
   isOpen: boolean;
+  assignedPerfilIds: readonly number[];
   onClose: () => void;
   onRegistrar: (
     data: RegistrarPerfilOpcionesData
@@ -85,6 +87,7 @@ const loadCatalog = async (
 
 export const useAsignarAccesosPerfilModal = ({
   isOpen,
+  assignedPerfilIds,
   onClose,
   onRegistrar,
 }: UseAsignarAccesosPerfilModalParams) => {
@@ -149,15 +152,32 @@ export const useAsignarAccesosPerfilModal = ({
     }
   }, [catalog]);
 
+  const assignedPerfilIdSet = useMemo(
+    () => new Set(assignedPerfilIds),
+    [assignedPerfilIds]
+  );
+
+  const availablePerfiles = useMemo(
+    () =>
+      filterUnassignedPerfilOptions(
+        catalog?.perfiles ?? [],
+        assignedPerfilIds
+      ),
+    [
+      assignedPerfilIds,
+      catalog?.perfiles,
+    ]
+  );
+
   const profileOptions = useMemo(
     () =>
-      (catalog?.perfiles ?? []).map(
+      availablePerfiles.map(
         (perfil) => ({
           id: perfil.idPerfil,
           label: perfil.nombrePerfil,
         })
       ),
-    [catalog?.perfiles]
+    [availablePerfiles]
   );
 
   const activeOption = useMemo(
@@ -360,6 +380,21 @@ export const useAsignarAccesosPerfilModal = ({
       return;
     }
 
+    if (
+      typeof form.perfilId === 'number' &&
+      assignedPerfilIdSet.has(
+        form.perfilId
+      )
+    ) {
+      setErrors({
+        perfilId:
+          MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS
+            .alreadyAssignedProfile,
+      });
+      setSubmitError(null);
+      return;
+    }
+
     const validationErrors =
       validateAsignarAccesosPerfilForm(
         form,
@@ -408,6 +443,7 @@ export const useAsignarAccesosPerfilModal = ({
       );
     }
   }, [
+    assignedPerfilIdSet,
     form,
     onClose,
     onRegistrar,
@@ -422,10 +458,13 @@ export const useAsignarAccesosPerfilModal = ({
       ? catalog.perfiles.length === 0
         ? MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS
             .emptyProfiles
-        : treeState.items.length === 0
+        : availablePerfiles.length === 0
           ? MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS
-              .emptyOptions
-          : null
+              .allProfilesAssigned
+          : treeState.items.length === 0
+            ? MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS
+                .emptyOptions
+            : null
       : null;
 
   const catalogError =

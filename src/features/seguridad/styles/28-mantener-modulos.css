@@ -500,3 +500,283 @@
     justify-self: start;
   }
 }
+
+/* =========================================================
+   SELECTOR VISUAL DE ICONOS SISGES
+   ========================================================= */
+
+.sisges-icon-picker__field-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.sisges-icon-picker {
+  width: 100%;
+  position: relative;
+}
+
+.sisges-icon-picker__trigger {
+  width: 100%;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 7px 10px;
+
+  color: var(--ap-text);
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-300);
+  border-radius: 5px;
+
+  text-align: left;
+  cursor: pointer;
+
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.sisges-icon-picker__trigger:hover:not(:disabled) {
+  border-color: var(--ap-navy);
+  background: var(--ap-gray-50);
+}
+
+.sisges-icon-picker__trigger:focus-visible,
+.sisges-icon-picker__trigger--open {
+  outline: none;
+  border-color: var(--ap-red);
+  box-shadow: 0 0 0 3px rgba(190, 20, 45, 0.12);
+}
+
+.sisges-icon-picker__trigger--error {
+  border-color: var(--ap-red);
+}
+
+.sisges-icon-picker__trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.sisges-icon-picker__selection-icon {
+  width: 32px;
+  height: 32px;
+
+  display: inline-flex;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--ap-navy);
+  background: var(--ap-gray-50);
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 6px;
+}
+
+.sisges-icon-picker__empty-symbol {
+  color: var(--ap-text-muted);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.sisges-icon-picker__selection-copy {
+  min-width: 0;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sisges-icon-picker__selection-label {
+  overflow: hidden;
+
+  color: var(--ap-navy);
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sisges-icon-picker__selection-help {
+  overflow: hidden;
+
+  color: var(--ap-text-muted);
+
+  font-size: 10px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sisges-icon-picker__chevron {
+  flex: 0 0 auto;
+
+  color: var(--ap-text-muted);
+
+  font-size: 8px;
+}
+
+.sisges-icon-picker__panel {
+  margin-top: 8px;
+  padding: 10px;
+
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 7px;
+  box-shadow: 0 12px 28px rgba(26, 37, 64, 0.13);
+}
+
+.sisges-icon-picker__filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  gap: 8px;
+
+  margin-bottom: 10px;
+}
+
+.sisges-icon-picker__search,
+.sisges-icon-picker__category {
+  min-width: 0;
+}
+
+.sisges-icon-picker__search input,
+.sisges-icon-picker__category select {
+  width: 100%;
+  min-height: 34px;
+
+  padding: 6px 9px;
+
+  color: var(--ap-text);
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-300);
+  border-radius: 5px;
+
+  font: inherit;
+  font-size: 11px;
+}
+
+.sisges-icon-picker__search input:focus,
+.sisges-icon-picker__category select:focus {
+  outline: none;
+  border-color: var(--ap-red);
+  box-shadow: 0 0 0 2px rgba(190, 20, 45, 0.1);
+}
+
+.sisges-icon-picker__grid {
+  max-height: 292px;
+
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(88px, 1fr));
+  gap: 7px;
+
+  padding: 2px;
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sisges-icon-picker__option {
+  min-width: 0;
+  min-height: 78px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+
+  padding: 8px 6px;
+
+  color: var(--ap-text);
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  transition:
+    border-color 130ms ease,
+    background 130ms ease,
+    transform 130ms ease;
+}
+
+.sisges-icon-picker__option:hover,
+.sisges-icon-picker__option:focus-visible {
+  outline: none;
+  color: var(--ap-navy);
+  background: var(--ap-gray-50);
+  border-color: var(--ap-navy);
+  transform: translateY(-1px);
+}
+
+.sisges-icon-picker__option--selected {
+  color: var(--ap-red);
+  background: #fff5f6;
+  border-color: var(--ap-red);
+  box-shadow: inset 0 0 0 1px var(--ap-red);
+}
+
+.sisges-icon-picker__option-icon {
+  height: 28px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sisges-icon-picker__option-icon--empty {
+  color: var(--ap-text-muted);
+
+  font-size: 22px;
+  line-height: 1;
+}
+
+.sisges-icon-picker__option-label {
+  width: 100%;
+
+  display: -webkit-box;
+  overflow: hidden;
+
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.sisges-icon-picker__empty-message {
+  margin: 8px 0 2px;
+  padding: 16px;
+
+  color: var(--ap-text-muted);
+  background: var(--ap-gray-50);
+  border-radius: 5px;
+
+  font-size: 11px;
+  text-align: center;
+}
+
+.sisges-icon-picker__required {
+  margin-left: 4px;
+  color: var(--ap-red);
+}
+
+@media (max-width: 620px) {
+  .sisges-icon-picker__filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sisges-icon-picker__grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+}

@@ -413,3 +413,36 @@
     padding: 10px 14px;
   }
 }
+.app-sidebar__status {
+  margin: 4px 8px;
+  padding: 10px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.app-sidebar__status--error {
+  background: rgba(192, 0, 30, 0.16);
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.app-sidebar__nav-item--disabled,
+.app-sidebar__nav-item--disabled:hover {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.32);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.app-sidebar__nav-item--disabled .app-sidebar__arrow {
+  color: rgba(255, 255, 255, 0.24);
+}
+
+.app-sidebar__sub-item--disabled,
+.app-sidebar__sub-item--disabled:hover {
+  color: rgba(255, 255, 255, 0.3);
+  background: transparent;
+  cursor: not-allowed;
+}
