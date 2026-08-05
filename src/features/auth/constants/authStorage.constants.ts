@@ -8,3 +8,9 @@ export const AUTH_STORAGE_KEYS = {
 } as const;
 
 export const AUTH_LOGOUT_CUSTOM_EVENT = 'ficha-deudor:logout';
+
+export const AUTH_STORAGE_VERSION = 1;
+
+export const AUTH_STORAGE_TIMING = {
+  MAX_FUTURE_SKEW_MS: 5 * 60 * 1000,
+} as const;

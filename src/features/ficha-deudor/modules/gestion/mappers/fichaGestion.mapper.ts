@@ -7,7 +7,11 @@ import {
   toApiDateTimeOrNull,
   toRequiredPeruApiDateTime,
 } from '../../../shared/utils/date.utils';
-import { toDecimalNumber, toNumber } from '../../../shared/utils/number.utils';
+import {
+  toDecimalNumber,
+  toOptionalIdOrZero,
+  toRequiredId,
+} from '../../../shared/utils/number.utils';
 import type { DocumentoApi } from '../../../shared/types';
 
 interface BuildCreateGestionPayloadParams {
@@ -101,12 +105,12 @@ const buildGestionIdentityPayload = ({
 >): GestionIdentityPayload => {
   return {
     nId_DocxCobrarOpe: 0,
-    nId_Cliente: toNumber(idCliente),
-    nId_Contrato: toNumber(idContrato),
-    nId_Cartera: toNumber(idCartera),
+    nId_Cliente: toRequiredId(idCliente, 'nId_Cliente'),
+    nId_Contrato: toRequiredId(idContrato, 'nId_Contrato'),
+    nId_Cartera: toRequiredId(idCartera, 'nId_Cartera'),
     nId_DocxCobrars: nIdDocxCobrars,
-    nId_PersDeudor: toNumber(idDeudor),
-    nId_Usuario: toNumber(idUsuario),
+    nId_PersDeudor: toRequiredId(idDeudor, 'nId_PersDeudor'),
+    nId_Usuario: toRequiredId(idUsuario, 'nId_Usuario'),
   };
 };
 
@@ -116,12 +120,15 @@ const buildGestionContactPayload = (
   return {
     cNOMBRECONTACTO: form.nombreContacto.trim(),
     cCARGO: form.cargo.trim(),
-    nNP0: toNumber(form.np0),
-    nNP1: toNumber(form.np1),
-    nNP2: toNumber(form.np2),
-    nESTADOGESTION: toNumber(form.estadoGestion),
+    nNP0: toRequiredId(form.np0, 'nNP0'),
+    nNP1: toRequiredId(form.np1, 'nNP1'),
+    nNP2: toOptionalIdOrZero(form.np2, 'nNP2'),
+    nESTADOGESTION: toRequiredId(
+      form.estadoGestion,
+      'nESTADOGESTION'
+    ),
     cTELEFONO: form.telefono.trim(),
-    nTIPOGESTION: toNumber(form.tipoGestion),
+    nTIPOGESTION: toRequiredId(form.tipoGestion, 'nTIPOGESTION'),
     nASIGNARGESTOR: null,
   };
 };
@@ -173,8 +180,14 @@ const buildGestionClaroPayload = (
   }
 
   return {
-    nESTADOGESTIONCLARO: toNumber(form.estadoGestionClaro),
-    nMOTIVONOPAGO: toNumber(form.motivoNoPago),
+    nESTADOGESTIONCLARO: toRequiredId(
+      form.estadoGestionClaro,
+      'nESTADOGESTIONCLARO'
+    ),
+    nMOTIVONOPAGO: toRequiredId(
+      form.motivoNoPago,
+      'nMOTIVONOPAGO'
+    ),
   };
 };
 

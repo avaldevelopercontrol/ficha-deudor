@@ -1,6 +1,8 @@
 import { apiClient } from '@shared/api/apiClient';
 import type { ApiResponseSimple } from '@shared/types/indexApi';
-import { assertApiSuccess } from '../../../shared/utils/apiResponse.utils';
+import {
+  unwrapApiObjectResponse,
+} from '../../../shared/utils/apiResponse.utils';
 import type {
   CabeceraInfoApi,
   CabeceraInfo,
@@ -28,12 +30,10 @@ export async function fetchCabeceraHeader(
     }
   );
 
-  assertApiSuccess(
+  const api = unwrapApiObjectResponse<CabeceraInfoApi>(
     result,
     'Error cargando información de cabecera'
   );
-
-  const api = result.response;
 
   return {
     zona: api.ciudad,
@@ -62,12 +62,10 @@ export async function fetchDeudorHeader(
     }
   );
 
-  assertApiSuccess(
+  const api = unwrapApiObjectResponse<DeudorInfoApi>(
     result,
     'Error cargando información del deudor'
   );
-
-  const api = result.response;
 
   return {
     nombreRazonSocial:

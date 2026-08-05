@@ -4,7 +4,7 @@ import {
 
 import {
   useAuth,
-} from '@features/auth/contexts/authContextValue';
+} from '@features/auth/hooks/useAuth';
 
 import {
   createUsuario,

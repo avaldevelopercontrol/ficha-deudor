@@ -1,7 +1,12 @@
 import { apiClient } from '@shared/api/apiClient';
-import type { Pago, PagoListResponse } from '../types/pago.types';
+import type { ApiResponse } from '@shared/types/indexApi';
+import {
+  unwrapApiArrayResponse,
+} from '../../../shared/utils/apiResponse.utils';
+import type { Pago, PagoApi } from '../types/pago.types';
 
 const BASE_GESTION = '/v1/Gestion';
+const PAGOS_ERROR_MESSAGE = 'Error cargando pagos';
 
 export async function fetchPagosByDeudor(
   id_cliente: string,
@@ -17,16 +22,17 @@ export async function fetchPagosByDeudor(
     PageSize: '1000',
   });
 
-  const result = await apiClient<PagoListResponse>(
+  const result = await apiClient<ApiResponse<PagoApi[]>>(
     `${BASE_GESTION}/GetGestionPagosDeudor?${params.toString()}`,
     { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando pagos');
-  }
+  const pagos = unwrapApiArrayResponse<PagoApi>(
+    result,
+    PAGOS_ERROR_MESSAGE
+  );
 
-  return result.response.map((item) => ({
+  return pagos.map((item) => ({
     nro: item.nro,
     codigoCliente: item.codigoCliente || '—',
     nroDocumento: item.nroDocumento || '—',

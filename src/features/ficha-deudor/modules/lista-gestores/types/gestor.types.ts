@@ -16,20 +16,10 @@ export interface Gestor {
   codRecaudacion: string;
 }
 
-export interface GestoresApiResponse {
-  code: string;
-  message: string;
-  messageUser: string;
-  statusCode: number;
-  pageNumber: number;
-  pageSize: number;
-  totalRecords: number;
-  totalPages: number;
-  response: GestorApi[];
-}
-
 export interface GestorSeleccionadoMessage {
+  version: 1;
   type: 'GESTOR_SELECTED';
+  popupId: string;
   payload: {
     id: string;
     nombre: string;

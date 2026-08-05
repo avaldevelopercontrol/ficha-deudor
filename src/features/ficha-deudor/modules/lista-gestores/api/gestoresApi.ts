@@ -1,9 +1,15 @@
 import { apiClient } from '@shared/api/apiClient';
+import type { ApiResponse } from '@shared/types/indexApi';
+import {
+  unwrapApiArrayResponse,
+} from '../../../shared/utils/apiResponse.utils';
 import type {
   Gestor,
   GestorApi,
-  GestoresApiResponse,
 } from '../types/gestor.types';
+
+const GESTORES_ERROR_MESSAGE =
+  'Error cargando gestores';
 
 const mapGestor = (item: GestorApi): Gestor => ({
   id: String(item.id ?? ''),
@@ -24,7 +30,7 @@ export async function fetchGestoresByCliente(
     PageSize: '1000',
   });
 
-  const data = await apiClient<GestoresApiResponse>(
+  const result = await apiClient<ApiResponse<GestorApi[]>>(
     `/v1/Usuario/GetUsuariosGrupo?${params.toString()}`,
     {
       method: 'GET',
@@ -32,7 +38,8 @@ export async function fetchGestoresByCliente(
     }
   );
 
-  return Array.isArray(data.response)
-    ? data.response.map(mapGestor)
-    : [];
+  return unwrapApiArrayResponse<GestorApi>(
+    result,
+    GESTORES_ERROR_MESSAGE
+  ).map(mapGestor);
 }

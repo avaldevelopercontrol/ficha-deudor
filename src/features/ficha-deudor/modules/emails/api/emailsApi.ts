@@ -5,10 +5,17 @@ import type {
   ApiResponseSimple,
 } from '@shared/types/indexApi';
 
-import { assertApiSuccess } from '../../../shared/utils/apiResponse.utils';
+import {
+  unwrapApiArrayResponse,
+  unwrapApiObjectResponse,
+} from '../../../shared/utils/apiResponse.utils';
+
+import {
+  buildCreateEmailRequest,
+  buildUpdateEmailRequest,
+} from '../mappers/emailRequest.mapper';
 
 import type {
-  CreateEmailRequest,
   CreateEmailResponse,
   Email,
   EmailApi,
@@ -17,7 +24,6 @@ import type {
   EmailFormData,
   EmailStatus,
   EmailStatusApi,
-  UpdateEmailRequest,
   UpdateEmailResponse,
 } from '../types/email.types';
 
@@ -61,16 +67,10 @@ export async function fetchEmailsByDeudor(
       }
     );
 
-  assertApiSuccess(
+  const emails = unwrapApiArrayResponse<EmailApi>(
     result,
     EMAIL_API_ERROR_MESSAGES.list
   );
-
-  const emails = Array.isArray(
-    result.response
-  )
-    ? result.response
-    : [];
 
   return emails.map((item) => ({
     id: String(item.nId_PersEmail),
@@ -102,16 +102,10 @@ export async function fetchEmailStatuses(
       }
     );
 
-  assertApiSuccess(
+  const statuses = unwrapApiArrayResponse<EmailStatusApi>(
     result,
     EMAIL_API_ERROR_MESSAGES.statuses
   );
-
-  const statuses = Array.isArray(
-    result.response
-  )
-    ? result.response
-    : [];
 
   return statuses.map((item) => ({
     id: String(
@@ -129,45 +123,12 @@ export async function createEmail(
   id_usuario: string,
   data: EmailFormData
 ): Promise<CreateEmailResponse> {
-  const now = new Date().toISOString();
-
-  const body: CreateEmailRequest = {
-    nId_PersDeudor:
-      Number(id_deudor) || 0,
-
-    cPers_Email:
-      data.email,
-
-    bEstado:
-      data.estado,
-
-    cEmail_Coment:
-      data.comentario,
-
-    cEmail_Contacto:
-      data.contacto,
-
-    nId_Cliente:
-      Number(id_cliente) || 0,
-
-    bBaseCliente:
-      false,
-
-    nId_UsuarioAct:
-      Number(id_usuario) || 0,
-
-    dFecRegistro:
-      now,
-
-    dFecActualizacion:
-      now,
-
-    nEmail_Prioridad:
-      Number(data.prioridad) || 0,
-
-    nId_PersEmailOpe:
-      Number(data.status) || 0,
-  };
+  const body = buildCreateEmailRequest(
+    id_cliente,
+    id_deudor,
+    id_usuario,
+    data
+  );
 
   const result =
     await apiClient<
@@ -180,12 +141,10 @@ export async function createEmail(
       }
     );
 
-  assertApiSuccess(
+  return unwrapApiObjectResponse<CreateEmailResponse>(
     result,
     EMAIL_API_ERROR_MESSAGES.create
   );
-
-  return result.response;
 }
 
 export async function fetchEmailById(
@@ -202,12 +161,10 @@ export async function fetchEmailById(
       }
     );
 
-  assertApiSuccess(
+  return unwrapApiObjectResponse<EmailByIdApi>(
     result,
     EMAIL_API_ERROR_MESSAGES.byId
   );
-
-  return result.response;
 }
 
 export async function updateEmail(
@@ -218,46 +175,14 @@ export async function updateEmail(
   data: EmailEditFormData,
   dFecRegistroOriginal: string
 ): Promise<UpdateEmailResponse> {
-  const body: UpdateEmailRequest = {
-    nId_PersEmail:
-      Number(id_email) || 0,
-
-    nId_PersDeudor:
-      Number(id_deudor) || 0,
-
-    cPers_Email:
-      data.email,
-
-    bEstado:
-      data.estado,
-
-    cEmail_Coment:
-      data.comentario,
-
-    cEmail_Contacto:
-      data.contacto,
-
-    nId_Cliente:
-      Number(id_cliente) || 0,
-
-    bBaseCliente:
-      false,
-
-    nId_UsuarioAct:
-      Number(id_usuario) || 0,
-
-    dFecRegistro:
-      dFecRegistroOriginal,
-
-    dFecActualizacion:
-      new Date().toISOString(),
-
-    nEmail_Prioridad:
-      Number(data.prioridad) || 0,
-
-    nId_PersEmailOpe:
-      Number(data.status) || 0,
-  };
+  const body = buildUpdateEmailRequest(
+    id_cliente,
+    id_deudor,
+    id_usuario,
+    id_email,
+    data,
+    dFecRegistroOriginal
+  );
 
   const result =
     await apiClient<
@@ -270,10 +195,8 @@ export async function updateEmail(
       }
     );
 
-  assertApiSuccess(
+  return unwrapApiObjectResponse<UpdateEmailResponse>(
     result,
     EMAIL_API_ERROR_MESSAGES.update
   );
-
-  return result.response;
 }

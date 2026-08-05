@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AUTH_ROUTES } from '../../../features/auth/constants';
-import { useAuth } from '../../../features/auth/contexts/authContextValue';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import '../../styles/components/app-header.css';
 
 interface AppHeaderProps {

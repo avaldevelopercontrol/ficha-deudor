@@ -1,60 +1,94 @@
 import {
   FICHA_DEUDOR_POPUP_REGISTRY,
 } from './popupRegistry';
+import {
+  isValidPopupId,
+} from '@shared/utils/popupId.utils';
 
-import type {
-  FichaDeudorPopupContext,
-  FichaDeudorPopupType,
+import {
+  isFichaDeudorPopupContext,
+  isFichaDeudorPopupType,
+  type FichaDeudorPopupContext,
+  type FichaDeudorPopupType,
 } from './popupContext.types';
 
 const POPUP_WINDOW_PREFIX = 'avalperu-popup';
-const POPUP_CONTEXT_REQUEST = 'AVALPERU_POPUP_CONTEXT_REQUEST';
-const POPUP_CONTEXT_RESPONSE = 'AVALPERU_POPUP_CONTEXT_RESPONSE';
+const POPUP_CONTEXT_REQUEST =
+  'AVALPERU_POPUP_CONTEXT_REQUEST';
+const POPUP_CONTEXT_RESPONSE =
+  'AVALPERU_POPUP_CONTEXT_RESPONSE';
+const POPUP_CONTEXT_REQUEST_TIMEOUT_MS = 60_000;
+
+export const POPUP_MESSAGING_PROTOCOL_VERSION = 1;
+
+export interface PopupWindowDescriptor {
+  popupType: FichaDeudorPopupType;
+  popupId: string;
+}
 
 export interface PopupContextRequestMessage {
+  version: typeof POPUP_MESSAGING_PROTOCOL_VERSION;
   type: typeof POPUP_CONTEXT_REQUEST;
   popupId: string;
+  popupType: FichaDeudorPopupType;
 }
 
 export interface PopupContextResponseMessage<
   T extends FichaDeudorPopupType = FichaDeudorPopupType,
 > {
+  version: typeof POPUP_MESSAGING_PROTOCOL_VERSION;
   type: typeof POPUP_CONTEXT_RESPONSE;
   popupId: string;
   popupType: T;
   context: FichaDeudorPopupContext<T>;
 }
 
+const isRecord = (
+  value: unknown
+): value is Record<string, unknown> => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+};
+
 export const isPopupContextRequestMessage = (
   value: unknown
 ): value is PopupContextRequestMessage => {
-  if (!value || typeof value !== 'object') {
+  if (!isRecord(value)) {
     return false;
   }
 
-  const message = value as Partial<PopupContextRequestMessage>;
-
   return (
-    message.type === POPUP_CONTEXT_REQUEST &&
-    typeof message.popupId === 'string'
+    value.version ===
+      POPUP_MESSAGING_PROTOCOL_VERSION &&
+    value.type === POPUP_CONTEXT_REQUEST &&
+    isValidPopupId(value.popupId) &&
+    isFichaDeudorPopupType(value.popupType)
   );
 };
 
 export const isPopupContextResponseMessage = (
   value: unknown
 ): value is PopupContextResponseMessage => {
-  if (!value || typeof value !== 'object') {
+  if (!isRecord(value)) {
     return false;
   }
 
-  const message = value as Partial<PopupContextResponseMessage>;
+  if (
+    value.version !==
+      POPUP_MESSAGING_PROTOCOL_VERSION ||
+    value.type !== POPUP_CONTEXT_RESPONSE ||
+    !isValidPopupId(value.popupId) ||
+    !isFichaDeudorPopupType(value.popupType)
+  ) {
+    return false;
+  }
 
-  return (
-    message.type === POPUP_CONTEXT_RESPONSE &&
-    typeof message.popupId === 'string' &&
-    typeof message.popupType === 'string' &&
-    typeof message.context === 'object' &&
-    message.context !== null
+  return isFichaDeudorPopupContext(
+    value.popupType,
+    value.context
   );
 };
 
@@ -63,7 +97,9 @@ const createPopupId = (): string => {
     return crypto.randomUUID();
   }
 
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`;
 };
 
 export const buildPopupWindowName = (
@@ -73,12 +109,35 @@ export const buildPopupWindowName = (
   return `${POPUP_WINDOW_PREFIX}:${popupType}:${popupId}`;
 };
 
+export const parsePopupWindowName = (
+  windowName: string
+): PopupWindowDescriptor | null => {
+  const parts = windowName.split(':');
+
+  if (parts.length !== 3) {
+    return null;
+  }
+
+  const [prefix, popupType, popupId] = parts;
+
+  if (
+    prefix !== POPUP_WINDOW_PREFIX ||
+    !isFichaDeudorPopupType(popupType) ||
+    !isValidPopupId(popupId)
+  ) {
+    return null;
+  }
+
+  return {
+    popupType,
+    popupId,
+  };
+};
+
 export const getPopupIdFromWindowName = (
   windowName: string
 ): string | null => {
-  const [, , popupId] = windowName.split(':');
-
-  return popupId || null;
+  return parsePopupWindowName(windowName)?.popupId ?? null;
 };
 
 const POPUP_MAX_WIDTH_RATIO = 0.92;
@@ -102,7 +161,9 @@ const buildPopupFeatures = (
   const maximumWidth = Math.max(
     100,
     Math.min(
-      Math.floor(availableWidth * POPUP_MAX_WIDTH_RATIO),
+      Math.floor(
+        availableWidth * POPUP_MAX_WIDTH_RATIO
+      ),
       availableWidth - POPUP_EDGE_MARGIN * 2
     )
   );
@@ -110,7 +171,9 @@ const buildPopupFeatures = (
   const maximumHeight = Math.max(
     100,
     Math.min(
-      Math.floor(availableHeight * POPUP_MAX_HEIGHT_RATIO),
+      Math.floor(
+        availableHeight * POPUP_MAX_HEIGHT_RATIO
+      ),
       availableHeight - POPUP_EDGE_MARGIN * 2
     )
   );
@@ -161,6 +224,12 @@ export const openFichaDeudorPopup = <
   popupType: T,
   context: FichaDeudorPopupContext<T>
 ): Window | null => {
+  if (!isFichaDeudorPopupContext(popupType, context)) {
+    throw new Error(
+      `El contexto del popup ${popupType} no es válido.`
+    );
+  }
+
   const config = FICHA_DEUDOR_POPUP_REGISTRY[popupType];
   const popupId = createPopupId();
 
@@ -173,6 +242,20 @@ export const openFichaDeudorPopup = <
   if (!popupWindow) {
     return null;
   }
+
+  let cleanupTimer: number | null = null;
+
+  const cleanup = (): void => {
+    window.removeEventListener(
+      'message',
+      handleContextRequest
+    );
+
+    if (cleanupTimer !== null) {
+      window.clearTimeout(cleanupTimer);
+      cleanupTimer = null;
+    }
+  };
 
   const handleContextRequest = (
     event: MessageEvent<unknown>
@@ -189,11 +272,15 @@ export const openFichaDeudorPopup = <
       return;
     }
 
-    if (event.data.popupId !== popupId) {
+    if (
+      event.data.popupId !== popupId ||
+      event.data.popupType !== popupType
+    ) {
       return;
     }
 
     const response: PopupContextResponseMessage<T> = {
+      version: POPUP_MESSAGING_PROTOCOL_VERSION,
       type: POPUP_CONTEXT_RESPONSE,
       popupId,
       popupType,
@@ -205,15 +292,17 @@ export const openFichaDeudorPopup = <
       window.location.origin
     );
 
-    window.removeEventListener(
-      'message',
-      handleContextRequest
-    );
+    cleanup();
   };
 
   window.addEventListener(
     'message',
     handleContextRequest
+  );
+
+  cleanupTimer = window.setTimeout(
+    cleanup,
+    POPUP_CONTEXT_REQUEST_TIMEOUT_MS
   );
 
   popupWindow.location.href = new URL(
@@ -225,11 +314,18 @@ export const openFichaDeudorPopup = <
 };
 
 export const requestPopupContext = (
+  popupType: FichaDeudorPopupType,
   popupId: string
 ): void => {
+  if (!isValidPopupId(popupId)) {
+    return;
+  }
+
   const request: PopupContextRequestMessage = {
+    version: POPUP_MESSAGING_PROTOCOL_VERSION,
     type: POPUP_CONTEXT_REQUEST,
     popupId,
+    popupType,
   };
 
   window.opener?.postMessage(

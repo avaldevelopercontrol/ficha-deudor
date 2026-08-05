@@ -32,7 +32,10 @@ import {
   mapGestionPaletaRespuesta,
   mapGestionTipos,
 } from '../mappers/fichaGestionCatalogos.mapper';
-import { assertApiSuccess } from '../../../shared/utils/apiResponse.utils';
+import {
+  unwrapApiArrayResponse,
+  unwrapApiObjectResponse,
+} from '../../../shared/utils/apiResponse.utils';
 
 
 export async function fetchGestionEstados(
@@ -48,9 +51,12 @@ export async function fetchGestionEstados(
     { signal }
   );
 
-  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.ESTADOS);
+  const estados = unwrapApiArrayResponse<GestionEstadoApi>(
+    result,
+    FICHA_GESTION_ERROR_MESSAGES.ESTADOS
+  );
 
-  return mapGestionEstados(result.response);
+  return mapGestionEstados(estados);
 }
 
 export async function fetchGestionTipos(
@@ -61,9 +67,12 @@ export async function fetchGestionTipos(
     { signal }
   );
 
-  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.TIPOS);
+  const tipos = unwrapApiArrayResponse<GestionTipoApi>(
+    result,
+    FICHA_GESTION_ERROR_MESSAGES.TIPOS
+  );
 
-  return mapGestionTipos(result.response);
+  return mapGestionTipos(tipos);
 }
 
 export async function fetchGestionPaletaRespuesta(
@@ -83,9 +92,12 @@ export async function fetchGestionPaletaRespuesta(
     { signal }
   );
 
-  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.PALETA_RESPUESTA);
+  const respuestas = unwrapApiArrayResponse<GestionPaletaRespuestaApi>(
+    result,
+    FICHA_GESTION_ERROR_MESSAGES.PALETA_RESPUESTA
+  );
 
-  return mapGestionPaletaRespuesta(result.response);
+  return mapGestionPaletaRespuesta(respuestas);
 }
 
 export async function fetchGestionEstadoGestionClaro(
@@ -103,9 +115,12 @@ export async function fetchGestionEstadoGestionClaro(
     { signal }
   );
 
-  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.ESTADO_GESTION_CLARO);
+  const estadosClaro = unwrapApiArrayResponse<GestionEstadoClaroApi>(
+    result,
+    FICHA_GESTION_ERROR_MESSAGES.ESTADO_GESTION_CLARO
+  );
 
-  return mapGestionEstadoClaro(result.response);
+  return mapGestionEstadoClaro(estadosClaro);
 }
 
 export async function fetchGestionMotivoNoPago(
@@ -123,9 +138,12 @@ export async function fetchGestionMotivoNoPago(
     { signal }
   );
 
-  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.MOTIVO_NO_PAGO);
+  const motivos = unwrapApiArrayResponse<GestionMotivoNoPagoApi>(
+    result,
+    FICHA_GESTION_ERROR_MESSAGES.MOTIVO_NO_PAGO
+  );
 
-  return mapGestionMotivoNoPago(result.response);
+  return mapGestionMotivoNoPago(motivos);
 }
 
 export async function createGestionOpeGesContratos(
@@ -141,7 +159,10 @@ export async function createGestionOpeGesContratos(
     }
   );
 
-  assertApiSuccess(result, FICHA_GESTION_ERROR_MESSAGES.CREATE_GESTION);
+  unwrapApiArrayResponse<CreateGestionOpeGesContratosResponse>(
+    result,
+    FICHA_GESTION_ERROR_MESSAGES.CREATE_GESTION
+  );
 
   return result;
 }
@@ -164,7 +185,7 @@ export async function createAgenda(
       }
     );
 
-  assertApiSuccess(
+  unwrapApiObjectResponse<CreateAgendaResponse>(
     result,
     FICHA_GESTION_ERROR_MESSAGES.CREATE_AGENDA
   );

@@ -1,7 +1,28 @@
 import type { FeedbackMessageVariant } from '@shared/components/ui';
 import type { SelectOption } from '@shared/types';
 import type { PaletaRespuestaOption } from '../../../shared/utils/selectOptions.utils';
-import type { GestionForm } from '../../../shared/types/gestion.types';
+
+export interface GestionForm {
+  nombreContacto: string;
+  cargo: string;
+  np0: string;
+  np1: string;
+  np2: string;
+  estadoGestion: string;
+  telefono: string;
+  tipoGestion: string;
+  gestorId: string;
+  gestorNombre: string;
+  fechaCompromisoPago: string;
+  compromisoSoles: string;
+  compromisoUSD: string;
+  fechaNuevaGestion: string;
+  horaNuevaGestion: string;
+  fechaGestion: string;
+  horaGestion: string;
+  gestionTerminada: boolean;
+  observaciones: string;
+}
 
 // ─── GESTIÓN: Estado de Gestión ───
 export interface GestionEstadoApi {

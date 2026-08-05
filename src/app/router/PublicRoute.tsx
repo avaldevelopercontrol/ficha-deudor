@@ -1,11 +1,13 @@
 import { Navigate, Outlet } from 'react-router-dom';
+
 import { AUTH_ROUTES } from '../../features/auth/constants';
-import { useAuth } from '../../features/auth/contexts/authContextValue';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { hasPrivateRouteAccess } from '../../features/auth/utils';
 
 export function PublicRoute() {
-  const { usuario, clienteSeleccionada } = useAuth();
+  const auth = useAuth();
 
-  if (usuario && clienteSeleccionada) {
+  if (hasPrivateRouteAccess(auth)) {
     return <Navigate to={AUTH_ROUTES.MENU_MODULOS} replace />;
   }
 

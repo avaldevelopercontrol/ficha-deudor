@@ -28,7 +28,7 @@ import RegistrarUsuarioFormFields from './RegistrarUsuarioFormFields';
 
 import {
   useAuth,
-} from '@features/auth/contexts/authContextValue';
+} from '@features/auth/hooks/useAuth';
 
 import {
   useRegistrarUsuarioCatalogos,

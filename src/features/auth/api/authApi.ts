@@ -1,5 +1,12 @@
 import { env } from '@app/config/env';
 import { apiClient } from '@shared/api/apiClient';
+import { isAbortError } from '@shared/utils/asyncResource.utils';
+import { toRequiredId } from '@shared/utils/number.utils';
+import {
+  ensureObjectResponse,
+  getApiErrorMessage,
+  isSuccessfulStatusCode,
+} from '@shared/api/apiResponse.utils';
 
 import {
   AUTH_API_ENDPOINTS,
@@ -7,7 +14,15 @@ import {
 } from '../constants/authApi.constants';
 import { mapUsuarioApiToUsuario } from '../mappers';
 import { mockGetClientesByUsuario, mockLogin } from '../mocks';
-import { buildLoginErrorResponse } from '../utils/authResponse.utils';
+import {
+  buildLoginErrorResponse,
+  getLoginRequestErrorMessage,
+} from '../utils/authResponse.utils';
+import { buildLoginEndpoint } from '../utils/loginRequest.utils';
+import {
+  isLoginUsuarioApi,
+  normalizeClientesResponse,
+} from '../validations';
 import type {
   ClientesResponse,
   LoginPayload,
@@ -15,37 +30,44 @@ import type {
   LoginUsuarioApiResponse,
 } from '../types';
 
-const buildLoginParams = (payload: LoginPayload): URLSearchParams => {
-  return new URLSearchParams({
-    cUsr_Login: payload.username.trim(),
-    cUsr_Pass: payload.password,
-  });
-};
-
 const getLoginApiMessage = (
-  result: LoginUsuarioApiResponse,
+  result: Pick<LoginUsuarioApiResponse, 'message' | 'messageUser'>,
   fallback: string
-): string => {
-  return result.messageUser || result.message || fallback;
-};
+): string => getApiErrorMessage(result, fallback);
+
+const parseLoginResponse = (
+  result: unknown
+): LoginUsuarioApiResponse =>
+  ensureObjectResponse<LoginUsuarioApiResponse>(
+    result,
+    AUTH_API_MESSAGES.LOGIN_INVALID_RESPONSE
+  );
 
 export const login = async (
-  payload: LoginPayload
+  payload: LoginPayload,
+  signal?: AbortSignal
 ): Promise<LoginResponse> => {
   if (env.useMocks) {
     return mockLogin(payload);
   }
 
-  const params = buildLoginParams(payload);
-
   try {
-    const result = await apiClient<LoginUsuarioApiResponse>(
-      `${AUTH_API_ENDPOINTS.LOGIN_USUARIO}?${params.toString()}`
+    const result = parseLoginResponse(
+      await apiClient<unknown>(
+        buildLoginEndpoint(AUTH_API_ENDPOINTS.LOGIN_USUARIO, payload),
+        {
+          method: 'GET',
+          signal,
+          cache: 'no-store',
+          referrerPolicy: 'no-referrer',
+        }
+      )
     );
 
-    const usuarioApi = result.response;
-
-    if (result.statusCode !== 200 || result.code !== '00' || !usuarioApi) {
+    if (
+      !isSuccessfulStatusCode(result.statusCode) ||
+      result.code !== '00'
+    ) {
       return buildLoginErrorResponse(
         getLoginApiMessage(
           result,
@@ -54,29 +76,67 @@ export const login = async (
       );
     }
 
-    if (!usuarioApi.bEstado) {
-      return buildLoginErrorResponse(AUTH_API_MESSAGES.LOGIN_INACTIVE_USER);
+    if (result.response === null) {
+      return buildLoginErrorResponse(
+        getLoginApiMessage(
+          result,
+          AUTH_API_MESSAGES.LOGIN_INVALID_CREDENTIALS
+        )
+      );
+    }
+
+    if (!isLoginUsuarioApi(result.response)) {
+      return buildLoginErrorResponse(
+        AUTH_API_MESSAGES.LOGIN_INVALID_RESPONSE
+      );
+    }
+
+    if (!result.response.bEstado) {
+      return buildLoginErrorResponse(
+        AUTH_API_MESSAGES.LOGIN_INACTIVE_USER
+      );
     }
 
     return {
       success: true,
-      message: getLoginApiMessage(result, AUTH_API_MESSAGES.LOGIN_SUCCESS),
-      usuario: mapUsuarioApiToUsuario(usuarioApi),
+      message: getLoginApiMessage(
+        result,
+        AUTH_API_MESSAGES.LOGIN_SUCCESS
+      ),
+      usuario: mapUsuarioApiToUsuario(result.response),
     };
   } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+
     return buildLoginErrorResponse(
-      error instanceof Error
-        ? error.message
-        : AUTH_API_MESSAGES.LOGIN_UNEXPECTED_ERROR
+      getLoginRequestErrorMessage(error)
     );
   }
 };
 
 export async function fetchClientesByUsuario(
-  idUsuario: string
+  idUsuario: string,
+  signal?: AbortSignal
 ): Promise<ClientesResponse> {
+  let normalizedUsuarioId: string;
+
+  try {
+    normalizedUsuarioId = String(
+      toRequiredId(idUsuario, 'id_usuario')
+    );
+  } catch {
+    throw new Error(AUTH_API_MESSAGES.CLIENTES_INVALID_USER);
+  }
+
   if (env.useMocks || env.useClientesMock) {
-    return mockGetClientesByUsuario(idUsuario);
+    return normalizeClientesResponse(
+      await mockGetClientesByUsuario(
+        normalizedUsuarioId,
+        signal
+      )
+    );
   }
 
   throw new Error(AUTH_API_MESSAGES.CLIENTES_ENDPOINT_NOT_CONFIGURED);

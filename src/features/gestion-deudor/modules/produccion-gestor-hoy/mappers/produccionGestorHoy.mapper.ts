@@ -1,3 +1,7 @@
+import {
+  normalizeApiCollectionResponse,
+} from '@shared/api/apiResponse.utils';
+
 import type {
   GetProduccionGestorHoyResponse,
   ProduccionGestorHoyApi,
@@ -14,22 +18,14 @@ const toNumber = (
     : 0;
 };
 
-const normalizeResponse = (
-  response:
-    GetProduccionGestorHoyResponse['response']
-): ProduccionGestorHoyApi[] => {
-  if (Array.isArray(response)) {
-    return response;
-  }
-
-  return response ? [response] : [];
-};
-
 export const mapProduccionGestorHoyResponse = (
   result: GetProduccionGestorHoyResponse
 ): ProduccionGestorHoyRow[] => {
-  return normalizeResponse(
-    result.response
+  return normalizeApiCollectionResponse<
+    ProduccionGestorHoyApi
+  >(
+    result.response,
+    'No se pudo cargar la producción del gestor por horas.'
   ).map((item) => ({
     hora: String(
       item.hora ?? ''

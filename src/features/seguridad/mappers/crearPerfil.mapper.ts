@@ -1,3 +1,7 @@
+import {
+  getCurrentPeruDateTime,
+} from '@shared/utils/peruDateTime.utils';
+
 import type {
   RegistrarPerfilFormData,
 } from '../modules/mantener-perfil/types/registrarPerfil.types';
@@ -7,7 +11,8 @@ import type {
 } from '../types/crearPerfil.types';
 
 export const buildCreatePerfilRequest = (
-  form: RegistrarPerfilFormData
+  form: RegistrarPerfilFormData,
+  currentDate = new Date()
 ): CreatePerfilRequestApi => ({
   nid_perfil: 0,
 
@@ -16,7 +21,9 @@ export const buildCreatePerfilRequest = (
    * exacto de realizar el registro.
    */
   per_Fecha:
-    new Date().toISOString(),
+    getCurrentPeruDateTime(
+      currentDate
+    ),
 
   per_Nombre:
     form.nombrePerfil.trim(),

@@ -1,4 +1,5 @@
 import type { FichaDeudorParams } from '../types/fichaDeudor.types';
+import { isPositiveIntegerValue } from './number.utils';
 
 const FICHA_DEUDOR_SESSION_KEY = 'ficha_deudor_active_context';
 const FICHA_DEUDOR_SESSION_VERSION = 1;
@@ -12,6 +13,13 @@ const isNonEmptyString = (value: unknown): value is string => {
   return typeof value === 'string' && value.trim().length > 0;
 };
 
+const isValidIdParam = (value: unknown): value is string => {
+  return (
+    isNonEmptyString(value) &&
+    isPositiveIntegerValue(value)
+  );
+};
+
 export const isFichaDeudorParams = (
   value: unknown
 ): value is FichaDeudorParams => {
@@ -22,11 +30,11 @@ export const isFichaDeudorParams = (
   const params = value as Partial<FichaDeudorParams>;
 
   return (
-    isNonEmptyString(params.id_cliente) &&
-    isNonEmptyString(params.id_cartera) &&
-    isNonEmptyString(params.id_deudor) &&
-    isNonEmptyString(params.id_contrato) &&
-    isNonEmptyString(params.id_usuario) &&
+    isValidIdParam(params.id_cliente) &&
+    isValidIdParam(params.id_cartera) &&
+    isValidIdParam(params.id_deudor) &&
+    isValidIdParam(params.id_contrato) &&
+    isValidIdParam(params.id_usuario) &&
     isNonEmptyString(params.fecha_inicio_gestion)
   );
 };

@@ -80,9 +80,16 @@ export function useTelefonosReferenciados(
     id_deudor
   );
 
-  const fetchTelefonosReferenciadosData = useCallback(() => {
-    return fetchTelefonosReferenciados(id_cliente, id_deudor);
-  }, [id_cliente, id_deudor]);
+  const fetchTelefonosReferenciadosData = useCallback(
+    (signal: AbortSignal) => {
+      return fetchTelefonosReferenciados(
+        id_cliente,
+        id_deudor,
+        signal
+      );
+    },
+    [id_cliente, id_deudor]
+  );
 
   const {
     allData,

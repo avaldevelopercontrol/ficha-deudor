@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { CLIENTE_CLARO_ID } from '../constants/fichaGestion.constants';
 import type { PaletaRespuestaOption } from '../../../shared/utils/selectOptions.utils';
+import { toNumberOrZero } from '../../../shared/utils/number.utils';
 
 interface UseFichaGestionDerivedValuesParams {
   idCliente: string;
@@ -38,7 +39,7 @@ export const useFichaGestionDerivedValues = ({
       (option) => String(option.id) === String(np1)
     );
 
-    return Number(np1Seleccionado?.idTipoContacto ?? 0);
+    return toNumberOrZero(np1Seleccionado?.idTipoContacto);
   }, [np1Options, np1]);
 
   return {

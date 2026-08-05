@@ -17,6 +17,7 @@ import type {
 import { useAutoClearValidationErrors } from './useAutoClearValidationErrors';
 import { useAutoClearFeedback } from './useAutoClearFeedback';
 import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
+import { useAsyncMutation } from '../../../../../shared/hooks/useAsyncMutation';
 
 interface UseFichaGestionAgendarParams {
   form: GestionFormClaro;
@@ -61,10 +62,10 @@ export const useFichaGestionAgendar = ({
     null
   );
 
-  const [
-    isScheduling,
-    setIsScheduling,
-  ] = useState(false);
+  const {
+    isPending: isScheduling,
+    execute: executeSchedule,
+  } = useAsyncMutation();
 
   const handleCloseAgendaFeedback =
     useCallback(() => {
@@ -84,10 +85,6 @@ export const useFichaGestionAgendar = ({
 
   const handleAgendar =
     useCallback(async () => {
-      if (isScheduling) {
-        return;
-      }
-
       setAgendaFeedback(null);
 
       let agendaRequest;
@@ -127,55 +124,57 @@ export const useFichaGestionAgendar = ({
         return;
       }
 
-      setIsScheduling(true);
+      const result = await executeSchedule(
+        () => createAgenda(agendaRequest.payload)
+      );
 
-      try {
-        await createAgenda(
-          agendaRequest.payload
-        );
+      if (result.status === 'skipped') {
+        return;
+      }
 
-        /*
-         * Se conserva el comportamiento que
-         * anteriormente tenía el botón Agendar.
-         */
-        setField(
-          'fechaGestion',
-          form.fechaNuevaGestion
-        );
-
-        setField(
-          'horaGestion',
-          form.horaNuevaGestion
-        );
-
-        setAgendaValidationErrors({});
-
-        setAgendaFeedback({
-          variant: 'success',
-          title: 'Agenda registrada correctamente',
-          message:
-            'La nueva gestión fue agendada correctamente.',
-        });
-      } catch (error) {
+      if (result.status === 'error') {
         setAgendaFeedback({
           variant: 'error',
           title:
             'No se pudo registrar la agenda',
           message:
             getErrorMessage(
-              error,
+              result.error,
               FICHA_GESTION_MESSAGES.AGENDA_ERROR
             )
         });
-      } finally {
-        setIsScheduling(false);
+
+        return;
       }
+
+      /*
+       * Se conserva el comportamiento que
+       * anteriormente tenía el botón Agendar.
+       */
+      setField(
+        'fechaGestion',
+        form.fechaNuevaGestion
+      );
+
+      setField(
+        'horaGestion',
+        form.horaNuevaGestion
+      );
+
+      setAgendaValidationErrors({});
+
+      setAgendaFeedback({
+        variant: 'success',
+        title: 'Agenda registrada correctamente',
+        message:
+          'La nueva gestión fue agendada correctamente.',
+      });
     }, [
       carteraNombre,
       clearAgendaValidationErrors,
       deudorNombre,
+      executeSchedule,
       form,
-      isScheduling,
       np1Options,
       np2Options,
       params,

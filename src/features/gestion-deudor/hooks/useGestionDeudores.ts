@@ -1,69 +1,54 @@
-import { useCallback, useState } from 'react';
-import { useClientSideTable } from '@shared/hooks/useClientSideTable';
-import { fetchDeudoresGestionDeudor } from '../api/deudoresGestionDeudorApi';
-import { GESTION_DEUDOR_API_DEFAULTS } from '../constants/gestionDeudorApi.constants';
-import { validateGestionDeudorSearch } from '../validations/validations';
+import {
+  useCallback,
+} from 'react';
+
+import {
+  useClientSideTable,
+} from '@shared/hooks/useClientSideTable';
+
+import {
+  useGestionDeudorSearch,
+} from '../modules/busqueda/hooks/useGestionDeudorSearch';
 import type {
   DeudorGestionDeudor,
-  TipoBusquedaGestionDeudor,
 } from '../types/gestionDeudor.types';
 
-export function useGestionDeudores(idCliente?: string | null) {
-  const [tipoBusqueda, setTipoBusqueda] =
-    useState<TipoBusquedaGestionDeudor>('R');
+export function useGestionDeudores(
+  idCliente?: string | null
+) {
+  const search =
+    useGestionDeudorSearch(idCliente);
+  const {
+    data,
+    tipoBusqueda,
+    valorBusqueda,
+    setTipoBusqueda,
+    setValorBusqueda,
+    isLoading,
+    error,
+    buscar: executeSearch,
+    limpiar: clearSearch,
+  } = search;
+  const table =
+    useClientSideTable<DeudorGestionDeudor>(
+      data,
+      [idCliente],
+      {
+        initialPageSize: 10,
+      }
+    );
 
-  const [valorBusqueda, setValorBusqueda] = useState('');
-  const [allData, setAllData] = useState<DeudorGestionDeudor[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { resetFilters } = table;
 
-  const table = useClientSideTable<DeudorGestionDeudor>(allData, [idCliente], {
-    initialPageSize: 10,
-  });
-
-  const buscar = useCallback(async () => {
-    const validation = validateGestionDeudorSearch({
-      idCliente,
-      tipoBusqueda,
-      valorBusqueda,
-    });
-
-    if (!validation.isValid) {
-      setError(validation.message || 'Datos de búsqueda inválidos.');
-      setAllData([]);
-      table.resetFilters();
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-    table.resetFilters();
-
-    try {
-      const result = await fetchDeudoresGestionDeudor({
-        nIdCliente: String(idCliente),
-        busqueda: validation.busqueda,
-        pageNumber: GESTION_DEUDOR_API_DEFAULTS.pageNumber,
-        pageSize: GESTION_DEUDOR_API_DEFAULTS.pageSize,
-      });
-
-      setAllData(result);
-    } catch (err) {
-      setAllData([]);
-      setError(
-        err instanceof Error ? err.message : 'Error al buscar deudores.'
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [idCliente, tipoBusqueda, valorBusqueda, table]);
+  const buscar = useCallback(() => {
+    resetFilters();
+    executeSearch();
+  }, [executeSearch, resetFilters]);
 
   const limpiar = useCallback(() => {
-    setValorBusqueda('');
-    setAllData([]);
-    setError(null);
-    table.resetFilters();
-  }, [table]);
+    clearSearch();
+    resetFilters();
+  }, [clearSearch, resetFilters]);
 
   return {
     tipoBusqueda,
@@ -71,7 +56,7 @@ export function useGestionDeudores(idCliente?: string | null) {
     setTipoBusqueda,
     setValorBusqueda,
 
-    allData,
+    allData: data,
     isLoading,
     error,
 

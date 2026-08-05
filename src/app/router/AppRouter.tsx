@@ -107,6 +107,20 @@ const MantenerPerfilPage = lazy(
     )
 );
 
+const MantenerModulosPage = lazy(
+  () =>
+    import(
+      '../../features/seguridad/pages/MantenerModulosPage'
+    )
+);
+
+const MantenerAccesosPerfilPage = lazy(
+  () =>
+    import(
+      '../../features/seguridad/pages/MantenerAccesosPerfilPage'
+    )
+);
+
 interface FeatureRouteProps {
   enabled: boolean;
   children: ReactNode;
@@ -299,6 +313,40 @@ export function AppRouter() {
                     }
                   >
                     <MantenerPerfilPage />
+                  </FeatureRoute>
+                }
+              />
+
+              <Route
+                path={
+                  SEGURIDAD_ROUTES
+                    .MANTENER_MODULOS
+                }
+                element={
+                  <FeatureRoute
+                    enabled={
+                      SEGURIDAD_FEATURE
+                        .enabled
+                    }
+                  >
+                    <MantenerModulosPage />
+                  </FeatureRoute>
+                }
+              />
+
+              <Route
+                path={
+                  SEGURIDAD_ROUTES
+                    .MANTENER_ACCESOS_PERFIL
+                }
+                element={
+                  <FeatureRoute
+                    enabled={
+                      SEGURIDAD_FEATURE
+                        .enabled
+                    }
+                  >
+                    <MantenerAccesosPerfilPage />
                   </FeatureRoute>
                 }
               />

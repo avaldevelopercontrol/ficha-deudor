@@ -9,13 +9,16 @@ import type {
   ColumnApi,
   DocumentoApi,
 } from '../../../shared/types';
+import type {
+  StableKeyPart,
+} from '@shared/utils/stableKey.utils';
 import { DOCUMENTOS_INITIAL_PAGE_SIZE } from '../constants/documentos.constants';
 import { enrichDocumentoWithDynamicColumns } from '../utils/documentosDynamicKeys';
 
 interface UseDocumentosTableDataParams {
   columns: ColumnApi[];
   rawData: DocumentoApi[];
-  resetDeps: readonly unknown[];
+  resetDeps: readonly StableKeyPart[];
 }
 
 export type { TextFilters, SelectedFilters };

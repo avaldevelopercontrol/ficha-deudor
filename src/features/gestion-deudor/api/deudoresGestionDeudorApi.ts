@@ -1,4 +1,8 @@
 import { apiClient } from '@shared/api/apiClient';
+import { toRequiredId } from '@shared/utils/number.utils';
+import {
+  assertApiSuccess,
+} from '@shared/api/apiResponse.utils';
 import {
   GESTION_DEUDOR_API_DEFAULTS,
   GESTION_DEUDOR_API_ENDPOINTS,
@@ -15,23 +19,30 @@ export async function fetchDeudoresGestionDeudor({
   busqueda,
   pageNumber = GESTION_DEUDOR_API_DEFAULTS.pageNumber,
   pageSize = GESTION_DEUDOR_API_DEFAULTS.pageSize,
-}: BuscarDeudoresGestionDeudorParams): Promise<DeudorGestionDeudor[]> {
+}: BuscarDeudoresGestionDeudorParams,
+  signal?: AbortSignal
+): Promise<DeudorGestionDeudor[]> {
+  const normalizedClientId = toRequiredId(
+    nIdCliente,
+    'nId_Cliente'
+  );
+
   const params = new URLSearchParams({
-    nId_Cliente: nIdCliente,
+    nId_Cliente: String(normalizedClientId),
     busqueda,
     PageNumber: String(pageNumber),
     PageSize: String(pageSize),
   });
 
   const result = await apiClient<GetDeudoresGestionDeudorResponse>(
-    `${GESTION_DEUDOR_API_ENDPOINTS.baseDeudor}${GESTION_DEUDOR_API_ENDPOINTS.getDeudor}?${params.toString()}`
+    `${GESTION_DEUDOR_API_ENDPOINTS.baseDeudor}${GESTION_DEUDOR_API_ENDPOINTS.getDeudor}?${params.toString()}`,
+    { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(
-      result.messageUser || result.message || 'Error al buscar el deudor.'
-    );
-  }
+  assertApiSuccess(
+    result,
+    'Error al buscar el deudor.'
+  );
 
   return mapDeudoresGestionDeudorResponse(result);
 }

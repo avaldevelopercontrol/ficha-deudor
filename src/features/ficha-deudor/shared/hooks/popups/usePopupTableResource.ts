@@ -1,8 +1,5 @@
 import {
   useCallback,
-  useEffect,
-  useReducer,
-  useRef,
 } from 'react';
 
 import {
@@ -10,23 +7,12 @@ import {
   type TextFilters,
   type SelectedFilters,
 } from '@shared/hooks/useClientSideTable';
+import {
+  useAsyncResource,
+  type AsyncResourceKeyPart,
+} from '@shared/hooks/useAsyncResource';
 
 export type { TextFilters, SelectedFilters };
-
-interface PopupTableResourceState<T> {
-  allData: T[];
-  isLoading: boolean;
-  error: string | null;
-}
-
-type PopupTableResourceAction<T> =
-  | { type: 'LOAD_START' }
-  | { type: 'LOAD_SUCCESS'; data: T[] }
-  | { type: 'LOAD_ERROR'; error: string }
-  | {
-      type: 'RESET_WITH_ERROR';
-      error: string;
-    };
 
 export interface UsePopupTableResourceReturn<T> {
   allData: T[];
@@ -61,53 +47,14 @@ interface UsePopupTableResourceParams<T> {
   areParamsReady: boolean;
   missingParamsError: string;
   loadError: string;
-  resetDeps: readonly unknown[];
+  resetDeps: readonly AsyncResourceKeyPart[];
 
   fetcher: (
-    signal?: AbortSignal
+    signal: AbortSignal
   ) => Promise<T[]>;
 
   initialPageSize?: number;
 }
-
-const createInitialState =
-  <T,>(): PopupTableResourceState<T> => ({
-    allData: [],
-    isLoading: false,
-    error: null,
-  });
-
-const popupTableResourceReducer = <T,>(
-  state: PopupTableResourceState<T>,
-  action: PopupTableResourceAction<T>
-): PopupTableResourceState<T> => {
-  switch (action.type) {
-    case 'LOAD_START':
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
-
-    case 'LOAD_SUCCESS':
-      return {
-        allData: action.data,
-        isLoading: false,
-        error: null,
-      };
-
-    case 'LOAD_ERROR':
-    case 'RESET_WITH_ERROR':
-      return {
-        allData: [],
-        isLoading: false,
-        error: action.error,
-      };
-
-    default:
-      return state;
-  }
-};
 
 export const usePopupTableResource = <T,>({
   areParamsReady,
@@ -117,159 +64,35 @@ export const usePopupTableResource = <T,>({
   fetcher,
   initialPageSize = 10,
 }: UsePopupTableResourceParams<T>): UsePopupTableResourceReturn<T> => {
-  const [state, dispatch] = useReducer(
-    popupTableResourceReducer<T>,
-    createInitialState<T>()
-  );
-
-  const {
-    allData,
-    isLoading,
-    error,
-  } = state;
+  const resource = useAsyncResource<T[]>({
+    loader: fetcher,
+    resourceKey: resetDeps,
+    initialData: [],
+    errorMessage: loadError,
+    enabled: areParamsReady,
+    disabledError: missingParamsError,
+  });
 
   const table = useClientSideTable(
-    allData,
+    resource.data,
     resetDeps,
     {
       initialPageSize,
     }
   );
 
-  const isMountedRef = useRef(true);
-
-  const activeControllerRef =
-    useRef<AbortController | null>(null);
-
-  const requestIdRef = useRef(0);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-      requestIdRef.current += 1;
-
-      activeControllerRef.current?.abort();
-      activeControllerRef.current = null;
-    };
-  }, []);
-
-  const executeRequest =
-    useCallback(async () => {
-      if (!areParamsReady) {
-        return;
-      }
-
-      /*
-       * Cancela la consulta anterior antes de
-       * iniciar una nueva.
-       */
-      activeControllerRef.current?.abort();
-
-      const controller =
-        new AbortController();
-
-      const requestId =
-        ++requestIdRef.current;
-
-      activeControllerRef.current =
-        controller;
-
-      dispatch({
-        type: 'LOAD_START',
-      });
-
-      try {
-        const result = await fetcher(
-          controller.signal
-        );
-
-        if (
-          !isMountedRef.current ||
-          controller.signal.aborted ||
-          requestId !==
-            requestIdRef.current
-        ) {
-          return;
-        }
-
-        dispatch({
-          type: 'LOAD_SUCCESS',
-          data: result,
-        });
-      } catch (err) {
-        if (
-          !isMountedRef.current ||
-          controller.signal.aborted ||
-          requestId !==
-            requestIdRef.current
-        ) {
-          return;
-        }
-
-        dispatch({
-          type: 'LOAD_ERROR',
-
-          error:
-            err instanceof Error
-              ? err.message
-              : loadError,
-        });
-      } finally {
-        if (
-          requestId ===
-            requestIdRef.current &&
-          activeControllerRef.current ===
-            controller
-        ) {
-          activeControllerRef.current =
-            null;
-        }
-      }
-    }, [
-      areParamsReady,
-      fetcher,
-      loadError,
-    ]);
-
-  useEffect(() => {
-    if (!areParamsReady) {
-      activeControllerRef.current?.abort();
-      activeControllerRef.current = null;
-      requestIdRef.current += 1;
-
-      dispatch({
-        type: 'RESET_WITH_ERROR',
-        error: missingParamsError,
-      });
-
-      return;
-    }
-
-    void executeRequest();
-
-    return () => {
-      activeControllerRef.current?.abort();
-      activeControllerRef.current = null;
-      requestIdRef.current += 1;
-    };
-  }, [
-    areParamsReady,
-    executeRequest,
-    missingParamsError,
-  ]);
+  const refetchResource = resource.refetch;
 
   const refetch = useCallback(() => {
-    void executeRequest();
-  }, [executeRequest]);
+    void refetchResource();
+  }, [refetchResource]);
 
   return {
-    allData,
+    allData: resource.data,
     filteredData: table.filteredData,
     paginatedData: table.paginatedData,
-    isLoading,
-    error,
+    isLoading: resource.isLoading,
+    error: resource.error,
     pageNumber: table.pageNumber,
     pageSize: table.pageSize,
     totalRecords: table.totalRecords,

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../../../features/auth/contexts/authContextValue';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { GESTION_USUARIOS_ROUTES } from '../../../features/gestion-usuarios/constants/gestionUsuariosRoutes.constants';
 import { AUTH_ROUTES } from '../../../features/auth/constants';
 import SidebarMenuSection from './SidebarMenuSection';
@@ -12,8 +12,8 @@ import {
 } from '../../../features/seguridad/constants/seguridadFeature.constants';
 
 import {
-  SEGURIDAD_ROUTES,
-} from '../../../features/seguridad/constants/seguridadRoutes.constants';
+  SEGURIDAD_SIDEBAR_ITEMS,
+} from '../../../features/seguridad/constants/seguridadSidebar.constants';
 
 interface AppSidebarProps {
   isCollapsed?: boolean;
@@ -280,16 +280,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = () => {
                     (current) => !current
                   );
                 }}
-                items={[
-                  {
-                    label:
-                      'Mantener perfil',
-
-                    to:
-                      SEGURIDAD_ROUTES
-                        .MANTENER_PERFIL,
-                  },
-                ]}
+                items={SEGURIDAD_SIDEBAR_ITEMS}
               />
             )}
 

@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAuth } from '@features/auth/contexts/authContextValue';
+import { useAuth } from '@features/auth/hooks/useAuth';
 
 import { MENU_MODULOS } from '../data';
 import type { MenuModulo } from '../types';

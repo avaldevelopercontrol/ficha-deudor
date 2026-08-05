@@ -8,7 +8,7 @@ import {
 } from '../../../constants/gestionDeudorSearch.constants';
 import type { TipoBusquedaGestionDeudor } from '../../../types/gestionDeudor.types';
 
-interface GestionDeudorSearchCardProps {
+export interface GestionDeudorSearchCardProps {
   tipoBusqueda: TipoBusquedaGestionDeudor;
   valorBusqueda: string;
   isLoading: boolean;

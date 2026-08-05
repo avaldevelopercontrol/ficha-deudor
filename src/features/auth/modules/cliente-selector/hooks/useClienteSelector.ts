@@ -1,7 +1,15 @@
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from 'react';
+
+import { createAsyncResourceController } from '@shared/utils/asyncResource.utils';
 
 import { fetchClientesByUsuario } from '../../../api';
-import type { Cliente, Usuario } from '../../../types';
+import type { Cliente, ClientesResponse, Usuario } from '../../../types';
 import {
   clienteSelectorReducer,
   initialClienteSelectorState,
@@ -25,57 +33,59 @@ export const useClienteSelector = ({
     clienteSelectorReducer,
     initialClienteSelectorState
   );
+  const requestControllerRef = useRef(
+    createAsyncResourceController<ClientesResponse>()
+  );
 
   const { clientes, selectedClienteId, isLoading, error } = state;
+  const usuarioId = usuario.id_usuario;
 
   useEffect(() => {
-    if (!isOpen || !usuario) {
+    const requestController = requestControllerRef.current;
+
+    if (!isOpen) {
+      requestController.cancel();
       dispatch({ type: 'RESET' });
       return;
     }
 
-    let isMounted = true;
+    dispatch({ type: 'LOAD_START' });
 
-    const loadClientes = async () => {
-      dispatch({ type: 'LOAD_START' });
-
-      try {
-        const response = await fetchClientesByUsuario(usuario.id_usuario);
-
-        if (!isMounted) {
+    void requestController
+      .execute((signal) =>
+        fetchClientesByUsuario(usuarioId, signal)
+      )
+      .then((result) => {
+        if (result.status === 'aborted') {
           return;
         }
 
-        if (response.success) {
+        if (result.status === 'error') {
           dispatch({
-            type: 'LOAD_SUCCESS',
-            clientes: response.clientes,
+            type: 'LOAD_ERROR',
+            error: CLIENTES_UNEXPECTED_ERROR_MESSAGE,
+          });
+          return;
+        }
+
+        if (!result.data.success) {
+          dispatch({
+            type: 'LOAD_ERROR',
+            error: CLIENTES_LOAD_ERROR_MESSAGE,
           });
           return;
         }
 
         dispatch({
-          type: 'LOAD_ERROR',
-          error: CLIENTES_LOAD_ERROR_MESSAGE,
+          type: 'LOAD_SUCCESS',
+          clientes: result.data.clientes,
         });
-      } catch {
-        if (!isMounted) {
-          return;
-        }
-
-        dispatch({
-          type: 'LOAD_ERROR',
-          error: CLIENTES_UNEXPECTED_ERROR_MESSAGE,
-        });
-      }
-    };
-
-    void loadClientes();
+      });
 
     return () => {
-      isMounted = false;
+      requestController.cancel();
     };
-  }, [isOpen, usuario]);
+  }, [isOpen, usuarioId]);
 
   const selectedCliente = useMemo(
     () => clientes.find((cliente) => cliente.id_cliente === selectedClienteId),

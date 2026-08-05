@@ -7,4 +7,5 @@ export const DOCUMENTOS_ERROR_MESSAGES = {
   META: 'Error cargando metadatos',
   DATA: 'Error cargando documentos',
   HEADERS: 'Error cargando cabeceras',
+  BUTTONS: 'Error cargando botones',
 } as const;

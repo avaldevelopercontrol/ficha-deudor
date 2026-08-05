@@ -1,7 +1,12 @@
 import { apiClient } from '@shared/api/apiClient';
-import type { Agenda, AgendaListResponse } from '../types/agenda.types';
+import type { ApiResponse } from '@shared/types/indexApi';
+import {
+  unwrapApiArrayResponse,
+} from '../../../shared/utils/apiResponse.utils';
+import type { Agenda, AgendaApi } from '../types/agenda.types';
 
 const BASE_GESTION = '/v1/Gestion';
+const AGENDAS_ERROR_MESSAGE = 'Error cargando agendas';
 
 export async function fetchAgendasByDeudor(
   id_cliente: string,
@@ -19,16 +24,17 @@ export async function fetchAgendasByDeudor(
     PageSize: '1000',
   });
 
-  const result = await apiClient<AgendaListResponse>(
+  const result = await apiClient<ApiResponse<AgendaApi[]>>(
     `${BASE_GESTION}/GetGestionAgendasDeudor?${params.toString()}`,
     { signal }
   );
 
-  if (result.statusCode !== 200) {
-    throw new Error(result.message || 'Error cargando agendas');
-  }
+  const agendas = unwrapApiArrayResponse<AgendaApi>(
+    result,
+    AGENDAS_ERROR_MESSAGE
+  );
 
-  return result.response.map((item) => ({
+  return agendas.map((item) => ({
     id: String(item.nid_agenda),
     fechaNuevaGestion: item.fechaNuevaGestion,
     tiempoVencido: item.tiempoVencido || '—',

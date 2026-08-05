@@ -1,8 +1,4 @@
 import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
   type Dispatch,
   type SetStateAction,
 } from 'react';
@@ -11,10 +7,16 @@ import {
   type TextFilters,
   type SelectedFilters,
 } from './useClientSideTable';
+import {
+  useAsyncResource,
+  type AsyncResourceKeyPart,
+} from './useAsyncResource';
 
 interface UseClientSideResourceTableParams<TData> {
-  fetchData: () => Promise<TData[]>;
-  resetDeps: readonly unknown[];
+  fetchData: (
+    signal: AbortSignal
+  ) => Promise<TData[]>;
+  resetDeps: readonly AsyncResourceKeyPart[];
   enabled?: boolean;
   initialPageSize?: number;
   errorMessage: string;
@@ -35,11 +37,21 @@ interface UseClientSideResourceTableReturn<TData> {
   refetch: () => Promise<void>;
   textFilters: TextFilters;
   selectedFilters: SelectedFilters;
-  onTextFilterChange: (columnKey: string, value: string) => void;
-  onSelectedFilterChange: (columnKey: string, values: string[]) => void;
+  onTextFilterChange: (
+    columnKey: string,
+    value: string
+  ) => void;
+  onSelectedFilterChange: (
+    columnKey: string,
+    values: string[]
+  ) => void;
   resetFilters: () => void;
-  setAllData: Dispatch<SetStateAction<TData[]>>;
-  setError: (error: string | null) => void;
+  setAllData: Dispatch<
+    SetStateAction<TData[]>
+  >;
+  setError: (
+    error: string | null
+  ) => void;
 }
 
 export function useClientSideResourceTable<TData>({
@@ -49,93 +61,42 @@ export function useClientSideResourceTable<TData>({
   initialPageSize = 10,
   errorMessage,
 }: UseClientSideResourceTableParams<TData>): UseClientSideResourceTableReturn<TData> {
-  const [allData, setAllData] = useState<TData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const isMountedRef = useRef(true);
-
-  const table = useClientSideTable<TData>(allData, resetDeps, {
-    initialPageSize,
+  const resource = useAsyncResource<TData[]>({
+    loader: fetchData,
+    resourceKey: resetDeps,
+    initialData: [],
+    errorMessage,
+    enabled,
   });
 
-  useEffect(() => {
-    isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  const loadData = useCallback(
-    async (isCancelled: () => boolean = () => false) => {
-      if (isCancelled() || !isMountedRef.current) return;
-
-      if (!enabled) {
-        setAllData([]);
-        setIsLoading(false);
-        setError(null);
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const result = await fetchData();
-
-        if (isCancelled() || !isMountedRef.current) return;
-
-        setAllData(result);
-      } catch (err) {
-        if (isCancelled() || !isMountedRef.current) return;
-
-        setError(err instanceof Error ? err.message : errorMessage);
-        setAllData([]);
-      } finally {
-        if (!isCancelled() && isMountedRef.current) {
-          setIsLoading(false);
-        }
-      }
-    },
-    [enabled, errorMessage, fetchData]
+  const table = useClientSideTable<TData>(
+    resource.data,
+    resetDeps,
+    {
+      initialPageSize,
+    }
   );
 
-  useEffect(() => {
-    let cancelled = false;
-
-    void Promise.resolve().then(() => {
-      void loadData(() => cancelled);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [loadData]);
-
-  const refetch = useCallback(() => {
-    return loadData();
-  }, [loadData]);
-
   return {
-    allData,
+    allData: resource.data,
     filteredData: table.filteredData,
     paginatedData: table.paginatedData,
-    isLoading,
-    error,
+    isLoading: resource.isLoading,
+    error: resource.error,
     pageNumber: table.pageNumber,
     pageSize: table.pageSize,
     totalRecords: table.totalRecords,
     totalPages: table.totalPages,
     setPageNumber: table.setPageNumber,
     setPageSize: table.setPageSize,
-    refetch,
+    refetch: resource.refetch,
     textFilters: table.textFilters,
     selectedFilters: table.selectedFilters,
     onTextFilterChange: table.onTextFilterChange,
-    onSelectedFilterChange: table.onSelectedFilterChange,
+    onSelectedFilterChange:
+      table.onSelectedFilterChange,
     resetFilters: table.resetFilters,
-    setAllData,
-    setError,
+    setAllData: resource.setData,
+    setError: resource.setError,
   };
 }

@@ -3,6 +3,10 @@ import {
   AUTH_STORAGE_KEYS,
 } from '../constants/authStorage.constants';
 import type { AuthState } from '../types';
+import {
+  buildStoredAuthSession,
+  parseStoredAuthSession,
+} from '../validations/authSession.guard';
 
 export type AuthLogoutReason = 'manual' | 'last-main-window-closed';
 
@@ -14,55 +18,53 @@ export const initialAuthState: AuthState = {
   error: null,
 };
 
+const removeStoredState = () => {
+  try {
+    localStorage.removeItem(AUTH_STORAGE_KEYS.STATE);
+  } catch {
+    // El estado en memoria seguirá siendo la fuente segura de la sesión actual.
+  }
+};
+
 export function loadStoredAuthState(): AuthState {
   try {
     const rawState = localStorage.getItem(AUTH_STORAGE_KEYS.STATE);
+    const parsedSession = parseStoredAuthSession(rawState);
 
-    if (!rawState) {
+    if (!parsedSession) {
+      if (rawState !== null) {
+        removeStoredState();
+      }
+
       return initialAuthState;
     }
 
-    const parsedState = JSON.parse(rawState) as Partial<AuthState>;
-
-    if (!parsedState.usuario) {
-      localStorage.removeItem(AUTH_STORAGE_KEYS.STATE);
-      return initialAuthState;
+    if (parsedSession.format === 'legacy') {
+      saveStoredAuthState(parsedSession.state);
     }
 
-    return {
-      ...initialAuthState,
-      isAuthenticated: true,
-      usuario: parsedState.usuario,
-      clienteSeleccionada: parsedState.clienteSeleccionada ?? null,
-      isLoading: false,
-      error: null,
-    };
+    return parsedSession.state;
   } catch {
-    localStorage.removeItem(AUTH_STORAGE_KEYS.STATE);
+    removeStoredState();
     return initialAuthState;
   }
 }
 
 export function saveStoredAuthState(state: AuthState) {
   try {
-    if (!state.usuario) {
-      localStorage.removeItem(AUTH_STORAGE_KEYS.STATE);
+    const storedSession = buildStoredAuthSession(state);
+
+    if (!storedSession) {
+      removeStoredState();
       return;
     }
 
-    const stateToStore: AuthState = {
-      ...state,
-      isAuthenticated: true,
-      isLoading: false,
-      error: null,
-    };
-
     localStorage.setItem(
       AUTH_STORAGE_KEYS.STATE,
-      JSON.stringify(stateToStore)
+      JSON.stringify(storedSession)
     );
   } catch {
-    localStorage.removeItem(AUTH_STORAGE_KEYS.STATE);
+    removeStoredState();
   }
 }
 
@@ -74,13 +76,16 @@ export function clearStoredAuthState(
     at: Date.now(),
   };
 
-  localStorage.removeItem(AUTH_STORAGE_KEYS.TOKEN);
-  localStorage.removeItem(AUTH_STORAGE_KEYS.STATE);
-
-  localStorage.setItem(
-    AUTH_STORAGE_KEYS.LOGOUT_EVENT,
-    JSON.stringify(logoutEvent)
-  );
+  try {
+    localStorage.removeItem(AUTH_STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(AUTH_STORAGE_KEYS.STATE);
+    localStorage.setItem(
+      AUTH_STORAGE_KEYS.LOGOUT_EVENT,
+      JSON.stringify(logoutEvent)
+    );
+  } catch {
+    // El evento local garantiza que el proveedor actual cierre la sesión.
+  }
 
   window.dispatchEvent(
     new CustomEvent(AUTH_LOGOUT_CUSTOM_EVENT, {
@@ -90,5 +95,17 @@ export function clearStoredAuthState(
 }
 
 export function hasStoredAuthState(): boolean {
-  return Boolean(localStorage.getItem(AUTH_STORAGE_KEYS.STATE));
+  try {
+    const rawState = localStorage.getItem(AUTH_STORAGE_KEYS.STATE);
+    const parsedSession = parseStoredAuthSession(rawState);
+
+    if (!parsedSession && rawState !== null) {
+      removeStoredState();
+    }
+
+    return Boolean(parsedSession);
+  } catch {
+    removeStoredState();
+    return false;
+  }
 }

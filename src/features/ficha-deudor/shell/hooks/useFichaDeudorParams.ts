@@ -9,7 +9,7 @@ import {
   useNavigate,
 } from 'react-router-dom';
 
-import { useAuth } from '@features/auth/contexts/authContextValue';
+import { useAuth } from '@features/auth/hooks/useAuth';
 
 import { FICHA_DEUDOR_ROUTES } from '../../shared/constants/fichaDeudorRoutes.constants';
 import type {

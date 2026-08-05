@@ -60,9 +60,16 @@ export function useDireccionesReferenciadas(
     id_deudor
   );
 
-  const fetchDireccionesReferenciadasData = useCallback(() => {
-    return fetchDireccionesReferenciadas(id_cliente, id_deudor);
-  }, [id_cliente, id_deudor]);
+  const fetchDireccionesReferenciadasData = useCallback(
+    (signal: AbortSignal) => {
+      return fetchDireccionesReferenciadas(
+        id_cliente,
+        id_deudor,
+        signal
+      );
+    },
+    [id_cliente, id_deudor]
+  );
 
   const {
     allData,

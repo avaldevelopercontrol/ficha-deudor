@@ -3,7 +3,10 @@ import type {
   FichaGestionValidationErrors,
   GestionFormClaro,
 } from '../types/fichaGestion.types';
-import { toDecimalNumber, toNumber } from '../../../shared/utils/number.utils';
+import {
+  toDecimalNumber,
+  toNumberOrZero,
+} from '../../../shared/utils/number.utils';
 import { normalizeTelefonoForComparison } from '../../telefonos-referenciados/utils/telefonoNormalization.utils';
 
 interface ValidateFichaGestionParams {
@@ -18,7 +21,7 @@ const isEmptyValue = (value: string | number | null | undefined) => {
 };
 
 const isEmptyOrZero = (value: string | number | null | undefined) => {
-  return isEmptyValue(value) || toNumber(value) === 0;
+  return isEmptyValue(value) || toNumberOrZero(value) === 0;
 };
 
 export const validateFichaGestion = ({
@@ -94,7 +97,7 @@ export const validateFichaGestion = ({
     errors.horaGestion = 'Ingrese Hora de Gestión';
   }
 
-  const tipoGestion = toNumber(form.tipoGestion);
+  const tipoGestion = toNumberOrZero(form.tipoGestion);
 
   const telefonoNormalizado =
     normalizeTelefonoForComparison(

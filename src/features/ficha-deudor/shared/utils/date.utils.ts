@@ -1,114 +1,222 @@
-const PERU_TIME_ZONE = 'America/Lima';
+import {
+  formatDateTimeInPeru,
+  getCurrentPeruDateTime,
+} from '@shared/utils/peruDateTime.utils';
+
+export {
+  formatDateTimeInPeru,
+  getCurrentPeruDateTime,
+  PERU_TIME_ZONE,
+} from '@shared/utils/peruDateTime.utils';
+
+export const PERU_UTC_OFFSET = '-05:00';
 
 const EXPLICIT_TIME_ZONE_PATTERN =
   /(Z|[+-]\d{2}:\d{2})$/i;
 
-type DateTimePartName =
-  | 'year'
-  | 'month'
-  | 'day'
-  | 'hour'
-  | 'minute'
-  | 'second';
+const DATE_ONLY_PATTERN =
+  /^(\d{4})-(\d{2})-(\d{2})$/;
 
-const getDateTimePart = (
-  parts: Array<{
-    type: string;
-    value: string;
-  }>,
-  type: DateTimePartName
+const LOCAL_DATE_TIME_PATTERN =
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/;
+
+const COMPLETE_TIME_PATTERN =
+  /^(\d{2}):(\d{2})$/;
+
+interface LocalDateTimeParts {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+  millisecond: number;
+}
+
+const padNumber = (
+  value: number,
+  length: number
 ): string => {
-  const part = parts.find(
-    (currentPart) =>
-      currentPart.type === type
+  return String(value).padStart(
+    length,
+    '0'
   );
-
-  if (!part) {
-    throw new Error(
-      `No se pudo obtener la parte de fecha: ${type}.`
-    );
-  }
-
-  return part.value;
 };
 
-/**
- * Convierte una fecha absoluta a la hora reloj de Perú.
- *
- * Devuelve:
- * YYYY-MM-DDTHH:mm:ss.SSS
- *
- * No agrega Z ni offset porque el backend almacena
- * la hora local de Perú en sus campos de gestión.
- */
-export const formatDateTimeInPeru = (
-  date: Date
-): string => {
-  if (Number.isNaN(date.getTime())) {
-    throw new Error(
-      'No se puede formatear una fecha inválida.'
-    );
+const isValidLocalDateTimeParts = (
+  parts: LocalDateTimeParts
+): boolean => {
+  const {
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    second,
+    millisecond,
+  } = parts;
+
+  if (
+    !Number.isInteger(year) ||
+    year < 1 ||
+    year > 9999 ||
+    !Number.isInteger(month) ||
+    month < 1 ||
+    month > 12 ||
+    !Number.isInteger(day) ||
+    day < 1 ||
+    day > 31 ||
+    !Number.isInteger(hour) ||
+    hour < 0 ||
+    hour > 23 ||
+    !Number.isInteger(minute) ||
+    minute < 0 ||
+    minute > 59 ||
+    !Number.isInteger(second) ||
+    second < 0 ||
+    second > 59 ||
+    !Number.isInteger(millisecond) ||
+    millisecond < 0 ||
+    millisecond > 999
+  ) {
+    return false;
   }
 
-  const parts =
-    new Intl.DateTimeFormat('en-US', {
-      timeZone: PERU_TIME_ZONE,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hourCycle: 'h23',
-    }).formatToParts(date);
-
-  const year = getDateTimePart(
-    parts,
-    'year'
+  const validationDate = new Date(
+    Date.UTC(
+      year,
+      month - 1,
+      day,
+      hour,
+      minute,
+      second,
+      millisecond
+    )
   );
-
-  const month = getDateTimePart(
-    parts,
-    'month'
-  );
-
-  const day = getDateTimePart(
-    parts,
-    'day'
-  );
-
-  const hour = getDateTimePart(
-    parts,
-    'hour'
-  );
-
-  const minute = getDateTimePart(
-    parts,
-    'minute'
-  );
-
-  const second = getDateTimePart(
-    parts,
-    'second'
-  );
-
-  const milliseconds = String(
-    date.getMilliseconds()
-  ).padStart(3, '0');
 
   return (
-    `${year}-${month}-${day}` +
-    `T${hour}:${minute}:${second}` +
-    `.${milliseconds}`
+    validationDate.getUTCFullYear() === year &&
+    validationDate.getUTCMonth() === month - 1 &&
+    validationDate.getUTCDate() === day &&
+    validationDate.getUTCHours() === hour &&
+    validationDate.getUTCMinutes() === minute &&
+    validationDate.getUTCSeconds() === second &&
+    validationDate.getUTCMilliseconds() === millisecond
   );
 };
 
-export const getCurrentPeruDateTime =
-  (): string => {
-    return formatDateTimeInPeru(
-      new Date()
-    );
+const formatLocalDateTimeParts = (
+  parts: LocalDateTimeParts,
+  includeMilliseconds = true
+): string => {
+  const baseDateTime = (
+    `${padNumber(parts.year, 4)}-` +
+    `${padNumber(parts.month, 2)}-` +
+    `${padNumber(parts.day, 2)}T` +
+    `${padNumber(parts.hour, 2)}:` +
+    `${padNumber(parts.minute, 2)}:` +
+    `${padNumber(parts.second, 2)}`
+  );
+
+  if (!includeMilliseconds) {
+    return baseDateTime;
+  }
+
+  return (
+    `${baseDateTime}.` +
+    `${padNumber(parts.millisecond, 3)}`
+  );
+};
+
+const parseLocalDateTime = (
+  value: string
+): LocalDateTimeParts | null => {
+  const dateOnlyMatch = value.match(
+    DATE_ONLY_PATTERN
+  );
+
+  if (dateOnlyMatch) {
+    const parts: LocalDateTimeParts = {
+      year: Number(dateOnlyMatch[1]),
+      month: Number(dateOnlyMatch[2]),
+      day: Number(dateOnlyMatch[3]),
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    };
+
+    return isValidLocalDateTimeParts(parts)
+      ? parts
+      : null;
+  }
+
+  const dateTimeMatch = value.match(
+    LOCAL_DATE_TIME_PATTERN
+  );
+
+  if (!dateTimeMatch) {
+    return null;
+  }
+
+  const millisecondText =
+    dateTimeMatch[7] ?? '0';
+
+  const parts: LocalDateTimeParts = {
+    year: Number(dateTimeMatch[1]),
+    month: Number(dateTimeMatch[2]),
+    day: Number(dateTimeMatch[3]),
+    hour: Number(dateTimeMatch[4]),
+    minute: Number(dateTimeMatch[5]),
+    second: Number(dateTimeMatch[6] ?? 0),
+    millisecond: Number(
+      millisecondText.padEnd(3, '0')
+    ),
   };
+
+  return isValidLocalDateTimeParts(parts)
+    ? parts
+    : null;
+};
+
+const parseDateAndTime = (
+  date: string,
+  time: string
+): LocalDateTimeParts | null => {
+  const normalizedDate = String(
+    date ?? ''
+  ).trim();
+
+  const normalizedTime = String(
+    time ?? ''
+  ).trim();
+
+  const dateMatch = normalizedDate.match(
+    DATE_ONLY_PATTERN
+  );
+
+  const timeMatch = normalizedTime.match(
+    COMPLETE_TIME_PATTERN
+  );
+
+  if (!dateMatch || !timeMatch) {
+    return null;
+  }
+
+  const parts: LocalDateTimeParts = {
+    year: Number(dateMatch[1]),
+    month: Number(dateMatch[2]),
+    day: Number(dateMatch[3]),
+    hour: Number(timeMatch[1]),
+    minute: Number(timeMatch[2]),
+    second: 0,
+    millisecond: 0,
+  };
+
+  return isValidLocalDateTimeParts(parts)
+    ? parts
+    : null;
+};
 
 /**
  * Alias temporal para evitar romper otros consumidores
@@ -158,7 +266,11 @@ export const normalizeDateValue = (
   return value.replace(' ', 'T');
 };
 
-export const toApiDateTimeOrNull = (
+/**
+ * Normaliza una fecha para los endpoints que almacenan
+ * hora reloj de Perú sin sufijo de zona horaria.
+ */
+export const toPeruApiDateTimeOrNull = (
   date: string | null | undefined
 ): string | null => {
   const normalizedDate =
@@ -169,29 +281,77 @@ export const toApiDateTimeOrNull = (
   }
 
   if (
-    normalizedDate.includes('T')
+    EXPLICIT_TIME_ZONE_PATTERN.test(
+      normalizedDate
+    )
   ) {
-    return normalizedDate;
+    const localDateTimeText =
+      normalizedDate.replace(
+        EXPLICIT_TIME_ZONE_PATTERN,
+        ''
+      );
+
+    if (
+      !parseLocalDateTime(
+        localDateTimeText
+      )
+    ) {
+      return null;
+    }
+
+    const parsedDate = new Date(
+      normalizedDate
+    );
+
+    return Number.isNaN(
+      parsedDate.getTime()
+    )
+      ? null
+      : formatDateTimeInPeru(
+          parsedDate
+        );
   }
 
-  return `${normalizedDate}T00:00:00`;
+  const localParts =
+    parseLocalDateTime(
+      normalizedDate
+    );
+
+  const includeMilliseconds =
+    /\.\d{1,3}$/.test(
+      normalizedDate
+    );
+
+  return localParts
+    ? formatLocalDateTimeParts(
+        localParts,
+        includeMilliseconds
+      )
+    : null;
 };
 
-export const toApiDateTimeOrCurrent = (
-  date: string | null | undefined
+export const toApiDateTimeOrNull =
+  toPeruApiDateTimeOrNull;
+
+export const toPeruApiDateTimeOrCurrent = (
+  date: string | null | undefined,
+  currentDate = new Date()
 ): string => {
   return (
-    toApiDateTimeOrNull(date) ??
-    getCurrentPeruDateTime()
+    toPeruApiDateTimeOrNull(date) ??
+    getCurrentPeruDateTime(currentDate)
   );
 };
+
+export const toApiDateTimeOrCurrent =
+  toPeruApiDateTimeOrCurrent;
 
 export const toRequiredApiDateTime = (
   date: string | null | undefined,
   fieldName: string
 ): string => {
   const normalizedDate =
-    toApiDateTimeOrNull(date);
+    toPeruApiDateTimeOrNull(date);
 
   if (!normalizedDate) {
     throw new Error(
@@ -205,48 +365,65 @@ export const toRequiredApiDateTime = (
 /**
  * Garantiza que una fecha de auditoría llegue a la API
  * como hora local de Perú.
- *
- * También corrige valores antiguos que puedan contener
- * Z u otro offset de zona horaria.
  */
-export const toRequiredPeruApiDateTime = (
-  date: string | null | undefined,
-  fieldName: string
+export const toRequiredPeruApiDateTime =
+  toRequiredApiDateTime;
+
+/**
+ * Combina una fecha y una hora de formulario como hora
+ * local de Perú, sin depender de la zona horaria del equipo.
+ */
+export const buildPeruApiDateTime = (
+  date: string,
+  time: string
 ): string => {
-  const normalizedDate =
-    toRequiredApiDateTime(
-      date,
-      fieldName
-    );
-
-  /*
-   * Una fecha sin Z ni offset ya representa
-   * la hora reloj de Perú que necesita la API.
-   */
-  if (
-    !EXPLICIT_TIME_ZONE_PATTERN.test(
-      normalizedDate
-    )
-  ) {
-    return normalizedDate;
-  }
-
-  const parsedDate =
-    new Date(normalizedDate);
-
-  if (
-    Number.isNaN(
-      parsedDate.getTime()
-    )
-  ) {
-    throw new Error(
-      `${fieldName} no contiene una fecha válida.`
-    );
-  }
-
-  return formatDateTimeInPeru(
-    parsedDate
+  const parts = parseDateAndTime(
+    date,
+    time
   );
+
+  if (!parts) {
+    throw new Error(
+      'La fecha y hora no son válidas.'
+    );
+  }
+
+  return formatLocalDateTimeParts(
+    parts
+  );
+};
+
+/**
+ * Convierte una fecha y hora reloj de Perú en un instante
+ * absoluto para comparaciones confiables.
+ */
+export const parsePeruDateTime = (
+  date: string,
+  time: string
+): Date | null => {
+  const parts = parseDateAndTime(
+    date,
+    time
+  );
+
+  if (!parts) {
+    return null;
+  }
+
+  const localDateTime =
+    formatLocalDateTimeParts(
+      parts
+    );
+
+  const parsedDate = new Date(
+    `${localDateTime}${PERU_UTC_OFFSET}`
+  );
+
+  return Number.isNaN(
+    parsedDate.getTime()
+  )
+    ? null
+    : parsedDate;
 };
 
 export const getTimeHour = (
@@ -289,6 +466,6 @@ export const hasValidDate = (
   date: string
 ) => {
   return Boolean(
-    date && date.trim()
+    toPeruApiDateTimeOrNull(date)
   );
 };

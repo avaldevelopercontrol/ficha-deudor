@@ -20,7 +20,7 @@ export const MANTENER_PERFIL_TEXTS = {
 
 export const MANTENER_PERFIL_COLUMNS = {
   idPerfil:
-    'ID Perfil',
+    'Id',
 
   nombrePerfil:
     'Nombre del Perfil',

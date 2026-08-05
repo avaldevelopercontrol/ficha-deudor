@@ -35,6 +35,28 @@ export const MENU_MODULOS: MenuModulo[] = [
             .MANTENER_PERFIL,
         badge: 'Disponible',
       },
+      {
+        key: 'mantener-modulos',
+        label: 'MANTENER MÓDULO',
+        descripcion:
+          'Consulta los módulos y opciones registrados en el sistema.',
+        icon: 'monitor',
+        path:
+          SEGURIDAD_ROUTES
+            .MANTENER_MODULOS,
+        badge: 'Disponible',
+      },
+      {
+        key: 'mantener-accesos-perfil',
+        label: 'MANTENER ACCESOS POR PERFIL',
+        descripcion:
+          'Consulta la cantidad de opciones asignadas a cada perfil.',
+        icon: 'key',
+        path:
+          SEGURIDAD_ROUTES
+            .MANTENER_ACCESOS_PERFIL,
+        badge: 'Disponible',
+      },
     ],
   },
   {

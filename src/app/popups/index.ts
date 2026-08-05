@@ -8,6 +8,7 @@ export {
 
 export {
   openFichaDeudorPopup,
+  parsePopupWindowName,
 } from './popupMessaging.utils';
 
 export type {

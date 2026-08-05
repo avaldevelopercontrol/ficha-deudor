@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import {
   fetchCabeceraDatosAdicionales,
   fetchAllDatosAdicionales,
 } from '../api/datosAdicionalesApi';
 import { useClientSideResourceTable } from '@shared/hooks/useClientSideResourceTable';
+import { useApiResource } from '@shared/hooks/useApiResource';
+import { hasRequiredValues } from '../../../shared/utils/requiredValues.utils';
 import type {
   TextFilters,
   SelectedFilters,
@@ -16,7 +18,6 @@ import {
   DATOS_ADICIONALES_ERROR_MESSAGES,
   DATOS_ADICIONALES_INITIAL_PAGE_SIZE,
 } from '../constants/datosAdicionales.constants';
-import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
 
 export type { TextFilters, SelectedFilters };
 
@@ -40,20 +41,12 @@ interface UseDatosAdicionalesReturn {
   onSelectedFilterChange: (columnKey: string, values: string[]) => void;
 }
 
-const hasRequiredValues = (...values: string[]) => {
-  return values.every((value) => value.trim() !== '');
-};
-
 export function useDatosAdicionales(
   id_cliente: string,
   id_cartera: string,
   id_deudor: string,
   pantalla = 3
 ): UseDatosAdicionalesReturn {
-  const [columns, setColumns] = useState<ColumnApi[]>([]);
-  const [metaLoading, setMetaLoading] = useState(false);
-  const [metaError, setMetaError] = useState<string | null>(null);
-
   const canLoadCabeceraDatosAdicionales = hasRequiredValues(id_cliente);
   const canLoadDatosAdicionales = hasRequiredValues(
     id_cliente,
@@ -61,46 +54,43 @@ export function useDatosAdicionales(
     id_deudor
   );
 
-  useEffect(() => {
-    if (!canLoadCabeceraDatosAdicionales) return;
+  const fetchCabeceraData = useCallback(
+    (signal: AbortSignal) =>
+      fetchCabeceraDatosAdicionales(
+        id_cliente,
+        pantalla,
+        signal
+      ),
+    [id_cliente, pantalla]
+  );
 
-    let cancelled = false;
+  const {
+    data: columnsData,
+    isLoading: metaLoading,
+    error: metaError,
+  } = useApiResource<ColumnApi[]>(
+    fetchCabeceraData,
+    [id_cliente, pantalla],
+    {
+      enabled: canLoadCabeceraDatosAdicionales,
+      initialLoading: false,
+      errorMessage: DATOS_ADICIONALES_ERROR_MESSAGES.META,
+    }
+  );
 
-    const loadCabeceraDatosAdicionales = async () => {
-      setMetaLoading(true);
-      setMetaError(null);
+  const columns = columnsData ?? [];
 
-      try {
-        const cols = await fetchCabeceraDatosAdicionales(id_cliente, pantalla);
-
-        if (!cancelled) {
-          setColumns(cols);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setMetaError(
-            getErrorMessage(error, DATOS_ADICIONALES_ERROR_MESSAGES.META)
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setMetaLoading(false);
-        }
-      }
-    };
-
-    void Promise.resolve().then(() => {
-      void loadCabeceraDatosAdicionales();
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [canLoadCabeceraDatosAdicionales, id_cliente, pantalla]);
-
-  const fetchDatosAdicionalesData = useCallback(() => {
-    return fetchAllDatosAdicionales(id_cliente, id_cartera, id_deudor);
-  }, [id_cliente, id_cartera, id_deudor]);
+  const fetchDatosAdicionalesData = useCallback(
+    (signal: AbortSignal) => {
+      return fetchAllDatosAdicionales(
+        id_cliente,
+        id_cartera,
+        id_deudor,
+        signal
+      );
+    },
+    [id_cliente, id_cartera, id_deudor]
+  );
 
   const {
     allData,

@@ -1,4 +1,6 @@
 import type { PaletaRespuestaOption } from '../../../shared/utils/selectOptions.utils';
+import { parsePeruDateTime } from '../../../shared/utils/date.utils';
+import { toNumberOrZero } from '../../../shared/utils/number.utils';
 import type {
   FichaGestionValidationErrors,
   GestionFormClaro,
@@ -21,41 +23,6 @@ const isCompleteTime = (
   value: string
 ): boolean => {
   return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
-};
-
-const buildLocalDateTime = (
-  date: string,
-  time: string
-): Date | null => {
-  const [year, month, day] = date
-    .split('-')
-    .map(Number);
-
-  const [hour, minute] = time
-    .split(':')
-    .map(Number);
-
-  if (
-    [year, month, day, hour, minute].some(
-      Number.isNaN
-    )
-  ) {
-    return null;
-  }
-
-  const result = new Date(
-    year,
-    month - 1,
-    day,
-    hour,
-    minute,
-    0,
-    0
-  );
-
-  return Number.isNaN(result.getTime())
-    ? null
-    : result;
 };
 
 export const normalizePaletaLabel = (
@@ -114,7 +81,7 @@ export const validateFichaGestionAgenda = ({
     !isEmpty(form.fechaNuevaGestion) &&
     isCompleteTime(form.horaNuevaGestion)
   ) {
-    const scheduledDate = buildLocalDateTime(
+    const scheduledDate = parsePeruDateTime(
       form.fechaNuevaGestion,
       form.horaNuevaGestion
     );
@@ -132,7 +99,7 @@ export const validateFichaGestionAgenda = ({
 
   if (
     isEmpty(form.np0) ||
-    Number(form.np0) === 0
+    toNumberOrZero(form.np0) === 0
   ) {
     errors.np0 =
       'Seleccione una opción en NP0.';
