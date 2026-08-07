@@ -1,4 +1,8 @@
 import {
+  getApplicationOptionDefinition,
+} from '@features/access-control/registry';
+
+import {
   isSupportedSisgesIconValue,
 } from '@shared/icons/sisges';
 
@@ -245,11 +249,55 @@ const validateCommonModuloFields = (
 export const validateRegistrarModuloForm = (
   form: RegistrarModuloFormData,
   options: ModuloFormValidationOptions = {}
-): Record<string, string> =>
-  validateCommonModuloFields(
-    form,
-    options
-  );
+): Record<string, string> => {
+  const errors =
+    validateCommonModuloFields(
+      form,
+      options
+    );
+
+  const definition =
+    getApplicationOptionDefinition(
+      form.applicationOptionCode
+    );
+
+  if (
+    !definition ||
+    !definition.enabled ||
+    !definition.registrable
+  ) {
+    errors.applicationOptionCode =
+      'Seleccione un módulo desarrollado válido.';
+
+    return errors;
+  }
+
+  if (
+    normalizeComparableValue(
+      form.codigo
+    ) !==
+    normalizeComparableValue(
+      definition.code
+    )
+  ) {
+    errors.codigo =
+      'El código debe corresponder al módulo desarrollado seleccionado.';
+  }
+
+  if (
+    normalizeComparableValue(
+      form.nombre
+    ) !==
+    normalizeComparableValue(
+      definition.name
+    )
+  ) {
+    errors.nombre =
+      'El nombre debe corresponder al módulo desarrollado seleccionado.';
+  }
+
+  return errors;
+};
 
 export const validateEditarModuloForm = (
   form: EditarModuloFormData,

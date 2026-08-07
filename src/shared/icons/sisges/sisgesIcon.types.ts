@@ -81,6 +81,7 @@ export const SISGES_ICON_NAMES = [
   'security',
   'permissions',
   'profiles',
+  'groups',
   'modules',
   'search',
   'filter',

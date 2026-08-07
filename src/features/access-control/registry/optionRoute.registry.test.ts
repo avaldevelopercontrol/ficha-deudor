@@ -6,7 +6,9 @@ import {
 } from '../../../test/testHarness';
 
 import {
+  getApplicationOptionDefinition,
   getOptionRoute,
+  getRegistrableApplicationOptions,
   hasRegisteredOptionRoute,
 } from './optionRoute.registry';
 
@@ -28,6 +30,43 @@ export const suite = defineSuite(
             'mMantenerAccesosPorPerfil'
           ),
           '/seguridad/mantener-accesos-por-perfil'
+        );
+
+        assert.equal(
+          getOptionRoute(
+            'mMantenerGrupo'
+          ),
+          '/seguridad/mantener-grupo'
+        );
+      }
+    ),
+    test(
+      'expone metadatos de las pantallas registrables',
+      () => {
+        const mantenerGrupo =
+          getApplicationOptionDefinition(
+            'mMantenerGrupo'
+          );
+
+        assert.equal(
+          mantenerGrupo?.name,
+          'Mantener Grupo'
+        );
+        assert.equal(
+          mantenerGrupo?.parentCode,
+          'mSeguridad'
+        );
+        assert.equal(
+          mantenerGrupo?.icon,
+          'groups'
+        );
+        assert.equal(
+          getRegistrableApplicationOptions().some(
+            (option) =>
+              option.code ===
+              'mMantenerGrupo'
+          ),
+          true
         );
       }
     ),

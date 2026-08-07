@@ -1,4 +1,8 @@
 import {
+  getApplicationOptionDefinition,
+} from '@features/access-control/registry';
+
+import {
   getCurrentPeruDateTime,
 } from '@shared/utils/peruDateTime.utils';
 
@@ -7,7 +11,6 @@ import type {
 } from '../modules/mantener-modulos/types/registrarModulo.types';
 
 import {
-  buildModuloRoute,
   calculateNextOrder,
 } from '../modules/mantener-modulos/utils/registrarModulo.utils';
 
@@ -57,8 +60,34 @@ export const buildCreateOpcionRequest = (
     );
   }
 
+  const applicationOption =
+    getApplicationOptionDefinition(
+      form.applicationOptionCode
+    );
+
+  if (
+    !applicationOption ||
+    !applicationOption.enabled ||
+    !applicationOption.registrable
+  ) {
+    throw new Error(
+      'El módulo desarrollado seleccionado no se encuentra disponible.'
+    );
+  }
+
   const codigo =
     form.codigo.trim();
+
+  if (
+    codigo.toLocaleLowerCase('es-PE') !==
+    applicationOption.code
+      .trim()
+      .toLocaleLowerCase('es-PE')
+  ) {
+    throw new Error(
+      'El código del módulo no corresponde a la pantalla seleccionada.'
+    );
+  }
 
   return {
     sCodigoOpcion:
@@ -71,10 +100,7 @@ export const buildCreateOpcionRequest = (
       form.descripcion.trim(),
 
     sUrlOpcion:
-      buildModuloRoute(
-        parentOption.ruta,
-        codigo
-      ),
+      applicationOption.path,
 
     sIcono:
       form.icono.trim(),

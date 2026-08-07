@@ -5,6 +5,9 @@ export const SEGURIDAD_ROUTES = {
   MANTENER_MODULOS:
     '/seguridad/mantener-modulos',
 
+  MANTENER_GRUPO:
+    '/seguridad/mantener-grupo',
+
   MANTENER_ACCESOS_PERFIL:
     '/seguridad/mantener-accesos-por-perfil',
 } as const;
@@ -15,6 +18,15 @@ export const SEGURIDAD_API_ENDPOINTS = {
 
   listadoPerfiles:
     '/v1/Perfil/GetPerfiles',
+
+  grupos:
+    '/v1/Grupo',
+
+  listadoGrupos:
+    '/v1/Grupo/GetGruposListado',
+
+  clientesActivos:
+    '/v1/Cliente/GetClientesActivos',
 
   opciones:
     '/v1/Opcion',

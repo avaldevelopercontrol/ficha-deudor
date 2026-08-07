@@ -32,6 +32,8 @@ interface ModuloFormFieldsProps {
   form: ModuloFormData;
   errors: Record<string, string>;
   parentOptions: SelectOption<number>[];
+  nameDisabled?: boolean;
+  codeDisabled?: boolean;
   parentDisabled?: boolean;
   visibleDisabled?: boolean;
   orderControl?: ReactNode;
@@ -62,6 +64,8 @@ export const ModuloFormFields = ({
   form,
   errors,
   parentOptions,
+  nameDisabled = false,
+  codeDisabled = false,
   parentDisabled = false,
   visibleDisabled = false,
   orderControl,
@@ -103,6 +107,7 @@ export const ModuloFormFields = ({
             }
             error={errors.nombre}
             autoComplete="off"
+            disabled={nameDisabled}
             required
           />
 
@@ -125,6 +130,7 @@ export const ModuloFormFields = ({
             }
             error={errors.codigo}
             autoComplete="off"
+            disabled={codeDisabled}
             required
           />
 

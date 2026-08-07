@@ -235,6 +235,26 @@
   box-shadow: inset 3px 0 0 var(--ap-red);
 }
 
+/*
+ * Los módulos padre inactivos mantienen una jerarquía neutra.
+ * El rojo queda reservado únicamente para la sección de la ruta actual.
+ */
+.app-sidebar__nav-item--parent:not(.app-sidebar__nav-item--active):not(.app-sidebar__nav-item--disabled) {
+  background: transparent;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.app-sidebar__nav-item--parent:not(.app-sidebar__nav-item--active):not(.app-sidebar__nav-item--disabled) .app-sidebar__arrow {
+  color: #ffffff;
+}
+
+.app-sidebar__nav-item--parent:not(.app-sidebar__nav-item--active):not(.app-sidebar__nav-item--disabled):hover {
+  background: rgba(255, 255, 255, 0.065);
+  color: #ffffff;
+  box-shadow: none;
+}
+
 .app-sidebar__nav-icon {
   width: 18px;
   height: 18px;

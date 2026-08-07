@@ -41,9 +41,11 @@ export const suite = defineSuite(
         const errors =
           validateRegistrarModuloForm(
             {
-              nombre: 'Seguridad',
+              applicationOptionCode:
+                'mMantenerGrupo',
+              nombre: 'Mantener Grupo',
               descripcion: '',
-              codigo: 'mSeguridad',
+              codigo: 'mMantenerGrupo',
               icono: 'ruta-inventada.ico',
               padreId: 1,
               visible: true,
@@ -57,6 +59,33 @@ export const suite = defineSuite(
         assert.equal(
           errors.icono,
           'Seleccione un icono válido del catálogo SISGES.'
+        );
+      }
+    ),
+    test(
+      'exige seleccionar una pantalla desarrollada al registrar',
+      () => {
+        const errors =
+          validateRegistrarModuloForm(
+            {
+              applicationOptionCode:
+                '',
+              nombre: '',
+              descripcion: '',
+              codigo: '',
+              icono: '',
+              padreId: 1,
+              visible: true,
+              estado: true,
+            },
+            {
+              modulosExistentes: [root],
+            }
+          );
+
+        assert.equal(
+          errors.applicationOptionCode,
+          'Seleccione un módulo desarrollado válido.'
         );
       }
     ),

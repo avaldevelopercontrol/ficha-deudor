@@ -47,6 +47,17 @@ export const MENU_MODULOS: MenuModulo[] = [
         badge: 'Disponible',
       },
       {
+        key: 'mantener-grupo',
+        label: 'MANTENER GRUPO',
+        descripcion:
+          'Consulta los grupos registrados y su cliente asociado.',
+        icon: 'users',
+        path:
+          SEGURIDAD_ROUTES
+            .MANTENER_GRUPO,
+        badge: 'Disponible',
+      },
+      {
         key: 'mantener-accesos-perfil',
         label: 'MANTENER ACCESOS POR PERFIL',
         descripcion:

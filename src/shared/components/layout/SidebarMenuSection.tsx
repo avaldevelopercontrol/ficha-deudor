@@ -2,6 +2,7 @@ import type React from 'react';
 
 import {
   NavLink,
+  useLocation,
 } from 'react-router-dom';
 
 interface SidebarSubItem {
@@ -22,6 +23,34 @@ interface SidebarMenuSectionProps {
 
 const NO_CONSULT_PERMISSION_TITLE =
   'Sin permiso de consulta';
+
+const normalizeRoutePath = (
+  path: string
+) => {
+  if (path === '/') {
+    return path;
+  }
+
+  return path.replace(/\/+$/, '');
+};
+
+const isRouteActive = (
+  pathname: string,
+  to: string
+) => {
+  const currentPath =
+    normalizeRoutePath(pathname);
+  const targetPath =
+    normalizeRoutePath(to);
+
+  return (
+    currentPath === targetPath ||
+    (targetPath !== '/' &&
+      currentPath.startsWith(
+        `${targetPath}/`
+      ))
+  );
+};
 
 const ChevronIcon = ({
   isOpen,
@@ -77,6 +106,25 @@ export const SidebarMenuSection: React.FC<
   disabled = false,
   onToggle,
 }) => {
+  const { pathname } = useLocation();
+
+  const isSectionActive =
+    !disabled &&
+    ((to
+      ? isRouteActive(
+          pathname,
+          to
+        )
+      : false) ||
+      items.some(
+        (item) =>
+          !item.disabled &&
+          isRouteActive(
+            pathname,
+            item.to
+          )
+      ));
+
   if (
     items.length === 0 &&
     to
@@ -130,7 +178,7 @@ export const SidebarMenuSection: React.FC<
           disabled
             ? 'app-sidebar__nav-item--disabled'
             : '',
-          !disabled && isOpen
+          isSectionActive
             ? 'app-sidebar__nav-item--active'
             : '',
         ]

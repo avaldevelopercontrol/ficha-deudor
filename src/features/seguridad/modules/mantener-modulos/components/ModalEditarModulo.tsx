@@ -376,6 +376,7 @@ export const ModalEditarModulo = ({
                   parentOptions={
                     parentOptions
                   }
+                  codeDisabled
                   parentDisabled={
                     isRootModule
                   }

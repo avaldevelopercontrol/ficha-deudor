@@ -17,11 +17,17 @@ export const MODAL_REGISTRAR_MODULO_TEXTS = {
 } as const;
 
 export const MODAL_REGISTRAR_MODULO_SECTIONS = {
+  source:
+    'Módulo desarrollado',
+
   general:
     'Datos del módulo',
 } as const;
 
 export const MODAL_REGISTRAR_MODULO_LABELS = {
+  applicationOption:
+    'Pantalla del sistema',
+
   nombre:
     'Nombre',
 
@@ -45,6 +51,9 @@ export const MODAL_REGISTRAR_MODULO_LABELS = {
 } as const;
 
 export const MODAL_REGISTRAR_MODULO_PLACEHOLDERS = {
+  applicationOption:
+    'Seleccione un módulo desarrollado',
+
   nombre:
     'Ingrese el nombre del módulo',
 
@@ -56,6 +65,14 @@ export const MODAL_REGISTRAR_MODULO_PLACEHOLDERS = {
 
   icono:
     'Seleccionar icono',
+} as const;
+
+export const MODAL_REGISTRAR_MODULO_HELP = {
+  applicationOption:
+    'Solo se muestran los módulos que todavía no están registradas.',
+
+  noApplicationOptions:
+    'No hay módulos desarrollados pendientes de registrar.',
 } as const;
 
 export const MODAL_REGISTRAR_MODULO_VISIBLE_OPTIONS:

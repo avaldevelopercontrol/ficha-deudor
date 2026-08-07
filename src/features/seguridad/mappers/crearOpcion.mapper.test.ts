@@ -40,10 +40,12 @@ export const suite = defineSuite(
         const request =
           buildCreateOpcionRequest(
             {
-              nombre: 'Módulo inactivo',
+              applicationOptionCode:
+                'mMantenerGrupo',
+              nombre: 'Mantener Grupo',
               descripcion:
                 'Descripción de prueba',
-              codigo: 'mModuloInactivo',
+              codigo: 'mMantenerGrupo',
               icono: '',
               padreId: 1,
               visible: true,
@@ -67,6 +69,10 @@ export const suite = defineSuite(
         assert.equal(
           request.sDescripcionOpcion,
           'Descripción de prueba'
+        );
+        assert.equal(
+          request.sUrlOpcion,
+          '/seguridad/mantener-grupo'
         );
         assert.equal(
           request.dFechaCrea,

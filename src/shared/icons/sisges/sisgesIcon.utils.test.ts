@@ -51,6 +51,17 @@ export const suite = defineSuite('sisgesIcon.utils', [
       SISGES_ICON_CATALOG.length
     );
   }),
+  test('incluye un icono específico para grupos', () => {
+    const groupsIcon = getSisgesIconDefinition('groups');
+
+    assert.equal(groupsIcon.name, 'groups');
+    assert.equal(groupsIcon.label, 'Grupos');
+    assert.equal(groupsIcon.category, 'seguridad');
+    assert.equal(
+      searchSisgesIcons('grupo').some((icon) => icon.name === 'groups'),
+      true
+    );
+  }),
   test('encuentra iconos por etiqueta y palabras clave', () => {
     assert.equal(
       searchSisgesIcons('reniec').some((icon) => icon.name === 'identity-search'),

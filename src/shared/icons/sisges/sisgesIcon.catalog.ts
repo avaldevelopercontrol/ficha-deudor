@@ -89,6 +89,7 @@ export const SISGES_ICON_CATALOG: readonly SisgesIconDefinition[] = [
   defineIcon('security', 'Seguridad', 'seguridad', ['seguridad', 'escudo', 'protección']),
   defineIcon('permissions', 'Permisos', 'seguridad', ['permisos', 'accesos', 'check']),
   defineIcon('profiles', 'Perfiles', 'seguridad', ['perfil', 'rol', 'usuarios']),
+  defineIcon('groups', 'Grupos', 'seguridad', ['grupo', 'grupos', 'usuarios', 'equipo']),
   defineIcon('modules', 'Módulos', 'seguridad', ['módulos', 'opciones', 'jerarquía']),
 
   defineIcon('search', 'Buscar', 'generales', ['buscar', 'consulta', 'lupa']),

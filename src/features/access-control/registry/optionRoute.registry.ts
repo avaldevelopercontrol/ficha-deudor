@@ -18,78 +18,196 @@ import {
   SEGURIDAD_ROUTES,
 } from '@features/seguridad/constants/seguridadRoutes.constants';
 
-interface OptionRouteDefinition {
+import type {
+  SisgesIconName,
+} from '@shared/icons/sisges';
+
+export interface ApplicationOptionDefinition {
+  readonly code: string;
+  readonly name: string;
+  readonly description: string;
   readonly path: string;
+  readonly icon: SisgesIconName;
+  readonly sectionName: string;
+  readonly parentCode?: string;
   readonly enabled: boolean;
+  readonly registrable: boolean;
 }
 
-const OPTION_ROUTE_REGISTRY: Readonly<
-  Record<string, OptionRouteDefinition>
-> = {
-  mGestionDeudor: {
-    path: AUTH_ROUTES.GESTION_DEUDOR,
-    enabled: true,
-  },
+const APPLICATION_OPTION_REGISTRY:
+  readonly ApplicationOptionDefinition[] = [
+    {
+      code: 'mGestionDeudor',
+      name: 'Gestión Deudor',
+      description:
+        'Busca deudores por RUC, DNI o teléfono y accede a su ficha.',
+      path: AUTH_ROUTES.GESTION_DEUDOR,
+      icon: 'user',
+      sectionName:
+        'Gestión de Cobranzas',
+      parentCode:
+        'mGestionDeCobranzas',
+      enabled: true,
+      registrable: true,
+    },
+    {
+      code: 'mCambiarClave',
+      name: 'Cambiar Clave',
+      description:
+        'Actualiza la contraseña de acceso de un usuario.',
+      path:
+        GESTION_USUARIOS_ROUTES
+          .CAMBIAR_CLAVE,
+      icon: 'key',
+      sectionName:
+        'Gestión de Usuarios',
+      enabled:
+        GESTION_USUARIOS_FEATURE
+          .enabled,
+      registrable: true,
+    },
+    {
+      code: 'mAsignarUsuario',
+      name: 'Asignar Usuario',
+      description:
+        'Asigna usuarios según cliente, perfil o responsabilidad.',
+      path:
+        GESTION_USUARIOS_ROUTES
+          .ASIGNAR_USUARIO,
+      icon: 'users',
+      sectionName:
+        'Gestión de Usuarios',
+      enabled:
+        GESTION_USUARIOS_FEATURE
+          .enabled,
+      registrable: true,
+    },
+    {
+      code: 'mMantenerUsuario',
+      name: 'Mantener Usuario',
+      description:
+        'Consulta y administra los usuarios registrados.',
+      path:
+        GESTION_USUARIOS_ROUTES
+          .MANTENER_USUARIO,
+      icon: 'user',
+      sectionName:
+        'Gestión de Usuarios',
+      enabled:
+        GESTION_USUARIOS_FEATURE
+          .enabled,
+      registrable: true,
+    },
+    {
+      code: 'mMantenerPerfil',
+      name: 'Mantener Perfil',
+      description:
+        'Consulta y administra los perfiles registrados.',
+      path:
+        SEGURIDAD_ROUTES
+          .MANTENER_PERFIL,
+      icon: 'user',
+      sectionName: 'Seguridad',
+      parentCode: 'mSeguridad',
+      enabled:
+        SEGURIDAD_FEATURE.enabled,
+      registrable: true,
+    },
+    {
+      code: 'mMantenerModulo',
+      name: 'Mantener Módulo',
+      description:
+        'Consulta los módulos y opciones registrados en el sistema.',
+      path:
+        SEGURIDAD_ROUTES
+          .MANTENER_MODULOS,
+      icon: 'monitor',
+      sectionName: 'Seguridad',
+      parentCode: 'mSeguridad',
+      enabled:
+        SEGURIDAD_FEATURE.enabled,
+      registrable: true,
+    },
+    {
+      code: 'mMantenerGrupo',
+      name: 'Mantener Grupo',
+      description:
+        'Consulta los grupos registrados y su cliente asociado.',
+      path:
+        SEGURIDAD_ROUTES
+          .MANTENER_GRUPO,
+      icon: 'groups',
+      sectionName: 'Seguridad',
+      parentCode: 'mSeguridad',
+      enabled:
+        SEGURIDAD_FEATURE.enabled,
+      registrable: true,
+    },
+    {
+      code:
+        'mMantenerAccesosPorPerfil',
+      name:
+        'Mantener Accesos por Perfil',
+      description:
+        'Consulta y administra los permisos asignados a cada perfil.',
+      path:
+        SEGURIDAD_ROUTES
+          .MANTENER_ACCESOS_PERFIL,
+      icon: 'key',
+      sectionName: 'Seguridad',
+      parentCode: 'mSeguridad',
+      enabled:
+        SEGURIDAD_FEATURE.enabled,
+      registrable: true,
+    },
+  ];
 
-  mCambiarClave: {
-    path:
-      GESTION_USUARIOS_ROUTES
-        .CAMBIAR_CLAVE,
-    enabled:
-      GESTION_USUARIOS_FEATURE
-        .enabled,
-  },
+const normalizeOptionCode = (
+  optionCode: string
+): string =>
+  optionCode.trim().toLocaleLowerCase(
+    'es-PE'
+  );
 
-  mAsignarUsuario: {
-    path:
-      GESTION_USUARIOS_ROUTES
-        .ASIGNAR_USUARIO,
-    enabled:
-      GESTION_USUARIOS_FEATURE
-        .enabled,
-  },
+export const getApplicationOptionCatalog = ():
+  readonly ApplicationOptionDefinition[] =>
+  APPLICATION_OPTION_REGISTRY;
 
-  mMantenerUsuario: {
-    path:
-      GESTION_USUARIOS_ROUTES
-        .MANTENER_USUARIO,
-    enabled:
-      GESTION_USUARIOS_FEATURE
-        .enabled,
-  },
+export const getApplicationOptionDefinition = (
+  optionCode: string
+): ApplicationOptionDefinition | null => {
+  const normalizedCode =
+    normalizeOptionCode(optionCode);
 
-  mMantenerPerfil: {
-    path:
-      SEGURIDAD_ROUTES
-        .MANTENER_PERFIL,
-    enabled:
-      SEGURIDAD_FEATURE.enabled,
-  },
+  if (!normalizedCode) {
+    return null;
+  }
 
-  mMantenerModulo: {
-    path:
-      SEGURIDAD_ROUTES
-        .MANTENER_MODULOS,
-    enabled:
-      SEGURIDAD_FEATURE.enabled,
-  },
-
-  mMantenerAccesosPorPerfil: {
-    path:
-      SEGURIDAD_ROUTES
-        .MANTENER_ACCESOS_PERFIL,
-    enabled:
-      SEGURIDAD_FEATURE.enabled,
-  },
+  return (
+    APPLICATION_OPTION_REGISTRY.find(
+      (definition) =>
+        normalizeOptionCode(
+          definition.code
+        ) === normalizedCode
+    ) ?? null
+  );
 };
+
+export const getRegistrableApplicationOptions = ():
+  readonly ApplicationOptionDefinition[] =>
+  APPLICATION_OPTION_REGISTRY.filter(
+    (definition) =>
+      definition.enabled &&
+      definition.registrable
+  );
 
 export const getOptionRoute = (
   optionCode: string
 ): string | null => {
   const definition =
-    OPTION_ROUTE_REGISTRY[
-      optionCode.trim()
-    ];
+    getApplicationOptionDefinition(
+      optionCode
+    );
 
   if (
     !definition ||

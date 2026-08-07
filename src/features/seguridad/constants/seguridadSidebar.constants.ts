@@ -15,6 +15,10 @@ export const SEGURIDAD_SIDEBAR_ITEMS: SeguridadSidebarItem[] = [
     to: SEGURIDAD_ROUTES.MANTENER_MODULOS,
   },
   {
+    label: 'Mantener grupo',
+    to: SEGURIDAD_ROUTES.MANTENER_GRUPO,
+  },
+  {
     label: 'Mantener accesos por perfil',
     to: SEGURIDAD_ROUTES.MANTENER_ACCESOS_PERFIL,
   },

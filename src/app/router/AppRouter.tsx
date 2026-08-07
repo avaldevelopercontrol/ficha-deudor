@@ -118,6 +118,13 @@ const MantenerModulosPage = lazy(
     )
 );
 
+const MantenerGrupoPage = lazy(
+  () =>
+    import(
+      '../../features/seguridad/pages/MantenerGrupoPage'
+    )
+);
+
 const MantenerAccesosPerfilPage = lazy(
   () =>
     import(
@@ -348,6 +355,25 @@ export function AppRouter() {
                   >
                     <OptionAccessRoute optionCode="mMantenerModulo">
                       <MantenerModulosPage />
+                    </OptionAccessRoute>
+                  </FeatureRoute>
+                }
+              />
+
+              <Route
+                path={
+                  SEGURIDAD_ROUTES
+                    .MANTENER_GRUPO
+                }
+                element={
+                  <FeatureRoute
+                    enabled={
+                      SEGURIDAD_FEATURE
+                        .enabled
+                    }
+                  >
+                    <OptionAccessRoute optionCode="mMantenerGrupo">
+                      <MantenerGrupoPage />
                     </OptionAccessRoute>
                   </FeatureRoute>
                 }
