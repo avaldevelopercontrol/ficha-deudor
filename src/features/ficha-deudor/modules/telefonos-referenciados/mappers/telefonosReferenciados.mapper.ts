@@ -1,5 +1,9 @@
-import { parseApiDate } from '@shared/utils/dateUtils';
+import {
+  getCurrentPeruDateTime,
+  toPeruApiDateTimeOrCurrent,
+} from '../../../shared/utils/date.utils';
 import { toNumberValue, toStringValue } from '@shared/utils/formValueMappers';
+import { toRequiredId } from '../../../shared/utils/number.utils';
 import type {
   CreateTelefonoRequest,
   TelefonoFormData,
@@ -47,27 +51,39 @@ export const mapTelefonosReferenciados = (
 export const buildCreateTelefonoRequest = (
   id_deudor: string,
   id_usuario: string,
-  data: TelefonoFormData
+  data: TelefonoFormData,
+  currentDate = new Date()
 ): CreateTelefonoRequest => {
-  const nowIso = new Date().toISOString();
+  const currentPeruDateTime =
+    getCurrentPeruDateTime(
+      currentDate
+    );
 
   return {
-    nId_PersDeudor: toNumberValue(id_deudor),
+    nId_PersDeudor: toRequiredId(id_deudor, 'nId_PersDeudor'),
     nTelef_Pre: '',
     nTelef_Nro: toStringValue(data.numero),
     nTelef_Anexo: toStringValue(data.anexo),
-    nId_PersRefUbi: toNumberValue(data.ubicacion),
-    nTelef_Prioridad: toNumberValue(data.prioridad),
+    nId_PersRefUbi: toRequiredId(data.ubicacion, 'nId_PersRefUbi'),
+    nTelef_Prioridad: toRequiredId(data.prioridad, 'nTelef_Prioridad'),
     cTelef_Coment: toStringValue(data.comentario),
-    nId_PersDeudorGestionHrs: toNumberValue(data.horarioGestion),
-    nId_PersTelefOpe: toNumberValue(data.resultado),
-    nId_Fuente: toNumberValue(data.fuenteBusqueda),
-    nreferencia: toNumberValue(data.referencia),
-    nid_usuarioupd: toNumberValue(id_usuario),
-    nId_OperadorTelefonico: toNumberValue(data.operadorTelefonico),
+    nId_PersDeudorGestionHrs: toRequiredId(
+      data.horarioGestion,
+      'nId_PersDeudorGestionHrs'
+    ),
+    nId_PersTelefOpe: toRequiredId(data.resultado, 'nId_PersTelefOpe'),
+    nId_Fuente: toRequiredId(data.fuenteBusqueda, 'nId_Fuente'),
+    nreferencia: toRequiredId(data.referencia, 'nreferencia'),
+    nid_usuarioupd: toRequiredId(id_usuario, 'nid_usuarioupd'),
+    nId_OperadorTelefonico: toRequiredId(
+      data.operadorTelefonico,
+      'nId_OperadorTelefonico'
+    ),
     bEstado: true,
-    dFecUlt_PerstelefOpe: nowIso,
-    dFecCarga_PersTelef: nowIso,
+    dFecUlt_PerstelefOpe:
+      currentPeruDateTime,
+    dFecCarga_PersTelef:
+      currentPeruDateTime,
     bReclamo: data.reclamoIndecopi ?? false,
   };
 };
@@ -76,7 +92,8 @@ export const buildUpdateTelefonoRequest = (
   id_deudor: string,
   id_usuario: string,
   id_telefono: number,
-  data: TelefonoFormData
+  data: TelefonoFormData,
+  currentDate = new Date()
 ): CreateTelefonoRequest => {
   const numero = toStringValue(data.numero);
 
@@ -85,23 +102,36 @@ export const buildUpdateTelefonoRequest = (
     : ['', numero];
 
   return {
-    nId_PersTelef: id_telefono,
-    nId_PersDeudor: toNumberValue(id_deudor),
+    nId_PersTelef: toRequiredId(id_telefono, 'nId_PersTelef'),
+    nId_PersDeudor: toRequiredId(id_deudor, 'nId_PersDeudor'),
     nTelef_Pre: toStringValue(nTelef_Pre),
     nTelef_Nro: toStringValue(nTelef_Nro),
     nTelef_Anexo: toStringValue(data.anexo),
-    nId_PersRefUbi: toNumberValue(data.ubicacion),
-    nTelef_Prioridad: toNumberValue(data.prioridad),
+    nId_PersRefUbi: toRequiredId(data.ubicacion, 'nId_PersRefUbi'),
+    nTelef_Prioridad: toRequiredId(data.prioridad, 'nTelef_Prioridad'),
     cTelef_Coment: toStringValue(data.comentario),
-    nId_PersDeudorGestionHrs: toNumberValue(data.horarioGestion),
-    nId_PersTelefOpe: toNumberValue(data.resultado),
-    nId_Fuente: toNumberValue(data.fuenteBusqueda),
-    nreferencia: toNumberValue(data.referencia),
-    nid_usuarioupd: toNumberValue(id_usuario),
-    nId_OperadorTelefonico: toNumberValue(data.operadorTelefonico),
+    nId_PersDeudorGestionHrs: toRequiredId(
+      data.horarioGestion,
+      'nId_PersDeudorGestionHrs'
+    ),
+    nId_PersTelefOpe: toRequiredId(data.resultado, 'nId_PersTelefOpe'),
+    nId_Fuente: toRequiredId(data.fuenteBusqueda, 'nId_Fuente'),
+    nreferencia: toRequiredId(data.referencia, 'nreferencia'),
+    nid_usuarioupd: toRequiredId(id_usuario, 'nid_usuarioupd'),
+    nId_OperadorTelefonico: toRequiredId(
+      data.operadorTelefonico,
+      'nId_OperadorTelefonico'
+    ),
     bEstado: data.bEstado ?? true,
-    dFecUlt_PerstelefOpe: new Date().toISOString(),
-    dFecCarga_PersTelef: parseApiDate(data.dFecCarga_PersTelef),
+    dFecUlt_PerstelefOpe:
+      getCurrentPeruDateTime(
+        currentDate
+      ),
+    dFecCarga_PersTelef:
+      toPeruApiDateTimeOrCurrent(
+        data.dFecCarga_PersTelef,
+        currentDate
+      ),
     bReclamo: data.reclamoIndecopi ?? false,
   };
 };

@@ -53,4 +53,7 @@
   background: rgba(255, 255, 255, .1); 
   color: #fff; 
 }
-
+.modal-close:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}

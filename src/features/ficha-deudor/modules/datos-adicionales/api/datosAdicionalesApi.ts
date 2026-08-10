@@ -15,7 +15,10 @@ import {
   DATOS_ADICIONALES_FETCH_PAGE_SIZE,
 } from '../constants/datosAdicionales.constants';
 import { mapCabeceraDatosAdicionalesToColumns } from '../mappers/datosAdicionales.mapper';
-import { assertApiSuccess } from '../../../shared/utils/apiResponse.utils';
+import {
+  unwrapApiArrayResponse,
+  unwrapApiObjectResponse,
+} from '../../../shared/utils/apiResponse.utils';
 
 const buildCabeceraDatosAdicionalesParams = (
   id_cliente: string,
@@ -43,23 +46,29 @@ const buildDatosAdicionalesParams = (
 
 export async function fetchCabeceraDatosAdicionales(
   id_cliente: string,
-  pantalla: number
+  pantalla: number,
+  signal?: AbortSignal
 ): Promise<ColumnApi[]> {
   const params = buildCabeceraDatosAdicionalesParams(id_cliente, pantalla);
 
   const result = await apiClient<ApiResponseSimple<CabeceraDatosAdicionalesApi>>(
-    `${DATOS_ADICIONALES_ENDPOINTS.CABECERA}?${params.toString()}`
+    `${DATOS_ADICIONALES_ENDPOINTS.CABECERA}?${params.toString()}`,
+    { signal }
   );
 
-  assertApiSuccess(result, DATOS_ADICIONALES_ERROR_MESSAGES.META);
+  const cabecera = unwrapApiObjectResponse<CabeceraDatosAdicionalesApi>(
+    result,
+    DATOS_ADICIONALES_ERROR_MESSAGES.META
+  );
 
-  return mapCabeceraDatosAdicionalesToColumns(result.response);
+  return mapCabeceraDatosAdicionalesToColumns(cabecera);
 }
 
 export async function fetchAllDatosAdicionales(
   id_cliente: string,
   id_cartera: string,
-  id_deudor: string
+  id_deudor: string,
+  signal?: AbortSignal
 ): Promise<DatoAdicionalApi[]> {
   const params = buildDatosAdicionalesParams(
     id_cliente,
@@ -68,10 +77,12 @@ export async function fetchAllDatosAdicionales(
   );
 
   const result = await apiClient<ApiResponse<DatoAdicionalApi[]>>(
-    `${DATOS_ADICIONALES_ENDPOINTS.DATA}?${params.toString()}`
+    `${DATOS_ADICIONALES_ENDPOINTS.DATA}?${params.toString()}`,
+    { signal }
   );
 
-  assertApiSuccess(result, DATOS_ADICIONALES_ERROR_MESSAGES.DATA);
-
-  return result.response;
+  return unwrapApiArrayResponse<DatoAdicionalApi>(
+    result,
+    DATOS_ADICIONALES_ERROR_MESSAGES.DATA
+  );
 }

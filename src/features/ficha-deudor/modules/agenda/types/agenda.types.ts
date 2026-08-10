@@ -17,15 +17,3 @@ export interface Agenda {
   respuestaOEstado: string;
   usuario: string;
 }
-
-export interface AgendaListResponse {
-  code: string;
-  message: string;
-  messageUser: string;
-  statusCode: number;
-  pageNumber: number;
-  pageSize: number;
-  totalRecords: number;
-  totalPages: number;
-  response: AgendaApi[];
-}

@@ -14,10 +14,13 @@ import {
 import { closePopupWindow } from '../../../shared/utils/popupWindow.utils';
 import type {
   Gestor,
-  GestorSeleccionadoMessage,
 } from '../types/gestor.types';
 import {
+  buildGestorSeleccionadoMessage,
+} from '../utils/gestorMessaging.utils';
+import {
   PopupContextBoundary,
+  parsePopupWindowName,
   type FichaDeudorPopupContext,
 } from '@app/popups';
 
@@ -49,15 +52,25 @@ const ListaGestoresPopupContent: React.FC<
   } = useGestoresByCliente(idCliente);
 
   const handleSelect = useCallback((gestor: Gestor) => {
-    const message: GestorSeleccionadoMessage = {
-      type: 'GESTOR_SELECTED',
-      payload: {
-        id: gestor.id,
-        nombre: gestor.nombre,
-      },
-    };
+    const popupDescriptor =
+      parsePopupWindowName(window.name);
 
-    window.opener?.postMessage(message, window.location.origin);
+    if (
+      !popupDescriptor ||
+      popupDescriptor.popupType !== 'lista-gestores'
+    ) {
+      return;
+    }
+
+    const message = buildGestorSeleccionadoMessage(
+      gestor,
+      popupDescriptor.popupId
+    );
+
+    window.opener?.postMessage(
+      message,
+      window.location.origin
+    );
     closePopupWindow();
   }, []);
 

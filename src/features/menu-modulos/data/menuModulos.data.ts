@@ -1,10 +1,83 @@
+import { GESTION_USUARIOS_ROUTES } from '@features/gestion-usuarios/constants/gestionUsuariosRoutes.constants';
 import { MENU_MODULOS_ROUTES } from '../constants/menuModulosRoutes.constants';
 import type { MenuModulo } from '../types';
 import { GESTION_USUARIOS_FEATURE } from '@features/gestion-usuarios/constants/gestionUsuariosFeature.constants';
+import {
+  SEGURIDAD_FEATURE,
+} from '@features/seguridad/constants/seguridadFeature.constants';
+
+import {
+  SEGURIDAD_ROUTES,
+} from '@features/seguridad/constants/seguridadRoutes.constants';
 
 const PROXIMAMENTE_BADGE = 'Próximamente';
 
 export const MENU_MODULOS: MenuModulo[] = [
+  {
+    key: 'seguridad',
+    label: 'SEGURIDAD',
+    descripcion:
+      'Administración de perfiles y permisos de acceso al sistema.',
+    icon: 'shield',
+    isEnabled:
+      SEGURIDAD_FEATURE.enabled,
+    badge:
+      SEGURIDAD_FEATURE.badge,
+    children: [
+      {
+        key: 'mantener-perfil',
+        label: 'MANTENER PERFIL',
+        descripcion:
+          'Consulta y administra los perfiles registrados.',
+        icon: 'user',
+        path:
+          SEGURIDAD_ROUTES
+            .MANTENER_PERFIL,
+        badge: 'Disponible',
+      },
+      {
+        key: 'mantener-modulos',
+        label: 'MANTENER MÓDULO',
+        descripcion:
+          'Consulta los módulos y opciones registrados en el sistema.',
+        icon: 'monitor',
+        path:
+          SEGURIDAD_ROUTES
+            .MANTENER_MODULOS,
+        badge: 'Disponible',
+      },
+      {
+        key: 'mantener-grupo',
+        label: 'MANTENER GRUPO',
+        descripcion:
+          'Consulta los grupos registrados y su cliente asociado.',
+        icon: 'users',
+        path:
+          SEGURIDAD_ROUTES
+            .MANTENER_GRUPO,
+        badge: 'Disponible',
+      },
+      {
+        key: 'mantener-accesos-perfil',
+        label: 'MANTENER ACCESOS POR PERFIL',
+        descripcion:
+          'Consulta la cantidad de opciones asignadas a cada perfil.',
+        icon: 'key',
+        path:
+          SEGURIDAD_ROUTES
+            .MANTENER_ACCESOS_PERFIL,
+        badge: 'Disponible',
+      },
+    ],
+  },
+  {
+    key: 'carga-datos',
+    label: 'CARGA DE DATOS',
+    descripcion: 'Carga y procesamiento de bases para campañas de cobranza.',
+    icon: 'database',
+    isEnabled: false,
+    badge: PROXIMAMENTE_BADGE,
+  },
   {
     key: 'gestion-cobranza',
     label: 'GESTIÓN DE COBRANZAS',
@@ -56,14 +129,6 @@ export const MENU_MODULOS: MenuModulo[] = [
     ],
   },
   {
-    key: 'carga-datos',
-    label: 'CARGA DE DATOS',
-    descripcion: 'Carga y procesamiento de bases para campañas de cobranza.',
-    icon: 'database',
-    isEnabled: false,
-    badge: PROXIMAMENTE_BADGE,
-  },
-  {
   key: 'gestion-usuarios',
     label: 'GESTIÓN DE USUARIOS',
     descripcion:
@@ -71,7 +136,35 @@ export const MENU_MODULOS: MenuModulo[] = [
     icon: 'users',
     isEnabled: GESTION_USUARIOS_FEATURE.enabled,
     badge: GESTION_USUARIOS_FEATURE.badge,
-    
+    children: [
+      {
+        key: 'cambiar-clave',
+        label: 'CAMBIAR CLAVE',
+        descripcion:
+          'Actualiza la contraseña de acceso de un usuario.',
+        icon: 'key',
+        path: GESTION_USUARIOS_ROUTES.CAMBIAR_CLAVE,
+        badge: 'Disponible',
+      },
+      {
+        key: 'asignar-usuario',
+        label: 'ASIGNAR USUARIO',
+        descripcion:
+          'Asigna usuarios según cliente, perfil o responsabilidad.',
+        icon: 'users',
+        path: GESTION_USUARIOS_ROUTES.ASIGNAR_USUARIO,
+        badge: 'Disponible',
+      },
+      {
+        key: 'mantener-usuario',
+        label: 'MANTENER USUARIO',
+        descripcion:
+          'Consulta y administra los usuarios registrados.',
+        icon: 'user',
+        path: GESTION_USUARIOS_ROUTES.MANTENER_USUARIO,
+        badge: 'Disponible',
+      },
+    ],
   },
   {
     key: 'reportes-generales',
@@ -102,14 +195,6 @@ export const MENU_MODULOS: MenuModulo[] = [
     label: 'PRODUCCIÓN ONLINE',
     descripcion: 'Monitoreo de producción en tiempo real.',
     icon: 'monitor',
-    isEnabled: false,
-    badge: PROXIMAMENTE_BADGE,
-  },
-  {
-    key: 'parametros-iniciales',
-    label: 'PARÁMETROS INICIALES',
-    descripcion: 'Configuraciones iniciales y parámetros del sistema.',
-    icon: 'sliders',
     isEnabled: false,
     badge: PROXIMAMENTE_BADGE,
   },

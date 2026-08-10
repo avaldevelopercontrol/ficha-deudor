@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useApiResource } from '@shared/hooks/useApiResource';
+import { hasRequiredValues } from '../../../shared/utils/requiredValues.utils';
 import {
   fetchGestionEstados,
   fetchGestionTipos,
@@ -13,23 +14,13 @@ import type {
   GestionPaletaRespuestaList,
   GestionEstadoClaroList,
   GestionMotivoNoPagoList,
-} from '../../../shared/types';
+} from '../types/fichaGestion.types';
 import {
   CLIENTE_CLARO_ID,
   TIPO_GESTION_PALETA,
 } from '../constants/fichaGestion.constants';
 
 const resolveEmptyList = <T>() => Promise.resolve<T[]>([]);
-
-const hasValue = (value: string | number | null | undefined) => {
-  return String(value ?? '').trim() !== '';
-};
-
-const hasRequiredValues = (
-  ...values: Array<string | number | null | undefined>
-) => {
-  return values.every(hasValue);
-};
 
 const isClienteClaro = (idCliente: string) => {
   return String(idCliente) === CLIENTE_CLARO_ID;

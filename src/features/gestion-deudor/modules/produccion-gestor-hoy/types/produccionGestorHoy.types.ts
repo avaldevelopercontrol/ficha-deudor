@@ -1,3 +1,5 @@
+import type { ApiResponse } from '@shared/types/indexApi';
+
 export interface ProduccionGestorHoyApi {
   hora: string;
   total: number;
@@ -18,17 +20,8 @@ export interface ProduccionGestorHoyRow {
   otros: number;
 }
 
-export interface GetProduccionGestorHoyResponse {
-  code: string;
-  message: string;
-  messageUser: string;
-  statusCode: number;
-  pageNumber: number;
-  pageSize: number;
-  totalRecords: number;
-  totalPages: number;
-  response:
-    | ProduccionGestorHoyApi[]
-    | ProduccionGestorHoyApi
-    | null;
-}
+export type GetProduccionGestorHoyResponse = ApiResponse<
+  | ProduccionGestorHoyApi[]
+  | ProduccionGestorHoyApi
+  | null
+>;

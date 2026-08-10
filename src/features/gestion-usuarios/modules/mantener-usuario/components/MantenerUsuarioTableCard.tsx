@@ -1,28 +1,53 @@
-import type React from 'react';
+import {
+  useCallback,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import Table from '@shared/components/table/Table';
+
+import {
+  ActionButton,
+} from '@shared/components/ui';
+
 import Paginacion from '@shared/components/ui/Paginacion';
 
-import UsuariosTableResourceState from '../../../components/UsuariosTableResourceState';
+import TableResourceState from '@shared/components/table/TableResourceState';
+
 import {
   MANTENER_USUARIO_PAGE_SIZE_OPTIONS,
   MANTENER_USUARIO_TEXTS,
 } from '../constants/mantenerUsuario.constants';
-import { useMantenerUsuarioColumns } from '../hooks/useMantenerUsuarioColumns';
-import { useMantenerUsuarioTable } from '../hooks/useMantenerUsuarioTable';
-import type { UsuarioMantenible } from '../types/mantenerUsuario.types';
+
+import {
+  useMantenerUsuarioColumns,
+} from '../hooks/useMantenerUsuarioColumns';
+
+import {
+  useMantenerUsuarioTable,
+} from '../hooks/useMantenerUsuarioTable';
+
+import type {
+  UsuarioMantenible,
+} from '../types/mantenerUsuario.types';
+
+import ModalRegistrarUsuario from './ModalRegistrarUsuario';
 
 interface MantenerUsuarioTableCardProps {
   onEditUsuario?: (
-    usuario: UsuarioMantenible
+    usuario:
+      UsuarioMantenible
   ) => void;
 }
 
-export const MantenerUsuarioTableCard: React.FC<
-  MantenerUsuarioTableCardProps
-> = ({
+export const MantenerUsuarioTableCard = ({
   onEditUsuario,
-}) => {
+}: MantenerUsuarioTableCardProps): ReactNode => {
+  const [
+    isRegisterModalOpen,
+    setIsRegisterModalOpen,
+  ] = useState(false);
+
   const columns =
     useMantenerUsuarioColumns({
       onEditUsuario,
@@ -52,113 +77,169 @@ export const MantenerUsuarioTableCard: React.FC<
 
     onTextFilterChange,
     onSelectedFilterChange,
+
+    registrarUsuario,
   } = useMantenerUsuarioTable();
 
+  const handleOpenRegisterModal =
+    useCallback(() => {
+      setIsRegisterModalOpen(
+        true
+      );
+    }, []);
+
+  const handleCloseRegisterModal =
+    useCallback(() => {
+      setIsRegisterModalOpen(
+        false
+      );
+    }, []);
+
   return (
-    <section
-      className="mantener-usuario-card"
-      aria-labelledby="mantener-usuario-list-title"
-    >
-      <header className="mantener-usuario-card__header">
-        <div>
-          <h1
-            id="mantener-usuario-list-title"
-            className="mantener-usuario-card__title"
-          >
-            {
-              MANTENER_USUARIO_TEXTS
-                .sectionTitle
-            }
-          </h1>
-
-          <p className="mantener-usuario-card__description">
-            {
-              MANTENER_USUARIO_TEXTS
-                .sectionDescription
-            }
-          </p>
-        </div>
-
-        <span className="mantener-usuario-card__count">
-          {totalRecords} usuario(s)
-        </span>
-      </header>
-
-      <UsuariosTableResourceState
-        isLoading={isLoading}
-        error={error}
-        onRetry={refetch}
+    <>
+      <section
+        className="mantener-usuario-card"
+        aria-labelledby="mantener-usuario-list-title"
       >
-        <>
-          <div className="mantener-usuario-table">
-            <Table
-              columns={columns}
-              data={paginatedData}
-              allData={allData}
-              emptyMessage={
+        <header className="mantener-usuario-card__header">
+          <div>
+            <h1
+              id="mantener-usuario-list-title"
+              className="mantener-usuario-card__title"
+            >
+              {
                 MANTENER_USUARIO_TEXTS
-                  .emptyMessage
+                  .sectionTitle
               }
-              enableColumnFilters
-              textFilters={textFilters}
-              selectedFilters={
-                selectedFilters
+            </h1>
+
+            <p className="mantener-usuario-card__description">
+              {
+                MANTENER_USUARIO_TEXTS
+                  .sectionDescription
               }
-              onTextFilterChange={
-                onTextFilterChange
-              }
-              onSelectedFilterChange={
-                onSelectedFilterChange
-              }
-              fitToPanel
-            />
+            </p>
           </div>
 
-          {totalRecords > 0 && (
-            <div className="mantener-usuario-card__pagination">
-              <Paginacion
-                paginaActual={pageNumber}
-                totalPaginas={totalPages}
-                totalRegistros={
-                  totalRecords
+          <ActionButton
+            label={
+              MANTENER_USUARIO_TEXTS
+                .addAction
+            }
+            variant="primary"
+            size="sm"
+            icon="+"
+            onClick={
+              handleOpenRegisterModal
+            }
+            className="mantener-usuario-card__add-button"
+          />
+        </header>
+
+        <TableResourceState
+          loadingMessage="Cargando usuarios..."
+          isLoading={isLoading}
+          error={error}
+          onRetry={refetch}
+        >
+          <>
+            <div className="mantener-usuario-table">
+              <Table
+                columns={columns}
+                data={
+                  paginatedData
                 }
-                indiceInicio={
-                  indiceInicio
+                allData={allData}
+                emptyMessage={
+                  MANTENER_USUARIO_TEXTS
+                    .emptyMessage
                 }
-                indiceFin={indiceFin}
-                onPaginaAnterior={() => {
-                  setPageNumber(
-                    Math.max(
-                      1,
-                      pageNumber - 1
-                    )
-                  );
-                }}
-                onPaginaSiguiente={() => {
-                  setPageNumber(
-                    Math.min(
-                      totalPages,
-                      pageNumber + 1
-                    )
-                  );
-                }}
-                onIrAPagina={
-                  setPageNumber
+                enableColumnFilters
+                textFilters={
+                  textFilters
                 }
-                showPageSizeSelector
-                pageSize={pageSize}
-                pageSizeOptions={[
-                  ...MANTENER_USUARIO_PAGE_SIZE_OPTIONS,
-                ]}
-                onPageSizeChange={
-                  setPageSize
+                selectedFilters={
+                  selectedFilters
                 }
+                onTextFilterChange={
+                  onTextFilterChange
+                }
+                onSelectedFilterChange={
+                  onSelectedFilterChange
+                }
+                fitToPanel
               />
             </div>
-          )}
-        </>
-      </UsuariosTableResourceState>
-    </section>
+
+            {totalRecords >
+              0 && (
+              <div className="mantener-usuario-card__pagination">
+                <Paginacion
+                  paginaActual={
+                    pageNumber
+                  }
+                  totalPaginas={
+                    totalPages
+                  }
+                  totalRegistros={
+                    totalRecords
+                  }
+                  indiceInicio={
+                    indiceInicio
+                  }
+                  indiceFin={
+                    indiceFin
+                  }
+                  onPaginaAnterior={() => {
+                    setPageNumber(
+                      Math.max(
+                        1,
+                        pageNumber -
+                          1
+                      )
+                    );
+                  }}
+                  onPaginaSiguiente={() => {
+                    setPageNumber(
+                      Math.min(
+                        totalPages,
+                        pageNumber +
+                          1
+                      )
+                    );
+                  }}
+                  onIrAPagina={
+                    setPageNumber
+                  }
+                  showPageSizeSelector
+                  pageSize={
+                    pageSize
+                  }
+                  pageSizeOptions={[
+                    ...MANTENER_USUARIO_PAGE_SIZE_OPTIONS,
+                  ]}
+                  onPageSizeChange={
+                    setPageSize
+                  }
+                />
+              </div>
+            )}
+          </>
+        </TableResourceState>
+      </section>
+
+      <ModalRegistrarUsuario
+        isOpen={
+          isRegisterModalOpen
+        }
+        onClose={
+          handleCloseRegisterModal
+        }
+        onRegistrar={
+          registrarUsuario
+        }
+      />
+    </>
   );
 };
 

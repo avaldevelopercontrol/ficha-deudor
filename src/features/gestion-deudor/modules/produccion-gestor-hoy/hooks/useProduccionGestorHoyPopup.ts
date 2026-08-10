@@ -1,10 +1,15 @@
 import {
   useCallback,
+  useMemo,
 } from 'react';
 
 import {
   openFichaDeudorPopup,
 } from '@app/popups';
+
+import {
+  resolveProduccionGestorHoyIdentity,
+} from '../utils/produccionGestorHoyIdentity.utils';
 
 interface UseProduccionGestorHoyPopupParams {
   idCliente: string;
@@ -15,8 +20,15 @@ export const useProduccionGestorHoyPopup = ({
   idCliente,
   idUsuario,
 }: UseProduccionGestorHoyPopupParams) => {
-  const isDisabled =
-    !idCliente || !idUsuario;
+  const identity = useMemo(
+    () =>
+      resolveProduccionGestorHoyIdentity(
+        idCliente,
+        idUsuario
+      ),
+    [idCliente, idUsuario]
+  );
+  const isDisabled = !identity;
 
   const handleOpenProduccionGestorHoy =
     useCallback(() => {
@@ -26,14 +38,10 @@ export const useProduccionGestorHoyPopup = ({
 
       openFichaDeudorPopup(
         'produccion-gestor-hoy',
-        {
-          idCliente,
-          idUsuario,
-        }
+        identity
       );
     }, [
-      idCliente,
-      idUsuario,
+      identity,
       isDisabled,
     ]);
 

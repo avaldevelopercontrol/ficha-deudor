@@ -1,6 +1,10 @@
 import type { FichaDeudorGestionFormParams } from '../../../shared/types/fichaDeudor.types';
 import type { PaletaRespuestaOption } from '../../../shared/utils/selectOptions.utils';
-import { toNumber } from '../../../shared/utils/number.utils';
+import {
+  buildPeruApiDateTime,
+  getCurrentPeruDateTime,
+} from '../../../shared/utils/date.utils';
+import { toRequiredId } from '../../../shared/utils/number.utils';
 import { isSinDatoOption } from '../validations/fichaGestionAgendaValidation';
 import type {
   CreateAgendaPayload,
@@ -45,39 +49,6 @@ const extractLastNumericCode = (
   return Number(lastMatch[1]);
 };
 
-const buildScheduledDateTime = (
-  date: string,
-  time: string
-): string => {
-  const [year, month, day] = date
-    .split('-')
-    .map(Number);
-
-  const [hour, minute] = time
-    .split(':')
-    .map(Number);
-
-  const scheduledDate = new Date(
-    year,
-    month - 1,
-    day,
-    hour,
-    minute,
-    0,
-    0
-  );
-
-  if (
-    Number.isNaN(scheduledDate.getTime())
-  ) {
-    throw new Error(
-      'La fecha y hora de nueva gestión no son válidas.'
-    );
-  }
-
-  return scheduledDate.toISOString();
-};
-
 export const buildCreateAgendaPayload = ({
   form,
   params,
@@ -116,28 +87,42 @@ export const buildCreateAgendaPayload = ({
     nid_agenda: 0,
 
     dFechNuevaGestion:
-      buildScheduledDateTime(
+      buildPeruApiDateTime(
         form.fechaNuevaGestion,
         form.horaNuevaGestion
       ),
 
     nid_PersDeudor:
-      toNumber(params.id_deudor),
+      toRequiredId(
+        params.id_deudor,
+        'nid_PersDeudor'
+      ),
 
     nombre: deudorNombre.trim(),
     cartera: carteraNombre.trim(),
 
     nid_Cartera:
-      toNumber(params.id_cartera),
+      toRequiredId(
+        params.id_cartera,
+        'nid_Cartera'
+      ),
 
     nid_Cliente:
-      toNumber(params.id_cliente),
+      toRequiredId(
+        params.id_cliente,
+        'nid_Cliente'
+      ),
 
     nid_UsuOpe:
-      toNumber(params.id_usuario),
+      toRequiredId(
+        params.id_usuario,
+        'nid_UsuOpe'
+      ),
 
     dFecRegistro:
-      registrationDate.toISOString(),
+      getCurrentPeruDateTime(
+        registrationDate
+      ),
 
     cUsr_Login:
       String(params.id_usuario),

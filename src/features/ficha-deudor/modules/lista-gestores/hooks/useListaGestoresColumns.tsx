@@ -62,6 +62,7 @@ export const useListaGestoresColumns = ({
         label: LISTA_GESTORES_POPUP_COLUMNS.acciones,
         width:
           LISTA_GESTORES_POPUP_COLUMN_WIDTHS.acciones,
+        align: 'center',  
         filterable: false,
         render: (row: Gestor) => (
           <SelectActionButton

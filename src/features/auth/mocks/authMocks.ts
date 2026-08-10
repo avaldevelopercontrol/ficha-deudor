@@ -22,7 +22,7 @@ const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
   gestor1: {
     password: 'gestor123',
     usuario: {
-      id_usuario: 'USR002',
+      id_usuario: '16069',
       nombre: 'María',
       apellido: 'López',
       username: 'gestor1',
@@ -34,7 +34,7 @@ const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
   gestor2: {
     password: 'gestor456',
     usuario: {
-      id_usuario: 'USR003',
+      id_usuario: '16070',
       nombre: 'Juan',
       apellido: 'Pérez',
       username: 'gestor2',
@@ -61,6 +61,34 @@ export const clientesMock: Cliente[] = [
 // ─────────────────────────────────────────────
 // MOCK FUNCTIONS
 // ─────────────────────────────────────────────
+
+const waitForMockDelay = (
+  duration: number,
+  signal?: AbortSignal
+): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      const error = new Error('Solicitud cancelada');
+      error.name = 'AbortError';
+      reject(error);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      signal?.removeEventListener('abort', handleAbort);
+      resolve();
+    }, duration);
+
+    const handleAbort = () => {
+      clearTimeout(timeoutId);
+      signal?.removeEventListener('abort', handleAbort);
+      const error = new Error('Solicitud cancelada');
+      error.name = 'AbortError';
+      reject(error);
+    };
+
+    signal?.addEventListener('abort', handleAbort, { once: true });
+  });
 
 /**
  * Simula el endpoint de login.
@@ -103,10 +131,11 @@ export const mockLogin = async (payload: {
  * Ya no filtra por usuario.
  */
 export const mockGetClientesByUsuario = async (
-  _id_usuario?: string
+  _id_usuario?: string,
+  signal?: AbortSignal
 ): Promise<ClientesResponse> => {
   void _id_usuario;
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  await waitForMockDelay(500, signal);
 
   const clientesActivos = clientesMock.filter((cliente) => cliente.activa);
 

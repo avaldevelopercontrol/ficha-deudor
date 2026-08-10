@@ -23,7 +23,7 @@ import {
   PRODUCCION_GESTOR_HOY_TEXTS,
 } from '../../produccion-gestor-hoy/constants/produccionGestorHoy.constants';
 
-interface GestionDeudorResultsCardProps {
+export interface GestionDeudorResultsCardProps {
   columns:
     Column<DeudorGestionDeudor>[];
 

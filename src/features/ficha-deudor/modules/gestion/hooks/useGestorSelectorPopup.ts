@@ -1,8 +1,16 @@
-import { useCallback, useEffect } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react';
 
 import {
   openFichaDeudorPopup,
+  parsePopupWindowName,
 } from '@app/popups';
+import {
+  isGestorSeleccionadoMessage,
+} from '../../lista-gestores/utils/gestorMessaging.utils';
 import type {
   SetGestionField,
 } from '../types/fichaGestion.types';
@@ -12,39 +20,50 @@ interface UseGestorSelectorPopupParams {
   setField: SetGestionField;
 }
 
-type GestorSelectedMessage = {
-  type: 'GESTOR_SELECTED';
-  payload?: {
-    id?: string | number;
-    nombre?: string;
-  };
-};
-
-const isGestorSelectedMessage = (
-  data: unknown
-): data is GestorSelectedMessage => {
-  if (typeof data !== 'object' || data === null) {
-    return false;
-  }
-
-  return (
-    (data as { type?: unknown }).type ===
-    'GESTOR_SELECTED'
-  );
-};
+interface GestorPopupReference {
+  popupWindow: Window;
+  popupId: string;
+}
 
 export const useGestorSelectorPopup = ({
   idCliente,
   setField,
 }: UseGestorSelectorPopupParams) => {
+  const popupReferenceRef =
+    useRef<GestorPopupReference | null>(null);
+
   const handleOpenListaGestores = useCallback(() => {
     if (!idCliente) {
       return;
     }
 
-    openFichaDeudorPopup('lista-gestores', {
-      idCliente,
-    });
+    const popupWindow = openFichaDeudorPopup(
+      'lista-gestores',
+      {
+        idCliente,
+      }
+    );
+
+    if (!popupWindow) {
+      popupReferenceRef.current = null;
+      return;
+    }
+
+    const popupDescriptor =
+      parsePopupWindowName(popupWindow.name);
+
+    if (
+      !popupDescriptor ||
+      popupDescriptor.popupType !== 'lista-gestores'
+    ) {
+      popupReferenceRef.current = null;
+      return;
+    }
+
+    popupReferenceRef.current = {
+      popupWindow,
+      popupId: popupDescriptor.popupId,
+    };
   }, [idCliente]);
 
   useEffect(() => {
@@ -55,22 +74,32 @@ export const useGestorSelectorPopup = ({
         return;
       }
 
-      if (!isGestorSelectedMessage(event.data)) {
-        return;
-      }
-
-      const { id, nombre } =
-        event.data.payload ?? {};
+      const popupReference =
+        popupReferenceRef.current;
 
       if (
-        id === undefined ||
-        nombre === undefined
+        !popupReference ||
+        event.source !== popupReference.popupWindow
       ) {
         return;
       }
 
-      setField('gestorId', String(id));
-      setField('gestorNombre', nombre);
+      if (
+        !isGestorSeleccionadoMessage(
+          event.data,
+          popupReference.popupId
+        )
+      ) {
+        return;
+      }
+
+      setField('gestorId', event.data.payload.id);
+      setField(
+        'gestorNombre',
+        event.data.payload.nombre
+      );
+
+      popupReferenceRef.current = null;
     };
 
     window.addEventListener(
@@ -83,6 +112,8 @@ export const useGestorSelectorPopup = ({
         'message',
         handleMessage
       );
+
+      popupReferenceRef.current = null;
     };
   }, [setField]);
 

@@ -1076,3 +1076,17 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* Estado de envío en formularios modales */
+.modal-form-layout__submit-button {
+  min-width: 118px;
+}
+
+/*
+ * Mientras se procesa, se impide modificar
+ * el formulario enviado.
+ */
+.modal-form-layout--submitting
+  .modal-form-layout__body {
+  pointer-events: none;
+  opacity: 0.82;
+}

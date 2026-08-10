@@ -3,7 +3,7 @@ import { WrapCell } from '@shared/components/ui/WrapCell';
 import type {
   GestionCompleta,
   GestionRealizada,
-} from '../../../shared/types';
+} from '../types/gestionRealizada.types';
 
 const CONTACTADO_TEXT = 'Contactado';
 

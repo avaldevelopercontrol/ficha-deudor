@@ -47,15 +47,10 @@ export interface DireccionEditFormData {
   estado: boolean;
 }
 
-export interface DepartamentoApi {
-  nId_Departamento: number;
-  cNombre_Departamento: string;
-}
-
-export interface Departamento {
-  id: string;
-  nombre: string;
-}
+export type {
+  Departamento,
+  DepartamentoApi,
+} from '@shared/catalogos/departamentos/types/departamento.types';
 
 export interface ProvinciaApi {
   nId_Provincia: number;

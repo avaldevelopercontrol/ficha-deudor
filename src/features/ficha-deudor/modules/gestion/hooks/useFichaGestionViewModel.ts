@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useAuth } from '@features/auth/contexts/authContextValue';
+import { useAuth } from '@features/auth/hooks/useAuth';
 import type { DocumentoApi } from '../../../shared/types';
 import { useFichaGestionActions } from './useFichaGestionActions';
 import { useFichaGestionCatalogos } from './useFichaGestionCatalogos';

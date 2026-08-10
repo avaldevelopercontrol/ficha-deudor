@@ -21,15 +21,3 @@ export interface Pago {
   notaCredito: string;
   marca: string;
 }
-
-export interface PagoListResponse {
-  code: string;
-  message: string;
-  messageUser: string;
-  statusCode: number;
-  pageNumber: number;
-  pageSize: number;
-  totalRecords: number;
-  totalPages: number;
-  response: PagoApi[];
-}

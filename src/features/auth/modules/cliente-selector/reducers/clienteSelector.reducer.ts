@@ -55,6 +55,14 @@ export function clienteSelectorReducer(
       };
 
     case 'SELECT_CLIENTE':
+      if (
+        !state.clientes.some(
+          (cliente) => cliente.id_cliente === action.clienteId
+        )
+      ) {
+        return state;
+      }
+
       return {
         ...state,
         selectedClienteId: action.clienteId,

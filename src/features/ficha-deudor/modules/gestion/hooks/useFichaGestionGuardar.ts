@@ -1,6 +1,5 @@
 import {
   useCallback,
-  useRef,
   useState,
 } from 'react';
 
@@ -16,6 +15,7 @@ import type {
 import { useAutoClearValidationErrors } from './useAutoClearValidationErrors';
 import { getCurrentPeruDateTime } from '../../../shared/utils/date.utils';
 import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
+import { useAsyncMutation } from '../../../../../shared/hooks/useAsyncMutation';
 
 interface UseFichaGestionGuardarParams {
   form: GestionFormClaro;
@@ -46,9 +46,10 @@ export const useFichaGestionGuardar = ({
     setValidationErrors,
   ] = useState<FichaGestionValidationErrors>({});
 
-  const [isSaving, setIsSaving] = useState(false);
-
-  const isSavingRef = useRef(false);
+  const {
+    isPending: isSaving,
+    execute: executeSave,
+  } = useAsyncMutation();
 
   const clearValidationErrors = useCallback(() => {
     setValidationErrors({});
@@ -61,22 +62,33 @@ export const useFichaGestionGuardar = ({
 
   const handleGuardar =
     useCallback(async () => {
-      if (isSavingRef.current) {
-        return;
-      }
-
       const fechaFinGestion =
         getCurrentPeruDateTime();
 
-      const saveRequest =
-        buildGestionSaveRequest({
-          form,
-          params,
-          documentosFiltrados,
-          np1TipoContacto,
-          requiereCamposClaro,
-          fechaFinGestion,
-        });
+      let saveRequest;
+
+      try {
+        saveRequest =
+          buildGestionSaveRequest({
+            form,
+            params,
+            documentosFiltrados,
+            np1TipoContacto,
+            requiereCamposClaro,
+            fechaFinGestion,
+          });
+      } catch (error) {
+        clearValidationErrors();
+
+        onError?.(
+          getErrorMessage(
+            error,
+            FICHA_GESTION_MESSAGES.SAVE_ERROR
+          )
+        );
+
+        return;
+      }
 
       setValidationErrors(
         saveRequest.validationErrors
@@ -86,30 +98,25 @@ export const useFichaGestionGuardar = ({
         return;
       }
 
-      isSavingRef.current = true;
-      setIsSaving(true);
+      const result = await executeSave(
+        () =>
+          createGestionOpeGesContratos(
+            saveRequest.payload
+          )
+      );
 
-      let gestionGuardada = false;
+      if (result.status === 'skipped') {
+        return;
+      }
 
-      try {
-        await createGestionOpeGesContratos(
-          saveRequest.payload
-        );
-
-        gestionGuardada = true;
-      } catch (error) {
+      if (result.status === 'error') {
         onError?.(
           getErrorMessage(
-            error,
+            result.error,
             FICHA_GESTION_MESSAGES.SAVE_ERROR
           )
         );
-      } finally {
-        isSavingRef.current = false;
-        setIsSaving(false);
-      }
 
-      if (!gestionGuardada) {
         return;
       }
 
@@ -122,7 +129,9 @@ export const useFichaGestionGuardar = ({
         form.gestionTerminada
       );
     }, [
+      clearValidationErrors,
       documentosFiltrados,
+      executeSave,
       form,
       np1TipoContacto,
       onError,

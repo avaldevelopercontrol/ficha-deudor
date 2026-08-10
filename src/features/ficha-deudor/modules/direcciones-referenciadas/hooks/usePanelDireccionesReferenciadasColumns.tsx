@@ -47,6 +47,7 @@ export const usePanelDireccionesReferenciadasColumns = ({
         key: 'acciones',
         label: 'Editar',
         width: '55px',
+        align: 'center',
         filterable: false,
         render: (row) => renderDireccionEditCell(row, onEdit),
       },

@@ -9,6 +9,8 @@ interface ApiRequestOptions<T = unknown> {
   body?: unknown;
   signal?: AbortSignal;
   headers?: Record<string, string>;
+  cache?: RequestCache;
+  referrerPolicy?: ReferrerPolicy;
   mock?: MockFn<T>;
   useMock?: boolean;
 }
@@ -126,6 +128,8 @@ export async function apiClient<T>(
     body,
     signal,
     headers = {},
+    cache,
+    referrerPolicy,
     mock,
     useMock = env.useMocks,
   } = options;
@@ -149,6 +153,8 @@ export async function apiClient<T>(
     method,
     signal,
     headers: requestHeaders,
+    cache,
+    referrerPolicy,
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 

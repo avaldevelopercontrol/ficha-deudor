@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {
+  useCallback,
+} from 'react';
 import { ModalFormLayout } from '../../../shared/components/modals/ModalFormLayout';
 
 import { useModalForm } from '@shared/hooks/ui/useModalForm';
@@ -6,6 +8,7 @@ import { useEmailById } from '../hooks/useEmailsByDeudor';
 import { useEmailCatalogosForm } from '../hooks/useEmailCatalogosForm';
 import type { DeudorInfo } from '../../../shared/types';
 import type {
+  Email,
   EmailEditFormData,
   EmailByIdApi,
 } from '../types/email.types';
@@ -28,19 +31,26 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   emailId: string | null;
+
+  emailsExistentes:
+    readonly Email[];
+
   onGuardar?: (
     data: EmailEditFormData
   ) => Promise<void> | void;
+
   deudorData?: DeudorInfo | null;
 }
 
-const ModalEditarEmail: React.FC<Props> = ({
-  isOpen,
-  onClose,
-  emailId,
-  onGuardar,
-  deudorData,
-}) => {
+const ModalEditarEmail:
+  React.FC<Props> = ({
+    isOpen,
+    onClose,
+    emailId,
+    emailsExistentes,
+    onGuardar,
+    deudorData,
+  }) => {
   const {
     data: emailApi,
     isLoading: isLoadingEmail,
@@ -49,6 +59,19 @@ const ModalEditarEmail: React.FC<Props> = ({
 
   const { statusesOptions, isLoadingStatuses, errorStatuses } =
     useEmailCatalogosForm();
+
+  const validate = useCallback(
+    (data: EmailEditFormData) =>
+      validateEmailEditForm(
+        data,
+        emailsExistentes,
+        emailId
+      ),
+    [
+      emailsExistentes,
+      emailId,
+    ]
+  );
 
   const {
     form,
@@ -75,7 +98,7 @@ const ModalEditarEmail: React.FC<Props> = ({
     onSubmit: (data) =>
       onGuardar?.(data),
 
-    validate: validateEmailEditForm,
+    validate,
     resetOnClose: true,
   });
 

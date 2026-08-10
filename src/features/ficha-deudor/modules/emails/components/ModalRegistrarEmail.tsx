@@ -1,12 +1,16 @@
-import React from 'react';
+import React, {
+  useCallback,
+} from 'react';
 
 import { ModalFormLayout } from '../../../shared/components/modals/ModalFormLayout';
 
 import { useModalForm } from '@shared/hooks/ui/useModalForm';
 import { useEmailCatalogosForm } from '../hooks/useEmailCatalogosForm';
 import type { DeudorInfo } from '../../../shared/types';
-import type { EmailFormData } from '../types/email.types';
-
+import type {
+  Email,
+  EmailFormData,
+} from '../types/email.types';
 
 import { validateEmailForm } from '../validations/emailValidations';
 import {
@@ -23,20 +27,36 @@ import { EmailFormFields } from './EmailFormFields';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+
+  emailsExistentes:
+    readonly Email[];
+
   onRegistrar?: (
     data: EmailFormData
   ) => Promise<void> | void;
+
   deudorData?: DeudorInfo | null;
 }
 
-const ModalRegistrarEmail: React.FC<Props> = ({
-  isOpen,
-  onClose,
-  onRegistrar,
-  deudorData,
-}) => {
+const ModalRegistrarEmail:
+  React.FC<Props> = ({
+    isOpen,
+    onClose,
+    emailsExistentes,
+    onRegistrar,
+    deudorData,
+  }) => {
   const { statusesOptions, isLoadingStatuses, errorStatuses } =
     useEmailCatalogosForm();
+
+  const validate = useCallback(
+    (data: EmailFormData) =>
+      validateEmailForm(
+        data,
+        emailsExistentes
+      ),
+    [emailsExistentes]
+  );
 
   const {
     form,
@@ -55,7 +75,7 @@ const ModalRegistrarEmail: React.FC<Props> = ({
     onSubmit: (data) =>
       onRegistrar?.(data),
 
-    validate: validateEmailForm,
+    validate,
     resetOnClose: true,
   });
 

@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {
+  useCallback,
+} from 'react';
 
 import { ModalFormLayout } from '../../../shared/components/modals/ModalFormLayout';
 import { useModalForm } from '@shared/hooks/ui/useModalForm';
@@ -7,6 +9,7 @@ import { useTelefonoCatalogosForm } from '../hooks/useTelefonoCatalogosForm';
 import type {
   TelefonoFormData,
   TelefonoEditarApi,
+  TelefonoReferenciado,
 } from '../types/telefono.types';
 import {
   MODAL_EDITAR_TELEFONO_INITIAL_FORM,
@@ -26,17 +29,23 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   telefonoId: number | null;
+
+  telefonosExistentes:
+    readonly TelefonoReferenciado[];
+
   onGuardar?: (
     data: TelefonoFormData
   ) => Promise<void> | void;
 }
 
-const ModalEditarTelefono: React.FC<Props> = ({
-  isOpen,
-  onClose,
-  telefonoId,
-  onGuardar,
-}) => {
+const ModalEditarTelefono:
+  React.FC<Props> = ({
+    isOpen,
+    onClose,
+    telefonoId,
+    telefonosExistentes,
+    onGuardar,
+  }) => {
   const {
     data: telefonoApi,
     isLoading: isLoadingTelefono,
@@ -63,6 +72,19 @@ const ModalEditarTelefono: React.FC<Props> = ({
 
   const telefonoEntity = telefonoApi as TelefonoEditarApi | null;
 
+  const validate = useCallback(
+    (data: TelefonoFormData) =>
+      validateModalEditarTelefono(
+        data,
+        telefonosExistentes,
+        telefonoId
+      ),
+    [
+      telefonosExistentes,
+      telefonoId,
+    ]
+  );
+
   const {
     form,
     errors,
@@ -88,8 +110,7 @@ const ModalEditarTelefono: React.FC<Props> = ({
     onSubmit: (data) =>
       onGuardar?.(data),
 
-    validate:
-      validateModalEditarTelefono,
+    validate,
 
     resetOnClose: true,
   });

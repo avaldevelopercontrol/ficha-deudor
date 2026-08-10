@@ -26,3 +26,34 @@
 .select-action-button:focus-visible { outline: 2px solid var(--ap-red); outline-offset: 2px; }
 .select-action-button:disabled { cursor: not-allowed; opacity: 0.5; }
 .select-action-button svg { width: 17px; height: 17px; pointer-events: none; }
+/* Estado de carga reutilizable para botones */
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.btn--loading {
+  cursor: wait;
+}
+
+.btn-loading-spinner {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+
+  border: 2px solid
+    rgba(255, 255, 255, 0.45);
+
+  border-top-color: currentColor;
+  border-radius: 50%;
+
+  animation:
+    btn-loading-spin 0.7s linear
+    infinite;
+}
+
+@keyframes btn-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -20,7 +20,10 @@ import {
 import { DOCUMENTOS_API_ENDPOINTS } from '../constants/documentosApi.constants';
 import { buildDocumentosBotones } from '../constants/documentosBotones.constants';
 import { mapCabecerasToColumns } from '../mappers/documentos.mapper';
-import { assertApiSuccess } from '../../../shared/utils/apiResponse.utils';
+import {
+  ensureArrayResponse,
+  unwrapApiArrayResponse,
+} from '../../../shared/utils/apiResponse.utils';
 import {
   buildDocumentosBotonesParams,
   buildDocumentosCabeceraParams,
@@ -45,14 +48,12 @@ export async function fetchColumnas(
       { signal }
     );
 
-  assertApiSuccess(
+  const cabeceras = unwrapApiArrayResponse<CabeceraPantallaApi>(
     result,
     DOCUMENTOS_ERROR_MESSAGES.HEADERS
   );
 
-  return mapCabecerasToColumns(
-    result.response
-  );
+  return mapCabecerasToColumns(cabeceras);
 }
 
 export async function fetchBotones(
@@ -64,7 +65,7 @@ export async function fetchBotones(
       id_cliente
     );
 
-  return apiClient<BotonApi[]>(
+  const result = await apiClient<BotonApi[]>(
     `${DOCUMENTOS_API_ENDPOINTS.BOTONES}?${params.toString()}`,
     {
       mock: () =>
@@ -74,6 +75,11 @@ export async function fetchBotones(
       useMock: env.useDocumentosMock,
       signal,
     }
+  );
+
+  return ensureArrayResponse<BotonApi>(
+    result,
+    DOCUMENTOS_ERROR_MESSAGES.BUTTONS
   );
 }
 
@@ -102,14 +108,10 @@ export async function fetchAllGestiones(
       { signal }
     );
 
-  assertApiSuccess(
+  return unwrapApiArrayResponse<DocumentoApi>(
     result,
     DOCUMENTOS_ERROR_MESSAGES.DATA
   );
-
-  return Array.isArray(result.response)
-    ? result.response
-    : [];
 }
 
 export async function fetchGestiones(
@@ -127,7 +129,14 @@ export async function fetchGestiones(
     pageSize,
   });
 
-  return apiClient<ApiResponse<DocumentoApi[]>>(
+  const result = await apiClient<ApiResponse<DocumentoApi[]>>(
     `${DOCUMENTOS_API_ENDPOINTS.DOCUMENTOS}?${params.toString()}`
   );
+
+  unwrapApiArrayResponse<DocumentoApi>(
+    result,
+    DOCUMENTOS_ERROR_MESSAGES.DATA
+  );
+
+  return result;
 }

@@ -2,8 +2,8 @@ import type {
   EstadoGestion,
   EstadoGestionApi,
   EstadoGestionCompleta,
-  GestionHistoricaApi,
-} from '../../../shared/types';
+  EstadoGestionHistoricaApi,
+} from '../types/estadoGestion.types';
 
 export const mapEstadoGestion = (
   item: EstadoGestionApi
@@ -27,7 +27,7 @@ export const mapEstadosGestion = (
 };
 
 export const mapEstadoGestionHistorico = (
-  item: GestionHistoricaApi
+  item: EstadoGestionHistoricaApi
 ): EstadoGestionCompleta => {
   return {
     id: String(item.nId_DocxCobrarOpe),
@@ -45,7 +45,7 @@ export const mapEstadoGestionHistorico = (
 };
 
 export const mapEstadosGestionHistoricos = (
-  data: GestionHistoricaApi[]
+  data: EstadoGestionHistoricaApi[]
 ): EstadoGestionCompleta[] => {
   return data.map(mapEstadoGestionHistorico);
 };

@@ -1,8 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { login as loginApi } from '../../api/authApi';
-import { AUTH_API_MESSAGES } from '../../constants/authApi.constants';
-import { useAuthExternalLogoutSync } from '../../hooks/useAuthExternalLogoutSync';
+import { useAuthExternalSessionSync } from '../../hooks/useAuthExternalSessionSync';
+import { useLoginRequest } from '../../hooks/useLoginRequest';
 import type {
   AuthContextValue,
   AuthState,
@@ -11,112 +10,67 @@ import type {
   LoginResponse,
 } from '../../types';
 import {
-  buildLoginErrorResponse,
+  buildAuthenticatedUserState,
+  buildLoginCancelledResponse,
+  buildRejectedLoginState,
+  clearAuthStateError,
   clearStoredAuthState,
   initialAuthState,
   loadStoredAuthState,
+  resolveAuthContextState,
   saveStoredAuthState,
+  selectAuthClient,
 } from '../../utils';
 
 export const useAuthProviderValue = (): AuthContextValue => {
   const [state, setState] = useState<AuthState>(() => loadStoredAuthState());
+  const {
+    isLoading: loginIsLoading,
+    error: loginError,
+    execute: executeLogin,
+    reset: resetLogin,
+    clearError: clearLoginError,
+  } = useLoginRequest();
 
-  useAuthExternalLogoutSync(setState);
+  useAuthExternalSessionSync(setState, resetLogin);
 
   const login = useCallback(
     async (payload: LoginPayload): Promise<LoginResponse> => {
-      setState((prev) => ({
-        ...prev,
-        isLoading: true,
-        error: null,
-      }));
+      const outcome = await executeLogin(payload);
 
-      try {
-        const response = await loginApi(payload);
-
-        if (!response.success || !response.usuario) {
-          clearStoredAuthState('manual');
-
-          setState((prev) => ({
-            ...prev,
-            isAuthenticated: false,
-            usuario: null,
-            clienteSeleccionada: null,
-            isLoading: false,
-            error: response.message,
-          }));
-
-          return response;
-        }
-
-        setState((prev) => {
-          const nextState: AuthState = {
-            ...prev,
-            isAuthenticated: true,
-            usuario: response.usuario,
-            clienteSeleccionada: null,
-            isLoading: false,
-            error: null,
-          };
-
-          saveStoredAuthState(nextState);
-
-          return nextState;
-        });
-
-        return response;
-      } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : AUTH_API_MESSAGES.LOGIN_UNEXPECTED_ERROR;
-
-        clearStoredAuthState('manual');
-
-        setState((prev) => ({
-          ...prev,
-          isAuthenticated: false,
-          usuario: null,
-          clienteSeleccionada: null,
-          isLoading: false,
-          error: message,
-        }));
-
-        return buildLoginErrorResponse(message);
+      if (outcome.status === 'cancelled') {
+        return buildLoginCancelledResponse();
       }
+
+      const response = outcome.response;
+
+      if (!response.success || !response.usuario) {
+        clearStoredAuthState('manual');
+        setState(buildRejectedLoginState(response.message));
+        return response;
+      }
+
+      const nextState = buildAuthenticatedUserState(response.usuario);
+
+      saveStoredAuthState(nextState);
+      setState(nextState);
+
+      return response;
     },
-    []
+    [executeLogin]
   );
 
   const logout = useCallback(() => {
+    resetLogin();
     clearStoredAuthState('manual');
     setState(initialAuthState);
-  }, []);
+  }, [resetLogin]);
 
   const seleccionarCliente = useCallback((cliente: Cliente) => {
-    setState((prev) => {
-      const nextState: AuthState = {
-        ...prev,
-        isAuthenticated: !!prev.usuario,
-        clienteSeleccionada: cliente,
-        isLoading: false,
-        error: null,
-      };
+    setState((currentState) => {
+      const nextState = selectAuthClient(currentState, cliente);
 
-      saveStoredAuthState(nextState);
-
-      return nextState;
-    });
-  }, []);
-
-  const clearError = useCallback(() => {
-    setState((prev) => {
-      const nextState: AuthState = {
-        ...prev,
-        error: null,
-      };
-
-      if (nextState.usuario) {
+      if (nextState !== currentState) {
         saveStoredAuthState(nextState);
       }
 
@@ -124,14 +78,36 @@ export const useAuthProviderValue = (): AuthContextValue => {
     });
   }, []);
 
+  const clearError = useCallback(() => {
+    clearLoginError();
+
+    setState((currentState) => {
+      const nextState = clearAuthStateError(currentState);
+
+      if (nextState !== currentState && nextState.usuario) {
+        saveStoredAuthState(nextState);
+      }
+
+      return nextState;
+    });
+  }, [clearLoginError]);
+
   return useMemo(
     () => ({
-      ...state,
+      ...resolveAuthContextState(state, loginIsLoading, loginError),
       login,
       logout,
       seleccionarCliente,
       clearError,
     }),
-    [state, login, logout, seleccionarCliente, clearError]
+    [
+      state,
+      loginIsLoading,
+      loginError,
+      login,
+      logout,
+      seleccionarCliente,
+      clearError,
+    ]
   );
 };

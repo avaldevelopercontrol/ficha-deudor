@@ -1,3 +1,5 @@
+import type { ApiResponse } from '@shared/types/indexApi';
+
 export type TipoBusquedaGestionDeudor = 'R' | 'D' | 'F';
 
 export interface DeudorGestionDeudorApi {
@@ -44,17 +46,11 @@ export interface DeudorGestionDeudor {
   mejorStatus: string;
 }
 
-export interface GetDeudoresGestionDeudorResponse {
-  code: string;
-  message: string;
-  messageUser: string;
-  statusCode: number;
-  pageNumber: number;
-  pageSize: number;
-  totalRecords: number;
-  totalPages: number;
-  response: DeudorGestionDeudorApi[] | DeudorGestionDeudorApi | null;
-}
+export type GetDeudoresGestionDeudorResponse = ApiResponse<
+  | DeudorGestionDeudorApi[]
+  | DeudorGestionDeudorApi
+  | null
+>;
 
 export interface BuscarDeudoresGestionDeudorParams {
   nIdCliente: string;

@@ -1,11 +1,14 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from '../../features/auth/contexts/authContextValue';
+import { Navigate, Outlet } from 'react-router-dom';
+
+import { AUTH_ROUTES } from '../../features/auth/constants';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { hasPrivateRouteAccess } from '../../features/auth/utils';
 
 export function ProtectedRoute() {
-  const { usuario, clienteSeleccionada } = useAuth();
+  const auth = useAuth();
 
-  if (!usuario || !clienteSeleccionada) {
-    return <Navigate to="/login" replace />;
+  if (!hasPrivateRouteAccess(auth)) {
+    return <Navigate to={AUTH_ROUTES.LOGIN} replace />;
   }
 
   return <Outlet />;

@@ -1,4 +1,12 @@
 import { useReducer, useMemo, useCallback, useEffect } from 'react';
+import {
+  clampPageNumber,
+  resolveClientPagination,
+} from '../utils/pagination.utils';
+import {
+  createStableKey,
+  type StableKeyPart,
+} from '../utils/stableKey.utils';
 
 export interface TextFilters {
   [columnKey: string]: string;
@@ -118,7 +126,7 @@ function getRowValue(row: unknown, columnKey: string): unknown {
 
 export function useClientSideTable<T>(
   data: T[],
-  resetDeps: readonly unknown[] = [],
+  resetDeps: readonly StableKeyPart[] = [],
   options: UseClientSideTableOptions = {}
 ): UseClientSideTableReturn<T> {
   const { initialPageSize = 10 } = options;
@@ -131,7 +139,7 @@ export function useClientSideTable<T>(
 
   const { pageNumber, pageSize, textFilters, selectedFilters } = state;
 
-  const resetDepsKey = JSON.stringify(resetDeps);
+  const resetDepsKey = createStableKey(resetDeps);
 
   useEffect(() => {
     dispatch({ type: 'RESET_ALL' });
@@ -164,17 +172,45 @@ export function useClientSideTable<T>(
   }, [data, textFilters, selectedFilters]);
 
   const totalRecords = filteredData.length;
-  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
-  const indiceInicio = (pageNumber - 1) * pageSize;
-  const indiceFin = Math.min(indiceInicio + pageSize, totalRecords);
-  const paginatedData = filteredData.slice(indiceInicio, indiceFin);
+  const pagination = resolveClientPagination(
+    totalRecords,
+    pageSize,
+    pageNumber
+  );
+  const {
+    pageNumber: safePageNumber,
+    totalPages,
+    startIndex: indiceInicio,
+    endIndex: indiceFin,
+  } = pagination;
+  const paginatedData = filteredData.slice(
+    indiceInicio,
+    indiceFin
+  );
 
-  const handleSetPageNumber = useCallback((page: number) => {
+  useEffect(() => {
+    if (pageNumber === safePageNumber) {
+      return;
+    }
+
     dispatch({
       type: 'SET_PAGE_NUMBER',
-      page,
+      page: safePageNumber,
     });
-  }, []);
+  }, [pageNumber, safePageNumber]);
+
+  const handleSetPageNumber = useCallback(
+    (page: number) => {
+      dispatch({
+        type: 'SET_PAGE_NUMBER',
+        page: clampPageNumber(
+          page,
+          totalPages
+        ),
+      });
+    },
+    [totalPages]
+  );
 
   const handleSetPageSize = useCallback((size: number) => {
     dispatch({
@@ -211,7 +247,7 @@ export function useClientSideTable<T>(
   return {
     filteredData,
     paginatedData,
-    pageNumber,
+    pageNumber: safePageNumber,
     pageSize,
     totalRecords,
     totalPages,

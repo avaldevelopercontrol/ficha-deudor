@@ -101,6 +101,7 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
       <ModalRegistrarDireccion
         isOpen={showRegistrar}
         onClose={handleCloseRegistrar}
+        direccionesExistentes={allData}
         onRegistrar={handleRegistrar}
       />
 
@@ -108,6 +109,7 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
         isOpen={showEditar}
         onClose={handleCloseEditar}
         direccionId={direccionEditarId}
+        direccionesExistentes={allData}
         onGuardar={handleGuardarEdicion}
       />
     </>

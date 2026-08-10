@@ -3,7 +3,7 @@ import type {
   GestionHistoricaApi,
   GestionRealizada,
   GestionRealizadaApi,
-} from '../../../shared/types';
+} from '../types/gestionRealizada.types';
 
 export const mapGestionRealizada = (
   item: GestionRealizadaApi

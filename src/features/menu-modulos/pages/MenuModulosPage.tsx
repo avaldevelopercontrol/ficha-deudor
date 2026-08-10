@@ -1,5 +1,9 @@
 import type React from 'react';
 
+import {
+  AccessControlFeedback,
+} from '@features/access-control';
+
 import MenuModuloCard from '../components/MenuModuloCard';
 import MenuModuloChildrenModal from '../components/MenuModuloChildrenModal';
 import { useMenuModulos } from '../hooks';
@@ -9,10 +13,61 @@ export const MenuModulosPage: React.FC = () => {
     modulos,
     selectedModulo,
     welcomeName,
+    status,
+    error,
+    onRetry,
     onSelectModulo,
     onSelectChildModulo,
     onCloseModal,
   } = useMenuModulos();
+
+  const renderContent = () => {
+    if (
+      status === 'idle' ||
+      status === 'loading'
+    ) {
+      return (
+        <AccessControlFeedback
+          message="Cargando módulos disponibles..."
+        />
+      );
+    }
+
+    if (status === 'error') {
+      return (
+        <AccessControlFeedback
+          message={
+            error ??
+            'No se pudieron cargar sus módulos.'
+          }
+          actionLabel="Reintentar"
+          onAction={() => {
+            void onRetry();
+          }}
+        />
+      );
+    }
+
+    if (modulos.length === 0) {
+      return (
+        <AccessControlFeedback
+          message="Su perfil no tiene módulos habilitados."
+        />
+      );
+    }
+
+    return (
+      <div className="menu-modulos-grid">
+        {modulos.map((modulo) => (
+          <MenuModuloCard
+            key={modulo.key}
+            modulo={modulo}
+            onSelect={onSelectModulo}
+          />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <section className="menu-modulos-page">
@@ -27,26 +82,19 @@ export const MenuModulosPage: React.FC = () => {
           </h1>
 
           <p className="menu-modulos-hero__description">
-            Selecciona el módulo con el que deseas trabajar. Solo se muestran
-            como activos los apartados disponibles en esta versión.
+            Selecciona uno de los módulos habilitados para tu perfil.
           </p>
         </div>
       </div>
 
-      <div className="menu-modulos-grid">
-        {modulos.map((modulo) => (
-          <MenuModuloCard
-            key={modulo.key}
-            modulo={modulo}
-            onSelect={onSelectModulo}
-          />
-        ))}
-      </div>
+      {renderContent()}
 
       <MenuModuloChildrenModal
         modulo={selectedModulo}
         onClose={onCloseModal}
-        onSelect={onSelectChildModulo}
+        onSelect={
+          onSelectChildModulo
+        }
       />
     </section>
   );

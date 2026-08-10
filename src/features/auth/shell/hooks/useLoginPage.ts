@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { Cliente, LoginPayload, Usuario } from '../../types';
-import { useAuth } from '../../contexts/authContextValue';
+import { useAuth } from '../../hooks/useAuth';
 import { AUTH_ROUTES } from '../../constants';
 
 const buildGestionDeudorUrl = (
@@ -41,6 +41,10 @@ export const useLoginPage = () => {
       setLoginError(null);
 
       const response = await login(payload);
+
+      if (response.cancelled) {
+        return;
+      }
 
       if (!response.success || !response.usuario) {
         setLoginError(response.message || 'Usuario o contraseña incorrectos');

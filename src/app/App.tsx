@@ -1,11 +1,12 @@
 import { AppRouter } from './router/AppRouter';
-import { useAuth } from '../features/auth/contexts/authContextValue';
+import { useAuth } from '../features/auth/hooks/useAuth';
 import { useLastMainWindowLogout } from '../features/auth/hooks/useLastMainWindowLogout';
+import { hasAuthenticatedIdentity } from '../features/auth/utils';
 
 function AppContent() {
-  const { isAuthenticated } = useAuth();
+  const auth = useAuth();
 
-  useLastMainWindowLogout(isAuthenticated);
+  useLastMainWindowLogout(hasAuthenticatedIdentity(auth));
 
   return <AppRouter />;
 }

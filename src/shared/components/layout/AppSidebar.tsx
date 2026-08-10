@@ -1,20 +1,44 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import type React from 'react';
 
-import { useAuth } from '../../../features/auth/contexts/authContextValue';
-import { GESTION_USUARIOS_ROUTES } from '../../../features/gestion-usuarios/constants/gestionUsuariosRoutes.constants';
-import { AUTH_ROUTES } from '../../../features/auth/constants';
+import {
+  useState,
+} from 'react';
+
+import {
+  useNavigate,
+} from 'react-router-dom';
+
+import {
+  useAccessControl,
+} from '../../../features/access-control';
+
+import {
+  AUTH_ROUTES,
+} from '../../../features/auth/constants';
+
+import {
+  useAuth,
+} from '../../../features/auth/hooks/useAuth';
+
+import {
+  SisgesIcon,
+} from '../../icons/sisges';
+
 import SidebarMenuSection from './SidebarMenuSection';
+
 import '../../styles/components/app-sidebar.css';
-import { GESTION_USUARIOS_FEATURE } from '../../../features/gestion-usuarios/constants/gestionUsuariosFeature.constants';
 
 interface AppSidebarProps {
   isCollapsed?: boolean;
   onToggleCollapsed?: () => void;
-  onExpandedChange?: (isExpanded: boolean) => void;
+  onExpandedChange?: (
+    isExpanded: boolean
+  ) => void;
 }
 
-const getRoleInitials = (role?: string) => {
+const getRoleInitials = (
+  role?: string
+) => {
   const cleanRole = role?.trim();
 
   if (!cleanRole) {
@@ -26,102 +50,21 @@ const getRoleInitials = (role?: string) => {
     .split(/\s+/)
     .filter(Boolean);
 
-  const first = words[0]?.charAt(0) ?? '';
-  const second = words[1]?.charAt(0) ?? '';
+  const first =
+    words[0]?.charAt(0) ?? '';
 
-  return `${first}${second}`.toUpperCase() || 'R';
+  const second =
+    words[1]?.charAt(0) ?? '';
+
+  return `${first}${second}`
+    .toUpperCase() || 'R';
 };
 
-const GestionIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <rect
-      x="3"
-      y="3"
-      width="7"
-      height="7"
-      rx="1"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-
-    <rect
-      x="14"
-      y="3"
-      width="7"
-      height="7"
-      rx="1"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-
-    <rect
-      x="3"
-      y="14"
-      width="7"
-      height="7"
-      rx="1"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-
-    <rect
-      x="14"
-      y="14"
-      width="7"
-      height="7"
-      rx="1"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-  </svg>
-);
-
-const UsersIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path
-      d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-
-    <circle
-      cx="9"
-      cy="7"
-      r="4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-
-    <path
-      d="M23 21v-2a4 4 0 0 0-3-3.87"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-
-    <path
-      d="M16 3.13a4 4 0 0 1 0 7.75"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 const LogoutIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <svg
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
     <path
       d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
       fill="none"
@@ -141,7 +84,9 @@ const LogoutIcon = () => (
   </svg>
 );
 
-export const AppSidebar: React.FC<AppSidebarProps> = () => {
+export const AppSidebar: React.FC<
+  AppSidebarProps
+> = () => {
   const navigate = useNavigate();
 
   const {
@@ -150,14 +95,43 @@ export const AppSidebar: React.FC<AppSidebarProps> = () => {
     logout,
   } = useAuth();
 
-  const [isCobranzaOpen, setIsCobranzaOpen] = useState(true);
-  const [isUsuariosOpen, setIsUsuariosOpen] = useState(true);
+  const {
+    status,
+    error,
+    navigationTree,
+  } = useAccessControl();
 
-  const initials = getRoleInitials(usuario?.perfil);
+  const [openSections, setOpenSections] =
+    useState<Record<string, boolean>>(
+      {}
+    );
+
+  const initials = getRoleInitials(
+    usuario?.perfil
+  );
 
   const handleLogout = () => {
     logout();
-    navigate('/login', { replace: true });
+    navigate(
+      AUTH_ROUTES.LOGIN,
+      {
+        replace: true,
+      }
+    );
+  };
+
+  const toggleSection = (
+    optionCode: string
+  ) => {
+    setOpenSections(
+      (currentSections) => ({
+        ...currentSections,
+        [optionCode]:
+          !(currentSections[
+            optionCode
+          ] ?? true),
+      })
+    );
   };
 
   return (
@@ -207,11 +181,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = () => {
 
           <div className="app-sidebar__user-info">
             <span className="app-sidebar__user-name">
-              {usuario?.perfil || 'Perfil no definido'}
+              {usuario?.perfil ||
+                'Perfil no definido'}
             </span>
 
             <span className="app-sidebar__user-role">
-              {usuario?.id_usuario || 'Usuario no definido'}
+              {usuario?.id_usuario ||
+                'Usuario no definido'}
             </span>
           </div>
         </div>
@@ -237,45 +213,79 @@ export const AppSidebar: React.FC<AppSidebarProps> = () => {
           </p>
 
           <div className="app-sidebar__nav-list">
-            <SidebarMenuSection
-              label="Gestión de cobranzas"
-              icon={<GestionIcon />}
-              isOpen={isCobranzaOpen}
-              onToggle={() => {
-                setIsCobranzaOpen((current) => !current);
-              }}
-              items={[
-                {
-                  label: 'Gestión deudor',
-                  to: AUTH_ROUTES.GESTION_DEUDOR,
-                },
-              ]}
-            />
-
-            {GESTION_USUARIOS_FEATURE.enabled && (
-              <SidebarMenuSection
-                label="Gestión de usuarios"
-                icon={<UsersIcon />}
-                isOpen={isUsuariosOpen}
-                onToggle={() => {
-                  setIsUsuariosOpen((current) => !current);
-                }}
-                items={[
-                  {
-                    label: 'Cambiar clave',
-                    to: GESTION_USUARIOS_ROUTES.CAMBIAR_CLAVE,
-                  },
-                  {
-                    label: 'Asignar usuario',
-                    to: GESTION_USUARIOS_ROUTES.ASIGNAR_USUARIO,
-                  },
-                  {
-                    label: 'Mantener usuario',
-                    to: GESTION_USUARIOS_ROUTES.MANTENER_USUARIO,
-                  },
-                ]}
-              />
+            {(
+              status === 'idle' ||
+              status === 'loading'
+            ) && (
+              <p className="app-sidebar__status">
+                Cargando accesos...
+              </p>
             )}
+
+            {status === 'error' && (
+              <p className="app-sidebar__status app-sidebar__status--error">
+                {error ??
+                  'No se pudieron cargar los accesos.'}
+              </p>
+            )}
+
+            {status === 'ready' &&
+              navigationTree.length === 0 && (
+                <p className="app-sidebar__status">
+                  Sin módulos habilitados.
+                </p>
+              )}
+
+            {status === 'ready' &&
+              navigationTree.map(
+                (module) => {
+                  const items =
+                    module.children
+                      .filter(
+                        (child) =>
+                          child.route !== null
+                      )
+                      .map((child) => ({
+                        label: child.name,
+                        to: child.route as string,
+                        disabled:
+                          !child.permissions
+                            .consultar,
+                      }));
+
+                  return (
+                    <SidebarMenuSection
+                      key={module.code}
+                      label={module.name}
+                      icon={
+                        <SisgesIcon
+                          name={module.icon}
+                          aria-hidden="true"
+                        />
+                      }
+                      isOpen={
+                        openSections[
+                          module.code
+                        ] ?? true
+                      }
+                      items={items}
+                      to={
+                        module.route ??
+                        undefined
+                      }
+                      disabled={
+                        !module.permissions
+                          .consultar
+                      }
+                      onToggle={() => {
+                        toggleSection(
+                          module.code
+                        );
+                      }}
+                    />
+                  );
+                }
+              )}
           </div>
         </nav>
       </div>

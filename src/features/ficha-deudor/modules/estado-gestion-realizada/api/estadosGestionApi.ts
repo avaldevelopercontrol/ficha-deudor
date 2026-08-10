@@ -7,8 +7,8 @@ import type {
   EstadoGestion,
   EstadoGestionApi,
   EstadoGestionCompleta,
-  GestionHistoricaApi,
-} from '../../../shared/types';
+  EstadoGestionHistoricaApi,
+} from '../types/estadoGestion.types';
 import {
   ESTADOS_GESTION_ENDPOINTS,
   ESTADOS_GESTION_ERROR_MESSAGES,
@@ -21,7 +21,9 @@ import {
   mapEstadosGestion,
   mapEstadosGestionHistoricos,
 } from '../mappers/estadosGestion.mapper';
-import { assertApiSuccess } from '../../../shared/utils/apiResponse.utils';
+import {
+  unwrapApiArrayResponse,
+} from '../../../shared/utils/apiResponse.utils';
 
 const buildEstadosGestionParams = (
   id_cliente: string,
@@ -56,7 +58,8 @@ const buildEstadosGestionHistoricosParams = (
 export async function fetchEstadosGestion(
   id_cliente: string,
   id_cartera: string,
-  id_deudor: string
+  id_deudor: string,
+  signal?: AbortSignal
 ): Promise<{ resumido: EstadoGestion[] }> {
   const params = buildEstadosGestionParams(
     id_cliente,
@@ -65,13 +68,17 @@ export async function fetchEstadosGestion(
   );
 
   const result = await apiClient<ApiResponseSimple<EstadoGestionApi[]>>(
-    `${ESTADOS_GESTION_ENDPOINTS.RESUMIDOS}?${params.toString()}`
+    `${ESTADOS_GESTION_ENDPOINTS.RESUMIDOS}?${params.toString()}`,
+    { signal }
   );
 
-  assertApiSuccess(result, ESTADOS_GESTION_ERROR_MESSAGES.RESUMIDOS);
+  const estados = unwrapApiArrayResponse<EstadoGestionApi>(
+    result,
+    ESTADOS_GESTION_ERROR_MESSAGES.RESUMIDOS
+  );
 
   return {
-    resumido: mapEstadosGestion(result.response),
+    resumido: mapEstadosGestion(estados),
   };
 }
 
@@ -80,7 +87,8 @@ export async function fetchEstadosGestionHistoricos(
   id_cartera: string,
   id_deudor: string,
   pageNumber = ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_NUMBER,
-  pageSize = ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_SIZE
+  pageSize = ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_SIZE,
+  signal?: AbortSignal
 ): Promise<{
   completo: EstadoGestionCompleta[];
   pageNumber: number;
@@ -96,14 +104,18 @@ export async function fetchEstadosGestionHistoricos(
     pageSize
   );
 
-  const result = await apiClient<ApiResponse<GestionHistoricaApi[]>>(
-    `${ESTADOS_GESTION_ENDPOINTS.HISTORICOS}?${params.toString()}`
+  const result = await apiClient<ApiResponse<EstadoGestionHistoricaApi[]>>(
+    `${ESTADOS_GESTION_ENDPOINTS.HISTORICOS}?${params.toString()}`,
+    { signal }
   );
 
-  assertApiSuccess(result, ESTADOS_GESTION_ERROR_MESSAGES.HISTORICOS);
+  const estadosHistoricos = unwrapApiArrayResponse<EstadoGestionHistoricaApi>(
+    result,
+    ESTADOS_GESTION_ERROR_MESSAGES.HISTORICOS
+  );
 
   return {
-    completo: mapEstadosGestionHistoricos(result.response),
+    completo: mapEstadosGestionHistoricos(estadosHistoricos),
     pageNumber: result.pageNumber,
     pageSize: result.pageSize,
     totalRecords: result.totalRecords,

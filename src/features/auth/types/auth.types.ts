@@ -1,3 +1,5 @@
+import type { ApiResponseSimple } from '@shared/types/indexApi';
+
 // ─────────────────────────────────────────────
 // ENTIDADES
 // ─────────────────────────────────────────────
@@ -55,7 +57,7 @@ export interface LoginUsuarioApi {
   nId_Sucursal: number;
   dUsr_FecSalida?: string;
   nId_UEstado?: number;
-  nid_perfil: number;
+  nid_perfil?: number;
   cod_Recau?: string;
   nUsr_CiuGestor?: string;
   nUsr_Zona?: string;
@@ -80,13 +82,9 @@ export interface LoginUsuarioApi {
   dFechaHora_Codigo?: string;
 }
 
-export interface LoginUsuarioApiResponse {
-  code: string;
-  message: string;
-  messageUser: string;
-  statusCode: number;
-  response: LoginUsuarioApi | null;
-}
+export type LoginUsuarioApiResponse = ApiResponseSimple<
+  LoginUsuarioApi | null
+>;
 
 // ─────────────────────────────────────────────
 // PAYLOADS / REQUESTS
@@ -111,6 +109,7 @@ export interface LoginResponse {
   message: string;
   usuario: Usuario | null;
   token?: string;
+  cancelled?: boolean;
 }
 
 export interface ClientesResponse {

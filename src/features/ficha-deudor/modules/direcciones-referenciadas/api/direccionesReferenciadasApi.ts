@@ -1,8 +1,9 @@
 import { apiClient } from '@shared/api/apiClient';
+import {
+  fetchDepartamentos as fetchDepartamentosCatalogo,
+} from '@shared/catalogos/departamentos/api/departamentosApi';
 import type {
   CreateDireccionResponse,
-  Departamento,
-  DepartamentoApi,
   DireccionByIdApi,
   DireccionEditFormData,
   DireccionFormData,
@@ -29,13 +30,15 @@ import {
 import {
   buildCreateDireccionRequest,
   buildUpdateDireccionRequest,
-  mapDepartamentos,
   mapDireccionUbicaciones,
   mapDireccionesReferenciadas,
   mapDistritos,
   mapProvincias,
 } from '../mappers/direccionesReferenciadas.mapper';
-import { assertApiSuccess } from '../../../shared/utils/apiResponse.utils';
+import {
+  unwrapApiArrayResponse,
+  unwrapApiObjectResponse,
+} from '../../../shared/utils/apiResponse.utils';
 
 const buildDireccionesReferenciadasParams = (
   id_cliente: string,
@@ -57,17 +60,22 @@ const buildDistritosParams = (idProvincia: string) => {
 
 export async function fetchDireccionesReferenciadas(
   id_cliente: string,
-  id_deudor: string
+  id_deudor: string,
+  signal?: AbortSignal
 ): Promise<DireccionReferenciada[]> {
   const params = buildDireccionesReferenciadasParams(id_cliente, id_deudor);
 
   const result = await apiClient<ApiResponse<DireccionReferenciadaApi[]>>(
-    `${DIRECCIONES_REFERENCIADAS_ENDPOINTS.LIST}?${params.toString()}`
+    `${DIRECCIONES_REFERENCIADAS_ENDPOINTS.LIST}?${params.toString()}`,
+    { signal }
   );
 
-  assertApiSuccess(result, DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.LIST);
+  const direcciones = unwrapApiArrayResponse<DireccionReferenciadaApi>(
+    result,
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.LIST
+  );
 
-  return mapDireccionesReferenciadas(result.response);
+  return mapDireccionesReferenciadas(direcciones);
 }
 
 export async function createDireccion(
@@ -91,9 +99,10 @@ export async function createDireccion(
     }
   );
 
-  assertApiSuccess(result, DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.CREATE);
-
-  return result.response;
+  return unwrapApiObjectResponse<CreateDireccionResponse>(
+    result,
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.CREATE
+  );
 }
 
 export async function fetchDireccionById(
@@ -105,9 +114,10 @@ export async function fetchDireccionById(
     { signal }
   );
 
-  assertApiSuccess(result, DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.BY_ID_EDIT);
-
-  return result.response;
+  return unwrapApiObjectResponse<DireccionByIdApi>(
+    result,
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.BY_ID_EDIT
+  );
 }
 
 export async function updateDireccion(
@@ -133,26 +143,14 @@ export async function updateDireccion(
     }
   );
 
-  assertApiSuccess(result, DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.UPDATE);
-
-  return result.response;
-}
-
-export async function fetchDepartamentos(
-  signal?: AbortSignal
-): Promise<Departamento[]> {
-  const result = await apiClient<ApiResponseSimple<DepartamentoApi[]>>(
-    DIRECCIONES_REFERENCIADAS_ENDPOINTS.DEPARTAMENTOS,
-    { signal }
-  );
-
-  assertApiSuccess(
+  return unwrapApiObjectResponse<UpdateDireccionResponse>(
     result,
-    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.DEPARTAMENTOS
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.UPDATE
   );
-
-  return mapDepartamentos(result.response);
 }
+
+export const fetchDepartamentos =
+  fetchDepartamentosCatalogo;
 
 export async function fetchProvincias(
   idDepartamento: string,
@@ -168,9 +166,12 @@ export async function fetchProvincias(
     }
   );
 
-  assertApiSuccess(result, DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.PROVINCIAS);
+  const provincias = unwrapApiArrayResponse<ProvinciaApi>(
+    result,
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.PROVINCIAS
+  );
 
-  return mapProvincias(result.response);
+  return mapProvincias(provincias);
 }
 
 export async function fetchDistritos(
@@ -190,9 +191,12 @@ export async function fetchDistritos(
     }
   );
 
-  assertApiSuccess(result, DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.DISTRITOS);
+  const distritos = unwrapApiArrayResponse<DistritoApi>(
+    result,
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.DISTRITOS
+  );
 
-  return mapDistritos(result.response);
+  return mapDistritos(distritos);
 }
 
 export async function fetchDireccionUbicaciones(
@@ -203,7 +207,10 @@ export async function fetchDireccionUbicaciones(
     { signal }
   );
 
-  assertApiSuccess(result, DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.UBICACIONES);
+  const ubicaciones = unwrapApiArrayResponse<DireccionUbicacionApi>(
+    result,
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.UBICACIONES
+  );
 
-  return mapDireccionUbicaciones(result.response);
+  return mapDireccionUbicaciones(ubicaciones);
 }

@@ -1,6 +1,6 @@
 import type React from 'react';
 
-import { ClienteSelectorModal, LoginForm } from '../components';
+import { ClienteSelectorModal, LoginForm } from '../modules';
 import { useLoginPage } from '../shell/hooks/useLoginPage';
 
 export const LoginPage: React.FC = () => {

@@ -18,6 +18,7 @@ export interface Column<TData = unknown> {
   group?: string;
   groupLabel?: string;
   filterOptionLabel?: (value: string) => string;
+  align?: React.CSSProperties['textAlign'];
 }
 
 export interface Ubigeo {

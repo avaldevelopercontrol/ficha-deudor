@@ -235,6 +235,26 @@
   box-shadow: inset 3px 0 0 var(--ap-red);
 }
 
+/*
+ * Los módulos padre inactivos mantienen una jerarquía neutra.
+ * El rojo queda reservado únicamente para la sección de la ruta actual.
+ */
+.app-sidebar__nav-item--parent:not(.app-sidebar__nav-item--active):not(.app-sidebar__nav-item--disabled) {
+  background: transparent;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.app-sidebar__nav-item--parent:not(.app-sidebar__nav-item--active):not(.app-sidebar__nav-item--disabled) .app-sidebar__arrow {
+  color: #ffffff;
+}
+
+.app-sidebar__nav-item--parent:not(.app-sidebar__nav-item--active):not(.app-sidebar__nav-item--disabled):hover {
+  background: rgba(255, 255, 255, 0.065);
+  color: #ffffff;
+  box-shadow: none;
+}
+
 .app-sidebar__nav-icon {
   width: 18px;
   height: 18px;
@@ -412,4 +432,37 @@
   .app-sidebar__logout {
     padding: 10px 14px;
   }
+}
+.app-sidebar__status {
+  margin: 4px 8px;
+  padding: 10px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.app-sidebar__status--error {
+  background: rgba(192, 0, 30, 0.16);
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.app-sidebar__nav-item--disabled,
+.app-sidebar__nav-item--disabled:hover {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.32);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.app-sidebar__nav-item--disabled .app-sidebar__arrow {
+  color: rgba(255, 255, 255, 0.24);
+}
+
+.app-sidebar__sub-item--disabled,
+.app-sidebar__sub-item--disabled:hover {
+  color: rgba(255, 255, 255, 0.3);
+  background: transparent;
+  cursor: not-allowed;
 }

@@ -1,4 +1,4 @@
 export * from './useAuth';
-export * from './useAuthExternalLogoutSync';
+export * from './useAuthExternalSessionSync';
 export * from './useLastMainWindowLogout';
-export * from './useLogin';
+export * from './useLoginRequest';

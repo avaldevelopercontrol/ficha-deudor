@@ -1,3 +1,10 @@
+import {
+  normalizeApiCollectionResponse,
+} from '@shared/api/apiResponse.utils';
+import {
+  toOptionalIdOrZero,
+  toRequiredId,
+} from '@shared/utils/number.utils';
 import type {
   DeudorGestionDeudor,
   DeudorGestionDeudorApi,
@@ -18,12 +25,24 @@ export function mapDeudorGestionDeudor(
   item: DeudorGestionDeudorApi
 ): DeudorGestionDeudor {
   return {
-    nId_PersDeudor: toNumber(item.nId_PersDeudor),
+    nId_PersDeudor: toRequiredId(
+      item.nId_PersDeudor,
+      'nId_PersDeudor'
+    ),
     nro: toNumber(item.nro),
     zonaCampanna: toStringValue(item.zonaCampanna),
-    nId_Cliente: toNumber(item.nId_Cliente),
-    nId_Contrato: toNumber(item.nId_Contrato),
-    nId_Cartera: toNumber(item.nId_Cartera),
+    nId_Cliente: toOptionalIdOrZero(
+      item.nId_Cliente,
+      'nId_Cliente'
+    ),
+    nId_Contrato: toRequiredId(
+      item.nId_Contrato,
+      'nId_Contrato'
+    ),
+    nId_Cartera: toRequiredId(
+      item.nId_Cartera,
+      'nId_Cartera'
+    ),
     cartera: toStringValue(item.cartera),
     codigoCliente: toStringValue(item.codigoCliente),
     deudor: toStringValue(item.deudor),
@@ -43,11 +62,10 @@ export function mapDeudorGestionDeudor(
 export function mapDeudoresGestionDeudorResponse(
   result: GetDeudoresGestionDeudorResponse
 ): DeudorGestionDeudor[] {
-  const response = Array.isArray(result.response)
-    ? result.response
-    : result.response
-      ? [result.response]
-      : [];
-
-  return response.map(mapDeudorGestionDeudor);
+  return normalizeApiCollectionResponse<
+    DeudorGestionDeudorApi
+  >(
+    result.response,
+    'Error al buscar el deudor.'
+  ).map(mapDeudorGestionDeudor);
 }

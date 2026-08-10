@@ -1,3 +1,5 @@
+import { isPositiveIntegerValue } from '@shared/utils/number.utils';
+
 import type { TipoBusquedaGestionDeudor } from '../types/gestionDeudor.types';
 
 interface ValidateGestionDeudorSearchParams {
@@ -24,6 +26,15 @@ export function validateGestionDeudorSearch({
     return {
       isValid: false,
       message: 'No se encontró el cliente seleccionado.',
+      valorNormalizado,
+      busqueda: '',
+    };
+  }
+
+  if (!isPositiveIntegerValue(idCliente)) {
+    return {
+      isValid: false,
+      message: 'El identificador del cliente seleccionado no es válido.',
       valorNormalizado,
       busqueda: '',
     };

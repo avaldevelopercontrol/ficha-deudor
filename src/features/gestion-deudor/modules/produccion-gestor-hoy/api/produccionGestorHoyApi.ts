@@ -1,6 +1,9 @@
 import {
   apiClient,
 } from '@shared/api/apiClient';
+import {
+  assertApiSuccess,
+} from '@shared/api/apiResponse.utils';
 
 import {
   PRODUCCION_GESTOR_HOY_API_ENDPOINTS,
@@ -15,13 +18,22 @@ import type {
   GetProduccionGestorHoyResponse,
   ProduccionGestorHoyRow,
 } from '../types/produccionGestorHoy.types';
+import {
+  resolveProduccionGestorHoyIdentity,
+} from '../utils/produccionGestorHoyIdentity.utils';
 
 export async function fetchProduccionGestorHoy(
   idCliente: string,
   idUsuario: string,
   signal?: AbortSignal
 ): Promise<ProduccionGestorHoyRow[]> {
-  if (!idCliente || !idUsuario) {
+  const identity =
+    resolveProduccionGestorHoyIdentity(
+      idCliente,
+      idUsuario
+    );
+
+  if (!identity) {
     throw new Error(
       PRODUCCION_GESTOR_HOY_TEXTS
         .missingParams
@@ -29,8 +41,8 @@ export async function fetchProduccionGestorHoy(
   }
 
   const params = new URLSearchParams({
-    nId_Cliente: idCliente,
-    nId_Usuario: idUsuario,
+    nId_Cliente: identity.idCliente,
+    nId_Usuario: identity.idUsuario,
   });
 
   const result =
@@ -47,14 +59,10 @@ export async function fetchProduccionGestorHoy(
       }
     );
 
-  if (result.statusCode !== 200) {
-    throw new Error(
-      result.messageUser ||
-        result.message ||
-        PRODUCCION_GESTOR_HOY_TEXTS
-          .loadError
-    );
-  }
+  assertApiSuccess(
+    result,
+    PRODUCCION_GESTOR_HOY_TEXTS.loadError
+  );
 
   return mapProduccionGestorHoyResponse(
     result

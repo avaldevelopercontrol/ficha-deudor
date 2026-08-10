@@ -32,7 +32,10 @@ import {
   mapTelefonosReferenciados,
   mapTelefonoUbicaciones,
 } from '../mappers/telefonosReferenciados.mapper';
-import { assertApiSuccess } from '../../../shared/utils/apiResponse.utils';
+import {
+  unwrapApiArrayResponse,
+  unwrapApiObjectResponse,
+} from '../../../shared/utils/apiResponse.utils';
 
 const buildTelefonosReferenciadosParams = (
   id_cliente: string,
@@ -48,17 +51,22 @@ const buildTelefonosReferenciadosParams = (
 
 export async function fetchTelefonosReferenciados(
   id_cliente: string,
-  id_deudor: string
+  id_deudor: string,
+  signal?: AbortSignal
 ): Promise<TelefonoReferenciado[]> {
   const params = buildTelefonosReferenciadosParams(id_cliente, id_deudor);
 
   const result = await apiClient<ApiResponse<TelefonoReferenciadoApi[]>>(
-    `${TELEFONOS_REFERENCIADOS_ENDPOINTS.LIST}?${params.toString()}`
+    `${TELEFONOS_REFERENCIADOS_ENDPOINTS.LIST}?${params.toString()}`,
+    { signal }
   );
 
-  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.LIST);
+  const telefonos = unwrapApiArrayResponse<TelefonoReferenciadoApi>(
+    result,
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.LIST
+  );
 
-  return mapTelefonosReferenciados(result.response);
+  return mapTelefonosReferenciados(telefonos);
 }
 
 export async function fetchTelefonoById(
@@ -70,9 +78,10 @@ export async function fetchTelefonoById(
     { signal }
   );
 
-  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.BY_ID_EDIT);
-
-  return result.response;
+  return unwrapApiObjectResponse<TelefonoEditarApi>(
+    result,
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.BY_ID_EDIT
+  );
 }
 
 export async function createTelefono(
@@ -91,9 +100,10 @@ export async function createTelefono(
     }
   );
 
-  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.CREATE);
-
-  return result.response;
+  return unwrapApiObjectResponse<CreateTelefonoResponse>(
+    result,
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.CREATE
+  );
 }
 
 export async function updateTelefono(
@@ -118,9 +128,10 @@ export async function updateTelefono(
     }
   );
 
-  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.UPDATE);
-
-  return result.response;
+  return unwrapApiObjectResponse<CreateTelefonoResponse>(
+    result,
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.UPDATE
+  );
 }
 
 export async function fetchTelefonoResultados(
@@ -131,9 +142,12 @@ export async function fetchTelefonoResultados(
     { signal }
   );
 
-  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.RESULTADOS);
+  const resultados = unwrapApiArrayResponse<TelefonoResultadoApi>(
+    result,
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.RESULTADOS
+  );
 
-  return mapTelefonoResultados(result.response);
+  return mapTelefonoResultados(resultados);
 }
 
 export async function fetchTelefonoOperadores(
@@ -144,9 +158,12 @@ export async function fetchTelefonoOperadores(
     { signal }
   );
 
-  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.OPERADORES);
+  const operadores = unwrapApiArrayResponse<TelefonoOperadorApi>(
+    result,
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.OPERADORES
+  );
 
-  return mapTelefonoOperadores(result.response);
+  return mapTelefonoOperadores(operadores);
 }
 
 export async function fetchTelefonoUbicaciones(
@@ -157,9 +174,12 @@ export async function fetchTelefonoUbicaciones(
     { signal }
   );
 
-  assertApiSuccess(result, TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.UBICACIONES);
+  const ubicaciones = unwrapApiArrayResponse<TelefonoUbicacionApi>(
+    result,
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.UBICACIONES
+  );
 
-  return mapTelefonoUbicaciones(result.response);
+  return mapTelefonoUbicaciones(ubicaciones);
 }
 
 export async function fetchTelefonoHorarioGestion(
@@ -170,12 +190,12 @@ export async function fetchTelefonoHorarioGestion(
     { signal }
   );
 
-  assertApiSuccess(
+  const horarios = unwrapApiArrayResponse<TelefonoHorarioGestionApi>(
     result,
     TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.HORARIO_GESTION
   );
 
-  return mapTelefonoHorarioGestion(result.response);
+  return mapTelefonoHorarioGestion(horarios);
 }
 
 export async function fetchTelefonoFuenteBusqueda(
@@ -186,10 +206,10 @@ export async function fetchTelefonoFuenteBusqueda(
     { signal }
   );
 
-  assertApiSuccess(
+  const fuentes = unwrapApiArrayResponse<TelefonoFuenteBusquedaApi>(
     result,
     TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.FUENTE_BUSQUEDA
   );
 
-  return mapTelefonoFuenteBusqueda(result.response);
+  return mapTelefonoFuenteBusqueda(fuentes);
 }

@@ -1,15 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import type {
-  FichaDeudorPopupContext,
-  FichaDeudorPopupType,
+import {
+  isFichaDeudorPopupContext,
+  type FichaDeudorPopupContext,
+  type FichaDeudorPopupType,
 } from './popupContext.types';
 
 import {
-  getPopupIdFromWindowName,
   isPopupContextResponseMessage,
+  parsePopupWindowName,
   requestPopupContext,
 } from './popupMessaging.utils';
+import {
+  loadPopupContextFromStorage,
+  savePopupContextToStorage,
+} from './popupContextStorage.utils';
 
 interface UsePopupContextResult<
   T extends FichaDeudorPopupType,
@@ -19,55 +24,48 @@ interface UsePopupContextResult<
   error: string | null;
 }
 
-const getStorageKey = (
-  popupType: FichaDeudorPopupType,
-  popupId: string
-): string => {
-  return `avalperu_popup_context:${popupType}:${popupId}`;
-};
-
 export const usePopupContext = <
   T extends FichaDeudorPopupType,
 >(
   popupType: T
 ): UsePopupContextResult<T> => {
-  const popupId = useMemo(
-    () => getPopupIdFromWindowName(window.name),
+  const popupDescriptor = useMemo(
+    () => parsePopupWindowName(window.name),
     []
   );
 
-  const storageKey = popupId
-    ? getStorageKey(popupType, popupId)
-    : null;
+  const popupId =
+    popupDescriptor?.popupType === popupType
+      ? popupDescriptor.popupId
+      : null;
 
   const [context, setContext] =
     useState<FichaDeudorPopupContext<T> | null>(() => {
-      if (!storageKey) {
+      if (!popupId) {
         return null;
       }
 
       try {
-        const storedContext =
-          sessionStorage.getItem(storageKey);
-
-        return storedContext
-          ? (JSON.parse(
-              storedContext
-            ) as FichaDeudorPopupContext<T>)
-          : null;
+        return loadPopupContextFromStorage(
+          sessionStorage,
+          popupType,
+          popupId
+        );
       } catch {
         return null;
       }
     });
 
   const [error, setError] = useState<string | null>(
-    popupId
-      ? null
-      : 'No se pudo identificar el contexto del popup.'
+    !popupDescriptor
+      ? 'No se pudo identificar el contexto del popup.'
+      : popupDescriptor.popupType !== popupType
+        ? 'El contexto no corresponde al tipo de popup solicitado.'
+        : null
   );
 
   useEffect(() => {
-    if (context || !popupId || !storageKey) {
+    if (context || !popupId) {
       return;
     }
 
@@ -78,7 +76,9 @@ export const usePopupContext = <
      * No usamos setError aquí para evitar actualizar estado
      * directamente dentro del efecto.
      */
-    if (!window.opener) {
+    const openerWindow = window.opener;
+
+    if (!openerWindow) {
       return;
     }
 
@@ -89,7 +89,7 @@ export const usePopupContext = <
         return;
       }
 
-      if (event.source !== window.opener) {
+      if (event.source !== openerWindow) {
         return;
       }
 
@@ -99,18 +99,23 @@ export const usePopupContext = <
 
       if (
         event.data.popupId !== popupId ||
-        event.data.popupType !== popupType
+        event.data.popupType !== popupType ||
+        !isFichaDeudorPopupContext(
+          popupType,
+          event.data.context
+        )
       ) {
         return;
       }
 
-      const receivedContext =
-        event.data.context as FichaDeudorPopupContext<T>;
+      const receivedContext = event.data.context;
 
       try {
-        sessionStorage.setItem(
-          storageKey,
-          JSON.stringify(receivedContext)
+        savePopupContextToStorage(
+          sessionStorage,
+          popupType,
+          popupId,
+          receivedContext
         );
       } catch {
         /*
@@ -128,7 +133,7 @@ export const usePopupContext = <
       handleContextResponse
     );
 
-    requestPopupContext(popupId);
+    requestPopupContext(popupType, popupId);
 
     return () => {
       window.removeEventListener(
@@ -140,7 +145,6 @@ export const usePopupContext = <
     context,
     popupId,
     popupType,
-    storageKey,
   ]);
 
   const resolvedError =
