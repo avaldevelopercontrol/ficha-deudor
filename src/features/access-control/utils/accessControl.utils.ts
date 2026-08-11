@@ -12,6 +12,7 @@ import type {
   AccessPermissions,
   AuthorizedOption,
   ProfileOptionAccessSource,
+  UserGroupOptionAccessSource,
 } from '../types/accessControl.types';
 
 export const EMPTY_ACCESS_PERMISSIONS: AccessPermissions = Object.freeze({
@@ -88,7 +89,8 @@ const buildNavigableTree = (
 export const buildAccessControlSnapshot = (
   profileId: number,
   options: readonly AccessOptionSource[],
-  assignments: readonly ProfileOptionAccessSource[]
+  assignments: readonly ProfileOptionAccessSource[],
+  userGroupAssignments: readonly UserGroupOptionAccessSource[] = []
 ): AccessControlSnapshot => {
   const optionIds = new Set<number>();
   const optionCodes = new Set<string>();
@@ -133,15 +135,51 @@ export const buildAccessControlSnapshot = (
     );
   }
 
-  const assignmentByOptionId = new Map(
-    profileAssignments
-      .map(
-        (assignment) => [
-          assignment.optionId,
-          assignment,
-        ]
-      )
+  const assignmentByOptionId = new Map<
+    number,
+    {
+      permissions: AccessPermissions;
+      active: boolean;
+    }
+  >(
+    profileAssignments.map(
+      (assignment) => [
+        assignment.optionId,
+        assignment,
+      ]
+    )
   );
+
+  const specialOptionIds = new Set<number>();
+
+  for (const assignment of userGroupAssignments) {
+    if (
+      specialOptionIds.has(
+        assignment.optionId
+      )
+    ) {
+      throw new Error(
+        `La opción ${assignment.optionId} tiene más de un acceso especial registrado para el usuario y grupo seleccionados.`
+      );
+    }
+
+    specialOptionIds.add(
+      assignment.optionId
+    );
+
+    /*
+     * Una relación inactiva representa una excepción retirada:
+     * en ese caso se conserva el permiso heredado del perfil.
+     * Una relación activa reemplaza por completo los permisos de
+     * esa opción, incluso cuando todos son false.
+     */
+    if (assignment.active) {
+      assignmentByOptionId.set(
+        assignment.optionId,
+        assignment
+      );
+    }
+  }
 
   const childrenByParentId = new Map<
     number,

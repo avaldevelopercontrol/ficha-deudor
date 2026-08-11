@@ -40,6 +40,15 @@ export interface ProfileOptionAccessSource {
   active: boolean;
 }
 
+export interface UserGroupOptionAccessSource {
+  assignmentId: number;
+  userId: number;
+  groupId: number;
+  optionId: number;
+  permissions: AccessPermissions;
+  active: boolean;
+}
+
 export interface AuthorizedOption {
   id: number;
   code: string;

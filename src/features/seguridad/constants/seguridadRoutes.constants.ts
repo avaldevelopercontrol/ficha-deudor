@@ -10,6 +10,9 @@ export const SEGURIDAD_ROUTES = {
 
   MANTENER_ACCESOS_PERFIL:
     '/seguridad/mantener-accesos-por-perfil',
+
+  MANTENER_ACCESOS_USUARIO:
+    '/seguridad/mantener-accesos-por-usuario',
 } as const;
 
 export const SEGURIDAD_API_ENDPOINTS = {
@@ -42,4 +45,13 @@ export const SEGURIDAD_API_ENDPOINTS = {
 
   perfilOpcionesPorPerfil:
     '/v1/PerfilOpcion/GetOpcionesPorPerfil',
+
+  usuarioGrupoOpciones:
+    '/v1/UsuarioGrupoOpcion',
+
+  usuarioGrupoOpcionesListado:
+    '/v1/UsuarioGrupoOpcion/GetUsuarioGrupoOpcionListado',
+
+  usuarioGrupoOpcionesPorUsuarioGrupo:
+    '/v1/UsuarioGrupoOpcion/GetByIdUsuarioIdGrupo',
 } as const;

@@ -34,6 +34,13 @@ export const suite = defineSuite(
 
         assert.equal(
           getOptionRoute(
+            'mMantenerAccesosPorUsuario'
+          ),
+          '/seguridad/mantener-accesos-por-usuario'
+        );
+
+        assert.equal(
+          getOptionRoute(
             'mMantenerGrupo'
           ),
           '/seguridad/mantener-grupo'
@@ -50,7 +57,7 @@ export const suite = defineSuite(
 
         assert.equal(
           mantenerGrupo?.name,
-          'Mantener Grupo'
+          'Mantener grupo'
         );
         assert.equal(
           mantenerGrupo?.parentCode,
@@ -67,6 +74,13 @@ export const suite = defineSuite(
               'mMantenerGrupo'
           ),
           true
+        );
+
+        assert.equal(
+          getApplicationOptionDefinition(
+            'mMantenerAccesosPorUsuario'
+          )?.icon,
+          'user-group-access'
         );
       }
     ),

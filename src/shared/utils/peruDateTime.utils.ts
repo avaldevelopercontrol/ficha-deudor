@@ -8,6 +8,110 @@ type DateTimePartName =
   | 'minute'
   | 'second';
 
+
+const LOCAL_API_DATE_TIME_PATTERN =
+  /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,7}))?$/;
+
+const isValidLocalDateTime = (
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number,
+  second: number,
+  millisecond: number
+): boolean => {
+  const date = new Date(
+    Date.UTC(
+      year,
+      month - 1,
+      day,
+      hour,
+      minute,
+      second,
+      millisecond
+    )
+  );
+
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day &&
+    date.getUTCHours() === hour &&
+    date.getUTCMinutes() === minute &&
+    date.getUTCSeconds() === second &&
+    date.getUTCMilliseconds() === millisecond
+  );
+};
+
+/**
+ * Normaliza una fecha/hora local recibida desde la API al formato
+ * utilizado por los contratos de escritura: YYYY-MM-DDTHH:mm:ss.SSS.
+ *
+ * Los listados legacy pueden devolver el separador SQL con espacio y
+ * omitir milisegundos; los endpoints PUT/POST esperan el formato ISO
+ * local sin sufijo de zona horaria.
+ */
+export const normalizePeruApiDateTime = (
+  value: string,
+  fieldName = 'fecha'
+): string => {
+  const normalizedValue = value.trim();
+  const match = normalizedValue.match(
+    LOCAL_API_DATE_TIME_PATTERN
+  );
+
+  if (!match) {
+    throw new Error(
+      `${fieldName} debe contener una fecha y hora válida.`
+    );
+  }
+
+  const [
+    ,
+    yearText,
+    monthText,
+    dayText,
+    hourText,
+    minuteText,
+    secondText,
+    fractionText = '',
+  ] = match;
+
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const millisecondsText = fractionText
+    .slice(0, 3)
+    .padEnd(3, '0');
+  const millisecond = Number(millisecondsText);
+
+  if (
+    !isValidLocalDateTime(
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      second,
+      millisecond
+    )
+  ) {
+    throw new Error(
+      `${fieldName} debe contener una fecha y hora válida.`
+    );
+  }
+
+  return (
+    `${yearText}-${monthText}-${dayText}` +
+    `T${hourText}:${minuteText}:${secondText}` +
+    `.${millisecondsText}`
+  );
+};
+
 const getDateTimePart = (
   parts: Intl.DateTimeFormatPart[],
   type: DateTimePartName

@@ -1,0 +1,350 @@
+/* =========================================================
+   SEGURIDAD — MANTENER ACCESOS POR USUARIO
+   ========================================================= */
+
+.mantener-accesos-usuario-page {
+  width: 100%;
+  min-height: 100%;
+
+  background: var(--ap-gray-50);
+  color: var(--ap-text);
+}
+
+.mantener-accesos-usuario-page__content {
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  padding: 32px clamp(16px, 3vw, 32px) 40px;
+}
+
+.mantener-accesos-usuario-card {
+  width: 100%;
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.mantener-accesos-usuario-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding: 17px 24px;
+
+  background: var(--ap-gray-50);
+  border-bottom: 1px solid var(--ap-gray-200);
+  border-left: 4px solid var(--ap-red);
+}
+
+.mantener-accesos-usuario-card__title {
+  margin: 0;
+
+  color: var(--ap-navy);
+
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
+}
+
+.mantener-accesos-usuario-card__description {
+  margin: 5px 0 0;
+
+  color: var(--ap-text-muted);
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.mantener-accesos-usuario-table {
+  width: 100%;
+}
+
+.mantener-accesos-usuario-table
+  .data-table
+  td {
+  vertical-align: middle;
+}
+
+.mantener-accesos-usuario-table
+  .data-table
+  td:last-child
+  .btn {
+  min-width: 32px;
+  padding-right: 8px;
+  padding-left: 8px;
+}
+
+.mantener-accesos-usuario-card__pagination {
+  padding: 14px 24px 18px;
+}
+
+@media (max-width: 620px) {
+  .mantener-accesos-usuario-page__content {
+    padding: 20px 14px 28px;
+  }
+
+  .mantener-accesos-usuario-card__header {
+    padding: 15px 18px;
+  }
+
+  .mantener-accesos-usuario-card__title {
+    font-size: 14px;
+  }
+
+  .mantener-accesos-usuario-card__description {
+    font-size: 11px;
+  }
+
+  .mantener-accesos-usuario-card__pagination {
+    padding: 12px 18px 16px;
+  }
+}
+
+/* =========================================================
+   ACCIONES Y FORMULARIOS
+   ========================================================= */
+
+.mantener-accesos-usuario-card__add-button {
+  min-width: 208px;
+  flex: 0 0 auto;
+}
+
+.mantener-accesos-usuario-form__identity {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.85fr);
+  gap: 12px 18px;
+}
+
+.mantener-accesos-usuario-form__identity
+  .form-label--inline {
+  width: 74px;
+  flex-basis: 74px;
+}
+
+@media (max-width: 820px) {
+  .mantener-accesos-usuario-form__identity {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 620px) {
+  .mantener-accesos-usuario-card__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mantener-accesos-usuario-card__add-button {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   BUSCADOR DE USUARIOS
+   ========================================================= */
+
+.usuario-search-combobox__field {
+  min-width: 0;
+  flex: 1;
+}
+
+.usuario-search-combobox {
+  position: relative;
+  width: 100%;
+}
+
+.usuario-search-combobox__input {
+  padding-right: 32px;
+}
+
+.usuario-search-combobox__toggle {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+
+  width: 29px;
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--ap-text-muted);
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--ap-gray-200);
+  border-radius: 0 var(--radius) var(--radius) 0;
+
+  font: inherit;
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+.usuario-search-combobox__toggle:hover:not(:disabled) {
+  color: var(--ap-navy);
+  background: var(--ap-gray-50);
+}
+
+.usuario-search-combobox__toggle:focus-visible {
+  outline: 2px solid rgba(192, 0, 30, 0.25);
+  outline-offset: -2px;
+}
+
+.usuario-search-combobox__toggle:disabled {
+  cursor: not-allowed;
+}
+
+.usuario-search-combobox__required {
+  margin-left: 4px;
+  color: var(--ap-red);
+}
+
+.usuario-search-combobox__field
+  .form-error {
+  display: block;
+  margin-top: 4px;
+}
+
+.usuario-search-combobox__dropdown {
+  position: fixed;
+  z-index: 99999;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(26, 37, 64, 0.2);
+}
+
+.usuario-search-combobox__summary {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 8px 11px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  color: var(--ap-text-muted);
+  background: var(--ap-gray-50);
+  border-bottom: 1px solid var(--ap-gray-200);
+
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.usuario-search-combobox__summary
+  span:first-child {
+  color: var(--ap-navy);
+  font-weight: 700;
+}
+
+.usuario-search-combobox__options {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 5px;
+}
+
+.usuario-search-combobox__option {
+  min-height: 37px;
+  padding: 6px 8px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+
+  border-radius: 6px;
+  cursor: pointer;
+
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.usuario-search-combobox__option:hover,
+.usuario-search-combobox__option--active {
+  background: #f2f5fb;
+}
+
+.usuario-search-combobox__option--selected {
+  background: rgba(192, 0, 30, 0.06);
+}
+
+.usuario-search-combobox__option--selected.usuario-search-combobox__option--active,
+.usuario-search-combobox__option--selected:hover {
+  background: rgba(192, 0, 30, 0.1);
+}
+
+.usuario-search-combobox__option-name {
+  min-width: 0;
+  overflow: hidden;
+
+  color: var(--ap-text);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usuario-search-combobox__option-login {
+  max-width: 130px;
+  overflow: hidden;
+  padding: 2px 6px;
+
+  color: var(--ap-text-muted);
+  background: var(--ap-gray-50);
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 10px;
+
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usuario-search-combobox__option--selected
+  .usuario-search-combobox__option-name {
+  color: var(--ap-red);
+}
+
+.usuario-search-combobox__empty {
+  padding: 22px 14px;
+
+  color: var(--ap-text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+@media (max-width: 620px) {
+  .usuario-search-combobox__summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .usuario-search-combobox__option {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+  }
+
+  .usuario-search-combobox__option-login {
+    width: fit-content;
+    max-width: 100%;
+  }
+}

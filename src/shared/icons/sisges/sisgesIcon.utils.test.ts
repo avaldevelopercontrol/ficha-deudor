@@ -51,6 +51,28 @@ export const suite = defineSuite('sisgesIcon.utils', [
       SISGES_ICON_CATALOG.length
     );
   }),
+  test('incluye un icono específico para accesos por usuario', () => {
+    const userAccessIcon = getSisgesIconDefinition(
+      'user-group-access'
+    );
+
+    assert.equal(
+      userAccessIcon.label,
+      'Mantener accesos por usuario'
+    );
+    assert.equal(
+      userAccessIcon.category,
+      'seguridad'
+    );
+    assert.equal(
+      searchSisgesIcons('accesos usuario').some(
+        (icon) =>
+          icon.name ===
+          'user-group-access'
+      ),
+      true
+    );
+  }),
   test('incluye un icono específico para grupos', () => {
     const groupsIcon = getSisgesIconDefinition('groups');
 

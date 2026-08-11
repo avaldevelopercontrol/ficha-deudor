@@ -11,6 +11,10 @@ import {
 } from '@features/auth/hooks/useAuth';
 
 import {
+  resolveClienteGrupoId,
+} from '@features/auth/utils/clienteGrupo.utils';
+
+import {
   fetchAccessControlData,
 } from '../api/accessControlApi';
 
@@ -40,6 +44,8 @@ interface AccessControlState {
 interface AccessControlSessionProps
   extends AccessControlProviderProps {
   profileId: number;
+  userId: number;
+  groupId: number | null;
 }
 
 const NOOP_REFRESH = async (): Promise<void> => {
@@ -75,6 +81,8 @@ const INVALID_PROFILE_CONTEXT_VALUE =
 
 function AccessControlSession({
   profileId,
+  userId,
+  groupId,
   children,
 }: AccessControlSessionProps) {
   const [state, setState] =
@@ -131,16 +139,19 @@ function AccessControlSession({
       const data =
         await fetchAccessControlData(
           profileId,
+          userId,
+          groupId,
           signal
         );
 
       return buildAccessControlSnapshot(
         profileId,
         data.options,
-        data.assignments
+        data.assignments,
+        data.userGroupAssignments
       );
     },
-    [profileId]
+    [groupId, profileId, userId]
   );
 
   useEffect(() => {
@@ -334,6 +345,7 @@ export function AccessControlProvider({
   const {
     isAuthenticated,
     usuario,
+    clienteSeleccionada,
   } = useAuth();
 
   if (!isAuthenticated) {
@@ -367,10 +379,39 @@ export function AccessControlProvider({
     );
   }
 
+  const userId = Number(
+    usuario?.id_usuario
+  );
+
+  if (
+    !Number.isSafeInteger(userId) ||
+    userId <= 0
+  ) {
+    return (
+      <AccessControlContext.Provider
+        value={
+          buildUnavailableValue(
+            'error',
+            'El usuario autenticado no tiene un identificador válido.'
+          )
+        }
+      >
+        {children}
+      </AccessControlContext.Provider>
+    );
+  }
+
+  const groupId =
+    resolveClienteGrupoId(
+      clienteSeleccionada
+    );
+
   return (
     <AccessControlSession
-      key={`${usuario?.id_usuario ?? 'usuario'}:${profileId}`}
+      key={`${userId}:${profileId}:${groupId ?? 'sin-grupo'}`}
       profileId={profileId}
+      userId={userId}
+      groupId={groupId}
     >
       {children}
     </AccessControlSession>

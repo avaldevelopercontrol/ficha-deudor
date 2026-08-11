@@ -82,11 +82,17 @@ export const searchSisgesIcons = (
     return SISGES_ICON_CATALOG;
   }
 
+  const searchTerms = normalizedQuery
+    .split(/\s+/)
+    .filter(Boolean);
+
   return SISGES_ICON_CATALOG.filter((icon) => {
     const searchableText = normalizeSearchText(
       [icon.name, icon.label, ...icon.keywords].join(' ')
     );
 
-    return searchableText.includes(normalizedQuery);
+    return searchTerms.every((term) =>
+      searchableText.includes(term)
+    );
   });
 };

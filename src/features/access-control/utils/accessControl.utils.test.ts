@@ -8,6 +8,7 @@ import {
 import type {
   AccessOptionSource,
   ProfileOptionAccessSource,
+  UserGroupOptionAccessSource,
 } from '../types/accessControl.types';
 
 import {
@@ -24,6 +25,30 @@ const allow = (
 ): ProfileOptionAccessSource => ({
   assignmentId,
   profileId,
+  optionId,
+  permissions: {
+    consultar: true,
+    insertar: false,
+    editar: false,
+    eliminar: false,
+    exportar: false,
+  },
+  active: true,
+  ...overrides,
+});
+
+const special = (
+  assignmentId: number,
+  userId: number,
+  groupId: number,
+  optionId: number,
+  overrides: Partial<
+    UserGroupOptionAccessSource
+  > = {}
+): UserGroupOptionAccessSource => ({
+  assignmentId,
+  userId,
+  groupId,
   optionId,
   permissions: {
     consultar: true,
@@ -405,6 +430,174 @@ export const suite = defineSuite(
       }
     ),
     test(
+      'prioriza los permisos especiales activos del usuario y grupo sobre los del perfil',
+      () => {
+        const snapshot =
+          buildAccessControlSnapshot(
+            9,
+            [
+              option(1, 'Root', 'Root', 1, 0, 0),
+              option(2, 'mSeguridad', 'Seguridad', 2, 1, 1),
+              option(10, 'mMantenerPerfil', 'Mantener perfil', 3, 2, 1),
+            ],
+            [
+              allow(1, 9, 2),
+              allow(2, 9, 10, {
+                permissions: {
+                  consultar: true,
+                  insertar: true,
+                  editar: true,
+                  eliminar: true,
+                  exportar: true,
+                },
+              }),
+            ],
+            [
+              special(50, 14931, 156, 10, {
+                permissions: {
+                  consultar: true,
+                  insertar: false,
+                  editar: false,
+                  eliminar: false,
+                  exportar: false,
+                },
+              }),
+            ]
+          );
+
+        assert.deepEqual(
+          snapshot.optionsByCode.get(
+            'mMantenerPerfil'
+          )?.permissions,
+          {
+            consultar: true,
+            insertar: false,
+            editar: false,
+            eliminar: false,
+            exportar: false,
+          }
+        );
+      }
+    ),
+    test(
+      'usa el perfil cuando la relación especial está inactiva',
+      () => {
+        const snapshot =
+          buildAccessControlSnapshot(
+            9,
+            [
+              option(1, 'Root', 'Root', 1, 0, 0),
+              option(2, 'mSeguridad', 'Seguridad', 2, 1, 1),
+              option(10, 'mMantenerPerfil', 'Mantener perfil', 3, 2, 1),
+            ],
+            [
+              allow(1, 9, 2),
+              allow(2, 9, 10, {
+                permissions: {
+                  consultar: true,
+                  insertar: true,
+                  editar: false,
+                  eliminar: false,
+                  exportar: false,
+                },
+              }),
+            ],
+            [
+              special(50, 14931, 156, 10, {
+                active: false,
+                permissions: {
+                  consultar: false,
+                  insertar: false,
+                  editar: false,
+                  eliminar: false,
+                  exportar: false,
+                },
+              }),
+            ]
+          );
+
+        assert.equal(
+          snapshot.optionsByCode.get(
+            'mMantenerPerfil'
+          )?.permissions.insertar,
+          true
+        );
+      }
+    ),
+    test(
+      'permite que un acceso especial activo agregue una opción que el perfil no tenía',
+      () => {
+        const snapshot =
+          buildAccessControlSnapshot(
+            9,
+            [
+              option(1, 'Root', 'Root', 1, 0, 0),
+              option(2, 'mSeguridad', 'Seguridad', 2, 1, 1),
+              option(10, 'mMantenerPerfil', 'Mantener perfil', 3, 2, 1),
+            ],
+            [allow(1, 9, 2)],
+            [special(50, 14931, 156, 10)]
+          );
+
+        assert.equal(
+          snapshot.optionsByCode.has(
+            'mMantenerPerfil'
+          ),
+          true
+        );
+      }
+    ),
+    test(
+      'respeta una restricción especial activa aunque deje todos los permisos en false',
+      () => {
+        const snapshot =
+          buildAccessControlSnapshot(
+            9,
+            [
+              option(1, 'Root', 'Root', 1, 0, 0),
+              option(2, 'mSeguridad', 'Seguridad', 2, 1, 1),
+              option(10, 'mMantenerPerfil', 'Mantener perfil', 3, 2, 1),
+            ],
+            [
+              allow(1, 9, 2),
+              allow(2, 9, 10, {
+                permissions: {
+                  consultar: true,
+                  insertar: true,
+                  editar: true,
+                  eliminar: true,
+                  exportar: true,
+                },
+              }),
+            ],
+            [
+              special(50, 14931, 156, 10, {
+                permissions: {
+                  consultar: false,
+                  insertar: false,
+                  editar: false,
+                  eliminar: false,
+                  exportar: false,
+                },
+              }),
+            ]
+          );
+
+        assert.deepEqual(
+          snapshot.optionsByCode.get(
+            'mMantenerPerfil'
+          )?.permissions,
+          {
+            consultar: false,
+            insertar: false,
+            editar: false,
+            eliminar: false,
+            exportar: false,
+          }
+        );
+      }
+    ),
+    test(
       'rechaza opciones y accesos duplicados para evitar autorizaciones ambiguas',
       () => {
         assert.throws(
@@ -470,6 +663,23 @@ export const suite = defineSuite(
               ]
             ),
           /más de un acceso registrado/i
+        );
+
+        assert.throws(
+          () =>
+            buildAccessControlSnapshot(
+              9,
+              [
+                option(1, 'Root', 'Root', 1, 0, 0),
+                option(4, 'mGestionDeCobranzas', 'Gestión de cobranzas', 2, 1, 1),
+              ],
+              [allow(1, 9, 4)],
+              [
+                special(50, 14931, 156, 4),
+                special(51, 14931, 156, 4),
+              ]
+            ),
+          /más de un acceso especial registrado/i
         );
       }
     )

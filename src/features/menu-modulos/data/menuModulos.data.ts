@@ -29,7 +29,7 @@ export const MENU_MODULOS: MenuModulo[] = [
         label: 'MANTENER PERFIL',
         descripcion:
           'Consulta y administra los perfiles registrados.',
-        icon: 'user',
+        icon: 'profiles',
         path:
           SEGURIDAD_ROUTES
             .MANTENER_PERFIL,
@@ -40,7 +40,7 @@ export const MENU_MODULOS: MenuModulo[] = [
         label: 'MANTENER MÓDULO',
         descripcion:
           'Consulta los módulos y opciones registrados en el sistema.',
-        icon: 'monitor',
+        icon: 'modules',
         path:
           SEGURIDAD_ROUTES
             .MANTENER_MODULOS,
@@ -51,7 +51,7 @@ export const MENU_MODULOS: MenuModulo[] = [
         label: 'MANTENER GRUPO',
         descripcion:
           'Consulta los grupos registrados y su cliente asociado.',
-        icon: 'users',
+        icon: 'groups',
         path:
           SEGURIDAD_ROUTES
             .MANTENER_GRUPO,
@@ -62,10 +62,21 @@ export const MENU_MODULOS: MenuModulo[] = [
         label: 'MANTENER ACCESOS POR PERFIL',
         descripcion:
           'Consulta la cantidad de opciones asignadas a cada perfil.',
-        icon: 'key',
+        icon: 'permissions',
         path:
           SEGURIDAD_ROUTES
             .MANTENER_ACCESOS_PERFIL,
+        badge: 'Disponible',
+      },
+      {
+        key: 'mantener-accesos-usuario',
+        label: 'MANTENER ACCESOS POR USUARIO',
+        descripcion:
+          'Consulta los grupos y opciones asignados a cada usuario.',
+        icon: 'user-group-access',
+        path:
+          SEGURIDAD_ROUTES
+            .MANTENER_ACCESOS_USUARIO,
         badge: 'Disponible',
       },
     ],
@@ -90,7 +101,7 @@ export const MENU_MODULOS: MenuModulo[] = [
         label: 'GESTIÓN DEUDOR',
         breadcrumbLabel: 'GESTIÓN POR PERSONA/DEUDOR',
         descripcion: 'Busca deudores por RUC, DNI o teléfono y accede a su ficha.',
-        icon: 'user',
+        icon: 'debtor-management',
         path: MENU_MODULOS_ROUTES.GESTION_DEUDOR,
         badge: 'Disponible',
       },
@@ -142,7 +153,7 @@ export const MENU_MODULOS: MenuModulo[] = [
         label: 'CAMBIAR CLAVE',
         descripcion:
           'Actualiza la contraseña de acceso de un usuario.',
-        icon: 'key',
+        icon: 'password-change',
         path: GESTION_USUARIOS_ROUTES.CAMBIAR_CLAVE,
         badge: 'Disponible',
       },
@@ -151,7 +162,7 @@ export const MENU_MODULOS: MenuModulo[] = [
         label: 'ASIGNAR USUARIO',
         descripcion:
           'Asigna usuarios según cliente, perfil o responsabilidad.',
-        icon: 'users',
+        icon: 'user-assignment',
         path: GESTION_USUARIOS_ROUTES.ASIGNAR_USUARIO,
         badge: 'Disponible',
       },
@@ -160,7 +171,7 @@ export const MENU_MODULOS: MenuModulo[] = [
         label: 'MANTENER USUARIO',
         descripcion:
           'Consulta y administra los usuarios registrados.',
-        icon: 'user',
+        icon: 'user-settings',
         path: GESTION_USUARIOS_ROUTES.MANTENER_USUARIO,
         badge: 'Disponible',
       },

@@ -10,3 +10,4 @@ export * from './authSessionSync.utils';
 export * from './lastMainWindowLogout.utils';
 export * from './authAccess.utils';
 export * from './authState.utils';
+export * from './clienteGrupo.utils';
