@@ -22,4 +22,8 @@ export const SEGURIDAD_SIDEBAR_ITEMS: SeguridadSidebarItem[] = [
     label: 'Mantener accesos por perfil',
     to: SEGURIDAD_ROUTES.MANTENER_ACCESOS_PERFIL,
   },
+  {
+    label: 'Mantener accesos por usuario',
+    to: SEGURIDAD_ROUTES.MANTENER_ACCESOS_USUARIO,
+  },
 ];

@@ -123,7 +123,7 @@ export const suite = defineSuite(
         );
         assert.equal(
           form.nombre,
-          'Mantener Grupo'
+          'Mantener grupo'
         );
         assert.equal(
           form.codigo,

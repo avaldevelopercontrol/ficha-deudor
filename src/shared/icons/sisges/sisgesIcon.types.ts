@@ -80,6 +80,7 @@ export const SISGES_ICON_NAMES = [
   'initial-settings',
   'security',
   'permissions',
+  'user-group-access',
   'profiles',
   'groups',
   'modules',

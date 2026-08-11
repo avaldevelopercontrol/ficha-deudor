@@ -29,14 +29,18 @@ export type PerfilOpcionPermissionStates =
     PerfilOpcionCheckState
   >;
 
-export interface AsignarAccesosPerfilFormData {
-  perfilId: number | '';
+export interface AccesosOpcionesFormData {
   selectedOptionIds: number[];
   activeOptionId: number | null;
   permissionsByOptionId: Record<
     string,
     PerfilOpcionPermissions
   >;
+}
+
+export interface AsignarAccesosPerfilFormData
+  extends AccesosOpcionesFormData {
+  perfilId: number | '';
 }
 
 export interface OpcionTreeItem

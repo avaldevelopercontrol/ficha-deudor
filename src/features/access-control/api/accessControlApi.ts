@@ -13,13 +13,20 @@ import type {
   ApiResponseSimple,
 } from '@shared/types/indexApi';
 
+import { getOptionDisplayName } from '@shared/utils/optionDisplayName.utils';
+
 import {
   SEGURIDAD_API_ENDPOINTS,
 } from '@features/seguridad/constants/seguridadRoutes.constants';
 
+import {
+  fetchUsuarioGrupoOpcionesPermisosByUsuarioGrupo,
+} from '@features/seguridad/api/usuarioGrupoOpcionesApi';
+
 import type {
   AccessOptionSource,
   ProfileOptionAccessSource,
+  UserGroupOptionAccessSource,
 } from '../types/accessControl.types';
 
 interface AccessOptionApi {
@@ -50,6 +57,7 @@ interface ProfileOptionAccessApi {
 interface AccessControlApiData {
   options: AccessOptionSource[];
   assignments: ProfileOptionAccessSource[];
+  userGroupAssignments: UserGroupOptionAccessSource[];
 }
 
 const ACCESS_OPTIONS_ERROR =
@@ -168,9 +176,15 @@ const mapAccessOption = (
     option.sCodigoOpcion,
     'sCodigoOpcion'
   ),
-  name: toRequiredText(
-    option.sNombreOpcion,
-    'sNombreOpcion'
+  name: getOptionDisplayName(
+    toRequiredText(
+      option.sCodigoOpcion,
+      'sCodigoOpcion'
+    ),
+    toRequiredText(
+      option.sNombreOpcion,
+      'sNombreOpcion'
+    )
   ),
   description: toOptionalText(
     option.sDescripcionOpcion
@@ -332,6 +346,8 @@ const fetchProfileOptionAccess = async (
 
 export const fetchAccessControlData = async (
   profileId: number,
+  userId: number,
+  groupId: number | null,
   signal?: AbortSignal
 ): Promise<AccessControlApiData> => {
   if (
@@ -343,19 +359,80 @@ export const fetchAccessControlData = async (
     );
   }
 
+  if (
+    !Number.isSafeInteger(userId) ||
+    userId <= 0
+  ) {
+    throw new Error(
+      'El usuario autenticado no tiene un identificador válido.'
+    );
+  }
+
+  if (
+    groupId !== null &&
+    (
+      !Number.isSafeInteger(groupId) ||
+      groupId <= 0
+    )
+  ) {
+    throw new Error(
+      'El grupo seleccionado no tiene un identificador válido.'
+    );
+  }
+
   try {
-    const [options, assignments] =
-      await Promise.all([
-        fetchAccessOptions(signal),
-        fetchProfileOptionAccess(
-          profileId,
-          signal
-        ),
-      ]);
+    const [
+      options,
+      assignments,
+      userGroupDetails,
+    ] = await Promise.all([
+      fetchAccessOptions(signal),
+      fetchProfileOptionAccess(
+        profileId,
+        signal
+      ),
+      groupId === null
+        ? Promise.resolve([])
+        : fetchUsuarioGrupoOpcionesPermisosByUsuarioGrupo(
+            userId,
+            groupId,
+            signal
+          ),
+    ]);
+
+    const userGroupAssignments:
+      UserGroupOptionAccessSource[] =
+      userGroupDetails.map(
+        (assignment) => ({
+          assignmentId:
+            assignment.idUsuarioGrupoOpcion,
+          userId:
+            assignment.idUsuario,
+          groupId:
+            assignment.idGrupo,
+          optionId:
+            assignment.idOpcion,
+          permissions: {
+            consultar:
+              assignment.consultar,
+            insertar:
+              assignment.insertar,
+            editar:
+              assignment.editar,
+            eliminar:
+              assignment.eliminar,
+            exportar:
+              assignment.exportar,
+          },
+          active:
+            assignment.estadoActivo,
+        })
+      );
 
     return {
       options,
       assignments,
+      userGroupAssignments,
     };
   } catch (error) {
     throw resolveAccessControlError(

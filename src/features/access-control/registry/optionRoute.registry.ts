@@ -42,7 +42,7 @@ const APPLICATION_OPTION_REGISTRY:
       description:
         'Busca deudores por RUC, DNI o teléfono y accede a su ficha.',
       path: AUTH_ROUTES.GESTION_DEUDOR,
-      icon: 'user',
+      icon: 'debtor-management',
       sectionName:
         'Gestión de Cobranzas',
       parentCode:
@@ -58,7 +58,7 @@ const APPLICATION_OPTION_REGISTRY:
       path:
         GESTION_USUARIOS_ROUTES
           .CAMBIAR_CLAVE,
-      icon: 'key',
+      icon: 'password-change',
       sectionName:
         'Gestión de Usuarios',
       enabled:
@@ -74,7 +74,7 @@ const APPLICATION_OPTION_REGISTRY:
       path:
         GESTION_USUARIOS_ROUTES
           .ASIGNAR_USUARIO,
-      icon: 'users',
+      icon: 'user-assignment',
       sectionName:
         'Gestión de Usuarios',
       enabled:
@@ -90,7 +90,7 @@ const APPLICATION_OPTION_REGISTRY:
       path:
         GESTION_USUARIOS_ROUTES
           .MANTENER_USUARIO,
-      icon: 'user',
+      icon: 'user-settings',
       sectionName:
         'Gestión de Usuarios',
       enabled:
@@ -106,7 +106,7 @@ const APPLICATION_OPTION_REGISTRY:
       path:
         SEGURIDAD_ROUTES
           .MANTENER_PERFIL,
-      icon: 'user',
+      icon: 'profiles',
       sectionName: 'Seguridad',
       parentCode: 'mSeguridad',
       enabled:
@@ -121,7 +121,7 @@ const APPLICATION_OPTION_REGISTRY:
       path:
         SEGURIDAD_ROUTES
           .MANTENER_MODULOS,
-      icon: 'monitor',
+      icon: 'modules',
       sectionName: 'Seguridad',
       parentCode: 'mSeguridad',
       enabled:
@@ -130,7 +130,7 @@ const APPLICATION_OPTION_REGISTRY:
     },
     {
       code: 'mMantenerGrupo',
-      name: 'Mantener Grupo',
+      name: 'Mantener grupo',
       description:
         'Consulta los grupos registrados y su cliente asociado.',
       path:
@@ -153,7 +153,24 @@ const APPLICATION_OPTION_REGISTRY:
       path:
         SEGURIDAD_ROUTES
           .MANTENER_ACCESOS_PERFIL,
-      icon: 'key',
+      icon: 'permissions',
+      sectionName: 'Seguridad',
+      parentCode: 'mSeguridad',
+      enabled:
+        SEGURIDAD_FEATURE.enabled,
+      registrable: true,
+    },
+    {
+      code:
+        'mMantenerAccesosPorUsuario',
+      name:
+        'Mantener accesos por usuario',
+      description:
+        'Consulta los grupos y opciones asignados a cada usuario.',
+      path:
+        SEGURIDAD_ROUTES
+          .MANTENER_ACCESOS_USUARIO,
+      icon: 'user-group-access',
       sectionName: 'Seguridad',
       parentCode: 'mSeguridad',
       enabled:

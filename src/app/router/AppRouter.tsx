@@ -132,6 +132,13 @@ const MantenerAccesosPerfilPage = lazy(
     )
 );
 
+const MantenerAccesosUsuarioPage = lazy(
+  () =>
+    import(
+      '../../features/seguridad/pages/MantenerAccesosUsuarioPage'
+    )
+);
+
 interface FeatureRouteProps {
   enabled: boolean;
   children: ReactNode;
@@ -393,6 +400,25 @@ export function AppRouter() {
                   >
                     <OptionAccessRoute optionCode="mMantenerAccesosPorPerfil">
                       <MantenerAccesosPerfilPage />
+                    </OptionAccessRoute>
+                  </FeatureRoute>
+                }
+              />
+
+              <Route
+                path={
+                  SEGURIDAD_ROUTES
+                    .MANTENER_ACCESOS_USUARIO
+                }
+                element={
+                  <FeatureRoute
+                    enabled={
+                      SEGURIDAD_FEATURE
+                        .enabled
+                    }
+                  >
+                    <OptionAccessRoute optionCode="mMantenerAccesosPorUsuario">
+                      <MantenerAccesosUsuarioPage />
                     </OptionAccessRoute>
                   </FeatureRoute>
                 }

@@ -8,6 +8,7 @@ import {
 import {
   formatDateTimeInPeru,
   getCurrentPeruDateTime,
+  normalizePeruApiDateTime,
 } from './peruDateTime.utils';
 
 export const suite = defineSuite(
@@ -48,6 +49,42 @@ export const suite = defineSuite(
               new Date('invalid')
             ),
           /fecha inválida/
+        );
+      }
+    ),
+    test(
+      'normaliza fechas SQL de la API para contratos de escritura',
+      () => {
+        assert.equal(
+          normalizePeruApiDateTime(
+            '2026-08-11 11:26:24'
+          ),
+          '2026-08-11T11:26:24.000'
+        );
+        assert.equal(
+          normalizePeruApiDateTime(
+            '2026-08-11 11:26:24.297'
+          ),
+          '2026-08-11T11:26:24.297'
+        );
+        assert.equal(
+          normalizePeruApiDateTime(
+            '2026-08-11T11:26:24.2'
+          ),
+          '2026-08-11T11:26:24.200'
+        );
+      }
+    ),
+    test(
+      'rechaza fechas locales inválidas al normalizar para la API',
+      () => {
+        assert.throws(
+          () =>
+            normalizePeruApiDateTime(
+              '2026-02-30 11:26:24',
+              'dFechaCrea'
+            ),
+          /dFechaCrea.*válida/i
         );
       }
     ),

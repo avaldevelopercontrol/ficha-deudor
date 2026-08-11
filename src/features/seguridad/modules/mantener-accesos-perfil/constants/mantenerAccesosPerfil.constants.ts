@@ -12,7 +12,7 @@ export const MANTENER_ACCESOS_PERFIL_TEXTS = {
     'No se encontraron perfiles para mostrar.',
 
   addAction:
-    'Asignar Accesos al Perfil',
+    'Asignar accesos al perfil',
 
   editAction:
     'Editar accesos del perfil',

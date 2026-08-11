@@ -4,7 +4,7 @@ import type {
 } from 'react';
 
 import type {
-  AsignarAccesosPerfilFormData,
+  AccesosOpcionesFormData,
   OpcionTreeItem,
 } from '../types/asignarAccesosPerfil.types';
 
@@ -20,7 +20,7 @@ import AccessStateCheckbox from './AccessStateCheckbox';
 
 interface AccesosPerfilTreeProps {
   items: readonly OpcionTreeItem[];
-  form: AsignarAccesosPerfilFormData;
+  form: AccesosOpcionesFormData;
   disabled?: boolean;
   onActivate: (optionId: number) => void;
   onToggle: (

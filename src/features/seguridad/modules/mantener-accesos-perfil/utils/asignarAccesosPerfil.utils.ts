@@ -3,6 +3,7 @@ import {
 } from '@shared/utils/number.utils';
 
 import type {
+  AccesosOpcionesFormData,
   AsignarAccesosPerfilFormData,
   OpcionTreeItem,
   PerfilAccesoOption,
@@ -179,7 +180,7 @@ export const hasAnyPerfilOpcionPermission = (
   );
 
 const getPermissions = (
-  form: AsignarAccesosPerfilFormData,
+  form: AccesosOpcionesFormData,
   optionId: number
 ): PerfilOpcionPermissions =>
   form.permissionsByOptionId[
@@ -195,8 +196,8 @@ const getTreeItemById = (
     (item) => item.idModulo === optionId
   );
 
-const getSelectedLeafIds = (
-  form: AsignarAccesosPerfilFormData,
+export const getSelectedLeafIds = (
+  form: AccesosOpcionesFormData,
   treeItems: readonly OpcionTreeItem[]
 ): number[] => {
   const selectedIds = new Set(
@@ -235,9 +236,9 @@ const resolveSelectedAssignmentIds = (
 
 const keepSelectedLeafPermissions = (
   permissionsByOptionId:
-    AsignarAccesosPerfilFormData['permissionsByOptionId'],
+    AccesosOpcionesFormData['permissionsByOptionId'],
   selectedLeafIds: ReadonlySet<number>
-): AsignarAccesosPerfilFormData['permissionsByOptionId'] =>
+): AccesosOpcionesFormData['permissionsByOptionId'] =>
   Object.fromEntries(
     Object.entries(
       permissionsByOptionId
@@ -263,7 +264,7 @@ const resolveCheckState = (
 };
 
 export const getPerfilOpcionBranchSelectionState = (
-  form: AsignarAccesosPerfilFormData,
+  form: AccesosOpcionesFormData,
   treeItems: readonly OpcionTreeItem[],
   optionId: number
 ): PerfilOpcionCheckState => {
@@ -286,7 +287,7 @@ export const getPerfilOpcionBranchSelectionState = (
 };
 
 export const getPerfilOpcionBranchPermissionStates = (
-  form: AsignarAccesosPerfilFormData,
+  form: AccesosOpcionesFormData,
   treeItems: readonly OpcionTreeItem[],
   optionId: number
 ): PerfilOpcionPermissionStates => {
@@ -373,12 +374,14 @@ export const getPerfilOpcionBranchAllPermissionsState = (
   return 'mixed';
 };
 
-export const setPerfilOpcionBranchSelected = (
-  form: AsignarAccesosPerfilFormData,
+export const setPerfilOpcionBranchSelected = <
+  T extends AccesosOpcionesFormData,
+>(
+  form: T,
   treeItems: readonly OpcionTreeItem[],
   optionId: number,
   selected: boolean
-): AsignarAccesosPerfilFormData => {
+): T => {
   const normalizedOptionId =
     toRequiredId(
       optionId,
@@ -440,14 +443,16 @@ export const setPerfilOpcionBranchSelected = (
   };
 };
 
-export const setPerfilOpcionBranchPermission = (
-  form: AsignarAccesosPerfilFormData,
+export const setPerfilOpcionBranchPermission = <
+  T extends AccesosOpcionesFormData,
+>(
+  form: T,
   treeItems: readonly OpcionTreeItem[],
   optionId: number,
   permission:
     PerfilOpcionPermissionKey,
   checked: boolean
-): AsignarAccesosPerfilFormData => {
+): T => {
   const normalizedOptionId =
     toRequiredId(
       optionId,
@@ -509,12 +514,14 @@ export const setPerfilOpcionBranchPermission = (
   };
 };
 
-export const setAllPerfilOpcionBranchPermissions = (
-  form: AsignarAccesosPerfilFormData,
+export const setAllPerfilOpcionBranchPermissions = <
+  T extends AccesosOpcionesFormData,
+>(
+  form: T,
   treeItems: readonly OpcionTreeItem[],
   optionId: number,
   checked: boolean
-): AsignarAccesosPerfilFormData => {
+): T => {
   const normalizedOptionId =
     toRequiredId(
       optionId,

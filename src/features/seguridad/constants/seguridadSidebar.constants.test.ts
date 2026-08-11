@@ -4,7 +4,7 @@ import { SEGURIDAD_ROUTES } from './seguridadRoutes.constants';
 import { SEGURIDAD_SIDEBAR_ITEMS } from './seguridadSidebar.constants';
 
 export const suite = defineSuite('seguridadSidebar.constants', [
-  test('incluye mantener accesos por perfil dentro del menú lateral', () => {
+  test('incluye los módulos de accesos dentro del menú lateral', () => {
     assert.deepEqual(SEGURIDAD_SIDEBAR_ITEMS, [
       {
         label: 'Mantener perfil',
@@ -21,6 +21,10 @@ export const suite = defineSuite('seguridadSidebar.constants', [
       {
         label: 'Mantener accesos por perfil',
         to: SEGURIDAD_ROUTES.MANTENER_ACCESOS_PERFIL,
+      },
+      {
+        label: 'Mantener accesos por usuario',
+        to: SEGURIDAD_ROUTES.MANTENER_ACCESOS_USUARIO,
       },
     ]);
   }),
