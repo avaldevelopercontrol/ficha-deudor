@@ -1,4 +1,7 @@
-import type React from 'react';
+import {
+  useCallback,
+  type FC,
+} from 'react';
 
 import Modal from '@shared/components/modals/Modal';
 
@@ -50,7 +53,7 @@ interface RegistrarUsuarioErrorSummaryProps {
 }
 
 const RegistrarUsuarioErrorSummary:
-  React.FC<
+  FC<
     RegistrarUsuarioErrorSummaryProps
   > = ({
     errors,
@@ -90,7 +93,7 @@ const RegistrarUsuarioErrorSummary:
   };
 
 export const ModalRegistrarUsuario:
-  React.FC<
+  FC<
     ModalRegistrarUsuarioProps
   > = ({
     isOpen,
@@ -105,13 +108,39 @@ export const ModalRegistrarUsuario:
       catalogos,
       loading: catalogLoading,
       errors: catalogErrors,
-      isLoading: isLoadingCatalogos,
     } = useRegistrarUsuarioCatalogos({
       enabled: isOpen,
       idUsuario:
         usuario?.id_usuario ??
         null,
     });
+
+    const validate =
+      useCallback(
+        (
+          data:
+            RegistrarUsuarioFormData
+        ) =>
+          validateRegistrarUsuarioForm(
+            data,
+            {
+              catalogos,
+            }
+          ),
+        [catalogos]
+      );
+
+    const isRequiredCatalogLoading =
+      catalogLoading.perfiles ||
+      catalogLoading.grupos ||
+      catalogLoading.departamentosLabor;
+
+    const hasRequiredCatalogError =
+      Boolean(
+        catalogErrors.perfiles ||
+        catalogErrors.grupos ||
+        catalogErrors.departamentosLabor
+      );
 
     const {
       form,
@@ -130,8 +159,7 @@ export const ModalRegistrarUsuario:
 
         onClose,
 
-        validate:
-          validateRegistrarUsuarioForm,
+        validate,
 
         resetOnClose: true,
 
@@ -228,7 +256,13 @@ export const ModalRegistrarUsuario:
               onClick={handleSubmit}
               disabled={
                 isSubmitting ||
-                isLoadingCatalogos
+                isRequiredCatalogLoading ||
+                hasRequiredCatalogError
+              }
+              title={
+                hasRequiredCatalogError
+                  ? 'No se puede registrar hasta cargar los catálogos obligatorios.'
+                  : undefined
               }
               className="registrar-usuario-modal__submit-button"
             />

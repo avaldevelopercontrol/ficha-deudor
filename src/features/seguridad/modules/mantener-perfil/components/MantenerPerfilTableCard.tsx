@@ -10,6 +10,7 @@ import TableResourceState from '@shared/components/table/TableResourceState';
 
 import {
   ActionButton,
+  OperationFeedbackMessage,
 } from '@shared/components/ui';
 
 import Paginacion from '@shared/components/ui/Paginacion';
@@ -66,6 +67,9 @@ export const MantenerPerfilTableCard =
       canInsert,
       canEdit,
 
+      feedback,
+      clearFeedback,
+
       isLoading,
       error,
       refetch,
@@ -98,11 +102,13 @@ export const MantenerPerfilTableCard =
           perfil:
             Perfil
         ) => {
+          clearFeedback();
+
           setSelectedPerfilId(
             perfil.idPerfil
           );
         },
-        []
+        [clearFeedback]
       );
 
     const columns =
@@ -118,11 +124,13 @@ export const MantenerPerfilTableCard =
             return;
           }
 
+          clearFeedback();
+
           setIsRegisterModalOpen(
             true
           );
         },
-        [canInsert]
+        [canInsert, clearFeedback]
       );
 
     const handleCloseRegisterModal =
@@ -195,6 +203,11 @@ export const MantenerPerfilTableCard =
               className="mantener-perfil-card__add-button"
             />
           </header>
+
+          <OperationFeedbackMessage
+            feedback={feedback}
+            onClose={clearFeedback}
+          />
 
           <TableResourceState
             isLoading={

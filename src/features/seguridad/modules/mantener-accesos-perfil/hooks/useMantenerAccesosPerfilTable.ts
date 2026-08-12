@@ -21,8 +21,13 @@ import {
 } from '@shared/hooks/useClientSideTable';
 
 import {
+  useOperationFeedback,
+} from '@shared/hooks/useOperationFeedback';
+
+import {
   createPerfilOpciones,
   fetchPerfilOptionsCount,
+  fetchPerfilesAcceso,
   updatePerfilOpciones,
 } from '../../../api/perfilOpcionesApi';
 
@@ -38,6 +43,30 @@ import type {
 import {
   assertMantenerAccesosPerfilPermission,
 } from '../utils/mantenerAccesosPerfilPermissions';
+
+const loadPerfilesConEstado = async (
+  signal: AbortSignal
+): Promise<PerfilOpcionCount[]> => {
+  const [perfiles, perfilesCatalogo] =
+    await Promise.all([
+      fetchPerfilOptionsCount(signal),
+      fetchPerfilesAcceso(signal),
+    ]);
+
+  const estadoByPerfilId = new Map(
+    perfilesCatalogo.map((perfil) => [
+      perfil.idPerfil,
+      perfil.estadoActivo,
+    ])
+  );
+
+  return perfiles.map((perfil) => ({
+    ...perfil,
+    estadoActivo: estadoByPerfilId.get(
+      perfil.idPerfil
+    ),
+  }));
+};
 
 export const useMantenerAccesosPerfilTable = () => {
   const {
@@ -60,12 +89,18 @@ export const useMantenerAccesosPerfilTable = () => {
     permissions.editar;
 
   const {
+    feedback,
+    clearFeedback,
+    showSuccess,
+  } = useOperationFeedback();
+
+  const {
     data,
     isLoading,
     error,
     refetch,
   } = useApiResource<PerfilOpcionCount[]>(
-    fetchPerfilOptionsCount,
+    loadPerfilesConEstado,
     []
   );
 
@@ -92,6 +127,8 @@ export const useMantenerAccesosPerfilTable = () => {
       async (
         form: RegistrarPerfilOpcionesData
       ): Promise<void> => {
+        clearFeedback();
+
         assertMantenerAccesosPerfilPermission(
           'insertar',
           canInsert
@@ -135,12 +172,23 @@ export const useMantenerAccesosPerfilTable = () => {
 
         setPageNumber(1);
         await refreshAffectedState();
+
+        showSuccess({
+          entity: {
+            label: 'Accesos por perfil',
+            gender: 'masculine',
+            number: 'plural',
+          },
+          action: 'assign',
+        });
       },
       [
         canInsert,
+        clearFeedback,
         refetch,
         refreshAccessControl,
         setPageNumber,
+        showSuccess,
         usuario?.id_usuario,
         usuario?.perfilId,
       ]
@@ -154,6 +202,8 @@ export const useMantenerAccesosPerfilTable = () => {
           readonly PerfilOpcionDetalle[],
         form: RegistrarPerfilOpcionesData
       ): Promise<void> => {
+        clearFeedback();
+
         assertMantenerAccesosPerfilPermission(
           'editar',
           canEdit
@@ -196,11 +246,22 @@ export const useMantenerAccesosPerfilTable = () => {
         }
 
         await refreshAffectedState();
+
+        showSuccess({
+          entity: {
+            label: 'Accesos por perfil',
+            gender: 'masculine',
+            number: 'plural',
+          },
+          action: 'update',
+        });
       },
       [
         canEdit,
+        clearFeedback,
         refetch,
         refreshAccessControl,
+        showSuccess,
         usuario?.id_usuario,
         usuario?.perfilId,
       ]
@@ -220,6 +281,9 @@ export const useMantenerAccesosPerfilTable = () => {
 
     canInsert,
     canEdit,
+
+    feedback,
+    clearFeedback,
 
     paginatedData:
       table.paginatedData,

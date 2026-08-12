@@ -10,6 +10,7 @@ import type {
 } from '@features/gestion-usuarios/types/usuarioListado.types';
 
 import {
+  buildActiveUsuarioSearchOptions,
   buildUsuarioSearchOptions,
   searchUsuarioOptions,
 } from './usuarioSearch.utils';
@@ -79,6 +80,28 @@ export const suite = defineSuite(
               login: 'cramos',
             },
           ]
+        );
+      }
+    ),
+    test(
+      'construye el catálogo de asignación únicamente con usuarios activos',
+      () => {
+        const options =
+          buildActiveUsuarioSearchOptions([
+            ...usuarios,
+            {
+              id: 4,
+              nombre: 'Usuario Inactivo',
+              login: 'inactivo',
+              estado: 'INACTIVO',
+              perfil: 'GESTOR',
+              codigoRecaudacion: '',
+            },
+          ]);
+
+        assert.deepEqual(
+          options.map((option) => option.id),
+          [2, 1, 3]
         );
       }
     ),

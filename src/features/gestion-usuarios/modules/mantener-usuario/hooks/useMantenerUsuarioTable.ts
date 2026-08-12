@@ -3,8 +3,12 @@ import {
 } from 'react';
 
 import {
-  useAuth,
-} from '@features/auth/hooks/useAuth';
+  useOptionPermissions,
+} from '@features/access-control';
+
+import {
+  useOperationFeedback,
+} from '@shared/hooks/useOperationFeedback';
 
 import {
   createUsuario,
@@ -19,14 +23,24 @@ import type {
 } from '../types/registrarUsuario.types';
 
 export const useMantenerUsuarioTable = () => {
-  const {
-    usuario,
-  } = useAuth();
+  const permissions =
+    useOptionPermissions(
+      'mMantenerUsuario'
+    );
+
+  const canInsert =
+    permissions.insertar;
 
   const table =
     useUsuariosListTable({
       initialPageSize: 10,
     });
+
+  const {
+    feedback,
+    clearFeedback,
+    showSuccess,
+  } = useOperationFeedback();
 
   const {
     refetch,
@@ -39,43 +53,53 @@ export const useMantenerUsuarioTable = () => {
         form:
           RegistrarUsuarioFormData
       ): Promise<void> => {
-        /*
-         * Si createUsuario lanza un error,
-         * useModalForm lo mostrará y el modal
-         * permanecerá abierto.
-         */
-        const authenticatedUserId =
-          usuario?.id_usuario;
+        clearFeedback();
 
-        if (!authenticatedUserId) {
+        if (!canInsert) {
           throw new Error(
-            'No se pudo identificar al usuario autenticado que registra la operación.'
+            'No tiene permiso para agregar usuarios.'
           );
         }
 
-        await createUsuario(
-          form,
-          authenticatedUserId
-        );
+        /*
+         * Los errores 400/500 conservan el modal abierto
+         * porque createUsuario propaga messageUser mediante
+         * useModalForm.
+         */
+        await createUsuario(form);
 
         /*
-         * Después del registro se actualiza
-         * la tabla y se regresa a la primera
-         * página para facilitar la revisión.
+         * Después del registro se actualiza la tabla y se
+         * regresa a la primera página para facilitar la revisión.
          */
         setPageNumber(1);
 
         await refetch();
+
+        showSuccess({
+          entity: {
+            label: 'Usuario',
+            gender: 'masculine',
+          },
+          action: 'create',
+        });
       },
       [
+        canInsert,
+        clearFeedback,
         refetch,
         setPageNumber,
-        usuario?.id_usuario,
+        showSuccess,
       ]
     );
 
+
+
   return {
     ...table,
+    canInsert,
     registrarUsuario,
+    feedback,
+    clearFeedback,
   };
 };

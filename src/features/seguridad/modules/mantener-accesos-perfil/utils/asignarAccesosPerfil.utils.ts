@@ -23,6 +23,12 @@ import {
   getConfigurableBranchOptionIds,
 } from './accesosPerfilTree.utils';
 
+import {
+  getPerfilOpcionPermissionAvailability,
+  isPerfilOpcionPermissionAvailable,
+  sanitizePerfilOpcionPermissions,
+} from './opcionAccessCapabilities.utils';
+
 export const PERFIL_OPCION_PERMISSION_KEYS = [
   'consultar',
   'insertar',
@@ -66,7 +72,7 @@ export const ASIGNAR_ACCESOS_PERFIL_INITIAL_FORM:
     permissionsByOptionId: {},
   };
 
-export const filterUnassignedPerfilOptions = (
+export const filterAssignablePerfilOptions = (
   perfiles: readonly PerfilAccesoOption[],
   assignedPerfilIds: readonly number[]
 ): PerfilAccesoOption[] => {
@@ -80,6 +86,7 @@ export const filterUnassignedPerfilOptions = (
 
   return perfiles.filter(
     (perfil) =>
+      perfil.estadoActivo &&
       !assignedPerfilIdSet.has(
         perfil.idPerfil
       )
@@ -134,18 +141,24 @@ export const createAsignarAccesosPerfilFormFromAssignments = (
 
         return [
           String(optionId),
-          {
-            consultar:
-              assignment?.consultar ?? false,
-            insertar:
-              assignment?.insertar ?? false,
-            editar:
-              assignment?.editar ?? false,
-            eliminar:
-              assignment?.eliminar ?? false,
-            exportar:
-              assignment?.exportar ?? false,
-          },
+          sanitizePerfilOpcionPermissions(
+            treeItems.find(
+              (item) =>
+                item.idModulo === optionId
+            ),
+            {
+              consultar:
+                assignment?.consultar ?? false,
+              insertar:
+                assignment?.insertar ?? false,
+              editar:
+                assignment?.editar ?? false,
+              eliminar:
+                assignment?.eliminar ?? false,
+              exportar:
+                assignment?.exportar ?? false,
+            }
+          ),
         ];
       })
     );
@@ -326,10 +339,14 @@ export const getPerfilOpcionBranchPermissionStates = (
     form.selectedOptionIds.includes(
       activeOption.idModulo
     );
-  const permissions = getPermissions(
-    form,
-    activeOption.idModulo
-  );
+  const permissions =
+    sanitizePerfilOpcionPermissions(
+      activeOption,
+      getPermissions(
+        form,
+        activeOption.idModulo
+      )
+    );
 
   return PERFIL_OPCION_PERMISSION_KEYS.reduce<PerfilOpcionPermissionStates>(
     (states, permission) => {
@@ -348,12 +365,28 @@ export const getPerfilOpcionBranchPermissionStates = (
 };
 
 export const getPerfilOpcionBranchAllPermissionsState = (
-  permissionStates: PerfilOpcionPermissionStates
+  permissionStates: PerfilOpcionPermissionStates,
+  option?: OpcionTreeItem | null
 ): PerfilOpcionCheckState => {
+  const availability =
+    option
+      ? getPerfilOpcionPermissionAvailability(
+          option
+        )
+      : null;
   const states =
-    PERFIL_OPCION_PERMISSION_KEYS.map(
-      (key) => permissionStates[key]
-    );
+    PERFIL_OPCION_PERMISSION_KEYS
+      .filter(
+        (key) =>
+          availability?.[key] ?? true
+      )
+      .map(
+        (key) => permissionStates[key]
+      );
+
+  if (states.length === 0) {
+    return 'unchecked';
+  }
 
   if (
     states.every(
@@ -463,7 +496,13 @@ export const setPerfilOpcionBranchPermission = <
     normalizedOptionId
   );
 
-  if (!activeOption?.isPermissionTarget) {
+  if (
+    !activeOption?.isPermissionTarget ||
+    !isPerfilOpcionPermissionAvailable(
+      activeOption,
+      permission
+    )
+  ) {
     return {
       ...form,
       activeOptionId:
@@ -553,14 +592,23 @@ export const setAllPerfilOpcionBranchPermissions = <
     );
   }
 
+  const availability =
+    getPerfilOpcionPermissionAvailability(
+      activeOption
+    );
   const permissionsByOptionId = {
     ...form.permissionsByOptionId,
     [String(normalizedOptionId)]: {
-      consultar: checked,
-      insertar: checked,
-      editar: checked,
-      eliminar: checked,
-      exportar: checked,
+      consultar:
+        availability.consultar && checked,
+      insertar:
+        availability.insertar && checked,
+      editar:
+        availability.editar && checked,
+      eliminar:
+        availability.eliminar && checked,
+      exportar:
+        availability.exportar && checked,
     },
   };
 
@@ -639,14 +687,23 @@ const validateAccesosPerfilForm = (
 
   const optionsWithoutPermissions =
     selectedLeafIds
-      .filter(
-        (optionId) =>
-          !hasAnyPerfilOpcionPermission(
-            form.permissionsByOptionId[
-              String(optionId)
-            ]
-          )
-      )
+      .filter((optionId) => {
+        const option =
+          assignmentTargets.get(optionId);
+        const permissions =
+          form.permissionsByOptionId[
+            String(optionId)
+          ];
+
+        return !hasAnyPerfilOpcionPermission(
+          permissions
+            ? sanitizePerfilOpcionPermissions(
+                option,
+                permissions
+              )
+            : permissions
+        );
+      })
       .map(
         (optionId) =>
           assignmentTargets.get(optionId)
@@ -713,12 +770,13 @@ export const normalizeAsignarAccesosPerfilForm = (
         ),
         permissions:
           item.isPermissionTarget
-            ? {
-                ...getPermissions(
+            ? sanitizePerfilOpcionPermissions(
+                item,
+                getPermissions(
                   form,
                   item.idModulo
-                ),
-              }
+                )
+              )
             : {
                 ...AUTOMATIC_PARENT_PERMISSIONS,
               },

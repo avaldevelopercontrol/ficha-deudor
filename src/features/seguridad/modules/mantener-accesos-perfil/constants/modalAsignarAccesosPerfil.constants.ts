@@ -26,11 +26,13 @@ export const MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS = {
   loading:
     'Cargando perfiles y opciones...',
   emptyProfiles:
-    'No existen perfiles disponibles para asignar accesos.',
+    'No existen perfiles activos disponibles para asignar accesos.',
   allProfilesAssigned:
-    'Todos los perfiles disponibles ya tienen accesos asignados. Utilice la opción Editar para modificarlos.',
+    'Todos los perfiles activos disponibles ya tienen accesos asignados. Utilice la opción Editar para modificarlos.',
   alreadyAssignedProfile:
     'El perfil seleccionado ya tiene accesos asignados. Utilice la opción Editar para modificarlos.',
+  inactiveOrUnavailableProfile:
+    'Seleccione un perfil activo disponible para asignar accesos.',
   emptyOptions:
     'No existen opciones disponibles para asignar.',
   retry:

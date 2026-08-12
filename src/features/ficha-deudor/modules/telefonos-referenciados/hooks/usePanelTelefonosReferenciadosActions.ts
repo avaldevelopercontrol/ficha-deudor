@@ -2,6 +2,10 @@ import {
   useCallback,
   useState,
 } from 'react';
+import {
+  useOperationFeedback,
+} from '@shared/hooks/useOperationFeedback';
+
 
 import type {
   TelefonoFormData,
@@ -28,6 +32,12 @@ export const usePanelTelefonosReferenciadosActions =
     create,
     update,
   }: Params) => {
+    const {
+      feedback,
+      clearFeedback,
+      showSuccess,
+    } = useOperationFeedback();
+
     const [
       showRegistrar,
       setShowRegistrar,
@@ -45,8 +55,9 @@ export const usePanelTelefonosReferenciadosActions =
 
     const handleOpenRegistrar =
       useCallback(() => {
+        clearFeedback();
         setShowRegistrar(true);
-      }, []);
+      }, [clearFeedback]);
 
     const handleCloseRegistrar =
       useCallback(() => {
@@ -55,10 +66,11 @@ export const usePanelTelefonosReferenciadosActions =
 
     const handleEdit = useCallback(
       (row: TelefonoReferenciado) => {
+        clearFeedback();
         setTelefonoEditarId(row.id);
         setShowEditar(true);
       },
-      []
+      [clearFeedback]
     );
 
     const handleCloseEditar =
@@ -72,11 +84,21 @@ export const usePanelTelefonosReferenciadosActions =
         async (
           formData: TelefonoFormData
         ): Promise<void> => {
+          clearFeedback();
+
           try {
             await update(
               formData.id,
               formData
             );
+
+            showSuccess({
+              entity: {
+                label: 'Teléfono',
+                gender: 'masculine',
+              },
+              action: 'update',
+            });
           } catch (error) {
             throw new Error(
               getErrorMessage(
@@ -86,7 +108,11 @@ export const usePanelTelefonosReferenciadosActions =
             );
           }
         },
-        [update]
+        [
+          clearFeedback,
+          showSuccess,
+          update,
+        ]
       );
 
     const handleRegistrar =
@@ -94,8 +120,18 @@ export const usePanelTelefonosReferenciadosActions =
         async (
           formData: TelefonoFormData
         ): Promise<void> => {
+          clearFeedback();
+
           try {
             await create(formData);
+
+            showSuccess({
+              entity: {
+                label: 'Teléfono',
+                gender: 'masculine',
+              },
+              action: 'create',
+            });
           } catch (error) {
             throw new Error(
               getErrorMessage(
@@ -105,10 +141,16 @@ export const usePanelTelefonosReferenciadosActions =
             );
           }
         },
-        [create]
+        [
+          clearFeedback,
+          create,
+          showSuccess,
+        ]
       );
 
     return {
+      feedback,
+      clearFeedback,
       showRegistrar,
       showEditar,
       telefonoEditarId,

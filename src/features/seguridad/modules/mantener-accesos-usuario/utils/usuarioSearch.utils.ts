@@ -35,6 +35,14 @@ const getUsuarioLabel = (
   usuario.login ||
   `Usuario ${usuario.id}`;
 
+export const isUsuarioListadoActivo = (
+  usuario: UsuarioListado
+): boolean =>
+  usuario.estado
+    .trim()
+    .toLocaleUpperCase('es-PE') ===
+  'ACTIVO';
+
 export const buildUsuarioSearchOptions = (
   usuarios: UsuarioListado[]
 ): UsuarioSearchOption[] =>
@@ -81,6 +89,15 @@ export const buildUsuarioSearchOptions = (
         }
       )
     );
+
+export const buildActiveUsuarioSearchOptions = (
+  usuarios: UsuarioListado[]
+): UsuarioSearchOption[] =>
+  buildUsuarioSearchOptions(
+    usuarios.filter(
+      isUsuarioListadoActivo
+    )
+  );
 
 const getSearchScore = (
   option: UsuarioSearchOption,

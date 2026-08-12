@@ -72,6 +72,23 @@ const toBooleanValue = (
   value === '1' ||
   value === 'true';
 
+const toPerfilEstadoActivo = (
+  value: unknown
+): boolean => {
+  const estado = toNonNegativeInteger(
+    value,
+    'nEstadoGest'
+  );
+
+  if (estado !== 0 && estado !== 1) {
+    throw new Error(
+      'El campo nEstadoGest debe ser 0 o 1.'
+    );
+  }
+
+  return estado === 1;
+};
+
 export const mapPerfilOpcionCount = (
   item: PerfilOpcionCountApi
 ): PerfilOpcionCount => ({
@@ -117,6 +134,10 @@ export const mapPerfilAccesoOption = (
   nombrePerfil: toRequiredText(
     item.per_Nombre,
     'per_Nombre'
+  ),
+
+  estadoActivo: toPerfilEstadoActivo(
+    item.nEstadoGest
   ),
 });
 

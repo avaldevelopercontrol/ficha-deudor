@@ -38,7 +38,7 @@ import {
 
 import {
   ASIGNAR_ACCESOS_PERFIL_INITIAL_FORM,
-  filterUnassignedPerfilOptions,
+  filterAssignablePerfilOptions,
   getPerfilOpcionBranchAllPermissionsState,
   getPerfilOpcionBranchPermissionStates,
   normalizeAsignarAccesosPerfilForm,
@@ -159,7 +159,7 @@ export const useAsignarAccesosPerfilModal = ({
 
   const availablePerfiles = useMemo(
     () =>
-      filterUnassignedPerfilOptions(
+      filterAssignablePerfilOptions(
         catalog?.perfiles ?? [],
         assignedPerfilIds
       ),
@@ -167,6 +167,16 @@ export const useAsignarAccesosPerfilModal = ({
       assignedPerfilIds,
       catalog?.perfiles,
     ]
+  );
+
+  const availablePerfilIdSet = useMemo(
+    () =>
+      new Set(
+        availablePerfiles.map(
+          (perfil) => perfil.idPerfil
+        )
+      ),
+    [availablePerfiles]
   );
 
   const profileOptions = useMemo(
@@ -218,11 +228,12 @@ export const useAsignarAccesosPerfilModal = ({
     () =>
       activeOption?.isPermissionTarget
         ? getPerfilOpcionBranchAllPermissionsState(
-            activePermissionStates
+            activePermissionStates,
+            activeOption
           )
         : 'unchecked',
     [
-      activeOption?.isPermissionTarget,
+      activeOption,
       activePermissionStates,
     ]
   );
@@ -395,6 +406,21 @@ export const useAsignarAccesosPerfilModal = ({
       return;
     }
 
+    if (
+      typeof form.perfilId === 'number' &&
+      !availablePerfilIdSet.has(
+        form.perfilId
+      )
+    ) {
+      setErrors({
+        perfilId:
+          MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS
+            .inactiveOrUnavailableProfile,
+      });
+      setSubmitError(null);
+      return;
+    }
+
     const validationErrors =
       validateAsignarAccesosPerfilForm(
         form,
@@ -444,6 +470,7 @@ export const useAsignarAccesosPerfilModal = ({
     }
   }, [
     assignedPerfilIdSet,
+    availablePerfilIdSet,
     form,
     onClose,
     onRegistrar,
@@ -455,7 +482,9 @@ export const useAsignarAccesosPerfilModal = ({
     !resourceError &&
     !treeState.error &&
     catalog
-      ? catalog.perfiles.length === 0
+      ? !catalog.perfiles.some(
+          (perfil) => perfil.estadoActivo
+        )
         ? MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS
             .emptyProfiles
         : availablePerfiles.length === 0

@@ -54,11 +54,13 @@ export const suite = defineSuite(
             nid_perfil: 9,
             per_Nombre:
               'Administrador Base Datos      ',
+            nEstadoGest: 1,
           }),
           {
             idPerfil: 9,
             nombrePerfil:
               'Administrador Base Datos',
+            estadoActivo: true,
           }
         );
 
@@ -67,8 +69,32 @@ export const suite = defineSuite(
             mapPerfilAccesoOption({
               nid_perfil: 0,
               per_Nombre: 'Inválido',
+              nEstadoGest: 1,
             }),
           /nid_perfil/
+        );
+
+        assert.deepEqual(
+          mapPerfilAccesoOption({
+            nid_perfil: 31,
+            per_Nombre: 'Cliente BITEL 1',
+            nEstadoGest: 0,
+          }),
+          {
+            idPerfil: 31,
+            nombrePerfil: 'Cliente BITEL 1',
+            estadoActivo: false,
+          }
+        );
+
+        assert.throws(
+          () =>
+            mapPerfilAccesoOption({
+              nid_perfil: 31,
+              per_Nombre: 'Inválido',
+              nEstadoGest: 2,
+            }),
+          /nEstadoGest/
         );
       }
     ),

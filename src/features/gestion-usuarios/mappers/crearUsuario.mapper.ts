@@ -6,52 +6,21 @@ import type {
   CreateUsuarioRequestApi,
 } from '../types/crearUsuario.types';
 
-/*
- * Swagger define cod_Recau como string,
- * mientras que el formulario lo representa
- * mediante un checkbox.
- *
- * Si el backend espera otros valores, solamente
- * se modifican estas dos constantes.
- */
-const CODIGO_RECAUDADOR_CHECKED =
-  '1';
-
-const CODIGO_RECAUDADOR_UNCHECKED =
-  '0';
-
 const parseNumericId = (
   value: string
 ): number => {
-  const parsedValue =
-    Number(value);
-
-  if (
-    !Number.isInteger(
-      parsedValue
-    ) ||
-    parsedValue < 0
-  ) {
+  if (!value) {
     return 0;
   }
 
-  return parsedValue;
-};
-
-const parseAuthenticatedUserId = (
-  value: string
-): number => {
-  const parsedValue =
-    Number(value);
+  const parsedValue = Number(value);
 
   if (
-    !Number.isInteger(
-      parsedValue
-    ) ||
-    parsedValue <= 0
+    !Number.isInteger(parsedValue) ||
+    parsedValue < 0
   ) {
     throw new Error(
-      'No se pudo identificar al usuario autenticado que registra la operación.'
+      `El identificador "${value}" no es válido para registrar el usuario.`
     );
   }
 
@@ -66,29 +35,17 @@ const mapFechaNacimiento = (
   }
 
   /*
-   * El input date entrega YYYY-MM-DD.
-   * Se conserva exactamente el día seleccionado
-   * sin depender de la zona horaria del navegador.
+   * El input date entrega YYYY-MM-DD. Se conserva
+   * exactamente el día elegido y se serializa en el
+   * formato ISO esperado por el contrato del backend.
    */
   return `${value}T00:00:00.000Z`;
 };
 
 export const buildCreateUsuarioRequest = (
-  form: RegistrarUsuarioFormData,
-  authenticatedUserId: string
+  form: RegistrarUsuarioFormData
 ): CreateUsuarioRequestApi => ({
-  /*
-   * Usuario autenticado que ejecuta el registro.
-   * Nunca debe enviarse 0 porque el backend lo usa
-   * para identificar al responsable de la operación.
-   */
-  nId_Usuario:
-    parseAuthenticatedUserId(
-      authenticatedUserId
-    ),
-
-  cUsr_NroDoc:
-    form.dni.trim(),
+  cUsr_NroDoc: form.dni.trim(),
 
   cUsr_ApePat:
     form.apellidoPaterno.trim(),
@@ -103,27 +60,24 @@ export const buildCreateUsuarioRequest = (
     form.usuario.trim(),
 
   /*
-   * No se aplica trim a la contraseña.
-   * Los espacios podrían formar parte
-   * de la clave ingresada.
+   * La contraseña se envía exactamente como fue
+   * ingresada. No se aplica trim ni transformación.
    */
   cUsr_Pass:
     form.contrasena,
 
   nid_perfil:
-    parseNumericId(
-      form.perfil
-    ),
+    parseNumericId(form.perfil),
 
   nId_Grupo:
-    parseNumericId(
-      form.grupo
-    ),
+    parseNumericId(form.grupo),
 
-  cod_Recau:
-    form.codigoRecaudador
-      ? CODIGO_RECAUDADOR_CHECKED
-      : CODIGO_RECAUDADOR_UNCHECKED,
+  /*
+   * El código de recaudador no aplica en este flujo.
+   * El contrato del backend mantiene la propiedad,
+   * por lo que se envía siempre como cadena vacía.
+   */
+  cod_Recau: '',
 
   bEstado:
     form.estado,
@@ -146,10 +100,6 @@ export const buildCreateUsuarioRequest = (
   nUsr_CiuGestor:
     form.ciudadGestor.trim(),
 
-  /*
-   * El valor 0 representa SIN ZONA
-   * y es válido para el formulario.
-   */
   nId_SubZonaGen:
     parseNumericId(
       form.subZonalOficina

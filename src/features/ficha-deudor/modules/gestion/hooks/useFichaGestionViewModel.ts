@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useAuth } from '@features/auth/hooks/useAuth';
 import type { DocumentoApi } from '../../../shared/types';
 import { useFichaGestionActions } from './useFichaGestionActions';
@@ -6,7 +6,6 @@ import { useFichaGestionCatalogos } from './useFichaGestionCatalogos';
 import { useFichaGestionForm } from './useFichaGestionForm';
 import type {
   FichaGestionViewModel,
-  GestionFeedback,
   GestionFormClaro,
 } from '../types/fichaGestion.types';
 import type { FichaDeudorGestionFormParams } from '../../../shared/types/fichaDeudor.types';
@@ -14,7 +13,7 @@ import { useFichaGestionDerivedValues } from './useFichaGestionDerivedValues';
 import { useSyncTelefonoSeleccionado } from './useSyncTelefonoSeleccionado';
 import { buildFichaGestionViewModelProps } from '../mappers/fichaGestionViewModel.mapper';
 import { useSyncDefaultNP2Option } from './useSyncDefaultNP2Option';
-import { useAutoClearFeedback } from './useAutoClearFeedback';
+import { useOperationFeedback } from '@shared/hooks/useOperationFeedback';
 import type { TelefonoReferenciado } from '../../telefonos-referenciados/types/telefono.types';
 import { useBuscarTelefonoDeudor } from './useBuscarTelefonoDeudor';
 
@@ -57,7 +56,12 @@ export const useFichaGestionViewModel = ({
     id_usuario: idUsuario,
   } = params;
   const { usuario } = useAuth();
-  const [feedback, setFeedback] = useState<GestionFeedback | null>(null);
+  const {
+    feedback,
+    clearFeedback,
+    showFeedback,
+    showSuccess,
+  } = useOperationFeedback();
 
   const {
     form,
@@ -124,9 +128,13 @@ export const useFichaGestionViewModel = ({
     ) => {
       resetForm();
 
-      setFeedback({
-        variant: 'success',
-        title: 'Gestión registrada correctamente',
+      showSuccess({
+        entity: {
+          label: 'Gestión',
+          gender: 'feminine',
+        },
+        action: 'create',
+        context: 'record',
         message:
           'La nueva gestión fue guardada y la tabla de Gestión Realizada se actualizó.',
       });
@@ -136,18 +144,18 @@ export const useFichaGestionViewModel = ({
         fechaFinGestion
       );
     },
-    [onSubmit, resetForm]
+    [onSubmit, resetForm, showSuccess]
   );
   
   const handleGestionError =
   useCallback((message: string) => {
-    setFeedback({
+    showFeedback({
       variant: 'error',
       title:
         'No se pudo registrar la gestión',
       message,
     });
-  }, []);
+  }, [showFeedback]);
 
   const {
     agendaValidationErrors,
@@ -181,28 +189,22 @@ export const useFichaGestionViewModel = ({
 
   const handleAgendarGestion =
     useCallback(async () => {
-      setFeedback(null);
+      clearFeedback();
       await handleAgendar();
-    }, [handleAgendar]);
+    }, [clearFeedback, handleAgendar]);
 
   const handleGuardarGestion =
     useCallback(async () => {
-      setFeedback(null);
+      clearFeedback();
       clearAgendaState();
       await handleGuardar();
     }, [
       clearAgendaState,
+      clearFeedback,
       handleGuardar,
     ]);
 
-  const handleCloseFeedback = useCallback(() => {
-    setFeedback(null);
-  }, []);
-
-  useAutoClearFeedback({
-    feedback,
-    onClear: handleCloseFeedback,
-  });
+  const handleCloseFeedback = clearFeedback;
 
   return buildFichaGestionViewModelProps({
     idCliente,

@@ -10,12 +10,11 @@ import { FICHA_GESTION_MESSAGES } from '../constants/fichaGestionMessages.consta
 import { buildAgendaRequest } from '../services/fichaGestionAgendar.service';
 import type {
   FichaGestionValidationErrors,
-  GestionFeedback,
   GestionFormClaro,
   SetGestionField,
 } from '../types/fichaGestion.types';
 import { useAutoClearValidationErrors } from './useAutoClearValidationErrors';
-import { useAutoClearFeedback } from './useAutoClearFeedback';
+import { useOperationFeedback } from '@shared/hooks/useOperationFeedback';
 import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
 import { useAsyncMutation } from '../../../../../shared/hooks/useAsyncMutation';
 
@@ -55,37 +54,30 @@ export const useFichaGestionAgendar = ({
     onClear: clearAgendaValidationErrors,
   });
 
-  const [
-    agendaFeedback,
-    setAgendaFeedback,
-  ] = useState<GestionFeedback | null>(
-    null
-  );
+  const {
+    feedback: agendaFeedback,
+    clearFeedback: handleCloseAgendaFeedback,
+    showFeedback: showAgendaFeedback,
+    showSuccess: showAgendaSuccess,
+  } = useOperationFeedback();
 
   const {
     isPending: isScheduling,
     execute: executeSchedule,
   } = useAsyncMutation();
 
-  const handleCloseAgendaFeedback =
-    useCallback(() => {
-      setAgendaFeedback(null);
-    }, []);
-
-  useAutoClearFeedback({
-    feedback: agendaFeedback,
-    onClear: handleCloseAgendaFeedback,
-  });
-
   const clearAgendaState =
     useCallback(() => {
       clearAgendaValidationErrors();
-      setAgendaFeedback(null);
-    }, [clearAgendaValidationErrors]);
+      handleCloseAgendaFeedback();
+    }, [
+      clearAgendaValidationErrors,
+      handleCloseAgendaFeedback,
+    ]);
 
   const handleAgendar =
     useCallback(async () => {
-      setAgendaFeedback(null);
+      handleCloseAgendaFeedback();
 
       let agendaRequest;
 
@@ -102,7 +94,7 @@ export const useFichaGestionAgendar = ({
       } catch (error) {
         clearAgendaValidationErrors();
 
-        setAgendaFeedback({
+        showAgendaFeedback({
           variant: 'error',
           title:
             'No se pudo preparar la agenda',
@@ -133,7 +125,7 @@ export const useFichaGestionAgendar = ({
       }
 
       if (result.status === 'error') {
-        setAgendaFeedback({
+        showAgendaFeedback({
           variant: 'error',
           title:
             'No se pudo registrar la agenda',
@@ -163,9 +155,13 @@ export const useFichaGestionAgendar = ({
 
       setAgendaValidationErrors({});
 
-      setAgendaFeedback({
-        variant: 'success',
-        title: 'Agenda registrada correctamente',
+      showAgendaSuccess({
+        entity: {
+          label: 'Agenda',
+          gender: 'feminine',
+        },
+        action: 'create',
+        context: 'record',
         message:
           'La nueva gestión fue agendada correctamente.',
       });
@@ -173,12 +169,15 @@ export const useFichaGestionAgendar = ({
       carteraNombre,
       clearAgendaValidationErrors,
       deudorNombre,
+      handleCloseAgendaFeedback,
       executeSchedule,
       form,
       np1Options,
       np2Options,
       params,
       setField,
+      showAgendaFeedback,
+      showAgendaSuccess,
     ]);
 
   return {

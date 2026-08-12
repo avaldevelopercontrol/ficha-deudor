@@ -8,6 +8,7 @@ import Table from '@shared/components/table/Table';
 import TableResourceState from '@shared/components/table/TableResourceState';
 import {
   ActionButton,
+  OperationFeedbackMessage,
 } from '@shared/components/ui';
 import Paginacion from '@shared/components/ui/Paginacion';
 
@@ -54,6 +55,8 @@ export const MantenerAccesosUsuarioTableCard =
       allData,
       canInsert,
       canEdit,
+      feedback,
+      clearFeedback,
       paginatedData,
       isLoading,
       error,
@@ -84,9 +87,11 @@ export const MantenerAccesosUsuarioTableCard =
         (
           acceso: UsuarioGrupoOpcionListado
         ) => {
+          clearFeedback();
+
           setSelectedAcceso(acceso);
         },
-        []
+        [clearFeedback]
       );
 
     const columns =
@@ -100,8 +105,10 @@ export const MantenerAccesosUsuarioTableCard =
           return;
         }
 
+        clearFeedback();
+
         setIsAssignModalOpen(true);
-      }, [canInsert]);
+      }, [canInsert, clearFeedback]);
 
     const handleCloseAssignModal =
       useCallback(() => {
@@ -159,6 +166,11 @@ export const MantenerAccesosUsuarioTableCard =
               className="mantener-accesos-usuario-card__add-button"
             />
           </header>
+
+          <OperationFeedbackMessage
+            feedback={feedback}
+            onClose={clearFeedback}
+          />
 
           <TableResourceState
             isLoading={isLoading}

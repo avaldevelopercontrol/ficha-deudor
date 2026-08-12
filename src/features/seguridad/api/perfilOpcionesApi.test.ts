@@ -128,6 +128,7 @@ export const suite = defineSuite(
                 nid_perfil: 9,
                 per_Nombre:
                   'Administrador Base Datos      ',
+                nEstadoGest: 1,
               },
             ],
           });
@@ -162,6 +163,7 @@ export const suite = defineSuite(
                 idPerfil: 9,
                 nombrePerfil:
                   'Administrador Base Datos',
+                estadoActivo: true,
               },
             ]
           );

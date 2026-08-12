@@ -8,6 +8,7 @@ import Table from '@shared/components/table/Table';
 
 import {
   ActionButton,
+  OperationFeedbackMessage,
 } from '@shared/components/ui';
 
 import Paginacion from '@shared/components/ui/Paginacion';
@@ -78,15 +79,27 @@ export const MantenerUsuarioTableCard = ({
     onTextFilterChange,
     onSelectedFilterChange,
 
+    canInsert,
     registrarUsuario,
+    feedback,
+    clearFeedback,
   } = useMantenerUsuarioTable();
 
   const handleOpenRegisterModal =
     useCallback(() => {
+      if (!canInsert) {
+        return;
+      }
+
+      clearFeedback();
+
       setIsRegisterModalOpen(
         true
       );
-    }, []);
+    }, [
+      canInsert,
+      clearFeedback,
+    ]);
 
   const handleCloseRegisterModal =
     useCallback(() => {
@@ -132,9 +145,20 @@ export const MantenerUsuarioTableCard = ({
             onClick={
               handleOpenRegisterModal
             }
+            disabled={!canInsert}
+            title={
+              canInsert
+                ? undefined
+                : 'No tiene permiso para agregar usuarios.'
+            }
             className="mantener-usuario-card__add-button"
           />
         </header>
+
+        <OperationFeedbackMessage
+          feedback={feedback}
+          onClose={clearFeedback}
+        />
 
         <TableResourceState
           loadingMessage="Cargando usuarios..."

@@ -21,6 +21,10 @@ import {
   hasAnyPerfilOpcionPermission,
 } from '../../mantener-accesos-perfil/utils/asignarAccesosPerfil.utils';
 
+import {
+  sanitizePerfilOpcionPermissions,
+} from '../../mantener-accesos-perfil/utils/opcionAccessCapabilities.utils';
+
 import type {
   AsignarAccesosUsuarioFormData,
   RegistrarUsuarioGrupoOpcionesData,
@@ -128,18 +132,24 @@ export const createAsignarAccesosUsuarioFormFromAssignments = (
 
         return [
           String(optionId),
-          {
-            consultar:
-              assignment?.consultar ?? false,
-            insertar:
-              assignment?.insertar ?? false,
-            editar:
-              assignment?.editar ?? false,
-            eliminar:
-              assignment?.eliminar ?? false,
-            exportar:
-              assignment?.exportar ?? false,
-          },
+          sanitizePerfilOpcionPermissions(
+            treeItems.find(
+              (item) =>
+                item.idModulo === optionId
+            ),
+            {
+              consultar:
+                assignment?.consultar ?? false,
+              insertar:
+                assignment?.insertar ?? false,
+              editar:
+                assignment?.editar ?? false,
+              eliminar:
+                assignment?.eliminar ?? false,
+              exportar:
+                assignment?.exportar ?? false,
+            }
+          ),
         ];
       })
     );
@@ -232,14 +242,23 @@ const validateAccessSelection = (
 
   const optionsWithoutPermissions =
     selectedLeafIds
-      .filter(
-        (optionId) =>
-          !hasAnyPerfilOpcionPermission(
-            form.permissionsByOptionId[
-              String(optionId)
-            ]
-          )
-      )
+      .filter((optionId) => {
+        const option =
+          assignmentTargets.get(optionId);
+        const permissions =
+          form.permissionsByOptionId[
+            String(optionId)
+          ];
+
+        return !hasAnyPerfilOpcionPermission(
+          permissions
+            ? sanitizePerfilOpcionPermissions(
+                option,
+                permissions
+              )
+            : permissions
+        );
+      })
       .map(
         (optionId) =>
           assignmentTargets.get(optionId)
@@ -330,12 +349,13 @@ export const normalizeAsignarAccesosUsuarioForm = (
         ),
         permissions:
           item.isPermissionTarget
-            ? {
-                ...getPermissions(
+            ? sanitizePerfilOpcionPermissions(
+                item,
+                getPermissions(
                   form,
                   item.idModulo
-                ),
-              }
+                )
+              )
             : {
                 ...AUTOMATIC_PARENT_PERMISSIONS,
               },

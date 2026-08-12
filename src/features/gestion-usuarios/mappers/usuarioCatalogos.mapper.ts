@@ -15,18 +15,35 @@ const cleanLabel = (
 ): string =>
   value.trim();
 
+const isPerfilActivo = (
+  value: number
+): boolean => {
+  if (value !== 0 && value !== 1) {
+    throw new Error(
+      'El estado del perfil debe ser 0 o 1.'
+    );
+  }
+
+  return value === 1;
+};
+
 export const mapPerfilesToOptions = (
   data: PerfilApi[]
 ): SelectOption<string>[] =>
-  data.map((item) => ({
-    id: String(
-      item.nid_perfil
-    ),
-
-    label: cleanLabel(
-      item.per_Nombre
-    ),
-  }));
+  data
+    .filter((item) =>
+      isPerfilActivo(
+        item.nEstadoGest
+      )
+    )
+    .map((item) => ({
+      id: String(
+        item.nid_perfil
+      ),
+      label: cleanLabel(
+        item.per_Nombre
+      ),
+    }));
 
 export const mapGruposToOptions = (
   data: GrupoApi[]

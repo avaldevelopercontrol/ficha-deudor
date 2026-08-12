@@ -10,6 +10,7 @@ import TableResourceState from '@shared/components/table/TableResourceState';
 
 import {
   ActionButton,
+  OperationFeedbackMessage,
 } from '@shared/components/ui';
 
 import Paginacion from '@shared/components/ui/Paginacion';
@@ -66,6 +67,9 @@ export const MantenerGrupoTableCard =
       canInsert,
       canEdit,
 
+      feedback,
+      clearFeedback,
+
       isLoading,
       error,
       refetch,
@@ -115,11 +119,13 @@ export const MantenerGrupoTableCard =
             return;
           }
 
+          clearFeedback();
+
           setIsRegisterModalOpen(
             true
           );
         },
-        [canInsert]
+        [canInsert, clearFeedback]
       );
 
     const handleCloseRegisterModal =
@@ -192,6 +198,11 @@ export const MantenerGrupoTableCard =
               className="mantener-grupo-card__add-button"
             />
           </header>
+
+          <OperationFeedbackMessage
+            feedback={feedback}
+            onClose={clearFeedback}
+          />
 
           <TableResourceState
             isLoading={

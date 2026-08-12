@@ -16,6 +16,9 @@ export const GESTION_USUARIOS_API_ENDPOINTS = {
   createUsuario:
     '/v1/Usuario',
 
+  resetearClaveUsuario:
+    '/v1/Usuario/ResetearClaveUsuario',
+
   getPerfiles:
     '/v1/Perfil/GetPerfiles',
 

@@ -4,7 +4,10 @@ import {
   PopupContextBoundary,
   type FichaDeudorPopupContext,
 } from '@app/popups';
-import { ActionButton } from '@shared/components/ui';
+import {
+  ActionButton,
+  OperationFeedbackMessage,
+} from '@shared/components/ui';
 import { useEmailsByDeudor } from '../hooks/useEmailsByDeudor';
 import { useEmailDeudorColumns } from '../hooks/useEmailDeudorColumns';
 import { useEmailDeudorModalActions } from '../hooks/useEmailDeudorModalActions';
@@ -59,6 +62,8 @@ const EmailDeudorPopupContent: React.FC<
   } = useEmailsByDeudor(idCliente, idDeudor);
 
   const {
+    feedback,
+    clearFeedback,
     showRegistrar,
     showEditar,
     emailEditarId,
@@ -106,6 +111,11 @@ const EmailDeudorPopupContent: React.FC<
         nombre={nombre}
         documento={documento}
       >
+        <OperationFeedbackMessage
+          feedback={feedback}
+          onClose={clearFeedback}
+        />
+
         <PopupPaginatedTableSection
           columns={columns}
           data={paginatedData}

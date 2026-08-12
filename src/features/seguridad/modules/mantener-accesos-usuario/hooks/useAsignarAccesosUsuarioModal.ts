@@ -55,7 +55,7 @@ import {
   hasUsuarioGrupoAccess,
 } from '../utils/accesosUsuarioAvailability.utils';
 import {
-  buildUsuarioSearchOptions,
+  buildActiveUsuarioSearchOptions,
 } from '../utils/usuarioSearch.utils';
 
 interface UseAsignarAccesosUsuarioModalParams {
@@ -135,9 +135,9 @@ export const useAsignarAccesosUsuarioModal = ({
     }
   }, [catalog]);
 
-  const allUserOptions = useMemo(
+  const activeUserOptions = useMemo(
     () =>
-      buildUsuarioSearchOptions(
+      buildActiveUsuarioSearchOptions(
         catalog?.usuarios ?? []
       ),
     [catalog?.usuarios]
@@ -146,15 +146,25 @@ export const useAsignarAccesosUsuarioModal = ({
   const userOptions = useMemo(
     () =>
       filterAvailableUsuarioOptionsForGrupo(
-        allUserOptions,
+        activeUserOptions,
         existingAccesses,
         form.grupoId
       ),
     [
-      allUserOptions,
+      activeUserOptions,
       existingAccesses,
       form.grupoId,
     ]
+  );
+
+  const availableUserIdSet = useMemo(
+    () =>
+      new Set(
+        userOptions.map(
+          (usuario) => usuario.id
+        )
+      ),
+    [userOptions]
   );
 
   const groupOptions = useMemo(
@@ -213,11 +223,12 @@ export const useAsignarAccesosUsuarioModal = ({
     () =>
       activeOption?.isPermissionTarget
         ? getPerfilOpcionBranchAllPermissionsState(
-            activePermissionStates
+            activePermissionStates,
+            activeOption
           )
         : 'unchecked',
     [
-      activeOption?.isPermissionTarget,
+      activeOption,
       activePermissionStates,
     ]
   );
@@ -408,6 +419,22 @@ export const useAsignarAccesosUsuarioModal = ({
     }
 
     if (
+      typeof form.usuarioId === 'number' &&
+      !hasUsuarioGrupoAccess(
+        existingAccesses,
+        form.usuarioId,
+        form.grupoId
+      ) &&
+      !availableUserIdSet.has(
+        form.usuarioId
+      )
+    ) {
+      validationErrors.usuarioId =
+        MANTENER_ACCESOS_USUARIO_RULE_MESSAGES
+          .inactiveOrUnavailableUser;
+    }
+
+    if (
       Object.keys(validationErrors).length >
       0
     ) {
@@ -450,6 +477,7 @@ export const useAsignarAccesosUsuarioModal = ({
       );
     }
   }, [
+    availableUserIdSet,
     existingAccesses,
     form,
     onClose,
@@ -462,7 +490,7 @@ export const useAsignarAccesosUsuarioModal = ({
     !resourceError &&
     !treeState.error &&
     catalog
-      ? allUserOptions.length === 0
+      ? activeUserOptions.length === 0
         ? MODAL_ASIGNAR_ACCESOS_USUARIO_TEXTS
             .emptyUsers
         : groupOptions.length === 0

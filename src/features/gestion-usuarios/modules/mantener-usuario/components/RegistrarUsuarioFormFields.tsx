@@ -1,11 +1,18 @@
 import type React from 'react';
 
 import {
-  CheckboxField,
   InputField,
   PasswordField,
   SelectField,
 } from '@shared/components/ui';
+
+import {
+  USUARIO_PASSWORD_REQUIREMENTS,
+} from '../../../constants/usuarioPassword.constants';
+
+import {
+  getUsuarioPasswordRequirementStatus,
+} from '../../../validations/usuarioPassword.validation';
 
 import {
   MODAL_REGISTRAR_USUARIO_LABELS,
@@ -69,6 +76,11 @@ export const RegistrarUsuarioFormFields:
     )
       .toISOString()
       .slice(0, 10);
+
+    const passwordRequirementStatus =
+      getUsuarioPasswordRequirementStatus(
+        form.contrasena
+      );
 
     const getCatalogPlaceholder = (
       isLoading: boolean
@@ -269,162 +281,184 @@ export const RegistrarUsuarioFormFields:
             }
           </h2>
 
-          <div className="registrar-usuario-form__grid">
-            <InputField
-              id="registrar-usuario-login"
-              label={
-                MODAL_REGISTRAR_USUARIO_LABELS
-                  .usuario
-              }
-              layout="inline"
-              value={form.usuario}
-              onChange={(event) => {
-                onChange(
-                  'usuario',
-                  event.target.value
-                );
-              }}
-              placeholder={
-                MODAL_REGISTRAR_USUARIO_PLACEHOLDERS
-                  .usuario
-              }
-              autoComplete="username"
-              maxLength={
-                MODAL_REGISTRAR_USUARIO_LIMITS
-                  .usuario
-              }
-              error={errors.usuario}
-              required
-            />
-
-            <PasswordField
-              id="registrar-usuario-contrasena"
-              label={
-                MODAL_REGISTRAR_USUARIO_LABELS
-                  .contrasena
-              }
-              layout="inline"
-              value={
-                form.contrasena
-              }
-              onChange={(event) => {
-                onChange(
-                  'contrasena',
-                  event.target.value
-                );
-              }}
-              placeholder={
-                MODAL_REGISTRAR_USUARIO_PLACEHOLDERS
-                  .contrasena
-              }
-              autoComplete="new-password"
-              maxLength={
-                MODAL_REGISTRAR_USUARIO_LIMITS
-                  .contrasena
-              }
-              error={
-                errors.contrasena
-              }
-              required
-            />
-
-            <SelectField
-              label={
-                MODAL_REGISTRAR_USUARIO_LABELS
-                  .perfil
-              }
-              layout="inline"
-              value={form.perfil}
-              options={catalogos.perfiles}
-              onChange={(value) => {
-                onChange(
-                  'perfil',
-                  value
-                );
-              }}
-              placeholder={
-                getCatalogPlaceholder(
-                  catalogLoading.perfiles
-                )
-              }
-              error={
-                errors.perfil ||
-                catalogErrors.perfiles ||
-                ''
-              }
-              disabled={
-                catalogLoading.perfiles
-              }
-            />
-
-            <SelectField
-              label={
-                MODAL_REGISTRAR_USUARIO_LABELS
-                  .grupo
-              }
-              layout="inline"
-              value={form.grupo}
-              options={catalogos.grupos}
-              onChange={(value) => {
-                onChange(
-                  'grupo',
-                  value
-                );
-              }}
-              placeholder={
-                getCatalogPlaceholder(
-                  catalogLoading.grupos
-                )
-              }
-              error={
-                errors.grupo ||
-                catalogErrors.grupos ||
-                ''
-              }
-              disabled={
-                catalogLoading.grupos
-              }
-            />
-
-            <SelectField<boolean>
-              label={
-                MODAL_REGISTRAR_USUARIO_LABELS
-                  .estado
-              }
-              layout="inline"
-              value={form.estado}
-              options={catalogos.estados}
-              onChange={(value) => {
-                onChange(
-                  'estado',
-                  value
-                );
-              }}
-              hidePlaceholder
-            />
-
-            <div className="form-row-inline registrar-usuario-form__checkbox-field">
-              <span className="form-label form-label--inline">
-                {
+          <div className="registrar-usuario-form__grid registrar-usuario-form__grid--access">
+            <div className="registrar-usuario-form__access-item registrar-usuario-form__access-item--usuario">
+              <InputField
+                id="registrar-usuario-login"
+                label={
                   MODAL_REGISTRAR_USUARIO_LABELS
-                    .codigoRecaudador
+                    .usuario
                 }
-              </span>
+                layout="inline"
+                value={form.usuario}
+                onChange={(event) => {
+                  onChange(
+                    'usuario',
+                    event.target.value
+                  );
+                }}
+                placeholder={
+                  MODAL_REGISTRAR_USUARIO_PLACEHOLDERS
+                    .usuario
+                }
+                autoComplete="username"
+                maxLength={
+                  MODAL_REGISTRAR_USUARIO_LIMITS
+                    .usuario
+                }
+                error={errors.usuario}
+                required
+              />
+            </div>
 
-              <div className="registrar-usuario-form__checkbox-control">
-                <CheckboxField
-                  label="Sí"
-                  checked={
-                    form.codigoRecaudador
-                  }
-                  onChange={(checked) => {
-                    onChange(
-                      'codigoRecaudador',
-                      checked
-                    );
-                  }}
-                />
-              </div>
+            <div className="registrar-usuario-form__access-item registrar-usuario-form__access-item--contrasena registrar-usuario-form__password-field">
+              <PasswordField
+                id="registrar-usuario-contrasena"
+                label={
+                  MODAL_REGISTRAR_USUARIO_LABELS
+                    .contrasena
+                }
+                layout="inline"
+                value={form.contrasena}
+                onChange={(event) => {
+                  onChange(
+                    'contrasena',
+                    event.target.value
+                  );
+                }}
+                placeholder={
+                  MODAL_REGISTRAR_USUARIO_PLACEHOLDERS
+                    .contrasena
+                }
+                autoComplete="new-password"
+                maxLength={
+                  MODAL_REGISTRAR_USUARIO_LIMITS
+                    .contrasena
+                }
+                error={errors.contrasena}
+                required
+              />
+            </div>
+
+            <div className="registrar-usuario-form__access-item registrar-usuario-form__access-item--perfil">
+              <SelectField
+                label={
+                  MODAL_REGISTRAR_USUARIO_LABELS
+                    .perfil
+                }
+                layout="inline"
+                value={form.perfil}
+                options={catalogos.perfiles}
+                onChange={(value) => {
+                  onChange(
+                    'perfil',
+                    value
+                  );
+                }}
+                placeholder={
+                  getCatalogPlaceholder(
+                    catalogLoading.perfiles
+                  )
+                }
+                error={
+                  errors.perfil ||
+                  catalogErrors.perfiles ||
+                  ''
+                }
+                disabled={
+                  catalogLoading.perfiles ||
+                  Boolean(
+                    catalogErrors.perfiles
+                  )
+                }
+                required
+              />
+            </div>
+
+            <ul
+              className="registrar-usuario-password-requirements"
+              aria-label="Requisitos de la contraseña"
+            >
+              {USUARIO_PASSWORD_REQUIREMENTS.map(
+                (requirement) => {
+                  const isMet =
+                    passwordRequirementStatus[
+                      requirement.id
+                    ];
+
+                  return (
+                    <li
+                      key={requirement.id}
+                      className={
+                        isMet
+                          ? 'registrar-usuario-password-requirements__item registrar-usuario-password-requirements__item--valid'
+                          : 'registrar-usuario-password-requirements__item'
+                      }
+                    >
+                      <span aria-hidden="true">
+                        {isMet ? '✓' : '○'}
+                      </span>
+                      <span>
+                        {requirement.label}
+                      </span>
+                    </li>
+                  );
+                }
+              )}
+            </ul>
+
+            <div className="registrar-usuario-form__access-item registrar-usuario-form__access-item--estado">
+              <SelectField<boolean>
+                label={
+                  MODAL_REGISTRAR_USUARIO_LABELS
+                    .estado
+                }
+                layout="inline"
+                value={form.estado}
+                options={catalogos.estados}
+                onChange={(value) => {
+                  onChange(
+                    'estado',
+                    value
+                  );
+                }}
+                hidePlaceholder
+              />
+            </div>
+
+            <div className="registrar-usuario-form__access-item registrar-usuario-form__access-item--grupo">
+              <SelectField
+                label={
+                  MODAL_REGISTRAR_USUARIO_LABELS
+                    .grupo
+                }
+                layout="inline"
+                value={form.grupo}
+                options={catalogos.grupos}
+                onChange={(value) => {
+                  onChange(
+                    'grupo',
+                    value
+                  );
+                }}
+                placeholder={
+                  getCatalogPlaceholder(
+                    catalogLoading.grupos
+                  )
+                }
+                error={
+                  errors.grupo ||
+                  catalogErrors.grupos ||
+                  ''
+                }
+                disabled={
+                  catalogLoading.grupos ||
+                  Boolean(
+                    catalogErrors.grupos
+                  )
+                }
+                required
+              />
             </div>
           </div>
         </section>
@@ -471,7 +505,11 @@ export const RegistrarUsuarioFormFields:
               }
               disabled={
                 catalogLoading
-                  .departamentosLabor
+                  .departamentosLabor ||
+                Boolean(
+                  catalogErrors
+                    .departamentosLabor
+                )
               }
               required
             />
@@ -532,9 +570,11 @@ export const RegistrarUsuarioFormFields:
                 ''
               }
               disabled={
-                catalogLoading.subZonalesOficina
+                catalogLoading.subZonalesOficina ||
+                Boolean(
+                  catalogErrors.subZonalesOficina
+                )
               }
-              required
             />
 
             <InputField
@@ -697,7 +737,11 @@ export const RegistrarUsuarioFormFields:
               }
               disabled={
                 catalogLoading
-                  .campanasDiscador
+                  .campanasDiscador ||
+                Boolean(
+                  catalogErrors
+                    .campanasDiscador
+                )
               }
             />
           </div>

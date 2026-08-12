@@ -1,3 +1,7 @@
+import {
+  USUARIO_PASSWORD_MAX_LENGTH,
+} from '../../../constants/usuarioPassword.constants';
+
 import type {
   RegistrarUsuarioFormData,
 } from '../types/registrarUsuario.types';
@@ -27,7 +31,6 @@ export const MODAL_REGISTRAR_USUARIO_LABELS = {
   contrasena: 'Contraseña',
   perfil: 'Perfil',
   grupo: 'Grupo',
-  codigoRecaudador: 'Cod. recaudador',
   estado: 'Estado',
   fechaNacimiento: 'Fecha nacimiento',
   sexo: 'Sexo',
@@ -62,7 +65,7 @@ export const MODAL_REGISTRAR_USUARIO_LIMITS = {
   nombre: 150,
   apellido: 50,
   usuario: 30,
-  contrasena: 20,
+  contrasena: USUARIO_PASSWORD_MAX_LENGTH,
   ciudadGestor: 100,
   movilEmpresa: 15,
   anexo: 4,
@@ -79,7 +82,6 @@ export const MODAL_REGISTRAR_USUARIO_INITIAL_FORM:
     contrasena: '',
     perfil: '',
     grupo: '',
-    codigoRecaudador: false,
     estado: true,
     fechaNacimiento: '',
     sexo: '',

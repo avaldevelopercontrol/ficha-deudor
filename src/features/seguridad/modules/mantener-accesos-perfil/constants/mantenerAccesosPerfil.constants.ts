@@ -28,6 +28,9 @@ export const MANTENER_ACCESOS_PERFIL_COLUMNS = {
   nombrePerfil:
     'Nombre',
 
+  estado:
+    'Estado',
+
   cantidadOpciones:
     'Cantidad Opciones',
 
@@ -37,8 +40,9 @@ export const MANTENER_ACCESOS_PERFIL_COLUMNS = {
 
 export const MANTENER_ACCESOS_PERFIL_COLUMN_WIDTHS = {
   idPerfil: '9%',
-  nombrePerfil: '64%',
-  cantidadOpciones: '20%',
+  nombrePerfil: '50%',
+  estado: '16%',
+  cantidadOpciones: '18%',
   editar: '7%',
 } as const;
 

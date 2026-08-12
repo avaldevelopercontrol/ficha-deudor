@@ -214,45 +214,6 @@
 }
 
 /* =========================================================
-   CHECKBOX — COD. RECAUDADOR
-   ========================================================= */
-
-.registrar-usuario-form__checkbox-field {
-  align-items: center;
-}
-
-.registrar-usuario-form__checkbox-control {
-  display: flex;
-  min-width: 0;
-  min-height: 26px;
-  flex: 1;
-  align-items: center;
-
-  padding: 0 8px;
-
-  background: #ffffff;
-  border: 1px solid var(--ap-gray-200);
-  border-radius: var(--radius);
-}
-
-.registrar-usuario-form__checkbox-control
-  .checkbox-wrapper {
-  width: 100%;
-  margin: 0;
-}
-
-.registrar-usuario-form__checkbox-control
-  .checkbox-input {
-  width: 14px;
-  height: 14px;
-}
-
-.registrar-usuario-form__checkbox-control
-  .checkbox-label {
-  font-size: 11px;
-}
-
-/* =========================================================
    FOOTER DEL MODAL
    ========================================================= */
 
@@ -354,8 +315,7 @@
 
   .registrar-usuario-form
     .form-row-inline
-    > div,
-  .registrar-usuario-form__checkbox-control {
+    > div {
     width: 100%;
   }
 
@@ -365,5 +325,99 @@
 
   .registrar-usuario-modal__submit-button {
     width: 100%;
+  }
+}
+/* =========================================================
+   ACCESO Y ASIGNACIÓN / VALIDACIÓN DE CONTRASEÑA
+   ========================================================= */
+
+.registrar-usuario-form__grid--access {
+  grid-template-areas:
+    "usuario contrasena"
+    "perfil requisitos"
+    "estado grupo";
+  align-items: start;
+}
+
+.registrar-usuario-form__access-item {
+  min-width: 0;
+}
+
+.registrar-usuario-form__access-item--usuario {
+  grid-area: usuario;
+}
+
+.registrar-usuario-form__access-item--contrasena {
+  grid-area: contrasena;
+}
+
+.registrar-usuario-form__access-item--perfil {
+  grid-area: perfil;
+}
+
+.registrar-usuario-form__access-item--estado {
+  grid-area: estado;
+}
+
+.registrar-usuario-form__access-item--grupo {
+  grid-area: grupo;
+}
+
+.registrar-usuario-form__password-field {
+  min-width: 0;
+}
+
+.registrar-usuario-password-requirements {
+  display: grid;
+  grid-area: requisitos;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 4px 10px;
+
+  margin: 0 0 0 145px;
+  padding: 0;
+
+  color: var(--ap-text-muted);
+  list-style: none;
+
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.registrar-usuario-password-requirements__item {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.registrar-usuario-password-requirements__item--valid {
+  color: var(--ap-success);
+}
+
+.mantener-usuario-card__feedback {
+  padding: 8px 20px 0;
+}
+
+@media (max-width: 900px) {
+  .registrar-usuario-form__grid--access {
+    grid-template-areas:
+      "usuario"
+      "contrasena"
+      "requisitos"
+      "perfil"
+      "grupo"
+      "estado";
+  }
+
+  .registrar-usuario-password-requirements {
+    margin-left: 155px;
+  }
+}
+
+@media (max-width: 620px) {
+  .registrar-usuario-password-requirements {
+    grid-template-columns: 1fr;
+    margin-left: 0;
   }
 }

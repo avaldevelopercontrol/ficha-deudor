@@ -204,9 +204,7 @@ export const useRegistrarUsuarioCatalogos = ({
             ) ?? [],
 
         subZonalesOficina:
-        subZonasResource.data?.filter(
-          (option) => option.id !== '0'
-        ) ?? [],
+          subZonasResource.data ?? [],
 
         campanasDiscador:
           campanasResource.data ??

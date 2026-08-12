@@ -283,11 +283,12 @@ export const useEditarAccesosPerfilModal = ({
     () =>
       activeOption?.isPermissionTarget
         ? getPerfilOpcionBranchAllPermissionsState(
-            activePermissionStates
+            activePermissionStates,
+            activeOption
           )
         : 'unchecked',
     [
-      activeOption?.isPermissionTarget,
+      activeOption,
       activePermissionStates,
     ]
   );
