@@ -12,7 +12,7 @@ import type {
 import {
   ASIGNAR_ACCESOS_PERFIL_INITIAL_FORM,
   createAsignarAccesosPerfilFormFromAssignments,
-  filterUnassignedPerfilOptions,
+  filterAssignablePerfilOptions,
   getPerfilOpcionBranchAllPermissionsState,
   getPerfilOpcionBranchPermissionStates,
   getPerfilOpcionBranchSelectionState,
@@ -109,42 +109,51 @@ export const suite = defineSuite(
   'asignarAccesosPerfil.utils',
   [
     test(
-      'excluye del selector los perfiles que ya tienen accesos registrados',
+      'muestra solo perfiles activos que todavía no tienen accesos registrados',
       () => {
         const perfiles = [
           {
             idPerfil: 9,
             nombrePerfil: 'Administrador',
+            estadoActivo: true,
           },
           {
             idPerfil: 10,
             nombrePerfil: 'Gestor',
+            estadoActivo: false,
           },
           {
             idPerfil: 11,
             nombrePerfil: 'Supervisor',
+            estadoActivo: true,
           },
         ];
 
         assert.deepEqual(
-          filterUnassignedPerfilOptions(
+          filterAssignablePerfilOptions(
             perfiles,
             [9, 11, 11, 0]
           ),
-          [
-            {
-              idPerfil: 10,
-              nombrePerfil: 'Gestor',
-            },
-          ]
+          []
         );
 
         assert.deepEqual(
-          filterUnassignedPerfilOptions(
+          filterAssignablePerfilOptions(
             perfiles,
             []
           ),
-          perfiles
+          [
+            {
+              idPerfil: 9,
+              nombrePerfil: 'Administrador',
+              estadoActivo: true,
+            },
+            {
+              idPerfil: 11,
+              nombrePerfil: 'Supervisor',
+              estadoActivo: true,
+            },
+          ]
         );
       }
     ),
@@ -278,6 +287,45 @@ export const suite = defineSuite(
       }
     ),
     test(
+      'Mantener perfil ignora intentos de habilitar eliminar o exportar',
+      () => {
+        const selected =
+          setPerfilOpcionBranchSelected(
+            ASIGNAR_ACCESOS_PERFIL_INITIAL_FORM,
+            treeItems,
+            6,
+            true
+          );
+        const withDelete =
+          setPerfilOpcionBranchPermission(
+            selected,
+            treeItems,
+            6,
+            'eliminar',
+            true
+          );
+        const withExport =
+          setPerfilOpcionBranchPermission(
+            withDelete,
+            treeItems,
+            6,
+            'exportar',
+            true
+          );
+
+        assert.deepEqual(
+          withExport.permissionsByOptionId['6'],
+          {
+            consultar: false,
+            insertar: false,
+            editar: false,
+            eliminar: false,
+            exportar: false,
+          }
+        );
+      }
+    ),
+    test(
       'seleccionar todos los permisos solo modifica una opción final',
       () => {
         const parentAttempt =
@@ -313,7 +361,10 @@ export const suite = defineSuite(
         );
         assert.equal(
           getPerfilOpcionBranchAllPermissionsState(
-            states
+            states,
+            treeItems.find(
+              (item) => item.idModulo === 6
+            )
           ),
           'checked'
         );
@@ -465,7 +516,7 @@ export const suite = defineSuite(
                 consultar: true,
                 insertar: false,
                 editar: true,
-                eliminar: false,
+                eliminar: true,
                 exportar: true,
                 estadoActivo: true,
               },
@@ -499,7 +550,7 @@ export const suite = defineSuite(
             insertar: false,
             editar: true,
             eliminar: false,
-            exportar: true,
+            exportar: false,
           }
         );
         assert.equal(

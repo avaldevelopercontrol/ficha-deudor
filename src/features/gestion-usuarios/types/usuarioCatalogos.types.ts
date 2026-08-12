@@ -10,6 +10,7 @@ import type {
 export interface PerfilApi {
   nid_perfil: number;
   per_Nombre: string;
+  nEstadoGest: number;
 }
 
 export interface GrupoApi {

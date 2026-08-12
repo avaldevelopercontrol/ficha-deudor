@@ -3,7 +3,6 @@ import type {
 } from '@shared/types/indexApi';
 
 export interface CreateUsuarioRequestApi {
-  nId_Usuario: number;
   cUsr_NroDoc: string;
   cUsr_ApePat: string;
   cUsr_ApeMat: string;
@@ -33,6 +32,11 @@ export interface CreateUsuarioResponseApi {
   cUsr_ApeMat: string;
   cUsr_Nombres: string;
   cUsr_Login: string;
+}
+
+export interface CreateUsuarioResult {
+  usuario: CreateUsuarioResponseApi;
+  message: string;
 }
 
 export type CreateUsuarioApiResponse =

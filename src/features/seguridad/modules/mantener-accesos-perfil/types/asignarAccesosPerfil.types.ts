@@ -5,6 +5,7 @@ import type {
 export interface PerfilAccesoOption {
   idPerfil: number;
   nombrePerfil: string;
+  estadoActivo: boolean;
 }
 
 export interface PerfilOpcionPermissions {

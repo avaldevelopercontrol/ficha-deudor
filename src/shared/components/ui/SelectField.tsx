@@ -65,7 +65,11 @@ export const SelectField = <T extends string | number | boolean = string>({
       )}
 
       {options.map((opt) => (
-        <option key={String(opt.id)} value={String(opt.id)}>
+        <option
+          key={String(opt.id)}
+          value={String(opt.id)}
+          disabled={opt.disabled}
+        >
           {opt.label}
         </option>
       ))}

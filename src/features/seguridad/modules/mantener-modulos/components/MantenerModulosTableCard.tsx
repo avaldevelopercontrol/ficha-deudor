@@ -10,6 +10,7 @@ import TableResourceState from '@shared/components/table/TableResourceState';
 
 import {
   ActionButton,
+  OperationFeedbackMessage,
 } from '@shared/components/ui';
 
 import Paginacion from '@shared/components/ui/Paginacion';
@@ -66,6 +67,9 @@ export const MantenerModulosTableCard =
       canInsert,
       canEdit,
 
+      feedback,
+      clearFeedback,
+
       isLoading,
       error,
       refetch,
@@ -97,11 +101,13 @@ export const MantenerModulosTableCard =
         (
           modulo: Modulo
         ) => {
+          clearFeedback();
+
           setSelectedModuloId(
             modulo.idModulo
           );
         },
-        []
+        [clearFeedback]
       );
 
     const columns =
@@ -117,11 +123,13 @@ export const MantenerModulosTableCard =
             return;
           }
 
+          clearFeedback();
+
           setIsRegisterModalOpen(
             true
           );
         },
-        [canInsert]
+        [canInsert, clearFeedback]
       );
 
     const handleCloseRegisterModal =
@@ -196,6 +204,11 @@ export const MantenerModulosTableCard =
               className="mantener-modulos-card__add-button"
             />
           </header>
+
+          <OperationFeedbackMessage
+            feedback={feedback}
+            onClose={clearFeedback}
+          />
 
           <TableResourceState
             isLoading={

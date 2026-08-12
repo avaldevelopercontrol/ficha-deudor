@@ -3,6 +3,7 @@ import type React from 'react';
 export type SelectOption<T = string> = {
   id: T;
   label: string;
+  disabled?: boolean;
 };
 
 type ColumnRender<TData> = {

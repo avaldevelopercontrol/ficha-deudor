@@ -1,6 +1,10 @@
 import React from 'react';
 
 import {
+  OperationFeedbackMessage,
+} from '@shared/components/ui';
+
+import {
   PANEL_DIRECCIONES_REFERENCIADAS_MESSAGES,
   PANEL_DIRECCIONES_REFERENCIADAS_TITLE,
 } from '../constants/panelDireccionesReferenciadas.constants';
@@ -38,6 +42,8 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
+    feedback,
+    clearFeedback,
     showRegistrar,
     showEditar,
     direccionEditarId,
@@ -70,6 +76,11 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
         title={PANEL_DIRECCIONES_REFERENCIADAS_TITLE}
         isActive={isActive}
       >
+        <OperationFeedbackMessage
+          feedback={feedback}
+          onClose={clearFeedback}
+        />
+
         <PanelTablaResumen
           columns={columns}
           data={paginatedData}

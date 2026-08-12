@@ -19,6 +19,7 @@ export interface PerfilOpcionCount {
   idPerfil: number;
   nombrePerfil: string;
   cantidadOpciones: number;
+  estadoActivo?: boolean;
 }
 
 export interface GetPerfilOptionsCountResponse
@@ -40,6 +41,7 @@ export interface GetPerfilOptionsCountResponse
 export interface PerfilAccesoOptionApi {
   nid_perfil: number;
   per_Nombre: string;
+  nEstadoGest: number;
 }
 
 export type GetPerfilesAccesoResponse =

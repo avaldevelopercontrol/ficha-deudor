@@ -21,6 +21,10 @@ import {
 } from '@shared/hooks/useClientSideTable';
 
 import {
+  useOperationFeedback,
+} from '@shared/hooks/useOperationFeedback';
+
+import {
   createOpcion,
   fetchOpciones,
   updateOpcion,
@@ -64,6 +68,12 @@ export const useMantenerModulosTable = () => {
     permissions.editar;
 
   const {
+    feedback,
+    clearFeedback,
+    showSuccess,
+  } = useOperationFeedback();
+
+  const {
     data,
     isLoading,
     error,
@@ -105,6 +115,8 @@ export const useMantenerModulosTable = () => {
         form:
           RegistrarModuloFormData
       ): Promise<void> => {
+        clearFeedback();
+
         assertMantenerModulosPermission(
           'insertar',
           canInsert
@@ -131,13 +143,23 @@ export const useMantenerModulosTable = () => {
 
         refetch();
         await refreshAccessControl();
+
+        showSuccess({
+          entity: {
+            label: 'Módulo',
+            gender: 'masculine',
+          },
+          action: 'create',
+        });
       },
       [
         allData,
         canInsert,
+        clearFeedback,
         refetch,
         refreshAccessControl,
         setPageNumber,
+        showSuccess,
         usuario?.id_usuario,
       ]
     );
@@ -151,6 +173,8 @@ export const useMantenerModulosTable = () => {
         form:
           EditarModuloFormData
       ): Promise<void> => {
+        clearFeedback();
+
         assertMantenerModulosPermission(
           'editar',
           canEdit
@@ -174,12 +198,22 @@ export const useMantenerModulosTable = () => {
 
         refetch();
         await refreshAccessControl();
+
+        showSuccess({
+          entity: {
+            label: 'Módulo',
+            gender: 'masculine',
+          },
+          action: 'update',
+        });
       },
       [
         allData,
         canEdit,
+        clearFeedback,
         refetch,
         refreshAccessControl,
+        showSuccess,
         usuario?.id_usuario,
       ]
     );
@@ -204,6 +238,9 @@ export const useMantenerModulosTable = () => {
 
     canInsert,
     canEdit,
+
+    feedback,
+    clearFeedback,
 
     paginatedData:
       table.paginatedData,

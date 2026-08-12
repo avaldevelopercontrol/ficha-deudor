@@ -16,6 +16,10 @@ import {
 } from '@shared/hooks/useClientSideTable';
 
 import {
+  useOperationFeedback,
+} from '@shared/hooks/useOperationFeedback';
+
+import {
   createPerfil,
   fetchPerfiles,
   updatePerfil,
@@ -45,6 +49,12 @@ export const useMantenerPerfilTable = () => {
 
   const canEdit =
     permissions.editar;
+
+  const {
+    feedback,
+    clearFeedback,
+    showSuccess,
+  } = useOperationFeedback();
 
   const {
     data,
@@ -90,6 +100,8 @@ export const useMantenerPerfilTable = () => {
         form:
           RegistrarPerfilFormData
       ): Promise<void> => {
+        clearFeedback();
+
         assertMantenerPerfilPermission(
           'insertar',
           canInsert
@@ -104,11 +116,21 @@ export const useMantenerPerfilTable = () => {
         );
 
         refetch();
+
+        showSuccess({
+          entity: {
+            label: 'Perfil',
+            gender: 'masculine',
+          },
+          action: 'create',
+        });
       },
       [
         canInsert,
+        clearFeedback,
         refetch,
         setPageNumber,
+        showSuccess,
       ]
     );
 
@@ -121,6 +143,8 @@ export const useMantenerPerfilTable = () => {
         form:
           RegistrarPerfilFormData
       ): Promise<void> => {
+        clearFeedback();
+
         assertMantenerPerfilPermission(
           'editar',
           canEdit
@@ -136,10 +160,20 @@ export const useMantenerPerfilTable = () => {
          * la página actual de la tabla.
          */
         refetch();
+
+        showSuccess({
+          entity: {
+            label: 'Perfil',
+            gender: 'masculine',
+          },
+          action: 'update',
+        });
       },
       [
         canEdit,
+        clearFeedback,
         refetch,
+        showSuccess,
       ]
     );
 
@@ -163,6 +197,9 @@ export const useMantenerPerfilTable = () => {
 
     canInsert,
     canEdit,
+
+    feedback,
+    clearFeedback,
 
     paginatedData:
       table.paginatedData,

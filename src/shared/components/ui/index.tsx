@@ -17,3 +17,4 @@ export * from './TextAreaField';
 export * from './FeedbackMessage';
 export * from './SelectActionButton';
 export * from './EditActionButton';
+export * from './OperationFeedbackMessage';

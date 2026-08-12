@@ -11,6 +11,7 @@ import TableResourceState from '@shared/components/table/TableResourceState';
 
 import {
   ActionButton,
+  OperationFeedbackMessage,
 } from '@shared/components/ui';
 
 import Paginacion from '@shared/components/ui/Paginacion';
@@ -60,6 +61,8 @@ export const MantenerAccesosPerfilTableCard =
 
       canInsert,
       canEdit,
+      feedback,
+      clearFeedback,
 
       isLoading,
       error,
@@ -83,9 +86,11 @@ export const MantenerAccesosPerfilTableCard =
     const handleEditPerfil =
       useCallback(
         (perfil: PerfilOpcionCount) => {
+          clearFeedback();
+
           setSelectedPerfil(perfil);
         },
-        []
+        [clearFeedback]
       );
 
     const columns =
@@ -99,8 +104,10 @@ export const MantenerAccesosPerfilTableCard =
           return;
         }
 
+        clearFeedback();
+
         setIsAssignModalOpen(true);
-      }, [canInsert]);
+      }, [canInsert, clearFeedback]);
 
     const handleCloseAssignModal =
       useCallback(() => {
@@ -166,6 +173,11 @@ export const MantenerAccesosPerfilTableCard =
               className="mantener-accesos-perfil-card__add-button"
             />
           </header>
+
+          <OperationFeedbackMessage
+            feedback={feedback}
+            onClose={clearFeedback}
+          />
 
           <TableResourceState
             isLoading={isLoading}

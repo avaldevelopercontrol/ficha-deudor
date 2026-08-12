@@ -20,6 +20,9 @@ import {
 import {
   useClientSideTable,
 } from '@shared/hooks/useClientSideTable';
+import {
+  useOperationFeedback,
+} from '@shared/hooks/useOperationFeedback';
 
 import {
   addUsuarioGrupoOpciones,
@@ -61,6 +64,12 @@ export const useMantenerAccesosUsuarioTable = () => {
   const canInsert =
     permissions.insertar;
   const canEdit = permissions.editar;
+
+  const {
+    feedback,
+    clearFeedback,
+    showSuccess,
+  } = useOperationFeedback();
 
   const {
     data,
@@ -130,6 +139,8 @@ export const useMantenerAccesosUsuarioTable = () => {
       async (
         form: RegistrarUsuarioGrupoOpcionesData
       ): Promise<void> => {
+        clearFeedback();
+
         assertMantenerAccesosUsuarioPermission(
           'insertar',
           canInsert
@@ -176,11 +187,22 @@ export const useMantenerAccesosUsuarioTable = () => {
           form.usuarioId,
           form.grupoId
         );
+
+        showSuccess({
+          entity: {
+            label: 'Accesos por usuario',
+            gender: 'masculine',
+            number: 'plural',
+          },
+          action: 'assign',
+        });
       },
       [
         canInsert,
+        clearFeedback,
         refreshAffectedState,
         setPageNumber,
+        showSuccess,
         usuario?.id_usuario,
       ]
     );
@@ -192,6 +214,8 @@ export const useMantenerAccesosUsuarioTable = () => {
           readonly UsuarioGrupoOpcionDetalle[],
         form: RegistrarUsuarioGrupoOpcionesData
       ): Promise<void> => {
+        clearFeedback();
+
         assertMantenerAccesosUsuarioPermission(
           'editar',
           canEdit
@@ -224,10 +248,21 @@ export const useMantenerAccesosUsuarioTable = () => {
           form.usuarioId,
           form.grupoId
         );
+
+        showSuccess({
+          entity: {
+            label: 'Accesos por usuario',
+            gender: 'masculine',
+            number: 'plural',
+          },
+          action: 'update',
+        });
       },
       [
         canEdit,
+        clearFeedback,
         refreshAffectedState,
+        showSuccess,
         usuario?.id_usuario,
       ]
     );
@@ -245,6 +280,8 @@ export const useMantenerAccesosUsuarioTable = () => {
     allData,
     canInsert,
     canEdit,
+    feedback,
+    clearFeedback,
     paginatedData:
       table.paginatedData,
     isLoading,

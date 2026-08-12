@@ -3,6 +3,7 @@ import {
 } from 'react';
 
 import {
+  Badge,
   EditActionButton,
 } from '@shared/components/ui';
 
@@ -50,6 +51,38 @@ export const useMantenerAccesosPerfilColumns = ({
             .nombrePerfil,
         render: (row) =>
           row.nombrePerfil || '—',
+      },
+      {
+        key: 'estadoActivo',
+        label:
+          MANTENER_ACCESOS_PERFIL_COLUMNS
+            .estado,
+        width:
+          MANTENER_ACCESOS_PERFIL_COLUMN_WIDTHS
+            .estado,
+        render: (row) => {
+          if (row.estadoActivo === undefined) {
+            return '—';
+          }
+
+          return (
+            <Badge
+              variant={
+                row.estadoActivo
+                  ? 'success'
+                  : 'neutral'
+              }
+              style={{
+                padding: '3px 8px',
+                fontSize: '10px',
+              }}
+            >
+              {row.estadoActivo
+                ? 'ACTIVO'
+                : 'INACTIVO'}
+            </Badge>
+          );
+        },
       },
       {
         key: 'cantidadOpciones',

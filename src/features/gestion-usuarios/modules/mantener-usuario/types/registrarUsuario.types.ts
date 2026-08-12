@@ -20,7 +20,6 @@ export interface RegistrarUsuarioFormData {
   contrasena: string;
   perfil: string;
   grupo: string;
-  codigoRecaudador: boolean;
   estado: boolean;
   fechaNacimiento: string;
   sexo: SexoUsuarioValue;

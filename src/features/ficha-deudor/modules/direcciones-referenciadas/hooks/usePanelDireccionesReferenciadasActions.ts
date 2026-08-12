@@ -2,6 +2,10 @@ import {
   useCallback,
   useState,
 } from 'react';
+import {
+  useOperationFeedback,
+} from '@shared/hooks/useOperationFeedback';
+
 
 import type {
   DireccionEditFormData,
@@ -29,6 +33,12 @@ export const usePanelDireccionesReferenciadasActions =
     create,
     update,
   }: Params) => {
+    const {
+      feedback,
+      clearFeedback,
+      showSuccess,
+    } = useOperationFeedback();
+
     const [
       showRegistrar,
       setShowRegistrar,
@@ -46,8 +56,9 @@ export const usePanelDireccionesReferenciadasActions =
 
     const handleOpenRegistrar =
       useCallback(() => {
+        clearFeedback();
         setShowRegistrar(true);
-      }, []);
+      }, [clearFeedback]);
 
     const handleCloseRegistrar =
       useCallback(() => {
@@ -56,10 +67,11 @@ export const usePanelDireccionesReferenciadasActions =
 
     const handleEdit = useCallback(
       (row: DireccionReferenciada) => {
+        clearFeedback();
         setDireccionEditarId(row.id);
         setShowEditar(true);
       },
-      []
+      [clearFeedback]
     );
 
     const handleCloseEditar =
@@ -73,11 +85,21 @@ export const usePanelDireccionesReferenciadasActions =
         async (
           formData: DireccionEditFormData
         ): Promise<void> => {
+          clearFeedback();
+
           try {
             await update(
               formData.id,
               formData
             );
+
+            showSuccess({
+              entity: {
+                label: 'Dirección',
+                gender: 'feminine',
+              },
+              action: 'update',
+            });
           } catch (error) {
             throw new Error(
               getErrorMessage(
@@ -87,7 +109,11 @@ export const usePanelDireccionesReferenciadasActions =
             );
           }
         },
-        [update]
+        [
+          clearFeedback,
+          showSuccess,
+          update,
+        ]
       );
 
     const handleRegistrar =
@@ -95,8 +121,18 @@ export const usePanelDireccionesReferenciadasActions =
         async (
           formData: DireccionFormData
         ): Promise<void> => {
+          clearFeedback();
+
           try {
             await create(formData);
+
+            showSuccess({
+              entity: {
+                label: 'Dirección',
+                gender: 'feminine',
+              },
+              action: 'create',
+            });
           } catch (error) {
             throw new Error(
               getErrorMessage(
@@ -106,10 +142,16 @@ export const usePanelDireccionesReferenciadasActions =
             );
           }
         },
-        [create]
+        [
+          clearFeedback,
+          create,
+          showSuccess,
+        ]
       );
 
     return {
+      feedback,
+      clearFeedback,
       showRegistrar,
       showEditar,
       direccionEditarId,

@@ -21,7 +21,7 @@ import type {
 
 import type {
   CreateUsuarioApiResponse,
-  CreateUsuarioResponseApi,
+  CreateUsuarioResult,
 } from '../types/crearUsuario.types';
 
 import type {
@@ -87,8 +87,10 @@ const resolveUsuarioApiError = (
         error.data,
         'message'
       ) ??
-      error.message.trim() ??
-      fallbackMessage
+      (
+        error.message.trim() ||
+        fallbackMessage
+      )
     );
   }
 
@@ -107,13 +109,24 @@ const isSuccessfulResponse = (
     code: string;
     statusCode: number;
   }
-): boolean =>
-  (
-    result.statusCode >= 200 &&
-    result.statusCode < 300
-  ) ||
-  result.code === '00' ||
-  result.code === '200';
+): boolean => {
+  /*
+   * Si el backend informa un statusCode real, ese valor
+   * prevalece sobre code. El fallback por code conserva
+   * compatibilidad con respuestas antiguas que usaban 0.
+   */
+  if (result.statusCode !== 0) {
+    return (
+      result.statusCode >= 200 &&
+      result.statusCode < 300
+    );
+  }
+
+  return (
+    result.code === '00' ||
+    result.code === '200'
+  );
+};
 
 export const fetchUsuariosList = async (
   signal?: AbortSignal
@@ -149,15 +162,11 @@ export const fetchUsuariosList = async (
 
 export const createUsuario = async (
   form:
-    RegistrarUsuarioFormData,
-  authenticatedUserId: string
-): Promise<
-  CreateUsuarioResponseApi
-> => {
+    RegistrarUsuarioFormData
+): Promise<CreateUsuarioResult> => {
   const body =
     buildCreateUsuarioRequest(
-      form,
-      authenticatedUserId
+      form
     );
 
   try {
@@ -190,7 +199,32 @@ export const createUsuario = async (
       );
     }
 
-    return result.response;
+    const usuarioCreado =
+      result.response;
+
+    if (
+      !usuarioCreado ||
+      !Number.isInteger(
+        usuarioCreado.nId_Usuario
+      ) ||
+      usuarioCreado.nId_Usuario <= 0
+    ) {
+      throw new Error(
+        'El servidor confirmó el registro, pero no devolvió un usuario válido.'
+      );
+    }
+
+    const backendMessage =
+      result.messageUser?.trim();
+
+    return {
+      usuario: usuarioCreado,
+      message:
+        backendMessage &&
+        backendMessage.toUpperCase() !== 'OK'
+          ? backendMessage
+          : 'Usuario registrado correctamente.',
+    };
   } catch (error) {
     throw new Error(
       resolveUsuarioApiError(

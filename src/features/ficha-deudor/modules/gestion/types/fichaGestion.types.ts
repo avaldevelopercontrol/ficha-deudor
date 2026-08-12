@@ -1,4 +1,4 @@
-import type { FeedbackMessageVariant } from '@shared/components/ui';
+import type { OperationFeedback } from '@shared/feedback/operationFeedback';
 import type { SelectOption } from '@shared/types';
 import type { PaletaRespuestaOption } from '../../../shared/utils/selectOptions.utils';
 
@@ -172,11 +172,7 @@ export type SetGestionField = <K extends keyof GestionFormClaro>(
 
 export type SetGestionFields = (fields: Partial<GestionFormClaro>) => void;
 
-export interface GestionFeedback {
-  variant: FeedbackMessageVariant;
-  title: string;
-  message: string;
-}
+export type GestionFeedback = OperationFeedback;
 
 export type FichaGestionValidationErrors = Partial<
   Record<keyof GestionFormClaro | 'montoCompromiso' | 'documentos', string>

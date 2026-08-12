@@ -110,6 +110,23 @@
   font-size: 13px;
 }
 
+.cambiar-clave-form .form-input--error {
+  border-color: var(--ap-danger);
+}
+
+.cambiar-clave-form .form-input--error:focus {
+  border-color: var(--ap-danger);
+  box-shadow: 0 0 0 3px rgba(192, 0, 30, 0.08);
+}
+
+.cambiar-clave-form .form-error {
+  margin-top: 1px !important;
+
+  color: var(--ap-danger) !important;
+  font-size: 11px !important;
+  line-height: 1.4;
+}
+
 .cambiar-clave-form .password-input-wrapper {
   position: relative;
 }
@@ -118,6 +135,14 @@
   .password-input-wrapper
   .password-toggle {
   right: 10px;
+}
+
+.cambiar-clave-form__feedback {
+  margin-top: -4px;
+}
+
+.cambiar-clave-form__feedback > * {
+  margin: 0 !important;
 }
 
 .cambiar-clave-form__actions {
@@ -166,15 +191,23 @@
   list-style: none;
 }
 
-.cambiar-clave-requirements__list li {
+.cambiar-clave-requirements__item {
   display: flex;
   align-items: flex-start;
   gap: 10px;
 
-  color: var(--ap-text-muted);
-
   font-size: 12px;
   line-height: 1.45;
+
+  transition: color 150ms ease;
+}
+
+.cambiar-clave-requirements__item--pending {
+  color: var(--ap-text-muted);
+}
+
+.cambiar-clave-requirements__item--valid {
+  color: var(--ap-success);
 }
 
 .cambiar-clave-requirements__icon {
@@ -188,7 +221,20 @@
 
   margin-top: 1px;
 
+  border: 1px solid var(--ap-gray-300);
   border-radius: 50%;
+  background: #ffffff;
+  color: transparent;
+
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.cambiar-clave-requirements__item--valid
+  .cambiar-clave-requirements__icon {
+  border-color: var(--ap-success-bg);
   background: var(--ap-success-bg);
   color: var(--ap-success);
 }
@@ -196,6 +242,39 @@
 .cambiar-clave-requirements__icon svg {
   width: 13px;
   height: 13px;
+}
+
+.cambiar-clave-requirements__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+
+  margin-top: 18px;
+  padding: 11px 12px;
+
+  background: var(--ap-info-bg);
+  border: 1px solid rgba(26, 95, 168, 0.18);
+  border-radius: var(--radius);
+  color: var(--ap-info);
+
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.cambiar-clave-requirements__notice-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cambiar-clave-requirements__notice-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* =========================================================
@@ -206,6 +285,10 @@
   .cambiar-clave-card__content {
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+
+  .cambiar-clave-requirements {
+    order: -1;
   }
 }
 
@@ -219,6 +302,7 @@
   }
 
   .cambiar-clave-card__content {
+    gap: 20px;
     padding: 22px 18px;
   }
 
@@ -228,6 +312,10 @@
 
   .cambiar-clave-card__description {
     font-size: 11px;
+  }
+
+  .cambiar-clave-form {
+    gap: 16px;
   }
 
   .cambiar-clave-form__actions,

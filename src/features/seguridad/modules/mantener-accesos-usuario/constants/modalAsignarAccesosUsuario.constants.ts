@@ -32,9 +32,9 @@ export const MODAL_ASIGNAR_ACCESOS_USUARIO_TEXTS = {
   loading:
     'Cargando usuarios, grupos y opciones...',
   emptyUsers:
-    'No existen usuarios disponibles para asignar accesos.',
+    'No existen usuarios activos disponibles para asignar accesos.',
   allUsersAssignedToGroup:
-    'Todos los usuarios disponibles ya tienen accesos configurados para este grupo. Utilice Editar para administrarlos.',
+    'Todos los usuarios activos disponibles ya tienen accesos configurados para este grupo. Utilice Editar para administrarlos.',
   emptyGroups:
     'No existen grupos disponibles para asignar accesos.',
   emptyOptions:

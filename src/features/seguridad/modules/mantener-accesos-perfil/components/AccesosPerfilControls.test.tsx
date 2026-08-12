@@ -188,6 +188,18 @@ export const suite = defineSuite(
         assert.match(html, /EDITAR/);
         assert.match(html, /ELIMINAR/);
         assert.match(html, /EXPORTAR/);
+        assert.equal(
+          (html.match(/disabled=""/g) ?? []).length,
+          2
+        );
+        assert.match(
+          html,
+          /aria-label="ELIMINAR"[^>]*disabled=""|disabled=""[^>]*aria-label="ELIMINAR"/
+        );
+        assert.match(
+          html,
+          /aria-label="EXPORTAR"[^>]*disabled=""|disabled=""[^>]*aria-label="EXPORTAR"/
+        );
       }
     ),
     test(

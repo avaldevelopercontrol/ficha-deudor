@@ -1,6 +1,10 @@
 import React from 'react';
 
 import {
+  OperationFeedbackMessage,
+} from '@shared/components/ui';
+
+import {
   PANEL_TELEFONOS_REFERENCIADOS_MESSAGES,
   PANEL_TELEFONOS_REFERENCIADOS_TITLE,
 } from '../constants/panelTelefonosReferenciados.constants';
@@ -45,6 +49,8 @@ const PanelTelefonosReferenciados: React.FC<
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
+    feedback,
+    clearFeedback,
     showRegistrar,
     showEditar,
     telefonoEditarId,
@@ -80,6 +86,11 @@ const PanelTelefonosReferenciados: React.FC<
         title={PANEL_TELEFONOS_REFERENCIADOS_TITLE}
         isActive={isActive}
       >
+        <OperationFeedbackMessage
+          feedback={feedback}
+          onClose={clearFeedback}
+        />
+
         <PanelTablaResumen
           columns={columns}
           data={paginatedData}

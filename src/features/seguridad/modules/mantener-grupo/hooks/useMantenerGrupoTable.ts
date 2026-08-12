@@ -16,6 +16,10 @@ import {
 } from '@shared/hooks/useClientSideTable';
 
 import {
+  useOperationFeedback,
+} from '@shared/hooks/useOperationFeedback';
+
+import {
   createGrupo,
   fetchGruposListado,
   updateGrupo,
@@ -45,6 +49,12 @@ export const useMantenerGrupoTable = () => {
 
   const canEdit =
     permissions.editar;
+
+  const {
+    feedback,
+    clearFeedback,
+    showSuccess,
+  } = useOperationFeedback();
 
   const {
     data,
@@ -90,6 +100,8 @@ export const useMantenerGrupoTable = () => {
         form:
           RegistrarGrupoFormData
       ): Promise<void> => {
+        clearFeedback();
+
         assertMantenerGrupoPermission(
           'insertar',
           canInsert
@@ -104,11 +116,21 @@ export const useMantenerGrupoTable = () => {
         );
 
         refetch();
+
+        showSuccess({
+          entity: {
+            label: 'Grupo',
+            gender: 'masculine',
+          },
+          action: 'create',
+        });
       },
       [
         canInsert,
+        clearFeedback,
         refetch,
         setPageNumber,
+        showSuccess,
       ]
     );
 
@@ -124,6 +146,8 @@ export const useMantenerGrupoTable = () => {
         form:
           RegistrarGrupoFormData
       ): Promise<void> => {
+        clearFeedback();
+
         assertMantenerGrupoPermission(
           'editar',
           canEdit
@@ -140,10 +164,20 @@ export const useMantenerGrupoTable = () => {
          * la página actual de la tabla.
          */
         refetch();
+
+        showSuccess({
+          entity: {
+            label: 'Grupo',
+            gender: 'masculine',
+          },
+          action: 'update',
+        });
       },
       [
         canEdit,
+        clearFeedback,
         refetch,
+        showSuccess,
       ]
     );
 
@@ -169,6 +203,9 @@ export const useMantenerGrupoTable = () => {
 
     canInsert,
     canEdit,
+
+    feedback,
+    clearFeedback,
 
     isLoading,
     error,

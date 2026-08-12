@@ -17,6 +17,10 @@ import {
   PERFIL_OPCION_PERMISSION_KEYS,
 } from '../utils/asignarAccesosPerfil.utils';
 
+import {
+  isPerfilOpcionPermissionAvailable,
+} from '../utils/opcionAccessCapabilities.utils';
+
 import AccessStateCheckbox from './AccessStateCheckbox';
 
 interface AccesosPerfilPermissionsPanelProps {
@@ -95,40 +99,58 @@ export const AccesosPerfilPermissionsPanel = ({
         )}
 
         {PERFIL_OPCION_PERMISSION_KEYS.map(
-          (permission) => (
-            <label
-              key={permission}
-              className="asignar-accesos-permissions__item"
-            >
-              <AccessStateCheckbox
-                state={
-                  permissionStates[
-                    permission
-                  ]
-                }
-                disabled={controlsDisabled}
-                ariaLabel={
-                  PERFIL_OPCION_PERMISSION_LABELS[
-                    permission
-                  ]
-                }
-                onChange={(checked) => {
-                  onPermissionChange(
-                    permission,
-                    checked
-                  );
-                }}
-              />
+          (permission) => {
+            const isAvailable =
+              isPerfilOpcionPermissionAvailable(
+                activeOption,
+                permission
+              );
+            const permissionDisabled =
+              controlsDisabled ||
+              !isAvailable;
 
-              <span>
-                {
-                  PERFIL_OPCION_PERMISSION_LABELS[
-                    permission
-                  ]
+            return (
+              <label
+                key={permission}
+                className="asignar-accesos-permissions__item"
+                aria-disabled={permissionDisabled}
+                title={
+                  !controlsDisabled &&
+                  !isAvailable
+                    ? 'Esta operación no aplica para este módulo.'
+                    : undefined
                 }
-              </span>
-            </label>
-          )
+              >
+                <AccessStateCheckbox
+                  state={
+                    permissionStates[
+                      permission
+                    ]
+                  }
+                  disabled={permissionDisabled}
+                  ariaLabel={
+                    PERFIL_OPCION_PERMISSION_LABELS[
+                      permission
+                    ]
+                  }
+                  onChange={(checked) => {
+                    onPermissionChange(
+                      permission,
+                      checked
+                    );
+                  }}
+                />
+
+                <span>
+                  {
+                    PERFIL_OPCION_PERMISSION_LABELS[
+                      permission
+                    ]
+                  }
+                </span>
+              </label>
+            );
+          }
         )}
       </div>
     </div>

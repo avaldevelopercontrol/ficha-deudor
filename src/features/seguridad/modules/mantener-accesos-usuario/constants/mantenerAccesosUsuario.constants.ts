@@ -46,8 +46,8 @@ export const MANTENER_ACCESOS_USUARIO_COLUMN_WIDTHS = {
   usuario: '12%',
   nombreCompleto: '22%',
   grupo: '16%',
-  opcion: '26%',
-  estado: '8%',
+  opcion: '23%',
+  estado: '11%',
   editar: '7%',
 } as const;
 
@@ -55,6 +55,8 @@ export const MANTENER_ACCESOS_USUARIO_COLUMN_WIDTHS = {
 export const MANTENER_ACCESOS_USUARIO_RULE_MESSAGES = {
   alreadyAssignedUserGroup:
     'El usuario seleccionado ya tiene accesos configurados para este grupo. Utilice Editar para administrarlos.',
+  inactiveOrUnavailableUser:
+    'Seleccione un usuario activo disponible para el grupo indicado.',
 } as const;
 
 export const MANTENER_ACCESOS_USUARIO_PAGE_SIZE_OPTIONS = [

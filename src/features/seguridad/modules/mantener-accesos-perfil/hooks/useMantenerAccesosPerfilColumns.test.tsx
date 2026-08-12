@@ -20,12 +20,15 @@ const row = {
   nombrePerfil:
     'Administrador Base Datos',
   cantidadOpciones: 3,
+  estadoActivo: true,
 };
 
 const ColumnsTable = ({
   enabled,
+  estadoActivo = true,
 }: {
   enabled: boolean;
+  estadoActivo?: boolean;
 }) => {
   const columns =
     useMantenerAccesosPerfilColumns({
@@ -37,8 +40,8 @@ const ColumnsTable = ({
   return (
     <Table
       columns={columns}
-      data={[row]}
-      allData={[row]}
+      data={[{ ...row, estadoActivo }]}
+      allData={[{ ...row, estadoActivo }]}
       fitToPanel
     />
   );
@@ -48,7 +51,7 @@ export const suite = defineSuite(
   'columnas de accesos por perfil',
   [
     test(
-      'muestra las cuatro columnas solicitadas y los datos normalizados',
+      'muestra las columnas del perfil incluyendo su estado',
       () => {
         const html =
           renderToStaticMarkup(
@@ -59,6 +62,12 @@ export const suite = defineSuite(
 
         assert.match(html, />Id</);
         assert.match(html, />Nombre</);
+        assert.match(html, />Estado</);
+        assert.match(html, /ACTIVO/);
+        assert.match(
+          html,
+          /background-color:#dcfce7/
+        );
         assert.match(
           html,
           /Cantidad Opciones/
@@ -69,6 +78,24 @@ export const suite = defineSuite(
           /Administrador Base Datos/
         );
         assert.match(html, />3</);
+      }
+    ),
+    test(
+      'muestra el estado inactivo con el mismo badge neutral de seguridad',
+      () => {
+        const html =
+          renderToStaticMarkup(
+            <ColumnsTable
+              enabled
+              estadoActivo={false}
+            />
+          );
+
+        assert.match(html, /INACTIVO/);
+        assert.match(
+          html,
+          /background-color:#f3f4f6/
+        );
       }
     ),
     test(
