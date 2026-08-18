@@ -46,7 +46,7 @@ const rootItem: OpcionTreeItem = {
 };
 
 const item: OpcionTreeItem = {
-  idModulo: 6,
+  idModulo: 10,
   nombre: 'Mantener perfil',
   descripcion: '',
   codigo: 'mMantenerPerfil',
@@ -73,7 +73,7 @@ const item: OpcionTreeItem = {
 
 const secondItem: OpcionTreeItem = {
   ...item,
-  idModulo: 7,
+  idModulo: 11,
   nombre: 'Mantener módulo',
   codigo: 'mMantenerModulo',
   orden: 2,
@@ -98,10 +98,10 @@ const parentItem: OpcionTreeItem = {
 
 const form: AsignarAccesosPerfilFormData = {
   perfilId: 9,
-  selectedOptionIds: [6],
-  activeOptionId: 6,
+  selectedOptionIds: [10],
+  activeOptionId: 10,
   permissionsByOptionId: {
-    '6': {
+    '10': {
       consultar: true,
       insertar: true,
       editar: true,

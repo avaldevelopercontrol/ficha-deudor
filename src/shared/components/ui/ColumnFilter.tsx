@@ -1,6 +1,7 @@
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -15,6 +16,7 @@ interface ColumnFilterProps {
   onTextFilterChange: (text: string) => void;
   label: string;
   getOptionLabel?: (value: string) => string;
+  showOptionsButton?: boolean;
 }
 
 const ColumnFilter: React.FC<ColumnFilterProps> = ({
@@ -25,6 +27,7 @@ const ColumnFilter: React.FC<ColumnFilterProps> = ({
   onTextFilterChange,
   label,
   getOptionLabel,
+  showOptionsButton = true,
 }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -35,6 +38,7 @@ const ColumnFilter: React.FC<ColumnFilterProps> = ({
     top: 0,
     left: 0,
     width: 0,
+    maxListHeight: 220,
   });
 
   const closeDropdown = useCallback(() => {
@@ -54,19 +58,59 @@ const ColumnFilter: React.FC<ColumnFilterProps> = ({
     });
   }, []);
 
-  useEffect(() => {
-    if (open && containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const scrollX = window.scrollX || window.pageXOffset;
-      const scrollY = window.scrollY || window.pageYOffset;
-
-      setDropdownPosition({
-        top: rect.bottom + scrollY + 6,
-        left: rect.left + scrollX,
-        width: Math.max(rect.width, 240),
-      });
+  const updateDropdownPosition = useCallback(() => {
+    if (!containerRef.current) {
+      return;
     }
-  }, [open]);
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const viewportWidth =
+      document.documentElement.clientWidth || window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const viewportGap = 8;
+    const dropdownGap = 6;
+    const maxAvailableWidth = Math.max(0, viewportWidth - viewportGap * 2);
+    const width = Math.min(
+      Math.max(rect.width, 240),
+      maxAvailableWidth
+    );
+    const maxLeft = Math.max(viewportGap, viewportWidth - width - viewportGap);
+    const left = Math.min(Math.max(rect.left, viewportGap), maxLeft);
+    const availableBelow = Math.max(0, viewportHeight - rect.bottom - dropdownGap - viewportGap);
+
+    setDropdownPosition({
+      top: rect.bottom + dropdownGap,
+      left,
+      width,
+      maxListHeight: Math.max(72, Math.min(220, availableBelow - 88)),
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    updateDropdownPosition();
+  }, [open, updateDropdownPosition]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const handleViewportChange = () => {
+      updateDropdownPosition();
+    };
+
+    window.addEventListener('resize', handleViewportChange);
+    window.addEventListener('scroll', handleViewportChange, true);
+
+    return () => {
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('scroll', handleViewportChange, true);
+    };
+  }, [open, updateDropdownPosition]);
 
   useEffect(() => {
     if (!open) return;
@@ -162,7 +206,7 @@ const ColumnFilter: React.FC<ColumnFilterProps> = ({
     <div
       ref={dropdownRef}
       style={{
-        position: 'absolute',
+        position: 'fixed',
         top: `${dropdownPosition.top}px`,
         left: `${dropdownPosition.left}px`,
         width: `${dropdownPosition.width}px`,
@@ -228,7 +272,7 @@ const ColumnFilter: React.FC<ColumnFilterProps> = ({
 
       <div
         style={{
-          maxHeight: '220px',
+          maxHeight: `${dropdownPosition.maxListHeight}px`,
           overflowY: 'auto',
           paddingRight: '4px',
         }}
@@ -306,31 +350,33 @@ const ColumnFilter: React.FC<ColumnFilterProps> = ({
           }}
         />
 
-        <button
-          onClick={handleToggleDropdown}
-          style={{
-            padding: '0 6px',
-            height: '32px',
-            borderRadius: '6px',
-            border: '1px solid #cfd6e4',
-            backgroundColor: selectedValues.length ? '#e8f0fe' : '#ffffff',
-            cursor: 'pointer',
-            fontSize: '11px',
-            fontWeight: 600,
-            color: '#185FA5',
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: '24px',
-          }}
-          type="button"
-        >
-          {selectedValues.length ? `${selectedValues.length}` : '▼'}
-        </button>
+        {showOptionsButton && (
+          <button
+            onClick={handleToggleDropdown}
+            style={{
+              padding: '0 6px',
+              height: '32px',
+              borderRadius: '6px',
+              border: '1px solid #cfd6e4',
+              backgroundColor: selectedValues.length ? '#e8f0fe' : '#ffffff',
+              cursor: 'pointer',
+              fontSize: '11px',
+              fontWeight: 600,
+              color: '#185FA5',
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: '24px',
+            }}
+            type="button"
+          >
+            {selectedValues.length ? `${selectedValues.length}` : '▼'}
+          </button>
+        )}
       </div>
 
-      {open && createPortal(dropdownContent, document.body)}
+      {showOptionsButton && open && createPortal(dropdownContent, document.body)}
     </div>
   );
 };

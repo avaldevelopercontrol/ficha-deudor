@@ -30,6 +30,7 @@ interface MutableModulo {
   nombre: string;
   descripcion: string;
   ruta: string;
+  urlBI: string;
   icono: string;
   tipo: number;
   idPadre: number;
@@ -63,6 +64,7 @@ const mapModuloToMutable = (
   nombre: modulo.nombre,
   descripcion: modulo.descripcion,
   ruta: modulo.ruta,
+  urlBI: modulo.urlBI?.trim() ?? '',
   icono: modulo.icono,
   tipo: modulo.tipo,
   idPadre: modulo.idPadre,
@@ -83,6 +85,8 @@ const mapOpcionApiToMutable = (
     modulo.sDescripcionOpcion?.trim() ?? '',
   ruta:
     modulo.sUrlOpcion?.trim() ?? '',
+  urlBI:
+    modulo.sUrlBI?.trim() ?? '',
   icono:
     modulo.sIcono?.trim() ?? '',
   tipo: Number(modulo.nTipo) || 0,
@@ -101,6 +105,7 @@ const hasChanged = (
   original.nombre !== updated.nombre ||
   original.descripcion !== updated.descripcion ||
   original.ruta !== updated.ruta ||
+  original.urlBI !== updated.urlBI ||
   original.icono !== updated.icono ||
   original.tipo !== updated.tipo ||
   original.idPadre !== updated.idPadre ||
@@ -372,6 +377,31 @@ const sortByOrder = (
   return left.idModulo - right.idModulo;
 };
 
+const resolveRouteSegment = (
+  route: string,
+  fallbackCode: string
+): string => {
+  const normalizedRoute = route
+    .trim()
+    .replace(/\\/g, '/')
+    .replace(/\/{2,}/g, '/')
+    .replace(/^\/+|\/+$/g, '');
+
+  if (!normalizedRoute) {
+    return fallbackCode.trim();
+  }
+
+  const segments =
+    normalizedRoute
+      .split('/')
+      .filter(Boolean);
+
+  return (
+    segments.at(-1) ??
+    fallbackCode.trim()
+  );
+};
+
 const renumberParentChildren = (
   modulesById: Map<number, MutableModulo>,
   parentId: number,
@@ -458,13 +488,19 @@ const cascadeHierarchyValues = (
     );
 
     children.forEach((child) => {
+      const routeSegment =
+        resolveRouteSegment(
+          child.ruta,
+          child.codigo
+        );
+
       modulesById.set(
         child.idModulo,
         {
           ...child,
           ruta: buildModuloRoute(
             parent.ruta,
-            child.codigo
+            routeSegment
           ),
           tipo: parent.tipo + 1,
         }
@@ -487,6 +523,7 @@ const toUpdateRequest = (
   sNombreOpcion: modulo.nombre,
   sDescripcionOpcion: modulo.descripcion,
   sUrlOpcion: modulo.ruta,
+  sUrlBI: modulo.urlBI,
   sIcono: modulo.icono,
   nTipo: modulo.tipo,
   nId_OpcionPadre: modulo.idPadre,
@@ -579,6 +616,33 @@ export const buildUpdateOpcionRequests = (
 
   const codigo = normalizedForm.codigo.trim();
 
+  const currentRouteSegment =
+    originalCurrent.codigo !== codigo
+      ? codigo
+      : resolveRouteSegment(
+          originalCurrent.ruta,
+          codigo
+        );
+
+  const hierarchyChanged =
+    originalCurrent.idPadre !==
+      normalizedForm.padreId ||
+    originalCurrent.codigo !== codigo;
+
+  const updatedRoute =
+    !hierarchyChanged &&
+    originalCurrent.ruta
+      ? originalCurrent.ruta
+      : parentOption
+        ? buildModuloRoute(
+            parentOption.ruta,
+            currentRouteSegment
+          )
+        : buildModuloRoute(
+            '',
+            currentRouteSegment
+          );
+
   const updatedCurrent:
     MutableModulo = {
       ...originalCurrent,
@@ -586,15 +650,7 @@ export const buildUpdateOpcionRequests = (
       nombre: normalizedForm.nombre.trim(),
       descripcion:
         normalizedForm.descripcion.trim(),
-      ruta: parentOption
-        ? buildModuloRoute(
-            parentOption.ruta,
-            codigo
-          )
-        : buildModuloRoute(
-            '',
-            codigo
-          ),
+      ruta: updatedRoute,
       icono: normalizedForm.icono.trim(),
       tipo: parentOption
         ? parentOption.tipo + 1

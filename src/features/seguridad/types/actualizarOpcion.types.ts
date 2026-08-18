@@ -12,6 +12,7 @@ export interface UpdateOpcionRequestApi {
   sNombreOpcion: string;
   sDescripcionOpcion: string;
   sUrlOpcion: string;
+  sUrlBI: string;
   sIcono: string;
   nTipo: number;
   nId_OpcionPadre: number;

@@ -13,8 +13,12 @@ interface Props<TData> {
   allData?: TData[];
   textFilters?: Record<string, string>;
   selectedFilters?: Record<string, string[]>;
+  filterValues?: Record<string, string[]>;
   onTextFilterChange?: (colKey: string, text: string) => void;
   onSelectedFilterChange?: (colKey: string, selected: string[]) => void;
+  sortKey?: string | null;
+  sortDirection?: 'asc' | 'desc';
+  onSortChange?: (colKey: string, direction: 'asc' | 'desc') => void;
   fitToPanel?: boolean;
 }
 
@@ -73,8 +77,12 @@ function Table<TData>({
   allData = [],
   textFilters = {},
   selectedFilters = {},
+  filterValues = {},
   onTextFilterChange,
   onSelectedFilterChange,
+  sortKey = null,
+  sortDirection = 'asc',
+  onSortChange,
   fitToPanel = true,
 }: Props<TData>) {
   const hasGroupedHeaders = columns.some((col) => col.group && col.groupLabel);
@@ -135,6 +143,39 @@ function Table<TData>({
 
     return map;
   }, [columns, allData, applyFiltersExcludingColumn]);
+
+  const getFilterValues = useCallback(
+    (columnKey: string): string[] =>
+      filterValues[columnKey] ?? uniqueValuesMap[columnKey] ?? [],
+    [filterValues, uniqueValuesMap]
+  );
+
+  const renderHeaderLabel = useCallback(
+    (column: Column<TData>) => {
+      if (!column.sortable || !onSortChange) {
+        return column.label;
+      }
+
+      const isActive = sortKey === column.key;
+      const nextDirection =
+        isActive && sortDirection === 'asc' ? 'desc' : 'asc';
+
+      return (
+        <button
+          type="button"
+          className={`data-table__sort-button${isActive ? ' is-active' : ''}`}
+          onClick={() => onSortChange(column.key, nextDirection)}
+          aria-label={`Ordenar ${column.label} ${nextDirection === 'asc' ? 'ascendente' : 'descendente'}`}
+        >
+          <span>{column.label}</span>
+          <span className="data-table__sort-indicator" aria-hidden="true">
+            {isActive ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}
+          </span>
+        </button>
+      );
+    },
+    [onSortChange, sortDirection, sortKey]
+  );
 
   const headerGroups = useMemo<HeaderCellGroup<TData>[]>(() => {
     const groups: HeaderCellGroup<TData>[] = [];
@@ -258,7 +299,7 @@ function Table<TData>({
                         whiteSpace: 'normal',
                       }}
                     >
-                      {col.label}
+                      {renderHeaderLabel(col)}
                     </div>
                   </th>
                 );
@@ -281,7 +322,7 @@ function Table<TData>({
                       {col.filterable !== false ? (
                         <ColumnFilter
                           label={col.label}
-                          values={uniqueValuesMap[col.key] || []}
+                          values={getFilterValues(col.key)}
                           selectedValues={
                             selectedFilters[col.key] || []
                           }
@@ -302,6 +343,9 @@ function Table<TData>({
                           }
                           getOptionLabel={
                             col.filterOptionLabel
+                          }
+                          showOptionsButton={
+                            col.showFilterOptions !== false
                           }
                         />
                       ) : (

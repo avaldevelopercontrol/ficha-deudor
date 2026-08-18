@@ -46,10 +46,10 @@ const compareOptions = (
 
 const flattenAuthorizedOptions = (
   options: readonly AuthorizedOption[],
-  target: Map<string, AuthorizedOption>
+  target: Map<number, AuthorizedOption>
 ): void => {
   for (const option of options) {
-    target.set(option.code, option);
+    target.set(option.id, option);
 
     flattenAuthorizedOptions(
       option.children,
@@ -251,7 +251,7 @@ export const buildAccessControlSnapshot = (
       );
 
     const route = getOptionRoute(
-      option.code
+      option.id
     );
 
     return {
@@ -315,14 +315,14 @@ export const buildAccessControlSnapshot = (
         option !== null
     );
 
-  const optionsByCode = new Map<
-    string,
+  const optionsById = new Map<
+    number,
     AuthorizedOption
   >();
 
   flattenAuthorizedOptions(
     menuTree,
-    optionsByCode
+    optionsById
   );
 
   const navigationTree =
@@ -332,6 +332,6 @@ export const buildAccessControlSnapshot = (
     profileId,
     menuTree,
     navigationTree,
-    optionsByCode,
+    optionsById,
   };
 };

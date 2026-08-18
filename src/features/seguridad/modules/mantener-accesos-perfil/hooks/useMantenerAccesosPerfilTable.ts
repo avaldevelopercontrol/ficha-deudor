@@ -8,6 +8,7 @@ import {
 } from '@features/auth/hooks/useAuth';
 
 import {
+  APPLICATION_OPTION_IDS,
   useAccessControl,
   useOptionPermissions,
 } from '@features/access-control';
@@ -79,7 +80,7 @@ export const useMantenerAccesosPerfilTable = () => {
 
   const permissions =
     useOptionPermissions(
-      'mMantenerAccesosPorPerfil'
+      APPLICATION_OPTION_IDS.MANTENER_ACCESOS_POR_PERFIL
     );
 
   const canInsert =

@@ -8,6 +8,7 @@ import {
 } from '@features/auth/hooks/useAuth';
 
 import {
+  APPLICATION_OPTION_IDS,
   useAccessControl,
   useOptionPermissions,
 } from '@features/access-control';
@@ -47,6 +48,10 @@ import {
   assertMantenerModulosPermission,
 } from '../utils/mantenerModulosPermissions';
 
+import {
+  resolveModuloImplementacion,
+} from '../utils/moduloImplementation.utils';
+
 export const useMantenerModulosTable = () => {
   const {
     usuario,
@@ -58,7 +63,7 @@ export const useMantenerModulosTable = () => {
 
   const permissions =
     useOptionPermissions(
-      'mMantenerModulo'
+      APPLICATION_OPTION_IDS.MANTENER_MODULO
     );
 
   const canInsert =
@@ -88,8 +93,21 @@ export const useMantenerModulosTable = () => {
 
   const allData =
     useMemo(
-      () =>
-        data ?? [],
+      () => {
+        const modulos =
+          data ?? [];
+
+        return modulos.map(
+          (modulo) => ({
+            ...modulo,
+            implementacion:
+              resolveModuloImplementacion(
+                modulo,
+                modulos
+              ),
+          })
+        );
+      },
       [data]
     );
 

@@ -31,14 +31,16 @@ const EMAIL_PATTERN =
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export interface RegistrarUsuarioValidationContext {
-  catalogos?: Pick<
+  catalogos?: Partial<Pick<
     RegistrarUsuarioCatalogos,
     | 'perfiles'
     | 'grupos'
     | 'departamentosLabor'
     | 'subZonalesOficina'
     | 'campanasDiscador'
-  >;
+  >>;
+  requirePassword?: boolean;
+  validateGroup?: boolean;
 }
 
 const normalizeHumanText = (
@@ -267,7 +269,11 @@ export const validateRegistrarUsuarioForm = (
   const normalizedForm =
     normalizeRegistrarUsuarioForm(form);
 
-  const { catalogos } = context;
+  const {
+    catalogos,
+    requirePassword = true,
+    validateGroup = true,
+  } = context;
 
   if (!normalizedForm.dni) {
     errors.dni =
@@ -338,16 +344,18 @@ export const validateRegistrarUsuarioForm = (
       'El usuario solo puede incluir letras, números, punto, guion o guion bajo.';
   }
 
-  if (!form.contrasena) {
-    errors.contrasena =
-      'La contraseña es obligatoria.';
-  } else if (
-    !areUsuarioPasswordRequirementsMet(
-      form.contrasena
-    )
-  ) {
-    errors.contrasena =
-      'La contraseña debe tener entre 8 y 20 caracteres e incluir al menos una letra, un número y un carácter especial.';
+  if (requirePassword) {
+    if (!form.contrasena) {
+      errors.contrasena =
+        'La contraseña es obligatoria.';
+    } else if (
+      !areUsuarioPasswordRequirementsMet(
+        form.contrasena
+      )
+    ) {
+      errors.contrasena =
+        'La contraseña debe tener entre 8 y 20 caracteres e incluir al menos una letra, un número y un carácter especial.';
+    }
   }
 
   const perfilError =
@@ -361,15 +369,17 @@ export const validateRegistrarUsuarioForm = (
     errors.perfil = perfilError;
   }
 
-  const grupoError =
-    validateRequiredCatalogSelection(
-      normalizedForm.grupo,
-      catalogos?.grupos,
-      'un grupo'
-    );
+  if (validateGroup) {
+    const grupoError =
+      validateRequiredCatalogSelection(
+        normalizedForm.grupo,
+        catalogos?.grupos,
+        'un grupo'
+      );
 
-  if (grupoError) {
-    errors.grupo = grupoError;
+    if (grupoError) {
+      errors.grupo = grupoError;
+    }
   }
 
   if (!normalizedForm.fechaNacimiento) {

@@ -106,10 +106,22 @@ export interface SeleccionarClientePayload {
 
 export interface LoginResponse {
   success: boolean;
+  code: string;
   message: string;
   usuario: Usuario | null;
   token?: string;
   cancelled?: boolean;
+  requiresPasswordChange?: boolean;
+  requiresPasswordChangeSoon?: boolean;
+}
+
+export interface ExpiredPasswordChallenge {
+  userId: string;
+  message: string;
+}
+
+export interface PasswordExpiryWarning {
+  message: string;
 }
 
 export interface ClientesResponse {
@@ -130,8 +142,12 @@ export interface AuthState {
 }
 
 export interface AuthContextValue extends AuthState {
+  expiredPasswordChallenge: ExpiredPasswordChallenge | null;
+  passwordExpiryWarning: PasswordExpiryWarning | null;
   login: (payload: LoginPayload) => Promise<LoginResponse>;
   logout: () => void;
   seleccionarCliente: (cliente: Cliente) => void;
   clearError: () => void;
+  clearExpiredPasswordChallenge: () => void;
+  clearPasswordExpiryWarning: () => void;
 }

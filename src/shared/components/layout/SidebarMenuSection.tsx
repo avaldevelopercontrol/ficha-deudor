@@ -5,20 +5,23 @@ import {
   useLocation,
 } from 'react-router-dom';
 
-interface SidebarSubItem {
+export interface SidebarNavigationItem {
+  id: number;
   label: string;
-  to: string;
+  to?: string;
   disabled?: boolean;
+  children?: SidebarNavigationItem[];
 }
 
 interface SidebarMenuSectionProps {
+  sectionId: number;
   label: string;
   icon: React.ReactNode;
-  isOpen: boolean;
-  items: SidebarSubItem[];
+  items: SidebarNavigationItem[];
+  openSections: Readonly<Record<number, boolean>>;
   to?: string;
   disabled?: boolean;
-  onToggle: () => void;
+  onToggle: (optionId: number) => void;
 }
 
 const NO_CONSULT_PERMISSION_TITLE =
@@ -51,6 +54,25 @@ const isRouteActive = (
       ))
   );
 };
+
+const isNavigationItemActive = (
+  pathname: string,
+  item: SidebarNavigationItem
+): boolean =>
+  !item.disabled &&
+  ((item.to
+    ? isRouteActive(
+        pathname,
+        item.to
+      )
+    : false) ||
+    (item.children?.some(
+      (child) =>
+        isNavigationItemActive(
+          pathname,
+          child
+        )
+    ) ?? false));
 
 const ChevronIcon = ({
   isOpen,
@@ -95,18 +117,151 @@ const NavigationContent = ({
   </>
 );
 
+interface NestedNavigationItemProps {
+  item: SidebarNavigationItem;
+  pathname: string;
+  openSections: Readonly<Record<number, boolean>>;
+  onToggle: (optionId: number) => void;
+}
+
+const NestedNavigationItem = ({
+  item,
+  pathname,
+  openSections,
+  onToggle,
+}: NestedNavigationItemProps) => {
+  const children =
+    item.children ?? [];
+  const hasChildren =
+    children.length > 0;
+  const isActive =
+    isNavigationItemActive(
+      pathname,
+      item
+    );
+  const isOpen =
+    openSections[item.id] ?? true;
+
+  if (hasChildren) {
+    return (
+      <div className="app-sidebar__sub-section">
+        <button
+          type="button"
+          className={[
+            'app-sidebar__sub-item',
+            'app-sidebar__sub-item--parent',
+            item.disabled
+              ? 'app-sidebar__sub-item--disabled'
+              : '',
+            isActive
+              ? 'app-sidebar__sub-item--active'
+              : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          onClick={() => {
+            onToggle(item.id);
+          }}
+          disabled={item.disabled}
+          aria-disabled={
+            item.disabled
+          }
+          aria-expanded={
+            item.disabled
+              ? false
+              : isOpen
+          }
+          title={
+            item.disabled
+              ? NO_CONSULT_PERMISSION_TITLE
+              : undefined
+          }
+        >
+          <span className="app-sidebar__sub-item-text">
+            {item.label}
+          </span>
+
+          <ChevronIcon
+            isOpen={
+              !item.disabled &&
+              isOpen
+            }
+          />
+        </button>
+
+        {!item.disabled &&
+          isOpen && (
+            <div className="app-sidebar__submenu app-sidebar__submenu--nested">
+              {children.map(
+                (child) => (
+                  <NestedNavigationItem
+                    key={child.id}
+                    item={child}
+                    pathname={
+                      pathname
+                    }
+                    openSections={
+                      openSections
+                    }
+                    onToggle={
+                      onToggle
+                    }
+                  />
+                )
+              )}
+            </div>
+          )}
+      </div>
+    );
+  }
+
+  if (!item.to || item.disabled) {
+    return (
+      <span
+        className="app-sidebar__sub-item app-sidebar__sub-item--disabled"
+        aria-disabled="true"
+        title={
+          NO_CONSULT_PERMISSION_TITLE
+        }
+      >
+        {item.label}
+      </span>
+    );
+  }
+
+  return (
+    <NavLink
+      to={item.to}
+      className={() =>
+        [
+          'app-sidebar__sub-item',
+          isActive
+            ? 'app-sidebar__sub-item--active'
+            : '',
+        ].join(' ')
+      }
+    >
+      {item.label}
+    </NavLink>
+  );
+};
+
 export const SidebarMenuSection: React.FC<
   SidebarMenuSectionProps
 > = ({
+  sectionId,
   label,
   icon,
-  isOpen,
   items,
+  openSections,
   to,
   disabled = false,
   onToggle,
 }) => {
   const { pathname } = useLocation();
+
+  const isOpen =
+    openSections[sectionId] ?? true;
 
   const isSectionActive =
     !disabled &&
@@ -118,10 +273,9 @@ export const SidebarMenuSection: React.FC<
       : false) ||
       items.some(
         (item) =>
-          !item.disabled &&
-          isRouteActive(
+          isNavigationItemActive(
             pathname,
-            item.to
+            item
           )
       ));
 
@@ -184,7 +338,9 @@ export const SidebarMenuSection: React.FC<
         ]
           .filter(Boolean)
           .join(' ')}
-        onClick={onToggle}
+        onClick={() => {
+          onToggle(sectionId);
+        }}
         aria-expanded={
           disabled
             ? false
@@ -214,35 +370,17 @@ export const SidebarMenuSection: React.FC<
       {!disabled &&
         isOpen && (
           <div className="app-sidebar__submenu">
-            {items.map((item) =>
-              item.disabled ? (
-                <span
-                  key={item.to}
-                  className="app-sidebar__sub-item app-sidebar__sub-item--disabled"
-                  aria-disabled="true"
-                  title={
-                    NO_CONSULT_PERMISSION_TITLE
+            {items.map(
+              (item) => (
+                <NestedNavigationItem
+                  key={item.id}
+                  item={item}
+                  pathname={pathname}
+                  openSections={
+                    openSections
                   }
-                >
-                  {item.label}
-                </span>
-              ) : (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({
-                    isActive,
-                  }) =>
-                    [
-                      'app-sidebar__sub-item',
-                      isActive
-                        ? 'app-sidebar__sub-item--active'
-                        : '',
-                    ].join(' ')
-                  }
-                >
-                  {item.label}
-                </NavLink>
+                  onToggle={onToggle}
+                />
               )
             )}
           </div>

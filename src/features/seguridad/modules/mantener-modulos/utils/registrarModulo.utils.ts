@@ -1,12 +1,3 @@
-import {
-  getRegistrableApplicationOptions,
-  type ApplicationOptionDefinition,
-} from '@features/access-control/registry';
-
-import type {
-  SelectOption,
-} from '@shared/types';
-
 import type {
   Modulo,
 } from '../../../types/opcion.types';
@@ -23,13 +14,6 @@ const normalizeTextForCode = (
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-zA-Z0-9]+/g, ' ')
     .trim();
-
-const normalizeComparableCode = (
-  value: string
-): string =>
-  value
-    .trim()
-    .toLocaleLowerCase('es-PE');
 
 const capitalizeWord = (
   value: string
@@ -91,7 +75,6 @@ export const resolveDefaultParentId = (
 export const buildRegistrarModuloInitialForm = (
   opciones: readonly Modulo[]
 ): RegistrarModuloFormData => ({
-  applicationOptionCode: '',
   nombre: '',
   descripcion: '',
   codigo: '',
@@ -103,85 +86,6 @@ export const buildRegistrarModuloInitialForm = (
   visible: true,
   estado: true,
 });
-
-export const getAvailableApplicationOptions = (
-  opciones: readonly Modulo[]
-): readonly ApplicationOptionDefinition[] => {
-  const registeredCodes = new Set(
-    opciones
-      .map((opcion) =>
-        normalizeComparableCode(
-          opcion.codigo
-        )
-      )
-      .filter(Boolean)
-  );
-
-  return getRegistrableApplicationOptions().filter(
-    (definition) =>
-      !registeredCodes.has(
-        normalizeComparableCode(
-          definition.code
-        )
-      )
-  );
-};
-
-export const buildApplicationOptionSelectOptions = (
-  opciones: readonly ApplicationOptionDefinition[]
-): SelectOption<string>[] =>
-  opciones.map((option) => ({
-    id: option.code,
-    label:
-      `${option.sectionName} — ${option.name}`,
-  }));
-
-export const resolveApplicationOptionParentId = (
-  definition: ApplicationOptionDefinition,
-  opciones: readonly Modulo[]
-): number | null => {
-  if (!definition.parentCode) {
-    return null;
-  }
-
-  return (
-    opciones.find(
-      (opcion) =>
-        normalizeComparableCode(
-          opcion.codigo
-        ) ===
-        normalizeComparableCode(
-          definition.parentCode ?? ''
-        )
-    )?.idModulo ?? null
-  );
-};
-
-export const applyApplicationOptionToForm = (
-  currentForm: RegistrarModuloFormData,
-  definition: ApplicationOptionDefinition,
-  opciones: readonly Modulo[]
-): RegistrarModuloFormData => {
-  const parentId =
-    resolveApplicationOptionParentId(
-      definition,
-      opciones
-    );
-
-  return {
-    ...currentForm,
-    applicationOptionCode:
-      definition.code,
-    nombre: definition.name,
-    descripcion:
-      definition.description,
-    codigo: definition.code,
-    icono: definition.icon,
-    padreId:
-      parentId ??
-      currentForm.padreId,
-  };
-};
 
 export const normalizeParentRoute = (
   route: string

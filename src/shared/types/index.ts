@@ -19,6 +19,8 @@ export interface Column<TData = unknown> {
   group?: string;
   groupLabel?: string;
   filterOptionLabel?: (value: string) => string;
+  showFilterOptions?: boolean;
+  sortable?: boolean;
   align?: React.CSSProperties['textAlign'];
 }
 

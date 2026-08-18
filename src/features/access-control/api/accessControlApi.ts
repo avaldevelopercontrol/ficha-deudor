@@ -13,7 +13,6 @@ import type {
   ApiResponseSimple,
 } from '@shared/types/indexApi';
 
-import { getOptionDisplayName } from '@shared/utils/optionDisplayName.utils';
 
 import {
   SEGURIDAD_API_ENDPOINTS,
@@ -176,15 +175,9 @@ const mapAccessOption = (
     option.sCodigoOpcion,
     'sCodigoOpcion'
   ),
-  name: getOptionDisplayName(
-    toRequiredText(
-      option.sCodigoOpcion,
-      'sCodigoOpcion'
-    ),
-    toRequiredText(
-      option.sNombreOpcion,
-      'sNombreOpcion'
-    )
+  name: toRequiredText(
+    option.sNombreOpcion,
+    'sNombreOpcion'
   ),
   description: toOptionalText(
     option.sDescripcionOpcion

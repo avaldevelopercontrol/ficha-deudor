@@ -253,3 +253,61 @@
   border-top: 1px solid #e5e7eb;
 }
 
+/* ========== CLAVE EXPIRADA ========== */
+
+.expired-password-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.expired-password-modal__icon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--ap-warning-bg);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  color: var(--ap-warning);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.expired-password-modal__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.expired-password-modal__title {
+  margin: 0;
+  color: var(--ap-navy);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.expired-password-modal__message {
+  margin: 0;
+  color: var(--ap-text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.expired-password-modal__actions {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.expired-password-modal__actions .btn {
+  min-width: 150px;
+}

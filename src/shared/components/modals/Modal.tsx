@@ -22,6 +22,7 @@ interface ModalProps {
   size?: ModalSize;
   closeOnEsc?: boolean;
   disableClose?: boolean;
+  showCloseButton?: boolean;
 }
 
 const sizeMap: Record<ModalSize, React.CSSProperties> = {
@@ -49,6 +50,7 @@ const Modal: React.FC<ModalProps> = ({
   size = 'md',
   closeOnEsc = true,
   disableClose = false,
+  showCloseButton = true,
 }) => {
   const modalIdRef = useRef<number>(0);
   const scrollYRef = useRef<number>(0);
@@ -168,15 +170,17 @@ const Modal: React.FC<ModalProps> = ({
         <div className="modal-header">
           <span className="modal-title">{title}</span>
 
-          <button
-            className="modal-close"
-            onClick={onClose}
-            type="button"
-            disabled={disableClose}
-            aria-label="Cerrar"
-          >
-            ✕
-          </button>
+          {showCloseButton && (
+            <button
+              className="modal-close"
+              onClick={onClose}
+              type="button"
+              disabled={disableClose}
+              aria-label="Cerrar"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         <div className="modal-body">

@@ -1,6 +1,7 @@
 import {
   lazy,
   Suspense,
+  useCallback,
   type ReactNode,
 } from 'react';
 
@@ -17,8 +18,14 @@ import {
 } from '@app/popups';
 
 import {
+  APPLICATION_OPTION_IDS,
   OptionAccessRoute,
+  useAccessControl,
 } from '../../features/access-control';
+
+import {
+  ANALYTICS_ROUTES,
+} from '../../features/analytics/constants/analyticsRoutes.constants';
 
 import {
   AUTH_ROUTES,
@@ -55,6 +62,10 @@ import {
 } from './appBreadcrumbs';
 
 import {
+  ExpiredPasswordRoute,
+} from './ExpiredPasswordRoute';
+
+import {
   ProtectedRoute,
 } from './ProtectedRoute';
 
@@ -76,6 +87,13 @@ const GestionDeudorPage = lazy(
     )
 );
 
+const PortfolioControlCenterPage = lazy(
+  () =>
+    import(
+      '../../features/analytics/pages/PortfolioControlCenterPage'
+    )
+);
+
 const FichaDeudor = lazy(
   () =>
     import(
@@ -87,6 +105,13 @@ const CambiarClavePage = lazy(
   () =>
     import(
       '../../features/gestion-usuarios/pages/CambiarClavePage'
+    )
+);
+
+const CambiarClaveExpiradaPage = lazy(
+  () =>
+    import(
+      '../../features/gestion-usuarios/pages/CambiarClaveExpiradaPage'
     )
 );
 
@@ -187,6 +212,37 @@ function LegacyFichaDeudorRedirect() {
   );
 }
 
+function PrivateAppLayout() {
+  const {
+    navigationTree,
+  } = useAccessControl();
+
+  const resolveBreadcrumb =
+    useCallback(
+      (pathname: string) =>
+        getAppBreadcrumb(
+          pathname,
+          navigationTree
+        ),
+      [navigationTree]
+    );
+
+  return (
+    <AppLayout
+      resolveBreadcrumb={
+        resolveBreadcrumb
+      }
+      withoutSidebarPaths={[
+        AUTH_ROUTES
+          .MENU_MODULOS,
+
+        FICHA_DEUDOR_ROUTES
+          .FICHA_DEUDOR,
+      ]}
+    />
+  );
+}
+
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -207,23 +263,19 @@ export function AppRouter() {
               path={AUTH_ROUTES.LOGIN}
               element={<LoginPage />}
             />
+
+            <Route element={<ExpiredPasswordRoute />}>
+              <Route
+                path={AUTH_ROUTES.CAMBIAR_CLAVE_EXPIRADA}
+                element={<CambiarClaveExpiradaPage />}
+              />
+            </Route>
           </Route>
 
           <Route element={<ProtectedRoute />}>
             <Route
               element={
-                <AppLayout
-                  resolveBreadcrumb={
-                    getAppBreadcrumb
-                  }
-                  withoutSidebarPaths={[
-                    AUTH_ROUTES
-                      .MENU_MODULOS,
-
-                    FICHA_DEUDOR_ROUTES
-                      .FICHA_DEUDOR,
-                  ]}
-                />
+                <PrivateAppLayout />
               }
             >
               <Route
@@ -242,8 +294,30 @@ export function AppRouter() {
                     .GESTION_DEUDOR
                 }
                 element={
-                  <OptionAccessRoute optionCode="mGestionDeudor">
+                  <OptionAccessRoute
+                    optionId={
+                      APPLICATION_OPTION_IDS
+                        .GESTION_DEUDOR
+                    }
+                  >
                     <GestionDeudorPage />
+                  </OptionAccessRoute>
+                }
+              />
+
+              <Route
+                path={
+                  ANALYTICS_ROUTES
+                    .PORTFOLIO_CONTROL_CENTER
+                }
+                element={
+                  <OptionAccessRoute
+                    optionId={
+                      APPLICATION_OPTION_IDS
+                        .PORTFOLIO_CONTROL_CENTER
+                    }
+                  >
+                    <PortfolioControlCenterPage />
                   </OptionAccessRoute>
                 }
               />
@@ -254,7 +328,12 @@ export function AppRouter() {
                     .LEGACY_FICHA_DEUDOR
                 }
                 element={
-                  <OptionAccessRoute optionCode="mGestionDeudor">
+                  <OptionAccessRoute
+                    optionId={
+                      APPLICATION_OPTION_IDS
+                        .GESTION_DEUDOR
+                    }
+                  >
                     <LegacyFichaDeudorRedirect />
                   </OptionAccessRoute>
                 }
@@ -266,7 +345,12 @@ export function AppRouter() {
                     .FICHA_DEUDOR
                 }
                 element={
-                  <OptionAccessRoute optionCode="mGestionDeudor">
+                  <OptionAccessRoute
+                    optionId={
+                      APPLICATION_OPTION_IDS
+                        .GESTION_DEUDOR
+                    }
+                  >
                     <FichaDeudor />
                   </OptionAccessRoute>
                 }
@@ -284,7 +368,12 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <OptionAccessRoute optionCode="mCambiarClave">
+                    <OptionAccessRoute
+                      optionId={
+                        APPLICATION_OPTION_IDS
+                          .CAMBIAR_CLAVE
+                      }
+                    >
                       <CambiarClavePage />
                     </OptionAccessRoute>
                   </FeatureRoute>
@@ -303,7 +392,12 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <OptionAccessRoute optionCode="mAsignarUsuario">
+                    <OptionAccessRoute
+                      optionId={
+                        APPLICATION_OPTION_IDS
+                          .ASIGNAR_USUARIO
+                      }
+                    >
                       <AsignarUsuarioPage />
                     </OptionAccessRoute>
                   </FeatureRoute>
@@ -322,7 +416,12 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <OptionAccessRoute optionCode="mMantenerUsuario">
+                    <OptionAccessRoute
+                      optionId={
+                        APPLICATION_OPTION_IDS
+                          .MANTENER_USUARIO
+                      }
+                    >
                       <MantenerUsuarioPage />
                     </OptionAccessRoute>
                   </FeatureRoute>
@@ -341,7 +440,12 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <OptionAccessRoute optionCode="mMantenerPerfil">
+                    <OptionAccessRoute
+                      optionId={
+                        APPLICATION_OPTION_IDS
+                          .MANTENER_PERFIL
+                      }
+                    >
                       <MantenerPerfilPage />
                     </OptionAccessRoute>
                   </FeatureRoute>
@@ -360,7 +464,12 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <OptionAccessRoute optionCode="mMantenerModulo">
+                    <OptionAccessRoute
+                      optionId={
+                        APPLICATION_OPTION_IDS
+                          .MANTENER_MODULO
+                      }
+                    >
                       <MantenerModulosPage />
                     </OptionAccessRoute>
                   </FeatureRoute>
@@ -379,7 +488,12 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <OptionAccessRoute optionCode="mMantenerGrupo">
+                    <OptionAccessRoute
+                      optionId={
+                        APPLICATION_OPTION_IDS
+                          .MANTENER_GRUPO
+                      }
+                    >
                       <MantenerGrupoPage />
                     </OptionAccessRoute>
                   </FeatureRoute>
@@ -398,7 +512,12 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <OptionAccessRoute optionCode="mMantenerAccesosPorPerfil">
+                    <OptionAccessRoute
+                      optionId={
+                        APPLICATION_OPTION_IDS
+                          .MANTENER_ACCESOS_POR_PERFIL
+                      }
+                    >
                       <MantenerAccesosPerfilPage />
                     </OptionAccessRoute>
                   </FeatureRoute>
@@ -417,7 +536,12 @@ export function AppRouter() {
                         .enabled
                     }
                   >
-                    <OptionAccessRoute optionCode="mMantenerAccesosPorUsuario">
+                    <OptionAccessRoute
+                      optionId={
+                        APPLICATION_OPTION_IDS
+                          .MANTENER_ACCESOS_POR_USUARIO
+                      }
+                    >
                       <MantenerAccesosUsuarioPage />
                     </OptionAccessRoute>
                   </FeatureRoute>
@@ -431,7 +555,12 @@ export function AppRouter() {
                   .POPUP
               }
               element={
-                <OptionAccessRoute optionCode="mGestionDeudor">
+                <OptionAccessRoute
+                  optionId={
+                    APPLICATION_OPTION_IDS
+                      .GESTION_DEUDOR
+                  }
+                >
                   <FichaDeudorPopupRoute />
                 </OptionAccessRoute>
               }

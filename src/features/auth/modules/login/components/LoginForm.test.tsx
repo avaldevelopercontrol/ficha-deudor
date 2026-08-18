@@ -6,11 +6,13 @@ import { LoginForm } from './LoginForm';
 const renderForm = ({
   isLoading = false,
   error = null as string | null,
+  successMessage = null as string | null,
 } = {}) => renderToStaticMarkup(
   <LoginForm
     onSubmit={() => undefined}
     isLoading={isLoading}
     error={error}
+    successMessage={successMessage}
   />
 );
 
@@ -33,5 +35,27 @@ export const suite = defineSuite('estados críticos del formulario de login', [
 
     assert.match(html, /role="alert"/);
     assert.match(html, /Credenciales incorrectas/);
+  }),
+  test('mantiene el error de autenticación debajo de la contraseña y antes del botón de ingreso', () => {
+    const html = renderForm({
+      error: 'Ha excedido la cantidad de intentos permitidos.',
+    });
+    const passwordIndex = html.indexOf('current-password');
+    const errorIndex = html.indexOf(
+      'Ha excedido la cantidad de intentos permitidos.'
+    );
+    const submitIndex = html.indexOf('Ingresar');
+
+    assert.ok(passwordIndex >= 0);
+    assert.ok(errorIndex > passwordIndex);
+    assert.ok(submitIndex > errorIndex);
+  }),
+  test('muestra la confirmación cuando una clave expirada fue actualizada', () => {
+    const html = renderForm({
+      successMessage: 'Clave actualizada correctamente.',
+    });
+
+    assert.match(html, /Clave actualizada/);
+    assert.match(html, /Clave actualizada correctamente\./);
   }),
 ]);

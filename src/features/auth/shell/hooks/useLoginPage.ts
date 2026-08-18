@@ -1,31 +1,35 @@
 import { useCallback, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import type { Cliente, LoginPayload, Usuario } from '../../types';
 import { useAuth } from '../../hooks/useAuth';
 import { AUTH_ROUTES } from '../../constants';
 
-const buildGestionDeudorUrl = (
-  cliente: Cliente,
-  usuario: Usuario | null
-): string => {
-  const queryParams = new URLSearchParams({
-    id_cliente: cliente.id_cliente,
-  });
+interface LoginLocationState {
+  passwordChangedMessage?: string;
+}
 
-  if (usuario?.id_usuario) {
-    queryParams.set('id_usuario', usuario.id_usuario);
+const getPasswordChangedMessage = (state: unknown): string | null => {
+  if (typeof state !== 'object' || state === null) {
+    return null;
   }
 
-  return `${AUTH_ROUTES.MENU_MODULOS}?${queryParams.toString()}`;
+  const message = (state as LoginLocationState).passwordChangedMessage;
+
+  return typeof message === 'string' && message.trim()
+    ? message.trim()
+    : null;
 };
 
 export const useLoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     login,
     seleccionarCliente,
+    expiredPasswordChallenge,
+    clearExpiredPasswordChallenge,
     isLoading: authLoading,
     error: authError,
     clearError,
@@ -34,15 +38,25 @@ export const useLoginPage = () => {
   const [showClienteModal, setShowClienteModal] = useState(false);
   const [modalUser, setModalUser] = useState<Usuario | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginSuccessMessage, setLoginSuccessMessage] = useState<string | null>(
+    () => getPasswordChangedMessage(location.state)
+  );
 
   const handleLogin = useCallback(
     async (payload: LoginPayload) => {
       clearError();
       setLoginError(null);
+      setLoginSuccessMessage(null);
 
       const response = await login(payload);
 
       if (response.cancelled) {
+        return;
+      }
+
+      if (response.requiresPasswordChange) {
+        setShowClienteModal(false);
+        setModalUser(null);
         return;
       }
 
@@ -62,11 +76,11 @@ export const useLoginPage = () => {
       seleccionarCliente(cliente);
       setShowClienteModal(false);
 
-      navigate(buildGestionDeudorUrl(cliente, modalUser), {
+      navigate(AUTH_ROUTES.MENU_MODULOS, {
         replace: true,
       });
     },
-    [seleccionarCliente, navigate, modalUser]
+    [seleccionarCliente, navigate]
   );
 
   const handleCloseModal = useCallback(() => {
@@ -74,13 +88,28 @@ export const useLoginPage = () => {
     setModalUser(null);
   }, []);
 
+  const handleChangeExpiredPassword = useCallback(() => {
+    navigate(AUTH_ROUTES.CAMBIAR_CLAVE_EXPIRADA);
+  }, [navigate]);
+
+  const handleCloseExpiredPasswordModal = useCallback(() => {
+    clearExpiredPasswordChallenge();
+  }, [clearExpiredPasswordChallenge]);
+
   const loginFormProps = useMemo(
     () => ({
       onSubmit: handleLogin,
       isLoading: authLoading,
       error: loginError || authError,
+      successMessage: loginSuccessMessage,
     }),
-    [handleLogin, authLoading, loginError, authError]
+    [
+      handleLogin,
+      authLoading,
+      loginError,
+      authError,
+      loginSuccessMessage,
+    ]
   );
 
   const clienteSelectorProps = useMemo(
@@ -93,8 +122,23 @@ export const useLoginPage = () => {
     [showClienteModal, modalUser, handleCloseModal, handleSelectCliente]
   );
 
+  const expiredPasswordModalProps = useMemo(
+    () => ({
+      isOpen: expiredPasswordChallenge !== null,
+      message: expiredPasswordChallenge?.message ?? '',
+      onChangePassword: handleChangeExpiredPassword,
+      onClose: handleCloseExpiredPasswordModal,
+    }),
+    [
+      expiredPasswordChallenge,
+      handleChangeExpiredPassword,
+      handleCloseExpiredPasswordModal,
+    ]
+  );
+
   return {
     loginFormProps,
     clienteSelectorProps,
+    expiredPasswordModalProps,
   };
 };

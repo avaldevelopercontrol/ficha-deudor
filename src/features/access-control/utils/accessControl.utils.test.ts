@@ -180,8 +180,8 @@ export const suite = defineSuite(
         );
 
         const mantenerModulo =
-          snapshot.optionsByCode.get(
-            'mMantenerModulo'
+          snapshot.optionsById.get(
+            11
           );
 
         assert.ok(mantenerModulo);
@@ -255,7 +255,7 @@ export const suite = defineSuite(
                 3
               ),
               option(
-                13,
+                30,
                 'mOpcionSinPantalla',
                 'Sin pantalla',
                 3,
@@ -276,7 +276,7 @@ export const suite = defineSuite(
                   exportar: true,
                 },
               }),
-              allow(5, 9, 13),
+              allow(5, 9, 30),
             ]
           );
 
@@ -313,18 +313,18 @@ export const suite = defineSuite(
         );
 
         assert.equal(
-          snapshot.optionsByCode.size,
+          snapshot.optionsById.size,
           3
         );
         assert.equal(
-          snapshot.optionsByCode.get(
-            'mMantenerAccesosPorPerfil'
+          snapshot.optionsById.get(
+            12
           )?.permissions.consultar,
           false
         );
         assert.equal(
-          snapshot.optionsByCode.has(
-            'mOpcionSinPantalla'
+          snapshot.optionsById.has(
+            30
           ),
           true
         );
@@ -466,8 +466,8 @@ export const suite = defineSuite(
           );
 
         assert.deepEqual(
-          snapshot.optionsByCode.get(
-            'mMantenerPerfil'
+          snapshot.optionsById.get(
+            10
           )?.permissions,
           {
             consultar: true,
@@ -517,8 +517,8 @@ export const suite = defineSuite(
           );
 
         assert.equal(
-          snapshot.optionsByCode.get(
-            'mMantenerPerfil'
+          snapshot.optionsById.get(
+            10
           )?.permissions.insertar,
           true
         );
@@ -540,8 +540,8 @@ export const suite = defineSuite(
           );
 
         assert.equal(
-          snapshot.optionsByCode.has(
-            'mMantenerPerfil'
+          snapshot.optionsById.has(
+            10
           ),
           true
         );
@@ -584,8 +584,8 @@ export const suite = defineSuite(
           );
 
         assert.deepEqual(
-          snapshot.optionsByCode.get(
-            'mMantenerPerfil'
+          snapshot.optionsById.get(
+            10
           )?.permissions,
           {
             consultar: false,
@@ -594,6 +594,85 @@ export const suite = defineSuite(
             eliminar: false,
             exportar: false,
           }
+        );
+      }
+    ),
+    test(
+      'mantiene navegable una pantalla cuando su módulo padre pasa a ser hijo de otro módulo',
+      () => {
+        const snapshot =
+          buildAccessControlSnapshot(
+            9,
+            [
+              option(1, 'Root', 'Root', 1, 0, 0),
+              option(2, 'mSeguridad', 'Seguridad', 2, 1, 1),
+              option(5, 'mGestionDeUsuarios', 'Gestión de usuarios', 3, 2, 1),
+              option(20, 'mAdministrarUsuarios', 'Administrar usuarios', 4, 5, 1),
+            ],
+            [
+              allow(1, 9, 2),
+              allow(2, 9, 5),
+              allow(3, 9, 20),
+            ]
+          );
+
+        const seguridad =
+          snapshot.navigationTree[0];
+        const gestionUsuarios =
+          seguridad?.children[0];
+        const mantenerUsuario =
+          gestionUsuarios?.children[0];
+
+        assert.equal(
+          seguridad?.id,
+          2
+        );
+        assert.equal(
+          gestionUsuarios?.id,
+          5
+        );
+        assert.equal(
+          mantenerUsuario?.id,
+          20
+        );
+        assert.equal(
+          mantenerUsuario?.route,
+          '/gestion-usuarios/mantener-usuario'
+        );
+      }
+    ),
+    test(
+      'mantiene la ruta React por Id aunque nombre y código cambien en la base de datos',
+      () => {
+        const snapshot =
+          buildAccessControlSnapshot(
+            9,
+            [
+              option(1, 'Root', 'Root', 1, 0, 0),
+              option(5, 'mGestionDeUsuarios', 'Gestión de usuarios', 2, 1, 1),
+              option(20, 'mAdministrarUsuarios', 'Administrar usuarios', 3, 5, 1),
+            ],
+            [
+              allow(1, 9, 5),
+              allow(2, 9, 20),
+            ]
+          );
+
+        const usuarioOption =
+          snapshot.optionsById.get(20);
+
+        assert.ok(usuarioOption);
+        assert.equal(
+          usuarioOption.code,
+          'mAdministrarUsuarios'
+        );
+        assert.equal(
+          usuarioOption.name,
+          'Administrar usuarios'
+        );
+        assert.equal(
+          usuarioOption.route,
+          '/gestion-usuarios/mantener-usuario'
         );
       }
     ),

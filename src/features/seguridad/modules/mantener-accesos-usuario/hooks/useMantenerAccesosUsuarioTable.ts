@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import {
+  APPLICATION_OPTION_IDS,
   useAccessControl,
   useOptionPermissions,
 } from '@features/access-control';
@@ -59,7 +60,7 @@ export const useMantenerAccesosUsuarioTable = () => {
 
   const permissions =
     useOptionPermissions(
-      'mMantenerAccesosPorUsuario'
+      APPLICATION_OPTION_IDS.MANTENER_ACCESOS_POR_USUARIO
     );
   const canInsert =
     permissions.insertar;

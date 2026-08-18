@@ -1,4 +1,3 @@
-import { getOptionDisplayName } from '@shared/utils/optionDisplayName.utils';
 
 import type {
   Modulo,
@@ -110,13 +109,8 @@ const mapOpcion = (
       opcion.nId_Opcion
     ),
 
-    nombre: getOptionDisplayName(
-      toTrimmedString(
-        opcion.sCodigoOpcion
-      ),
-      toTrimmedString(
-        opcion.sNombreOpcion
-      )
+    nombre: toTrimmedString(
+      opcion.sNombreOpcion
     ),
 
     descripcion: toTrimmedString(
@@ -129,6 +123,10 @@ const mapOpcion = (
 
     ruta: toTrimmedString(
       opcion.sUrlOpcion
+    ),
+
+    urlBI: toTrimmedString(
+      opcion.sUrlBI
     ),
 
     icono: toTrimmedString(

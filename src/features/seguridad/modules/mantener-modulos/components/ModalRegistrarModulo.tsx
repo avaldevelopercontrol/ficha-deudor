@@ -1,6 +1,8 @@
 import {
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   type ReactNode,
 } from 'react';
 
@@ -35,10 +37,8 @@ import {
 } from '../hooks/useModuloAvailabilityControls';
 
 import {
-  applyApplicationOptionToForm,
-  buildApplicationOptionSelectOptions,
   buildRegistrarModuloInitialForm,
-  getAvailableApplicationOptions,
+  suggestModuloCode,
 } from '../utils/registrarModulo.utils';
 
 import {
@@ -49,8 +49,6 @@ import {
 import ModuloFormErrorSummary from './ModuloFormErrorSummary';
 
 import ModuloFormFields from './ModuloFormFields';
-
-import RegistrarModuloSourceSelector from './RegistrarModuloSourceSelector';
 
 import {
   getMantenerModulosPermissionMessage,
@@ -79,6 +77,16 @@ export const ModalRegistrarModulo = ({
   onClose,
   onRegistrar,
 }: ModalRegistrarModuloProps): ReactNode => {
+  const codeWasEditedRef =
+    useRef(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      codeWasEditedRef.current =
+        false;
+    }
+  }, [isOpen]);
+
   const initialForm =
     useMemo(
       () =>
@@ -103,24 +111,6 @@ export const ModalRegistrarModulo = ({
           })
         ),
       [modulosExistentes]
-    );
-
-  const availableApplicationOptions =
-    useMemo(
-      () =>
-        getAvailableApplicationOptions(
-          modulosExistentes
-        ),
-      [modulosExistentes]
-    );
-
-  const applicationOptionSelectOptions =
-    useMemo(
-      () =>
-        buildApplicationOptionSelectOptions(
-          availableApplicationOptions
-        ),
-      [availableApplicationOptions]
     );
 
   const validate =
@@ -170,83 +160,40 @@ export const ModalRegistrarModulo = ({
       },
     });
 
-  const handleApplicationOptionChange =
+  const handleNombreChange =
     useCallback(
       (value: string) => {
-        const definition =
-          availableApplicationOptions.find(
-            (option) =>
-              option.code === value
-          );
-
-        if (!definition) {
-          handleChange(
-            'applicationOptionCode',
-            ''
-          );
-          handleChange(
-            'nombre',
-            ''
-          );
-          handleChange(
-            'descripcion',
-            ''
-          );
-          handleChange(
-            'codigo',
-            ''
-          );
-          handleChange(
-            'icono',
-            ''
-          );
-          handleChange(
-            'padreId',
-            initialForm.padreId
-          );
-
-          return;
-        }
-
-        const nextForm =
-          applyApplicationOptionToForm(
-            form,
-            definition,
-            modulosExistentes
-          );
-
-        handleChange(
-          'applicationOptionCode',
-          nextForm.applicationOptionCode
-        );
         handleChange(
           'nombre',
-          nextForm.nombre
+          value
         );
-        handleChange(
-          'descripcion',
-          nextForm.descripcion
-        );
+
+        if (
+          !codeWasEditedRef.current
+        ) {
+          handleChange(
+            'codigo',
+            suggestModuloCode(
+              value
+            )
+          );
+        }
+      },
+      [handleChange]
+    );
+
+  const handleCodigoChange =
+    useCallback(
+      (value: string) => {
+        codeWasEditedRef.current =
+          true;
+
         handleChange(
           'codigo',
-          nextForm.codigo
-        );
-        handleChange(
-          'icono',
-          nextForm.icono
-        );
-        handleChange(
-          'padreId',
-          nextForm.padreId
+          value
         );
       },
-      [
-        availableApplicationOptions,
-        form,
-        handleChange,
-        initialForm.padreId,
-        modulosExistentes,
-      ]
+      [handleChange]
     );
 
   const {
@@ -300,52 +247,24 @@ export const ModalRegistrarModulo = ({
         }
       >
         <div className="registrar-modulo-modal__body">
-          <div className="registrar-modulo-form registrar-modulo-form--source">
-            <RegistrarModuloSourceSelector
-              value={
-                form.applicationOptionCode
-              }
-              options={
-                applicationOptionSelectOptions
-              }
-              error={
-                errors.applicationOptionCode
-              }
-              disabled={
-                isSubmitting
-              }
-              onChange={
-                handleApplicationOptionChange
-              }
-            />
-          </div>
-
           <ModuloFormFields
             form={form}
             errors={errors}
             parentOptions={
               parentOptions
             }
-            nameDisabled
-            codeDisabled
-            onNombreChange={(value) => {
-              handleChange(
-                'nombre',
-                value
-              );
-            }}
+            onNombreChange={
+              handleNombreChange
+            }
             onDescripcionChange={(value) => {
               handleChange(
                 'descripcion',
                 value
               );
             }}
-            onCodigoChange={(value) => {
-              handleChange(
-                'codigo',
-                value
-              );
-            }}
+            onCodigoChange={
+              handleCodigoChange
+            }
             onIconoChange={(value) => {
               handleChange(
                 'icono',
@@ -410,9 +329,7 @@ export const ModalRegistrarModulo = ({
             }
             disabled={
               isSubmitting ||
-              !canInsert ||
-              !form.applicationOptionCode ||
-              applicationOptionSelectOptions.length === 0
+              !canInsert
             }
             title={
               !canInsert

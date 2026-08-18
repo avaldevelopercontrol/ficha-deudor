@@ -1,0 +1,77 @@
+--- a/src/features/seguridad/modules/mantener-modulos/constants/mantenerModulos.constants.ts
++++ b/src/features/seguridad/modules/mantener-modulos/constants/mantenerModulos.constants.ts
+@@ -28,9 +28,6 @@
+   nombre:
+     'Nombre',
+ 
+-  ruta:
+-    'Ruta',
+-
+   padre:
+     'Padre',
+ 
+@@ -52,14 +49,13 @@
+ 
+ export const MANTENER_MODULOS_COLUMN_WIDTHS = {
+   idModulo: '5%',
+-  nombre: '18%',
+-  ruta: '27%',
+-  padre: '13%',
+-  nivel: '6%',
+-  implementacion: '13%',
+-  visible: '6%',
+-  estado: '7%',
+-  editar: '5%',
++  nombre: '26%',
++  padre: '18%',
++  nivel: '7%',
++  implementacion: '20%',
++  visible: '7%',
++  estado: '10%',
++  editar: '7%',
+ } as const;
+ 
+ export const MANTENER_MODULOS_PAGE_SIZE_OPTIONS = [
+--- a/src/features/seguridad/modules/mantener-modulos/hooks/useMantenerModulosColumns.tsx
++++ b/src/features/seguridad/modules/mantener-modulos/hooks/useMantenerModulosColumns.tsx
+@@ -69,17 +69,6 @@
+             .nombre,
+         render: (row) =>
+           row.nombre || '—',
+-      },
+-      {
+-        key: 'ruta',
+-        label:
+-          MANTENER_MODULOS_COLUMNS
+-            .ruta,
+-        width:
+-          MANTENER_MODULOS_COLUMN_WIDTHS
+-            .ruta,
+-        render: (row) =>
+-          row.ruta || '—',
+       },
+       {
+         key: 'padre',
+--- a/src/features/seguridad/modules/mantener-modulos/hooks/useMantenerModulosColumns.test.tsx
++++ b/src/features/seguridad/modules/mantener-modulos/hooks/useMantenerModulosColumns.test.tsx
+@@ -144,7 +144,7 @@
+   'columnas de mantener módulos',
+   [
+     test(
+-      'oculta el código y mantiene el estado de implementación React',
++      'oculta código y ruta, y mantiene el estado de implementación React',
+       () => {
+         const html =
+           renderToStaticMarkup(
+@@ -157,7 +157,10 @@
+           html,
+           />Código</
+         );
+-        assert.match(html, />Ruta</);
++        assert.doesNotMatch(
++          html,
++          />Ruta</
++        );
+         assert.match(html, />Padre</);
+         assert.match(html, />Nivel</);
+         assert.match(

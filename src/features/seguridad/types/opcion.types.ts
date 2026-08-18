@@ -10,6 +10,11 @@ export type ModuloIndicador =
   | 'Sí'
   | 'No';
 
+export type ModuloImplementacion =
+  | 'IMPLEMENTADA'
+  | 'ESTRUCTURA'
+  | 'SIN PANTALLA';
+
 /**
  * Estructura recibida desde
  * GET /v1/Opcion/GetOpciones.
@@ -20,6 +25,7 @@ export interface OpcionApi {
   sNombreOpcion: string | null;
   sDescripcionOpcion: string | null;
   sUrlOpcion: string | null;
+  sUrlBI: string | null;
   sIcono?: string | null;
   nTipo: number;
   nId_OpcionPadre: number;
@@ -44,6 +50,8 @@ export interface Modulo {
   descripcion: string;
   codigo: string;
   ruta: string;
+  /** Valor interno de API; la UI de Mantener módulo todavía no lo administra. */
+  urlBI?: string;
   icono: string;
   tipo: number;
   idPadre: number;
@@ -54,6 +62,8 @@ export interface Modulo {
   visible: ModuloIndicador;
   estadoActivo: boolean;
   estado: ModuloEstado;
+  /** Estado derivado para la tabla de Mantener módulo. */
+  implementacion?: ModuloImplementacion;
 }
 
 export type GetOpcionesResponse =

@@ -13,6 +13,7 @@ interface ApiRequestOptions<T = unknown> {
   referrerPolicy?: ReferrerPolicy;
   mock?: MockFn<T>;
   useMock?: boolean;
+  baseUrl?: string;
 }
 
 interface ApiFileRequestOptions {
@@ -132,6 +133,7 @@ export async function apiClient<T>(
     referrerPolicy,
     mock,
     useMock = env.useMocks,
+    baseUrl = env.apiBaseUrl,
   } = options;
 
   if (useMock && mock) {
@@ -149,7 +151,7 @@ export async function apiClient<T>(
     requestHeaders["Content-Type"] = "application/json";
   }
 
-  const response = await fetch(`${env.apiBaseUrl}${endpoint}`, {
+  const response = await fetch(`${baseUrl}${endpoint}`, {
     method,
     signal,
     headers: requestHeaders,

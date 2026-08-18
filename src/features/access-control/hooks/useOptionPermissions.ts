@@ -3,11 +3,11 @@ import {
 } from './useAccessControl';
 
 export const useOptionPermissions = (
-  optionCode: string
+  optionId: number
 ) => {
   const {
     getPermissions,
   } = useAccessControl();
 
-  return getPermissions(optionCode);
+  return getPermissions(optionId);
 };

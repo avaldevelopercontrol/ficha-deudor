@@ -65,7 +65,7 @@ const treeItems: OpcionTreeItem[] = [
     isAssignmentTarget: true,
   }),
   createTreeItem({
-    idModulo: 6,
+    idModulo: 10,
     nombre: 'Mantener perfil',
     codigo: 'mMantenerPerfil',
     tipo: 3,
@@ -78,7 +78,7 @@ const treeItems: OpcionTreeItem[] = [
     isPermissionTarget: true,
   }),
   createTreeItem({
-    idModulo: 7,
+    idModulo: 11,
     nombre: 'Mantener módulo',
     codigo: 'mMantenerModulo',
     tipo: 3,
@@ -170,13 +170,13 @@ export const suite = defineSuite(
 
         assert.deepEqual(
           selected.selectedOptionIds,
-          [2, 6, 7]
+          [2, 10, 11]
         );
         assert.deepEqual(
           Object.keys(
             selected.permissionsByOptionId
           ),
-          ['6', '7']
+          ['10', '11']
         );
         assert.equal(
           getPerfilOpcionBranchSelectionState(
@@ -208,13 +208,13 @@ export const suite = defineSuite(
           setPerfilOpcionBranchSelected(
             ASIGNAR_ACCESOS_PERFIL_INITIAL_FORM,
             treeItems,
-            6,
+            10,
             true
           );
 
         assert.deepEqual(
           selected.selectedOptionIds,
-          [2, 6]
+          [2, 10]
         );
         assert.equal(
           getPerfilOpcionBranchSelectionState(
@@ -269,18 +269,18 @@ export const suite = defineSuite(
           setPerfilOpcionBranchPermission(
             parentAttempt,
             treeItems,
-            6,
+            10,
             'editar',
             true
           );
 
         assert.equal(
-          leafChanged.permissionsByOptionId['6']
+          leafChanged.permissionsByOptionId['10']
             ?.editar,
           true
         );
         assert.equal(
-          leafChanged.permissionsByOptionId['7']
+          leafChanged.permissionsByOptionId['11']
             ?.editar,
           false
         );
@@ -293,14 +293,14 @@ export const suite = defineSuite(
           setPerfilOpcionBranchSelected(
             ASIGNAR_ACCESOS_PERFIL_INITIAL_FORM,
             treeItems,
-            6,
+            10,
             true
           );
         const withDelete =
           setPerfilOpcionBranchPermission(
             selected,
             treeItems,
-            6,
+            10,
             'eliminar',
             true
           );
@@ -308,13 +308,13 @@ export const suite = defineSuite(
           setPerfilOpcionBranchPermission(
             withDelete,
             treeItems,
-            6,
+            10,
             'exportar',
             true
           );
 
         assert.deepEqual(
-          withExport.permissionsByOptionId['6'],
+          withExport.permissionsByOptionId['10'],
           {
             consultar: false,
             insertar: false,
@@ -345,25 +345,25 @@ export const suite = defineSuite(
           setAllPerfilOpcionBranchPermissions(
             parentAttempt,
             treeItems,
-            6,
+            10,
             true
           );
         const states =
           getPerfilOpcionBranchPermissionStates(
             result,
             treeItems,
-            6
+            10
           );
 
         assert.deepEqual(
           result.selectedOptionIds,
-          [2, 6]
+          [2, 10]
         );
         assert.equal(
           getPerfilOpcionBranchAllPermissionsState(
             states,
             treeItems.find(
-              (item) => item.idModulo === 6
+              (item) => item.idModulo === 10
             )
           ),
           'checked'
@@ -410,7 +410,7 @@ export const suite = defineSuite(
           setPerfilOpcionBranchPermission(
             selected,
             treeItems,
-            6,
+            10,
             'consultar',
             true
           );
@@ -418,7 +418,7 @@ export const suite = defineSuite(
           setPerfilOpcionBranchPermission(
             firstValid,
             treeItems,
-            7,
+            11,
             'editar',
             true
           );
@@ -442,7 +442,7 @@ export const suite = defineSuite(
               perfilId: 9,
             },
             treeItems,
-            6,
+            10,
             'editar',
             true
           );
@@ -466,7 +466,7 @@ export const suite = defineSuite(
                 },
               },
               {
-                opcionId: 6,
+                opcionId: 10,
                 permissions: {
                   consultar: false,
                   insertar: false,
@@ -512,7 +512,7 @@ export const suite = defineSuite(
               {
                 idPerfilOpcion: 3,
                 idPerfil: 9,
-                idOpcion: 6,
+                idOpcion: 10,
                 consultar: true,
                 insertar: false,
                 editar: true,
@@ -523,7 +523,7 @@ export const suite = defineSuite(
               {
                 idPerfilOpcion: 4,
                 idPerfil: 9,
-                idOpcion: 7,
+                idOpcion: 11,
                 consultar: true,
                 insertar: true,
                 editar: true,
@@ -537,14 +537,14 @@ export const suite = defineSuite(
 
         assert.deepEqual(
           form.selectedOptionIds,
-          [2, 6]
+          [2, 10]
         );
         assert.equal(
           form.activeOptionId,
-          6
+          10
         );
         assert.deepEqual(
-          form.permissionsByOptionId['6'],
+          form.permissionsByOptionId['10'],
           {
             consultar: true,
             insertar: false,
@@ -596,7 +596,7 @@ export const suite = defineSuite(
 
         assert.deepEqual(
           result.selectedOptionIds,
-          [2, 6, 7, 4]
+          [2, 10, 11, 4]
         );
         assert.equal(
           result.selectedOptionIds.includes(1),

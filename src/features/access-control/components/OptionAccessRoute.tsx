@@ -17,14 +17,14 @@ import {
 } from './AccessControlFeedback';
 
 interface OptionAccessRouteProps {
-  optionCode: string;
+  optionId: number;
   children: React.ReactNode;
 }
 
 export const OptionAccessRoute: React.FC<
   OptionAccessRouteProps
 > = ({
-  optionCode,
+  optionId,
   children,
 }) => {
   const {
@@ -62,7 +62,7 @@ export const OptionAccessRoute: React.FC<
 
   if (
     !hasPermission(
-      optionCode,
+      optionId,
       'consultar'
     )
   ) {

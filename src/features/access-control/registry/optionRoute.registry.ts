@@ -1,4 +1,8 @@
 import {
+  ANALYTICS_ROUTES,
+} from '@features/analytics/constants/analyticsRoutes.constants';
+
+import {
   AUTH_ROUTES,
 } from '@features/auth/constants';
 
@@ -18,212 +22,152 @@ import {
   SEGURIDAD_ROUTES,
 } from '@features/seguridad/constants/seguridadRoutes.constants';
 
-import type {
-  SisgesIconName,
-} from '@shared/icons/sisges';
+import {
+  APPLICATION_OPTION_IDS,
+  type ApplicationOptionId,
+} from './applicationOptionIds';
 
 export interface ApplicationOptionDefinition {
-  readonly code: string;
-  readonly name: string;
-  readonly description: string;
+  /** nId_Opcion persistente en la base de datos. */
+  readonly optionId: ApplicationOptionId;
+
+  /** Ruta real del navegador React; no corresponde a sUrlOpcion de la API. */
   readonly path: string;
-  readonly icon: SisgesIconName;
-  readonly sectionName: string;
-  readonly parentCode?: string;
+
   readonly enabled: boolean;
-  readonly registrable: boolean;
 }
 
 const APPLICATION_OPTION_REGISTRY:
   readonly ApplicationOptionDefinition[] = [
     {
-      code: 'mGestionDeudor',
-      name: 'Gestión Deudor',
-      description:
-        'Busca deudores por RUC, DNI o teléfono y accede a su ficha.',
-      path: AUTH_ROUTES.GESTION_DEUDOR,
-      icon: 'debtor-management',
-      sectionName:
-        'Gestión de Cobranzas',
-      parentCode:
-        'mGestionDeCobranzas',
+      optionId:
+        APPLICATION_OPTION_IDS
+          .PORTFOLIO_CONTROL_CENTER,
+      path:
+        ANALYTICS_ROUTES
+          .PORTFOLIO_CONTROL_CENTER,
       enabled: true,
-      registrable: true,
     },
     {
-      code: 'mCambiarClave',
-      name: 'Cambiar Clave',
-      description:
-        'Actualiza la contraseña de acceso de un usuario.',
+      optionId:
+        APPLICATION_OPTION_IDS
+          .GESTION_DEUDOR,
+      path: AUTH_ROUTES.GESTION_DEUDOR,
+      enabled: true,
+    },
+    {
+      optionId:
+        APPLICATION_OPTION_IDS
+          .CAMBIAR_CLAVE,
       path:
         GESTION_USUARIOS_ROUTES
           .CAMBIAR_CLAVE,
-      icon: 'password-change',
-      sectionName:
-        'Gestión de Usuarios',
       enabled:
         GESTION_USUARIOS_FEATURE
           .enabled,
-      registrable: true,
     },
     {
-      code: 'mAsignarUsuario',
-      name: 'Asignar Usuario',
-      description:
-        'Asigna usuarios según cliente, perfil o responsabilidad.',
+      optionId:
+        APPLICATION_OPTION_IDS
+          .ASIGNAR_USUARIO,
       path:
         GESTION_USUARIOS_ROUTES
           .ASIGNAR_USUARIO,
-      icon: 'user-assignment',
-      sectionName:
-        'Gestión de Usuarios',
       enabled:
         GESTION_USUARIOS_FEATURE
           .enabled,
-      registrable: true,
     },
     {
-      code: 'mMantenerUsuario',
-      name: 'Mantener Usuario',
-      description:
-        'Consulta y administra los usuarios registrados.',
+      optionId:
+        APPLICATION_OPTION_IDS
+          .MANTENER_USUARIO,
       path:
         GESTION_USUARIOS_ROUTES
           .MANTENER_USUARIO,
-      icon: 'user-settings',
-      sectionName:
-        'Gestión de Usuarios',
       enabled:
         GESTION_USUARIOS_FEATURE
           .enabled,
-      registrable: true,
     },
     {
-      code: 'mMantenerPerfil',
-      name: 'Mantener Perfil',
-      description:
-        'Consulta y administra los perfiles registrados.',
+      optionId:
+        APPLICATION_OPTION_IDS
+          .MANTENER_PERFIL,
       path:
         SEGURIDAD_ROUTES
           .MANTENER_PERFIL,
-      icon: 'profiles',
-      sectionName: 'Seguridad',
-      parentCode: 'mSeguridad',
       enabled:
         SEGURIDAD_FEATURE.enabled,
-      registrable: true,
     },
     {
-      code: 'mMantenerModulo',
-      name: 'Mantener Módulo',
-      description:
-        'Consulta los módulos y opciones registrados en el sistema.',
+      optionId:
+        APPLICATION_OPTION_IDS
+          .MANTENER_MODULO,
       path:
         SEGURIDAD_ROUTES
           .MANTENER_MODULOS,
-      icon: 'modules',
-      sectionName: 'Seguridad',
-      parentCode: 'mSeguridad',
       enabled:
         SEGURIDAD_FEATURE.enabled,
-      registrable: true,
     },
     {
-      code: 'mMantenerGrupo',
-      name: 'Mantener grupo',
-      description:
-        'Consulta los grupos registrados y su cliente asociado.',
+      optionId:
+        APPLICATION_OPTION_IDS
+          .MANTENER_GRUPO,
       path:
         SEGURIDAD_ROUTES
           .MANTENER_GRUPO,
-      icon: 'groups',
-      sectionName: 'Seguridad',
-      parentCode: 'mSeguridad',
       enabled:
         SEGURIDAD_FEATURE.enabled,
-      registrable: true,
     },
     {
-      code:
-        'mMantenerAccesosPorPerfil',
-      name:
-        'Mantener Accesos por Perfil',
-      description:
-        'Consulta y administra los permisos asignados a cada perfil.',
+      optionId:
+        APPLICATION_OPTION_IDS
+          .MANTENER_ACCESOS_POR_PERFIL,
       path:
         SEGURIDAD_ROUTES
           .MANTENER_ACCESOS_PERFIL,
-      icon: 'permissions',
-      sectionName: 'Seguridad',
-      parentCode: 'mSeguridad',
       enabled:
         SEGURIDAD_FEATURE.enabled,
-      registrable: true,
     },
     {
-      code:
-        'mMantenerAccesosPorUsuario',
-      name:
-        'Mantener accesos por usuario',
-      description:
-        'Consulta los grupos y opciones asignados a cada usuario.',
+      optionId:
+        APPLICATION_OPTION_IDS
+          .MANTENER_ACCESOS_POR_USUARIO,
       path:
         SEGURIDAD_ROUTES
           .MANTENER_ACCESOS_USUARIO,
-      icon: 'user-group-access',
-      sectionName: 'Seguridad',
-      parentCode: 'mSeguridad',
       enabled:
         SEGURIDAD_FEATURE.enabled,
-      registrable: true,
     },
   ];
-
-const normalizeOptionCode = (
-  optionCode: string
-): string =>
-  optionCode.trim().toLocaleLowerCase(
-    'es-PE'
-  );
 
 export const getApplicationOptionCatalog = ():
   readonly ApplicationOptionDefinition[] =>
   APPLICATION_OPTION_REGISTRY;
 
 export const getApplicationOptionDefinition = (
-  optionCode: string
+  optionId: number
 ): ApplicationOptionDefinition | null => {
-  const normalizedCode =
-    normalizeOptionCode(optionCode);
-
-  if (!normalizedCode) {
+  if (
+    !Number.isSafeInteger(optionId) ||
+    optionId <= 0
+  ) {
     return null;
   }
 
   return (
     APPLICATION_OPTION_REGISTRY.find(
       (definition) =>
-        normalizeOptionCode(
-          definition.code
-        ) === normalizedCode
+        definition.optionId === optionId
     ) ?? null
   );
 };
 
-export const getRegistrableApplicationOptions = ():
-  readonly ApplicationOptionDefinition[] =>
-  APPLICATION_OPTION_REGISTRY.filter(
-    (definition) =>
-      definition.enabled &&
-      definition.registrable
-  );
-
 export const getOptionRoute = (
-  optionCode: string
+  optionId: number
 ): string | null => {
   const definition =
     getApplicationOptionDefinition(
-      optionCode
+      optionId
     );
 
   if (
@@ -237,6 +181,6 @@ export const getOptionRoute = (
 };
 
 export const hasRegisteredOptionRoute = (
-  optionCode: string
+  optionId: number
 ): boolean =>
-  getOptionRoute(optionCode) !== null;
+  getOptionRoute(optionId) !== null;

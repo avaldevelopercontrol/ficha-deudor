@@ -10,9 +10,8 @@ import type {
 } from '../../../types/opcion.types';
 
 import {
-  applyApplicationOptionToForm,
   buildRegistrarModuloInitialForm,
-  getAvailableApplicationOptions,
+  suggestModuloCode,
 } from './registrarModulo.utils';
 
 const buildModulo = (
@@ -36,102 +35,51 @@ const buildModulo = (
   ...overrides,
 });
 
-const root = buildModulo({});
-
-const seguridad = buildModulo({
-  idModulo: 20,
-  nombre: 'Seguridad',
-  codigo: 'mSeguridad',
-  ruta: 'root/mSeguridad/',
-  tipo: 2,
-  idPadre: 1,
-  orden: 1,
-});
-
 export const suite = defineSuite(
   'registrarModulo.utils',
   [
     test(
-      'muestra solo pantallas desarrolladas que aún no están registradas',
+      'sugiere el código manual con el patrón m + nombre en PascalCase',
       () => {
-        const mantenerPerfil =
-          buildModulo({
-            idModulo: 21,
-            nombre:
-              'Mantener Perfil',
-            codigo:
-              'mMantenerPerfil',
-            idPadre: 20,
-          });
-
-        const available =
-          getAvailableApplicationOptions([
-            root,
-            seguridad,
-            mantenerPerfil,
-          ]);
-
         assert.equal(
-          available.some(
-            (option) =>
-              option.code ===
-              'mMantenerPerfil'
+          suggestModuloCode(
+            'Mantener accesos por perfil'
           ),
-          false
+          'mMantenerAccesosPorPerfil'
         );
         assert.equal(
-          available.some(
-            (option) =>
-              option.code ===
-              'mMantenerGrupo'
+          suggestModuloCode(
+            'Gestión de cobranzas'
           ),
-          true
+          'mGestionDeCobranzas'
+        );
+        assert.equal(
+          suggestModuloCode(
+            'Portfolio Control Center'
+          ),
+          'mPortfolioControlCenter'
         );
       }
     ),
     test(
-      'autocompleta Mantener Grupo y selecciona Seguridad como padre',
+      'inicia el registro sobre Root sin depender de una pantalla React previa',
       () => {
-        const initialForm =
+        const form =
           buildRegistrarModuloInitialForm([
-            root,
-            seguridad,
+            buildModulo({}),
           ]);
 
-        const definition =
-          getAvailableApplicationOptions([
-            root,
-            seguridad,
-          ]).find(
-            (option) =>
-              option.code ===
-              'mMantenerGrupo'
-          );
-
-        assert.ok(definition);
-
-        const form =
-          applyApplicationOptionToForm(
-            initialForm,
-            definition,
-            [root, seguridad]
-          );
-
-        assert.equal(
-          form.applicationOptionCode,
-          'mMantenerGrupo'
-        );
-        assert.equal(
-          form.nombre,
-          'Mantener grupo'
-        );
-        assert.equal(
-          form.codigo,
-          'mMantenerGrupo'
-        );
-        assert.equal(
-          form.padreId,
-          20
+        assert.deepEqual(
+          form,
+          {
+            nombre: '',
+            descripcion: '',
+            codigo: '',
+            icono: '',
+            padreId: 1,
+            visible: true,
+            estado: true,
+          }
         );
       }
     ),

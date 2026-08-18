@@ -40,8 +40,6 @@ export const suite = defineSuite(
         const request =
           buildCreateOpcionRequest(
             {
-              applicationOptionCode:
-                'mMantenerGrupo',
               nombre: 'Mantener Grupo',
               descripcion:
                 'Descripción de prueba',
@@ -72,11 +70,70 @@ export const suite = defineSuite(
         );
         assert.equal(
           request.sUrlOpcion,
-          '/seguridad/mantener-grupo'
+          'root/mMantenerGrupo/'
+        );
+        assert.equal(
+          request.sUrlBI,
+          ''
         );
         assert.equal(
           request.dFechaCrea,
           '2026-08-05T11:12:59.850'
+        );
+      }
+    ),
+    test(
+      'permite registrar un módulo sin pantalla React y construye la ruta desde el padre',
+      () => {
+        const parent: Modulo = {
+          ...root,
+          idModulo: 30,
+          nombre: 'Administración',
+          codigo: 'mAdministracion',
+          ruta: 'root/mAdministracion/',
+          tipo: 2,
+          idPadre: 1,
+          orden: 1,
+        };
+
+        const request =
+          buildCreateOpcionRequest(
+            {
+              nombre: 'Operaciones',
+              descripcion:
+                'Contenedor pendiente de implementación.',
+              codigo: 'mOperaciones',
+              icono: '',
+              padreId: 30,
+              visible: true,
+              estado: true,
+            },
+            [root, parent],
+            '16068',
+            new Date(
+              '2026-08-05T16:12:59.850Z'
+            )
+          );
+
+        assert.equal(
+          request.sCodigoOpcion,
+          'mOperaciones'
+        );
+        assert.equal(
+          request.sUrlOpcion,
+          'root/mAdministracion/mOperaciones/'
+        );
+        assert.equal(
+          request.sUrlBI,
+          ''
+        );
+        assert.equal(
+          request.nId_OpcionPadre,
+          30
+        );
+        assert.equal(
+          request.nTipo,
+          3
         );
       }
     ),

@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import {
+  APPLICATION_OPTION_IDS,
   useOptionPermissions,
 } from '@features/access-control';
 
@@ -41,7 +42,7 @@ import {
 export const useMantenerGrupoTable = () => {
   const permissions =
     useOptionPermissions(
-      'mMantenerGrupo'
+      APPLICATION_OPTION_IDS.MANTENER_GRUPO
     );
 
   const canInsert =

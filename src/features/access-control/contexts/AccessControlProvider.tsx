@@ -11,6 +11,10 @@ import {
 } from '@features/auth/hooks/useAuth';
 
 import {
+  hasPrivateRouteAccess,
+} from '@features/auth/utils/authAccess.utils';
+
+import {
   resolveClienteGrupoId,
 } from '@features/auth/utils/clienteGrupo.utils';
 
@@ -275,19 +279,19 @@ function AccessControlSession({
   );
 
   const hasOption = useCallback(
-    (optionCode: string): boolean =>
+    (optionId: number): boolean =>
       state.snapshot
-        ?.optionsByCode.has(
-          optionCode.trim()
+        ?.optionsById.has(
+          optionId
         ) ?? false,
     [state.snapshot]
   );
 
   const getPermissions = useCallback(
-    (optionCode: string) =>
+    (optionId: number) =>
       state.snapshot
-        ?.optionsByCode.get(
-          optionCode.trim()
+        ?.optionsById.get(
+          optionId
         )?.permissions ??
       EMPTY_ACCESS_PERMISSIONS,
     [state.snapshot]
@@ -295,10 +299,10 @@ function AccessControlSession({
 
   const hasPermission = useCallback(
     (
-      optionCode: string,
+      optionId: number,
       permission: AccessPermissionName
     ): boolean =>
-      getPermissions(optionCode)[
+      getPermissions(optionId)[
         permission
       ],
     [getPermissions]
@@ -343,12 +347,16 @@ export function AccessControlProvider({
   children,
 }: AccessControlProviderProps) {
   const {
-    isAuthenticated,
     usuario,
     clienteSeleccionada,
   } = useAuth();
 
-  if (!isAuthenticated) {
+  const hasCompleteAuthContext = hasPrivateRouteAccess({
+    usuario,
+    clienteSeleccionada,
+  });
+
+  if (!hasCompleteAuthContext) {
     return (
       <AccessControlContext.Provider
         value={IDLE_CONTEXT_VALUE}

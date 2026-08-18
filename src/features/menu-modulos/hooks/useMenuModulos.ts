@@ -1,14 +1,18 @@
 import {
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
 
 import {
+  useLocation,
   useNavigate,
 } from 'react-router-dom';
 
 import {
+  APPLICATION_OPTION_IDS,
+  getOptionRoute,
   useAccessControl,
 } from '@features/access-control';
 
@@ -19,6 +23,10 @@ import {
 import type {
   AuthorizedOption,
 } from '@features/access-control';
+
+import {
+  MENU_MODULOS_ROUTES,
+} from '../constants/menuModulosRoutes.constants';
 
 import type {
   MenuModulo,
@@ -68,7 +76,7 @@ const mapAuthorizedOptionToMenuModulo = (
         : NO_ACCESS_BADGE;
 
   return {
-    key: option.code,
+    key: String(option.id),
     label: option.name,
     descripcion: buildDescription(
       option
@@ -87,10 +95,13 @@ const mapAuthorizedOptionToMenuModulo = (
 };
 
 export const useMenuModulos = () => {
+  const location = useLocation();
   const navigate = useNavigate();
 
   const {
     usuario,
+    passwordExpiryWarning,
+    clearPasswordExpiryWarning,
   } = useAuth();
 
   const {
@@ -104,6 +115,17 @@ export const useMenuModulos = () => {
     useState<MenuModulo | null>(
       null
     );
+
+  useEffect(() => {
+    if (!location.search) {
+      return;
+    }
+
+    navigate(
+      MENU_MODULOS_ROUTES.MENU_MODULOS,
+      { replace: true }
+    );
+  }, [location.search, navigate]);
 
   const modulos = useMemo(
     () =>
@@ -138,6 +160,11 @@ export const useMenuModulos = () => {
   const handleSelectChildModulo =
     useCallback(
       (modulo: MenuModulo) => {
+        if (modulo.children?.length) {
+          setSelectedModulo(modulo);
+          return;
+        }
+
         if (!modulo.path) {
           return;
         }
@@ -153,6 +180,24 @@ export const useMenuModulos = () => {
       setSelectedModulo(null);
     }, []);
 
+  const handleDismissPasswordExpiryWarning = useCallback(() => {
+    clearPasswordExpiryWarning();
+  }, [clearPasswordExpiryWarning]);
+
+  const handleChangePasswordNow = useCallback(() => {
+    const changePasswordRoute = getOptionRoute(
+      APPLICATION_OPTION_IDS
+        .CAMBIAR_CLAVE
+    );
+
+    if (!changePasswordRoute) {
+      return;
+    }
+
+    clearPasswordExpiryWarning();
+    navigate(changePasswordRoute);
+  }, [clearPasswordExpiryWarning, navigate]);
+
   return {
     modulos,
     selectedModulo,
@@ -166,5 +211,16 @@ export const useMenuModulos = () => {
       handleSelectChildModulo,
     onCloseModal:
       handleCloseModal,
+    passwordExpiryWarningModalProps: {
+      isOpen: passwordExpiryWarning !== null,
+      message: passwordExpiryWarning?.message ?? '',
+      title: 'Clave próxima a expirar',
+      heading: 'Actualice su clave antes del bloqueo',
+      actionLabel: 'Cambiar ahora',
+      dismissLabel: 'Más tarde',
+      onClose: handleDismissPasswordExpiryWarning,
+      onDismiss: handleDismissPasswordExpiryWarning,
+      onChangePassword: handleChangePasswordNow,
+    },
   };
 };

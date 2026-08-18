@@ -1,10 +1,18 @@
 import type React from 'react';
 
-import { ClienteSelectorModal, LoginForm } from '../modules';
+import {
+  ClienteSelectorModal,
+  ExpiredPasswordModal,
+  LoginForm,
+} from '../modules';
 import { useLoginPage } from '../shell/hooks/useLoginPage';
 
 export const LoginPage: React.FC = () => {
-  const { loginFormProps, clienteSelectorProps } = useLoginPage();
+  const {
+    loginFormProps,
+    clienteSelectorProps,
+    expiredPasswordModalProps,
+  } = useLoginPage();
 
   return (
     <div className="login-page">
@@ -25,6 +33,8 @@ export const LoginPage: React.FC = () => {
           onContinue={clienteSelectorProps.onContinue}
         />
       )}
+
+      <ExpiredPasswordModal {...expiredPasswordModalProps} />
     </div>
   );
 };

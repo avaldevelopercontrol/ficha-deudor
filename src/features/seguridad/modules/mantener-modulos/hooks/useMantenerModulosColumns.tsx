@@ -71,17 +71,6 @@ export const useMantenerModulosColumns = ({
           row.nombre || '—',
       },
       {
-        key: 'ruta',
-        label:
-          MANTENER_MODULOS_COLUMNS
-            .ruta,
-        width:
-          MANTENER_MODULOS_COLUMN_WIDTHS
-            .ruta,
-        render: (row) =>
-          row.ruta || '—',
-      },
-      {
         key: 'padre',
         label:
           MANTENER_MODULOS_COLUMNS
@@ -100,6 +89,39 @@ export const useMantenerModulosColumns = ({
         width:
           MANTENER_MODULOS_COLUMN_WIDTHS
             .nivel,
+      },
+      {
+        key: 'implementacion',
+        label:
+          MANTENER_MODULOS_COLUMNS
+            .implementacion,
+        width:
+          MANTENER_MODULOS_COLUMN_WIDTHS
+            .implementacion,
+        render: (row) => {
+          const label =
+            row.implementacion ??
+            'SIN PANTALLA';
+
+          const variant =
+            label === 'IMPLEMENTADA'
+              ? 'success'
+              : label === 'ESTRUCTURA'
+                ? 'info'
+                : 'warning';
+
+          return (
+            <Badge
+              variant={variant}
+              style={{
+                padding: '3px 8px',
+                fontSize: '10px',
+              }}
+            >
+              {label}
+            </Badge>
+          );
+        },
       },
       {
         key: 'visible',

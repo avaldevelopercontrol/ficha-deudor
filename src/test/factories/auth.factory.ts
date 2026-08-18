@@ -77,13 +77,18 @@ export const createAuthContextValue = (
   overrides: Partial<AuthContextValue> = {}
 ): AuthContextValue => ({
   ...createAuthState(),
+  expiredPasswordChallenge: null,
+  passwordExpiryWarning: null,
   login: async () => ({
     success: true,
+    code: '00',
     message: 'Login exitoso',
     usuario: createUsuario(),
   }),
   logout: () => undefined,
   seleccionarCliente: () => undefined,
   clearError: () => undefined,
+  clearExpiredPasswordChallenge: () => undefined,
+  clearPasswordExpiryWarning: () => undefined,
   ...overrides,
 });
