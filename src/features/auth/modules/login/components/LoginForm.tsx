@@ -1,6 +1,10 @@
 import type React from 'react';
 
-import { InputField, PasswordField } from '@shared/components/ui';
+import {
+  FeedbackMessage,
+  InputField,
+  PasswordField,
+} from '@shared/components/ui';
 
 import type { LoginPayload } from '../../../types';
 import { useLoginForm } from '../hooks/useLoginForm';
@@ -9,12 +13,14 @@ interface LoginFormProps {
   onSubmit: (payload: LoginPayload) => void;
   isLoading: boolean;
   error?: string | null;
+  successMessage?: string | null;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   onSubmit,
   isLoading,
   error,
+  successMessage,
 }) => {
   const {
     values,
@@ -55,6 +61,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           autoComplete="current-password"
           required
         />
+
+        {successMessage && (
+          <FeedbackMessage
+            variant="success"
+            title="Clave actualizada"
+            message={successMessage}
+          />
+        )}
 
         {error && (
           <div className="login-form__error" role="alert">

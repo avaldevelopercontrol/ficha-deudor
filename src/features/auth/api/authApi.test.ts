@@ -101,9 +101,169 @@ export const suite = defineSuite('authApi', [
 
         assert.deepEqual(result, {
           success: false,
+          code: '01',
           message: 'Credenciales inválidas',
           usuario: null,
         });
+      }
+    );
+  }),
+  test('detecta code 092 con response null y exige el cambio de clave', async () => {
+    await withFetchResponse(
+      createJsonResponse({
+        code: '092',
+        message: 'Su clave ha expirado.',
+        messageUser: 'Su clave ha expirado.',
+        statusCode: 400,
+        response: null,
+      }),
+      async () => {
+        const result = await login({
+          username: '16149',
+          password: 'secreto',
+        });
+
+        assert.equal(result.success, false);
+        assert.equal(result.code, '092');
+        assert.equal(result.requiresPasswordChange, true);
+        assert.equal(result.message, 'Su clave ha expirado.');
+        assert.equal(result.usuario, null);
+      }
+    );
+  }),
+  test('recupera code 092 con response null aunque el HTTP no sea exitoso', async () => {
+    await withFetchResponse(
+      createJsonResponse(
+        {
+          code: '092',
+          message: 'Debe actualizar su clave antes de continuar.',
+          messageUser: '',
+          statusCode: 400,
+          response: null,
+        },
+        400
+      ),
+      async () => {
+        const result = await login({
+          username: '16149',
+          password: 'secreto',
+        });
+
+        assert.equal(result.success, false);
+        assert.equal(result.code, '092');
+        assert.equal(result.requiresPasswordChange, true);
+        assert.equal(result.usuario, null);
+        assert.equal(
+          result.message,
+          'Debe actualizar su clave antes de continuar.'
+        );
+      }
+    );
+  }),
+  test('detecta code 093 como login válido y conserva message para advertir la expiración próxima', async () => {
+    await withFetchResponse(
+      createJsonResponse({
+        code: '093',
+        message:
+          'Debe cambiar su clave. Faltan 5 días para el bloqueo de su usuario por expiración de clave.',
+        messageUser: 'Mensaje alternativo',
+        statusCode: 200,
+        response: createLoginUsuarioApi(),
+      }),
+      async () => {
+        const result = await login({
+          username: 'usuario',
+          password: 'secreto',
+        });
+
+        assert.equal(result.success, true);
+        assert.equal(result.code, '093');
+        assert.equal(result.requiresPasswordChangeSoon, true);
+        assert.equal(
+          result.message,
+          'Debe cambiar su clave. Faltan 5 días para el bloqueo de su usuario por expiración de clave.'
+        );
+        assert.equal(result.usuario?.id_usuario, '16068');
+      }
+    );
+  }),
+  test('recupera code 093 también si el servidor lo acompaña con un HTTP no exitoso', async () => {
+    await withFetchResponse(
+      createJsonResponse(
+        {
+          code: '093',
+          message: 'Debe cambiar su clave antes de que expire.',
+          messageUser: '',
+          statusCode: 401,
+          response: createLoginUsuarioApi(),
+        },
+        401
+      ),
+      async () => {
+        const result = await login({
+          username: 'usuario',
+          password: 'secreto',
+        });
+
+        assert.equal(result.success, true);
+        assert.equal(result.code, '093');
+        assert.equal(result.requiresPasswordChangeSoon, true);
+        assert.equal(
+          result.message,
+          'Debe cambiar su clave antes de que expire.'
+        );
+      }
+    );
+  }),
+  test('detecta code 094 como login rechazado y prioriza message para informar el exceso de intentos', async () => {
+    await withFetchResponse(
+      createJsonResponse({
+        code: '094',
+        message: 'Ha excedido la cantidad de intentos permitidos.',
+        messageUser: 'Mensaje alternativo',
+        statusCode: 200,
+        response: null,
+      }),
+      async () => {
+        const result = await login({
+          username: 'usuario',
+          password: 'secreto',
+        });
+
+        assert.deepEqual(result, {
+          success: false,
+          code: '094',
+          message: 'Ha excedido la cantidad de intentos permitidos.',
+          usuario: null,
+        });
+      }
+    );
+  }),
+  test('recupera code 094 y su message aunque el servidor responda con HTTP no exitoso', async () => {
+    await withFetchResponse(
+      createJsonResponse(
+        {
+          code: '094',
+          message: 'Ha excedido la cantidad de intentos permitidos.',
+          messageUser: '',
+          statusCode: 401,
+          response: null,
+        },
+        401
+      ),
+      async () => {
+        const result = await login({
+          username: 'usuario',
+          password: 'secreto',
+        });
+
+        assert.equal(result.success, false);
+        assert.equal(result.code, '094');
+        assert.equal(
+          result.message,
+          'Ha excedido la cantidad de intentos permitidos.'
+        );
+        assert.equal(result.usuario, null);
       }
     );
   }),
@@ -203,6 +363,7 @@ export const suite = defineSuite('authApi', [
 
         assert.deepEqual(result, {
           success: false,
+          code: 'CLIENT_ERROR',
           message: 'Servicio de autenticación no disponible',
           usuario: null,
         });

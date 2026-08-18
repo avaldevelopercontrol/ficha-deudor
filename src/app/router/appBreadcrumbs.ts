@@ -1,22 +1,18 @@
 import { matchPath } from 'react-router-dom';
 
+import {
+  APPLICATION_OPTION_IDS,
+  type AuthorizedOption,
+} from '@features/access-control';
+
 import { AUTH_ROUTES } from '@features/auth/constants';
 import { FICHA_DEUDOR_ROUTES } from '@features/ficha-deudor/shared/constants/fichaDeudorRoutes.constants';
-import { MENU_MODULOS } from '@features/menu-modulos/data';
-import type { MenuModulo } from '@features/menu-modulos/types';
 
 const MENU_MODULOS_HEADER = 'MENÚ DE MÓDULOS';
 const FICHA_DEUDOR_HEADER = 'FICHA DEUDOR';
 
-const GESTION_COBRANZA_KEY = 'gestion-cobranza';
-const GESTION_DEUDOR_KEY = 'gestion-deudor';
-
-const getBreadcrumbLabel = (modulo: MenuModulo): string => {
-  return modulo.breadcrumbLabel ?? modulo.label;
-};
-
 const matchesPath = (
-  routePath: string | undefined,
+  routePath: string | null | undefined,
   pathname: string
 ): boolean => {
   if (!routePath) {
@@ -34,78 +30,102 @@ const matchesPath = (
   );
 };
 
-const findMenuBreadcrumb = (pathname: string): string | null => {
-  for (const modulo of MENU_MODULOS) {
-    if (matchesPath(modulo.path, pathname)) {
-      return getBreadcrumbLabel(modulo);
+const findOptionPath = (
+  options: readonly AuthorizedOption[],
+  predicate: (option: AuthorizedOption) => boolean,
+  ancestors: readonly AuthorizedOption[] = []
+): AuthorizedOption[] | null => {
+  for (const option of options) {
+    const currentPath = [
+      ...ancestors,
+      option,
+    ];
+
+    if (predicate(option)) {
+      return currentPath;
     }
 
-    const child = modulo.children?.find((item) =>
-      matchesPath(item.path, pathname)
+    const childPath = findOptionPath(
+      option.children,
+      predicate,
+      currentPath
     );
 
-    if (child) {
-      return `${getBreadcrumbLabel(modulo)} › ${getBreadcrumbLabel(child)}`;
+    if (childPath) {
+      return childPath;
     }
   }
 
   return null;
 };
 
-const findModuleByKey = (
-  moduleKey: string
-): MenuModulo | undefined => {
-  for (const modulo of MENU_MODULOS) {
-    if (modulo.key === moduleKey) {
-      return modulo;
-    }
+const formatOptionPath = (
+  options: readonly AuthorizedOption[]
+): string =>
+  options
+    .map((option) =>
+      option.name
+        .trim()
+        .toLocaleUpperCase('es-PE')
+    )
+    .filter(Boolean)
+    .join(' › ');
 
-    const child = modulo.children?.find(
-      (item) => item.key === moduleKey
-    );
-
-    if (child) {
-      return child;
-    }
-  }
-
-  return undefined;
-};
-
-const getModuleLabelByKey = (
-  moduleKey: string,
-  fallback: string
+export const getAppBreadcrumb = (
+  pathname: string,
+  navigationTree: readonly AuthorizedOption[] = []
 ): string => {
-  const modulo = findModuleByKey(moduleKey);
-
-  return modulo
-    ? getBreadcrumbLabel(modulo)
-    : fallback;
-};
-
-export const getAppBreadcrumb = (pathname: string): string => {
-  if (matchesPath(AUTH_ROUTES.MENU_MODULOS, pathname)) {
+  if (
+    matchesPath(
+      AUTH_ROUTES.MENU_MODULOS,
+      pathname
+    )
+  ) {
     return MENU_MODULOS_HEADER;
   }
 
-  const menuBreadcrumb = findMenuBreadcrumb(pathname);
+  if (
+    matchesPath(
+      FICHA_DEUDOR_ROUTES.FICHA_DEUDOR,
+      pathname
+    ) ||
+    matchesPath(
+      FICHA_DEUDOR_ROUTES.LEGACY_FICHA_DEUDOR,
+      pathname
+    )
+  ) {
+    const gestionDeudorPath =
+      findOptionPath(
+        navigationTree,
+        (option) =>
+          option.id ===
+          APPLICATION_OPTION_IDS
+            .GESTION_DEUDOR
+      );
 
-  if (menuBreadcrumb) {
-    return menuBreadcrumb;
+    const parentBreadcrumb =
+      gestionDeudorPath
+        ? formatOptionPath(
+            gestionDeudorPath
+          )
+        : 'GESTIÓN DE COBRANZAS › GESTIÓN DEUDOR';
+
+    return `${parentBreadcrumb} › ${FICHA_DEUDOR_HEADER}`;
   }
 
-  if (matchesPath(FICHA_DEUDOR_ROUTES.FICHA_DEUDOR, pathname)) {
-    const gestionCobranzaLabel = getModuleLabelByKey(
-      GESTION_COBRANZA_KEY,
-      'GESTIÓN DE COBRANZAS'
-    );
+  const optionPath = findOptionPath(
+    navigationTree,
+    (option) =>
+      matchesPath(
+        option.route,
+        pathname
+      )
+  );
 
-    const gestionDeudorLabel = getModuleLabelByKey(
-      GESTION_DEUDOR_KEY,
-      'GESTIÓN POR PERSONA/DEUDOR'
+  if (optionPath) {
+    return formatOptionPath(
+      optionPath
     );
-
-    return `${gestionCobranzaLabel} › ${gestionDeudorLabel} › ${FICHA_DEUDOR_HEADER}`;
   }
 
   return MENU_MODULOS_HEADER;

@@ -3,7 +3,7 @@ export const MANTENER_MODULOS_TEXTS = {
     'Módulos registrados',
 
   sectionDescription:
-    'Consulte los módulos y opciones disponibles en el sistema.',
+    'Consulte la estructura configurada y verifique qué módulos ya tienen una implementación React asociada por Id.',
 
   loadingMessage:
     'Cargando módulos...',
@@ -28,9 +28,6 @@ export const MANTENER_MODULOS_COLUMNS = {
   nombre:
     'Nombre',
 
-  ruta:
-    'Ruta',
-
   padre:
     'Padre',
 
@@ -43,6 +40,9 @@ export const MANTENER_MODULOS_COLUMNS = {
   estado:
     'Estado',
 
+  implementacion:
+    'Implementación',
+
   editar:
     'Editar',
 } as const;
@@ -50,11 +50,11 @@ export const MANTENER_MODULOS_COLUMNS = {
 export const MANTENER_MODULOS_COLUMN_WIDTHS = {
   idModulo: '9%',
   nombre: '20%',
-  ruta: '20%',
-  padre: '15%',
+  padre: '18%',
   nivel: '9%',
+  implementacion: '18%',
   visible: '9%',
-  estado: '11%',
+  estado: '10%',
   editar: '7%',
 } as const;
 

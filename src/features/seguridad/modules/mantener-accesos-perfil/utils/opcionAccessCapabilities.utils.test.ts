@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 
 import {
+  APPLICATION_OPTION_IDS,
+} from '@features/access-control';
+
+import {
   defineSuite,
   test,
 } from '../../../../../test/testHarness';
@@ -15,9 +19,10 @@ import {
 } from './opcionAccessCapabilities.utils';
 
 const createOption = (
-  codigo: string
+  idModulo: number,
+  codigo = 'mCodigoEditable'
 ): OpcionTreeItem => ({
-  idModulo: 6,
+  idModulo,
   nombre: 'Opción',
   descripcion: '',
   codigo,
@@ -44,20 +49,28 @@ export const suite = defineSuite(
   'opcionAccessCapabilities.utils',
   [
     test(
-      'los mantenimientos revisados solo habilitan consultar, insertar y editar',
+      'los mantenimientos revisados se reconocen por nId_Opcion aunque cambie su código',
       () => {
-        const optionCodes = [
-          'mMantenerPerfil',
-          'mMantenerModulo',
-          'mMantenerGrupo',
-          'mMantenerAccesosPorPerfil',
-          'mMantenerAccesosPorUsuario',
+        const optionIds = [
+          APPLICATION_OPTION_IDS
+            .MANTENER_PERFIL,
+          APPLICATION_OPTION_IDS
+            .MANTENER_MODULO,
+          APPLICATION_OPTION_IDS
+            .MANTENER_GRUPO,
+          APPLICATION_OPTION_IDS
+            .MANTENER_ACCESOS_POR_PERFIL,
+          APPLICATION_OPTION_IDS
+            .MANTENER_ACCESOS_POR_USUARIO,
         ];
 
-        optionCodes.forEach((optionCode) => {
+        optionIds.forEach((optionId) => {
           assert.deepEqual(
             getPerfilOpcionPermissionAvailability(
-              createOption(optionCode)
+              createOption(
+                optionId,
+                `mRenombrado${optionId}`
+              )
             ),
             {
               consultar: true,
@@ -66,7 +79,7 @@ export const suite = defineSuite(
               eliminar: false,
               exportar: false,
             },
-            optionCode
+            String(optionId)
           );
         });
       }
@@ -74,9 +87,15 @@ export const suite = defineSuite(
     test(
       'cambiar clave solo habilita consultar y editar',
       () => {
+        const option = createOption(
+          APPLICATION_OPTION_IDS
+            .CAMBIAR_CLAVE,
+          'mActualizarCredencial'
+        );
+
         assert.deepEqual(
           getPerfilOpcionPermissionAvailability(
-            createOption('mCambiarClave')
+            option
           ),
           {
             consultar: true,
@@ -89,7 +108,7 @@ export const suite = defineSuite(
 
         assert.deepEqual(
           sanitizePerfilOpcionPermissions(
-            createOption('mCambiarClave'),
+            option,
             {
               consultar: true,
               insertar: true,
@@ -113,7 +132,10 @@ export const suite = defineSuite(
       () => {
         assert.deepEqual(
           getPerfilOpcionPermissionAvailability(
-            createOption('mGestionDeudor')
+            createOption(
+              APPLICATION_OPTION_IDS
+                .GESTION_DEUDOR
+            )
           ),
           {
             consultar: true,
@@ -130,7 +152,10 @@ export const suite = defineSuite(
       () => {
         assert.deepEqual(
           sanitizePerfilOpcionPermissions(
-            createOption('mMantenerPerfil'),
+            createOption(
+              APPLICATION_OPTION_IDS
+                .MANTENER_PERFIL
+            ),
             {
               consultar: true,
               insertar: true,

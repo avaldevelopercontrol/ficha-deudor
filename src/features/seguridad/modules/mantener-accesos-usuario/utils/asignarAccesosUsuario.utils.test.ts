@@ -39,7 +39,7 @@ const treeItems: OpcionTreeItem[] = [
     isPermissionTarget: false,
   },
   {
-    idModulo: 6,
+    idModulo: 10,
     nombre: 'Mantener perfil',
     descripcion: '',
     codigo: 'mMantenerPerfil',
@@ -78,7 +78,7 @@ export const suite = defineSuite(
                 idUsuarioGrupoOpcion: 1,
                 idUsuario: 10,
                 idGrupo: 20,
-                idOpcion: 6,
+                idOpcion: 10,
                 consultar: true,
                 insertar: true,
                 editar: true,
@@ -93,7 +93,7 @@ export const suite = defineSuite(
           );
 
         assert.deepEqual(
-          form.permissionsByOptionId['6'],
+          form.permissionsByOptionId['10'],
           {
             consultar: true,
             insertar: true,
@@ -112,10 +112,10 @@ export const suite = defineSuite(
             {
               usuarioId: 10,
               grupoId: 20,
-              selectedOptionIds: [2, 6],
-              activeOptionId: 6,
+              selectedOptionIds: [2, 10],
+              activeOptionId: 10,
               permissionsByOptionId: {
-                '6': {
+                '10': {
                   consultar: true,
                   insertar: true,
                   editar: true,
@@ -130,7 +130,7 @@ export const suite = defineSuite(
         assert.deepEqual(
           normalized.assignments.find(
             (assignment) =>
-              assignment.opcionId === 6
+              assignment.opcionId === 10
           )?.permissions,
           {
             consultar: true,

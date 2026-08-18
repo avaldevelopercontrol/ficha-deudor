@@ -3,6 +3,9 @@ import type React from 'react';
 import {
   AccessControlFeedback,
 } from '@features/access-control';
+import {
+  ExpiredPasswordModal,
+} from '@features/auth/modules/login';
 
 import MenuModuloCard from '../components/MenuModuloCard';
 import MenuModuloChildrenModal from '../components/MenuModuloChildrenModal';
@@ -19,6 +22,7 @@ export const MenuModulosPage: React.FC = () => {
     onSelectModulo,
     onSelectChildModulo,
     onCloseModal,
+    passwordExpiryWarningModalProps,
   } = useMenuModulos();
 
   const renderContent = () => {
@@ -88,6 +92,10 @@ export const MenuModulosPage: React.FC = () => {
       </div>
 
       {renderContent()}
+
+      <ExpiredPasswordModal
+        {...passwordExpiryWarningModalProps}
+      />
 
       <MenuModuloChildrenModal
         modulo={selectedModulo}

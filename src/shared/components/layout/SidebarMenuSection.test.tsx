@@ -17,6 +17,8 @@ import {
   SidebarMenuSection,
 } from './SidebarMenuSection';
 
+const OPEN_SECTIONS = {};
+
 export const suite = defineSuite(
   'SidebarMenuSection',
   [
@@ -27,10 +29,13 @@ export const suite = defineSuite(
           renderToStaticMarkup(
             <MemoryRouter>
               <SidebarMenuSection
+                sectionId={10}
                 label="Mantener perfil"
                 icon={<span>icono</span>}
-                isOpen
                 items={[]}
+                openSections={
+                  OPEN_SECTIONS
+                }
                 to="/seguridad/mantener-perfil"
                 disabled
                 onToggle={() => undefined}
@@ -59,22 +64,27 @@ export const suite = defineSuite(
           renderToStaticMarkup(
             <MemoryRouter>
               <SidebarMenuSection
+                sectionId={2}
                 label="Seguridad"
                 icon={<span>icono</span>}
-                isOpen
                 items={[
                   {
+                    id: 10,
                     label:
                       'Mantener perfil',
                     to: '/seguridad/mantener-perfil',
                     disabled: true,
                   },
                   {
+                    id: 11,
                     label:
                       'Mantener módulo',
                     to: '/seguridad/mantener-modulos',
                   },
                 ]}
+                openSections={
+                  OPEN_SECTIONS
+                }
                 onToggle={() => undefined}
               />
             </MemoryRouter>
@@ -98,7 +108,53 @@ export const suite = defineSuite(
         );
       }
     ),
+    test(
+      'renderiza contenedores anidados y conserva navegables sus descendientes',
+      () => {
+        const html =
+          renderToStaticMarkup(
+            <MemoryRouter>
+              <SidebarMenuSection
+                sectionId={2}
+                label="Seguridad"
+                icon={<span>icono</span>}
+                items={[
+                  {
+                    id: 5,
+                    label:
+                      'Gestión de usuarios',
+                    children: [
+                      {
+                        id: 20,
+                        label:
+                          'Mantener usuario',
+                        to: '/gestion-usuarios/mantener-usuario',
+                      },
+                    ],
+                  },
+                ]}
+                openSections={
+                  OPEN_SECTIONS
+                }
+                onToggle={() => undefined}
+              />
+            </MemoryRouter>
+          );
 
+        assert.match(
+          html,
+          /Gestión de usuarios/
+        );
+        assert.match(
+          html,
+          /app-sidebar__submenu--nested/
+        );
+        assert.match(
+          html,
+          /href="\/gestion-usuarios\/mantener-usuario"/
+        );
+      }
+    ),
     test(
       'no marca el módulo padre como activo solo por estar expandido',
       () => {
@@ -110,16 +166,20 @@ export const suite = defineSuite(
               ]}
             >
               <SidebarMenuSection
+                sectionId={2}
                 label="Seguridad"
                 icon={<span>icono</span>}
-                isOpen
                 items={[
                   {
+                    id: 10,
                     label:
                       'Mantener perfil',
                     to: '/seguridad/mantener-perfil',
                   },
                 ]}
+                openSections={
+                  OPEN_SECTIONS
+                }
                 onToggle={() => undefined}
               />
             </MemoryRouter>
@@ -142,21 +202,26 @@ export const suite = defineSuite(
               ]}
             >
               <SidebarMenuSection
+                sectionId={2}
                 label="Seguridad"
                 icon={<span>icono</span>}
-                isOpen
                 items={[
                   {
+                    id: 10,
                     label:
                       'Mantener perfil',
                     to: '/seguridad/mantener-perfil',
                   },
                   {
+                    id: 11,
                     label:
                       'Mantener módulo',
                     to: '/seguridad/mantener-modulos',
                   },
                 ]}
+                openSections={
+                  OPEN_SECTIONS
+                }
                 onToggle={() => undefined}
               />
             </MemoryRouter>

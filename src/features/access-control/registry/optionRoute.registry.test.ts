@@ -6,9 +6,13 @@ import {
 } from '../../../test/testHarness';
 
 import {
+  APPLICATION_OPTION_IDS,
+} from './applicationOptionIds';
+
+import {
+  getApplicationOptionCatalog,
   getApplicationOptionDefinition,
   getOptionRoute,
-  getRegistrableApplicationOptions,
   hasRegisteredOptionRoute,
 } from './optionRoute.registry';
 
@@ -16,85 +20,79 @@ export const suite = defineSuite(
   'optionRoute.registry',
   [
     test(
-      'resuelve las rutas de las opciones implementadas',
+      'resuelve las rutas por nId_Opcion y no por código o nombre',
       () => {
         assert.equal(
           getOptionRoute(
-            'mGestionDeudor'
+            APPLICATION_OPTION_IDS
+              .GESTION_DEUDOR
           ),
           '/gestion-cobranzas/gestion-deudor'
         );
 
         assert.equal(
           getOptionRoute(
-            'mMantenerAccesosPorPerfil'
+            APPLICATION_OPTION_IDS
+              .PORTFOLIO_CONTROL_CENTER
+          ),
+          '/analytics/portfolio-control-center'
+        );
+
+        assert.equal(
+          getOptionRoute(
+            APPLICATION_OPTION_IDS
+              .MANTENER_ACCESOS_POR_PERFIL
           ),
           '/seguridad/mantener-accesos-por-perfil'
         );
 
         assert.equal(
           getOptionRoute(
-            'mMantenerAccesosPorUsuario'
+            APPLICATION_OPTION_IDS
+              .MANTENER_ACCESOS_POR_USUARIO
           ),
           '/seguridad/mantener-accesos-por-usuario'
         );
+      }
+    ),
+    test(
+      'mantiene un identificador único por cada implementación React',
+      () => {
+        const catalog =
+          getApplicationOptionCatalog();
+
+        const ids = catalog.map(
+          (definition) =>
+            definition.optionId
+        );
 
         assert.equal(
-          getOptionRoute(
-            'mMantenerGrupo'
-          ),
+          new Set(ids).size,
+          ids.length
+        );
+
+        assert.equal(
+          getApplicationOptionDefinition(
+            APPLICATION_OPTION_IDS
+              .MANTENER_GRUPO
+          )?.path,
           '/seguridad/mantener-grupo'
         );
       }
     ),
     test(
-      'expone metadatos de las pantallas registrables',
-      () => {
-        const mantenerGrupo =
-          getApplicationOptionDefinition(
-            'mMantenerGrupo'
-          );
-
-        assert.equal(
-          mantenerGrupo?.name,
-          'Mantener grupo'
-        );
-        assert.equal(
-          mantenerGrupo?.parentCode,
-          'mSeguridad'
-        );
-        assert.equal(
-          mantenerGrupo?.icon,
-          'groups'
-        );
-        assert.equal(
-          getRegistrableApplicationOptions().some(
-            (option) =>
-              option.code ===
-              'mMantenerGrupo'
-          ),
-          true
-        );
-
-        assert.equal(
-          getApplicationOptionDefinition(
-            'mMantenerAccesosPorUsuario'
-          )?.icon,
-          'user-group-access'
-        );
-      }
-    ),
-    test(
-      'rechaza códigos vacíos o sin pantalla registrada',
+      'rechaza ids inválidos o sin pantalla registrada',
       () => {
         assert.equal(
-          getOptionRoute(''),
+          getOptionRoute(0),
           null
         );
         assert.equal(
-          hasRegisteredOptionRoute(
-            'mModuloFuturo'
-          ),
+          getOptionRoute(-1),
+          null
+        );
+        assert.equal(
+          hasRegisteredOptionRoute(9999),
           false
         );
       }

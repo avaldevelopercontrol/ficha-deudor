@@ -20,11 +20,11 @@ import {
 } from './useMantenerModulosColumns';
 
 const row: Modulo = {
-  idModulo: 6,
+  idModulo: 10,
   nombre: 'Mantener perfil',
   descripcion: '',
-  codigo: 'mMantenerPerfil',
-  ruta: 'root/mSeguridad/mMantenerPerfil/',
+  codigo: 'mAdministrarPerfiles',
+  ruta: 'root/mSeguridad/mAdministrarPerfiles/',
   icono: '',
   tipo: 3,
   idPadre: 2,
@@ -35,6 +35,7 @@ const row: Modulo = {
   visible: 'Sí',
   estadoActivo: true,
   estado: 'Activo',
+  implementacion: 'IMPLEMENTADA',
 };
 
 const ColumnsTable = () => {
@@ -46,6 +47,94 @@ const ColumnsTable = () => {
       columns={columns}
       data={[row]}
       allData={[row]}
+      enableColumnFilters
+      fitToPanel
+    />
+  );
+};
+
+const StructureColumnsTable = () => {
+  const structureRow: Modulo = {
+    ...row,
+    idModulo: 24,
+    nombre:
+      'Inteligencia de Negocio',
+    codigo:
+      'mInteligenciaDeNegocio',
+    ruta:
+      'root/mInteligenciaDeNegocio/',
+    tipo: 2,
+    idPadre: 1,
+    codigoPadre: 'Root',
+    padre: 'Root',
+    orden: 9,
+    implementacion: 'ESTRUCTURA',
+  };
+
+  const childRow: Modulo = {
+    ...row,
+    idModulo: 23,
+    nombre:
+      'Portfolio Control Center',
+    codigo:
+      'mPortfolioControlCenter',
+    ruta:
+      'root/mInteligenciaDeNegocio/mPortfolio-control-center/',
+    tipo: 3,
+    idPadre: 24,
+    codigoPadre:
+      'mInteligenciaDeNegocio',
+    padre:
+      'Inteligencia de Negocio',
+    orden: 1,
+  };
+
+  const modulos = [
+    structureRow,
+    childRow,
+  ];
+
+  const columns =
+    useMantenerModulosColumns();
+
+  return (
+    <Table
+      columns={columns}
+      data={[structureRow]}
+      allData={modulos}
+      fitToPanel
+    />
+  );
+};
+
+const PendingScreenColumnsTable = () => {
+  const pendingRow: Modulo = {
+    ...row,
+    idModulo: 14,
+    nombre: 'Cartera',
+    codigo: 'mCartera',
+    ruta:
+      'root/mGestionDeCobranzas/mCartera/',
+    tipo: 3,
+    idPadre: 4,
+    codigoPadre:
+      'mGestionDeCobranzas',
+    padre:
+      'Gestión de cobranzas',
+    orden: 2,
+    implementacion: 'SIN PANTALLA',
+    estadoActivo: false,
+    estado: 'Inactivo',
+  };
+
+  const columns =
+    useMantenerModulosColumns();
+
+  return (
+    <Table
+      columns={columns}
+      data={[pendingRow]}
+      allData={[pendingRow]}
       fitToPanel
     />
   );
@@ -55,25 +144,64 @@ export const suite = defineSuite(
   'columnas de mantener módulos',
   [
     test(
-      'muestra el listado sin la columna código',
+      'oculta código y ruta, y mantiene el estado de implementación React',
       () => {
         const html =
           renderToStaticMarkup(
             <ColumnsTable />
           );
 
+        assert.match(html, />Id</);
+        assert.match(html, />Nombre</);
         assert.doesNotMatch(
           html,
           />Código</
         );
-        assert.match(html, />Id</);
-        assert.match(html, />Nombre</);
-        assert.match(html, />Ruta</);
+        assert.doesNotMatch(
+          html,
+          />Ruta</
+        );
         assert.match(html, />Padre</);
         assert.match(html, />Nivel</);
+        assert.match(
+          html,
+          />Implementación</
+        );
+        assert.match(
+          html,
+          /placeholder="Implementación"/
+        );
+        assert.match(
+          html,
+          /IMPLEMENTADA/
+        );
         assert.match(html, />Visible</);
         assert.match(html, />Estado</);
         assert.match(html, />Editar</);
+      }
+    ),
+
+    test(
+      'distingue un contenedor de una pantalla pendiente',
+      () => {
+        const structureHtml =
+          renderToStaticMarkup(
+            <StructureColumnsTable />
+          );
+
+        const pendingHtml =
+          renderToStaticMarkup(
+            <PendingScreenColumnsTable />
+          );
+
+        assert.match(
+          structureHtml,
+          /ESTRUCTURA/
+        );
+        assert.match(
+          pendingHtml,
+          /SIN PANTALLA/
+        );
       }
     ),
   ]

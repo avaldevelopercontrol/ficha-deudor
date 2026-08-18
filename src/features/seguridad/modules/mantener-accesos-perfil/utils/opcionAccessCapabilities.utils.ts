@@ -1,3 +1,7 @@
+import {
+  APPLICATION_OPTION_IDS,
+} from '@features/access-control';
+
 import type {
   OpcionTreeItem,
   PerfilOpcionPermissionKey,
@@ -49,27 +53,45 @@ const CHANGE_PASSWORD_PERMISSIONS:
 /**
  * Capacidades funcionales reales de cada opción final.
  *
- * Las opciones que todavía no estén declaradas mantienen temporalmente
- * todos los permisos disponibles para no alterar módulos que aún no han
- * sido revisados. A medida que se valide cada módulo se agrega aquí su
- * matriz real de operaciones.
+ * Se indexan por nId_Opcion para que renombrar el módulo, regenerar su código
+ * o moverlo dentro de la jerarquía no cambie sus capacidades funcionales.
  */
-const OPTION_PERMISSION_AVAILABILITY_BY_CODE:
-  Readonly<
-    Record<
-      string,
-      PerfilOpcionPermissionAvailability
-    >
-  > = {
-    mCambiarClave: CHANGE_PASSWORD_PERMISSIONS,
-    mMantenerPerfil: MAINTENANCE_PERMISSIONS,
-    mMantenerModulo: MAINTENANCE_PERMISSIONS,
-    mMantenerGrupo: MAINTENANCE_PERMISSIONS,
-    mMantenerAccesosPorPerfil:
+const OPTION_PERMISSION_AVAILABILITY_BY_ID:
+  ReadonlyMap<
+    number,
+    PerfilOpcionPermissionAvailability
+  > = new Map([
+    [
+      APPLICATION_OPTION_IDS
+        .CAMBIAR_CLAVE,
+      CHANGE_PASSWORD_PERMISSIONS,
+    ],
+    [
+      APPLICATION_OPTION_IDS
+        .MANTENER_PERFIL,
       MAINTENANCE_PERMISSIONS,
-    mMantenerAccesosPorUsuario:
+    ],
+    [
+      APPLICATION_OPTION_IDS
+        .MANTENER_MODULO,
       MAINTENANCE_PERMISSIONS,
-  };
+    ],
+    [
+      APPLICATION_OPTION_IDS
+        .MANTENER_GRUPO,
+      MAINTENANCE_PERMISSIONS,
+    ],
+    [
+      APPLICATION_OPTION_IDS
+        .MANTENER_ACCESOS_POR_PERFIL,
+      MAINTENANCE_PERMISSIONS,
+    ],
+    [
+      APPLICATION_OPTION_IDS
+        .MANTENER_ACCESOS_POR_USUARIO,
+      MAINTENANCE_PERMISSIONS,
+    ],
+  ]);
 
 export const getPerfilOpcionPermissionAvailability = (
   option: OpcionTreeItem | null | undefined
@@ -81,9 +103,9 @@ export const getPerfilOpcionPermissionAvailability = (
   }
 
   return {
-    ...(OPTION_PERMISSION_AVAILABILITY_BY_CODE[
-      option.codigo
-    ] ?? ALL_PERMISSIONS_AVAILABLE),
+    ...(OPTION_PERMISSION_AVAILABILITY_BY_ID.get(
+      option.idModulo
+    ) ?? ALL_PERMISSIONS_AVAILABLE),
   };
 };
 

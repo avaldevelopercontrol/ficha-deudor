@@ -47,6 +47,38 @@
 
 .data-table th:last-child { border-right: none; }
 
+.data-table__sort-button {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.data-table__sort-button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.75);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.data-table__sort-indicator {
+  flex: 0 0 auto;
+  font-size: 9px;
+  opacity: 0.58;
+}
+
+.data-table__sort-button.is-active .data-table__sort-indicator {
+  opacity: 1;
+}
+
 .data-table tbody tr {
   border-bottom: 1px solid var(--ap-gray-100);
   transition: background 0.12s;

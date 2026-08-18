@@ -10,6 +10,7 @@ import {
 
 import {
   useAccessControl,
+  type AuthorizedOption,
 } from '../../../features/access-control';
 
 import {
@@ -24,7 +25,9 @@ import {
   SisgesIcon,
 } from '../../icons/sisges';
 
-import SidebarMenuSection from './SidebarMenuSection';
+import SidebarMenuSection, {
+  type SidebarNavigationItem,
+} from './SidebarMenuSection';
 
 import '../../styles/components/app-sidebar.css';
 
@@ -59,6 +62,23 @@ const getRoleInitials = (
   return `${first}${second}`
     .toUpperCase() || 'R';
 };
+
+
+const mapSidebarNavigationItem = (
+  option: AuthorizedOption
+): SidebarNavigationItem => ({
+  id: option.id,
+  label: option.name,
+  to: option.route ?? undefined,
+  disabled:
+    !option.permissions.consultar,
+  children:
+    option.children.length > 0
+      ? option.children.map(
+          mapSidebarNavigationItem
+        )
+      : undefined,
+});
 
 const LogoutIcon = () => (
   <svg
@@ -102,7 +122,7 @@ export const AppSidebar: React.FC<
   } = useAccessControl();
 
   const [openSections, setOpenSections] =
-    useState<Record<string, boolean>>(
+    useState<Record<number, boolean>>(
       {}
     );
 
@@ -121,14 +141,14 @@ export const AppSidebar: React.FC<
   };
 
   const toggleSection = (
-    optionCode: string
+    optionId: number
   ) => {
     setOpenSections(
       (currentSections) => ({
         ...currentSections,
-        [optionCode]:
+        [optionId]:
           !(currentSections[
-            optionCode
+            optionId
           ] ?? true),
       })
     );
@@ -238,53 +258,38 @@ export const AppSidebar: React.FC<
 
             {status === 'ready' &&
               navigationTree.map(
-                (module) => {
-                  const items =
-                    module.children
-                      .filter(
-                        (child) =>
-                          child.route !== null
+                (module) => (
+                  <SidebarMenuSection
+                    key={module.id}
+                    sectionId={module.id}
+                    label={module.name}
+                    icon={
+                      <SisgesIcon
+                        name={module.icon}
+                        aria-hidden="true"
+                      />
+                    }
+                    items={
+                      module.children.map(
+                        mapSidebarNavigationItem
                       )
-                      .map((child) => ({
-                        label: child.name,
-                        to: child.route as string,
-                        disabled:
-                          !child.permissions
-                            .consultar,
-                      }));
-
-                  return (
-                    <SidebarMenuSection
-                      key={module.code}
-                      label={module.name}
-                      icon={
-                        <SisgesIcon
-                          name={module.icon}
-                          aria-hidden="true"
-                        />
-                      }
-                      isOpen={
-                        openSections[
-                          module.code
-                        ] ?? true
-                      }
-                      items={items}
-                      to={
-                        module.route ??
-                        undefined
-                      }
-                      disabled={
-                        !module.permissions
-                          .consultar
-                      }
-                      onToggle={() => {
-                        toggleSection(
-                          module.code
-                        );
-                      }}
-                    />
-                  );
-                }
+                    }
+                    openSections={
+                      openSections
+                    }
+                    to={
+                      module.route ??
+                      undefined
+                    }
+                    disabled={
+                      !module.permissions
+                        .consultar
+                    }
+                    onToggle={
+                      toggleSection
+                    }
+                  />
+                )
               )}
           </div>
         </nav>

@@ -24,6 +24,7 @@ const createDeferred = <T>(): Deferred<T> => {
 
 const successResponse = (username: string): LoginResponse => ({
   success: true,
+  code: '00',
   message: 'Login exitoso',
   usuario: {
     id_usuario: '16068',

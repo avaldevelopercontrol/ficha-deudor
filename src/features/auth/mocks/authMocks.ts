@@ -105,6 +105,7 @@ export const mockLogin = async (payload: {
   if (!registro) {
     return {
       success: false,
+      code: '01',
       message: 'Usuario no encontrado',
       usuario: null,
     };
@@ -113,6 +114,7 @@ export const mockLogin = async (payload: {
   if (registro.password !== payload.password) {
     return {
       success: false,
+      code: '01',
       message: 'Contraseña incorrecta',
       usuario: null,
     };
@@ -120,6 +122,7 @@ export const mockLogin = async (payload: {
 
   return {
     success: true,
+    code: '00',
     message: 'Login exitoso',
     usuario: registro.usuario,
     token: `mock-jwt-token-${Date.now()}`,

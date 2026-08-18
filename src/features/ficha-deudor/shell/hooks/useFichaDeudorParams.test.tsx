@@ -32,10 +32,14 @@ const createAuthValue = (idUsuario = '5', idCliente = '1'): AuthContextValue => 
   },
   clienteSeleccionada: { id_cliente: idCliente, nombre: 'Cliente', codigo: 'CLI', activa: true },
   isLoading: false, error: null,
-  login: async () => ({ success: true, message: '', usuario: null }),
+  expiredPasswordChallenge: null,
+  passwordExpiryWarning: null,
+  login: async () => ({ success: true, code: '00', message: '', usuario: null }),
   logout: () => undefined,
   seleccionarCliente: () => undefined,
   clearError: () => undefined,
+  clearExpiredPasswordChallenge: () => undefined,
+  clearPasswordExpiryWarning: () => undefined,
 });
 
 const Probe = () => {

@@ -12,8 +12,18 @@ import {
 } from '../mappers/crearUsuario.mapper';
 
 import {
+  buildUpdateUsuarioRequest,
+  getUsuarioUpdateMismatches,
+} from '../mappers/editarUsuario.mapper';
+
+import {
   mapUsuariosListadoResponse,
 } from '../mappers/usuarioListado.mapper';
+
+import type {
+  EditarUsuarioFormData,
+  EditarUsuarioOriginalValues,
+} from '../modules/mantener-usuario/types/editarUsuario.types';
 
 import type {
   RegistrarUsuarioFormData,
@@ -23,6 +33,13 @@ import type {
   CreateUsuarioApiResponse,
   CreateUsuarioResult,
 } from '../types/crearUsuario.types';
+
+import type {
+  GetUsuarioByIdApiResponse,
+  UpdateUsuarioApiResponse,
+  UpdateUsuarioResponseApi,
+  UsuarioDetalleApi,
+} from '../types/editarUsuario.types';
 
 import type {
   GetUsuariosListResponse,
@@ -35,6 +52,12 @@ const USUARIOS_ERROR_MESSAGES = {
 
   create:
     'No se pudo registrar el usuario.',
+
+  detail:
+    'No se pudo obtener el usuario.',
+
+  update:
+    'No se pudo actualizar el usuario.',
 } as const;
 
 const isRecord = (
@@ -110,22 +133,24 @@ const isSuccessfulResponse = (
     statusCode: number;
   }
 ): boolean => {
-  /*
-   * Si el backend informa un statusCode real, ese valor
-   * prevalece sobre code. El fallback por code conserva
-   * compatibilidad con respuestas antiguas que usaban 0.
-   */
-  if (result.statusCode !== 0) {
-    return (
-      result.statusCode >= 200 &&
-      result.statusCode < 300
-    );
-  }
+  const normalizedCode =
+    result.code?.trim();
 
-  return (
-    result.code === '00' ||
-    result.code === '200'
-  );
+  const validCode =
+    normalizedCode === '00' ||
+    normalizedCode === '200';
+
+  const validStatus =
+    result.statusCode === 0 ||
+    (result.statusCode >= 200 &&
+      result.statusCode < 300);
+
+  /*
+   * HTTP 200 no basta: la API también comunica el resultado
+   * de negocio mediante code. Exigir ambas señales evita
+   * mostrar éxito frente a respuestas 200 con código de error.
+   */
+  return validCode && validStatus;
 };
 
 export const fetchUsuariosList = async (
@@ -140,6 +165,7 @@ export const fetchUsuariosList = async (
       {
         method: 'GET',
         signal,
+        cache: 'no-store',
       }
     );
 
@@ -230,6 +256,157 @@ export const createUsuario = async (
       resolveUsuarioApiError(
         error,
         USUARIOS_ERROR_MESSAGES.create
+      )
+    );
+  }
+};
+
+const assertPositiveUsuarioId = (
+  idUsuario: number
+): void => {
+  if (
+    !Number.isInteger(idUsuario) ||
+    idUsuario <= 0
+  ) {
+    throw new Error(
+      'El identificador del usuario no es válido.'
+    );
+  }
+};
+
+export const fetchUsuarioById = async (
+  idUsuario: number,
+  signal?: AbortSignal
+): Promise<UsuarioDetalleApi> => {
+  assertPositiveUsuarioId(idUsuario);
+
+  try {
+    const result =
+      await apiClient<
+        GetUsuarioByIdApiResponse
+      >(
+        `${
+          GESTION_USUARIOS_API_ENDPOINTS
+            .getUsuarioById
+        }/${idUsuario}`,
+        {
+          method: 'GET',
+          signal,
+          cache: 'no-store',
+        }
+      );
+
+    if (!isSuccessfulResponse(result)) {
+      throw new Error(
+        result.messageUser?.trim() ||
+          result.message?.trim() ||
+          USUARIOS_ERROR_MESSAGES.detail
+      );
+    }
+
+    const usuario = result.response;
+
+    if (
+      !usuario ||
+      !Number.isInteger(
+        usuario.nId_Usuario
+      ) ||
+      usuario.nId_Usuario <= 0
+    ) {
+      throw new Error(
+        'El servidor no devolvió un usuario válido.'
+      );
+    }
+
+    return usuario;
+  } catch (error) {
+    throw new Error(
+      resolveUsuarioApiError(
+        error,
+        USUARIOS_ERROR_MESSAGES.detail
+      )
+    );
+  }
+};
+
+export const updateUsuario = async (
+  form: EditarUsuarioFormData,
+  original: EditarUsuarioOriginalValues
+): Promise<UpdateUsuarioResponseApi> => {
+  assertPositiveUsuarioId(
+    original.idUsuario
+  );
+
+  const body =
+    buildUpdateUsuarioRequest(
+      form,
+      original
+    );
+
+  try {
+    const result =
+      await apiClient<
+        UpdateUsuarioApiResponse
+      >(
+        GESTION_USUARIOS_API_ENDPOINTS
+          .updateUsuario,
+        {
+          method: 'PUT',
+          body,
+        }
+      );
+
+    if (!isSuccessfulResponse(result)) {
+      throw new Error(
+        result.messageUser?.trim() ||
+          result.message?.trim() ||
+          USUARIOS_ERROR_MESSAGES.update
+      );
+    }
+
+    const usuario = result.response;
+
+    if (
+      !usuario ||
+      !Number.isInteger(
+        usuario.nId_Usuario
+      ) ||
+      usuario.nId_Usuario <= 0
+    ) {
+      throw new Error(
+        'El servidor confirmó la actualización, pero no devolvió un usuario válido.'
+      );
+    }
+
+    /*
+     * Un HTTP 200 solo confirma que la petición terminó. Para
+     * este mantenimiento verificamos además que el GET de
+     * detalle refleje lo enviado antes de cerrar el modal.
+     * Así un no-op del backend deja de verse como un éxito.
+     */
+    const persisted =
+      await fetchUsuarioById(
+        original.idUsuario
+      );
+
+    const mismatches =
+      getUsuarioUpdateMismatches(
+        form,
+        persisted
+      );
+
+    if (mismatches.length > 0) {
+      throw new Error(
+        `El servidor respondió correctamente, pero los cambios no se reflejaron al volver a consultar el usuario. Campos sin persistir: ${mismatches.join(', ')}.`
+      );
+    }
+
+    return usuario;
+  } catch (error) {
+    throw new Error(
+      resolveUsuarioApiError(
+        error,
+        USUARIOS_ERROR_MESSAGES.update
       )
     );
   }

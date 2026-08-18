@@ -67,7 +67,7 @@ export interface AccessControlSnapshot {
   profileId: number;
   menuTree: readonly AuthorizedOption[];
   navigationTree: readonly AuthorizedOption[];
-  optionsByCode: ReadonlyMap<string, AuthorizedOption>;
+  optionsById: ReadonlyMap<number, AuthorizedOption>;
 }
 
 export type AccessControlStatus =
@@ -82,13 +82,13 @@ export interface AccessControlContextValue {
   menuTree: readonly AuthorizedOption[];
   navigationTree: readonly AuthorizedOption[];
   refresh: () => Promise<void>;
-  hasOption: (optionCode: string) => boolean;
+  hasOption: (optionId: number) => boolean;
   hasPermission: (
-    optionCode: string,
+    optionId: number,
     permission: AccessPermissionName
   ) => boolean;
   getPermissions: (
-    optionCode: string
+    optionId: number
   ) => AccessPermissions;
 }
 

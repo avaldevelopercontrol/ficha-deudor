@@ -5,6 +5,8 @@ import path from 'node:path';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const proxyTarget = env.VITE_API_BASE_URL;
+  const analyticsProxyTarget =
+    env.VITE_ANALYTICS_API_PROXY_TARGET;
 
   if (!proxyTarget) {
     throw new Error(
@@ -31,6 +33,20 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
+        ...(analyticsProxyTarget
+          ? {
+              '/analytics-api': {
+                target: analyticsProxyTarget,
+                changeOrigin: true,
+                secure: false,
+                rewrite: (requestPath: string) =>
+                  requestPath.replace(
+                    /^\/analytics-api/,
+                    ''
+                  ),
+              },
+            }
+          : {}),
       },
     },
   };

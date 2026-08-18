@@ -32,6 +32,7 @@ import type {
   UsuarioMantenible,
 } from '../types/mantenerUsuario.types';
 
+import ModalEditarUsuario from './ModalEditarUsuario';
 import ModalRegistrarUsuario from './ModalRegistrarUsuario';
 
 interface MantenerUsuarioTableCardProps {
@@ -49,10 +50,10 @@ export const MantenerUsuarioTableCard = ({
     setIsRegisterModalOpen,
   ] = useState(false);
 
-  const columns =
-    useMantenerUsuarioColumns({
-      onEditUsuario,
-    });
+  const [
+    selectedEditUsuario,
+    setSelectedEditUsuario,
+  ] = useState<UsuarioMantenible | null>(null);
 
   const {
     allData,
@@ -80,10 +81,42 @@ export const MantenerUsuarioTableCard = ({
     onSelectedFilterChange,
 
     canInsert,
+    canEdit,
     registrarUsuario,
+    editarUsuario,
     feedback,
     clearFeedback,
   } = useMantenerUsuarioTable();
+
+  const handleOpenEditModal =
+    useCallback(
+      (usuario: UsuarioMantenible) => {
+        if (!canEdit) {
+          return;
+        }
+
+        clearFeedback();
+        setSelectedEditUsuario(usuario);
+        onEditUsuario?.(usuario);
+      },
+      [
+        canEdit,
+        clearFeedback,
+        onEditUsuario,
+      ]
+    );
+
+  const handleCloseEditModal =
+    useCallback(() => {
+      setSelectedEditUsuario(null);
+    }, []);
+
+  const columns =
+    useMantenerUsuarioColumns({
+      onEditUsuario:
+        handleOpenEditModal,
+      canEdit,
+    });
 
   const handleOpenRegisterModal =
     useCallback(() => {
@@ -263,6 +296,19 @@ export const MantenerUsuarioTableCard = ({
           registrarUsuario
         }
       />
+
+      {selectedEditUsuario && (
+        <ModalEditarUsuario
+          isOpen
+          idUsuario={
+            selectedEditUsuario.id
+          }
+          onClose={
+            handleCloseEditModal
+          }
+          onGuardar={editarUsuario}
+        />
+      )}
     </>
   );
 };

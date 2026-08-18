@@ -11,7 +11,7 @@ interface UseApiResourceState<T> {
 
 interface UseApiResourceReturn<T>
   extends UseApiResourceState<T> {
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 interface UseApiResourceOptions {
@@ -53,8 +53,6 @@ export function useApiResource<T>(
     data: resource.data,
     isLoading: resource.isLoading,
     error: resource.error,
-    refetch: () => {
-      void resource.refetch();
-    },
+    refetch: resource.refetch,
   };
 }

@@ -70,9 +70,11 @@ export const useLoginRequest = () => {
 
         setState({
           isLoading: false,
-          error: outcome.response.success
-            ? null
-            : outcome.response.message,
+          error:
+            outcome.response.success ||
+            outcome.response.requiresPasswordChange
+              ? null
+              : outcome.response.message,
           data: outcome.response,
         });
 

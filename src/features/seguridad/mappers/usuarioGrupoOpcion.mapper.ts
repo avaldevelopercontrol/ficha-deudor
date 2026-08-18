@@ -1,4 +1,3 @@
-import { getOptionDisplayName } from '@shared/utils/optionDisplayName.utils';
 
 import {
   toRequiredId,
@@ -143,15 +142,9 @@ export const mapUsuarioGrupoOpcionListado = (
     'sCodigoOpcion'
   ),
 
-  opcion: getOptionDisplayName(
-    toRequiredText(
-      item.sCodigoOpcion,
-      'sCodigoOpcion'
-    ),
-    toRequiredText(
-      item.sNombreOpcion,
-      'sNombreOpcion'
-    )
+  opcion: toRequiredText(
+    item.sNombreOpcion,
+    'sNombreOpcion'
   ),
 
   consultar: toBoolean(

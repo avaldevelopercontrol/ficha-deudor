@@ -421,3 +421,228 @@
     margin-left: 0;
   }
 }
+
+/* =========================================================
+   MODAL — EDITAR USUARIO
+   ========================================================= */
+
+.editar-usuario-form__access-grid {
+  align-items: start;
+}
+
+.editar-usuario-form__password-toggle {
+  display: flex;
+  grid-column: 2;
+  min-height: 26px;
+  align-items: center;
+  padding-left: 145px;
+}
+
+.editar-usuario-form__password-toggle
+  .checkbox-wrapper {
+  margin: 0;
+}
+
+.editar-usuario-form__password-field {
+  min-width: 0;
+}
+
+.editar-usuario-form__password-field--new {
+  grid-column: 1;
+}
+
+.editar-usuario-password-requirements {
+  grid-area: auto;
+  grid-column: 1;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  margin: -4px 0 0 145px;
+}
+
+.editar-usuario-groups-section {
+  margin-top: 18px;
+}
+
+.editar-usuario-groups-section__help {
+  margin: -5px 0 12px;
+  color: var(--ap-text-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+/* =========================================================
+   GESTOR DE GRUPOS DEL USUARIO
+   ========================================================= */
+
+.usuario-groups-manager {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.usuario-groups-manager__column {
+  min-width: 0;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: var(--radius);
+}
+
+.usuario-groups-manager__column-header {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 10px;
+  color: var(--ap-navy);
+  background: var(--ap-gray-50);
+  border-bottom: 1px solid var(--ap-gray-200);
+  font-size: 10px;
+  letter-spacing: 0.25px;
+  text-transform: uppercase;
+}
+
+.usuario-groups-manager__count {
+  display: inline-flex;
+  min-width: 22px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  color: var(--ap-text-muted);
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.usuario-groups-manager__search {
+  width: calc(100% - 16px);
+  height: 28px;
+  margin: 8px;
+  font-size: 10px;
+}
+
+.usuario-groups-manager__list {
+  min-height: 170px;
+  max-height: 250px;
+  overflow-y: auto;
+  border-top: 1px solid var(--ap-gray-100);
+}
+
+.usuario-groups-manager__item {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 7px 5px 10px;
+  border-bottom: 1px solid var(--ap-gray-100);
+}
+
+.usuario-groups-manager__item:last-child {
+  border-bottom: 0;
+}
+
+.usuario-groups-manager__item:hover {
+  background: var(--ap-gray-50);
+}
+
+.usuario-groups-manager__name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: var(--ap-text);
+  font-size: 10px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usuario-groups-manager__action {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  background: #ffffff;
+  border: 1px solid var(--ap-gray-300);
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.usuario-groups-manager__action--add {
+  color: var(--ap-success);
+}
+
+.usuario-groups-manager__action--remove {
+  color: var(--ap-red);
+}
+
+.usuario-groups-manager__action:hover:not(:disabled) {
+  background: var(--ap-gray-50);
+  border-color: var(--ap-gray-400);
+}
+
+.usuario-groups-manager__action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.usuario-groups-manager__empty {
+  display: flex;
+  min-height: 100px;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  color: var(--ap-text-muted);
+  font-size: 10px;
+  text-align: center;
+}
+
+.usuario-groups-manager__error {
+  grid-column: 1 / -1;
+  margin-top: -5px;
+}
+
+@media (max-width: 900px) {
+  .editar-usuario-form__password-toggle,
+  .editar-usuario-form__password-field--new,
+  .editar-usuario-password-requirements {
+    grid-column: auto;
+  }
+
+  .editar-usuario-form__password-toggle {
+    padding-left: 155px;
+  }
+
+  .editar-usuario-password-requirements {
+    margin-left: 155px;
+  }
+
+  .usuario-groups-manager {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 620px) {
+  .editar-usuario-form__password-toggle {
+    padding-left: 0;
+  }
+
+  .editar-usuario-password-requirements {
+    grid-template-columns: 1fr;
+    margin-left: 0;
+  }
+
+  .usuario-groups-manager__list {
+    max-height: 210px;
+  }
+}

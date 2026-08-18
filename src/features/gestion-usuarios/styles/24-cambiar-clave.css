@@ -327,3 +327,41 @@
     padding: 18px;
   }
 }
+
+/* =========================================================
+   CAMBIO DE CLAVE EXPIRADA — FLUJO PÚBLICO
+   ========================================================= */
+
+.cambiar-clave-page--public {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.cambiar-clave-page__public-shell {
+  width: min(100%, 1120px);
+}
+
+.cambiar-clave-page__public-brand {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.cambiar-clave-page__main--public {
+  padding-top: 20px;
+}
+
+.cambiar-clave-expirada {
+  width: 100%;
+}
+
+@media (max-width: 560px) {
+  .cambiar-clave-page--public {
+    align-items: flex-start;
+    padding: 20px 0;
+  }
+}

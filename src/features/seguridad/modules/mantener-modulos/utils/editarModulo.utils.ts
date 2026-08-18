@@ -11,6 +11,35 @@ import type {
   EditarModuloFormData,
 } from '../types/editarModulo.types';
 
+import {
+  suggestModuloCode,
+} from './registrarModulo.utils';
+
+export const resolveModuloCodeAfterNameChange = (
+  modulo: OpcionApi,
+  nextName: string
+): string => {
+  const currentCode =
+    modulo.sCodigoOpcion?.trim() ?? '';
+
+  const isRootModule =
+    (
+      Number(
+        modulo.nId_OpcionPadre
+      ) || 0
+    ) === 0;
+
+  if (
+    isRootModule
+  ) {
+    return currentCode;
+  }
+
+  return suggestModuloCode(
+    nextName
+  );
+};
+
 const sortModulesByOrder = (
   left: Modulo,
   right: Modulo

@@ -8,10 +8,8 @@ export interface ModuloFormData {
   estado: boolean;
 }
 
-export interface RegistrarModuloFormData
-  extends ModuloFormData {
-  applicationOptionCode: string;
-}
+export type RegistrarModuloFormData =
+  ModuloFormData;
 
 export type ModuloFormFieldChange = <
   K extends keyof ModuloFormData,
@@ -20,9 +18,5 @@ export type ModuloFormFieldChange = <
   value: ModuloFormData[K]
 ) => void;
 
-export type RegistrarModuloFieldChange = <
-  K extends keyof RegistrarModuloFormData,
->(
-  field: K,
-  value: RegistrarModuloFormData[K]
-) => void;
+export type RegistrarModuloFieldChange =
+  ModuloFormFieldChange;

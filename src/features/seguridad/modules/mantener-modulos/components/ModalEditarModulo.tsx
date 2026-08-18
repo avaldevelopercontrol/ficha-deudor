@@ -41,6 +41,7 @@ import {
   buildOrderOptions,
   buildOrderPreview,
   mapOpcionApiToEditarModuloForm,
+  resolveModuloCodeAfterNameChange,
   resolveOrderAfterParentChange,
 } from '../utils/editarModulo.utils';
 
@@ -250,6 +251,43 @@ export const ModalEditarModulo = ({
         ) === 0
       : false;
 
+  const handleNombreChange =
+    useCallback(
+      (
+        value: string
+      ) => {
+        handleChange(
+          'nombre',
+          value
+        );
+
+        if (!moduloDetalle) {
+          return;
+        }
+
+        const nextCode =
+          resolveModuloCodeAfterNameChange(
+            moduloDetalle,
+            value
+          );
+
+        if (
+          nextCode !==
+          form.codigo
+        ) {
+          handleChange(
+            'codigo',
+            nextCode
+          );
+        }
+      },
+      [
+        form.codigo,
+        handleChange,
+        moduloDetalle,
+      ]
+    );
+
   const handleParentChange =
     useCallback(
       (
@@ -380,12 +418,9 @@ export const ModalEditarModulo = ({
                   parentDisabled={
                     isRootModule
                   }
-                  onNombreChange={(value) => {
-                    handleChange(
-                      'nombre',
-                      value
-                    );
-                  }}
+                  onNombreChange={
+                    handleNombreChange
+                  }
                   onDescripcionChange={(value) => {
                     handleChange(
                       'descripcion',

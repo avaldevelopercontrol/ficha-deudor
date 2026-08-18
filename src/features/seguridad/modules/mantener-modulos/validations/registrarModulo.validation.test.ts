@@ -41,8 +41,6 @@ export const suite = defineSuite(
         const errors =
           validateRegistrarModuloForm(
             {
-              applicationOptionCode:
-                'mMantenerGrupo',
               nombre: 'Mantener Grupo',
               descripcion: '',
               codigo: 'mMantenerGrupo',
@@ -63,16 +61,15 @@ export const suite = defineSuite(
       }
     ),
     test(
-      'exige seleccionar una pantalla desarrollada al registrar',
+      'permite registrar un módulo antes de desarrollar su pantalla React',
       () => {
         const errors =
           validateRegistrarModuloForm(
             {
-              applicationOptionCode:
-                '',
-              nombre: '',
-              descripcion: '',
-              codigo: '',
+              nombre: 'Administración',
+              descripcion:
+                'Contenedor pendiente de implementación.',
+              codigo: 'mAdministracion',
               icono: '',
               padreId: 1,
               visible: true,
@@ -83,9 +80,9 @@ export const suite = defineSuite(
             }
           );
 
-        assert.equal(
-          errors.applicationOptionCode,
-          'Seleccione un módulo desarrollado válido.'
+        assert.deepEqual(
+          errors,
+          {}
         );
       }
     ),
