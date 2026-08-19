@@ -33,6 +33,9 @@ interface AccessOptionApi {
   sCodigoOpcion: unknown;
   sNombreOpcion: unknown;
   sDescripcionOpcion?: unknown;
+  sUrlBI?: unknown;
+  sImagenOpcion?: unknown;
+  sEmailOpcion?: unknown;
   sIcono?: unknown;
   nTipo: unknown;
   nId_OpcionPadre?: unknown;
@@ -156,6 +159,16 @@ const toOptionalText = (
     ? value.trim()
     : '';
 
+
+const toNullableText = (
+  value: unknown
+): string | null => {
+  const normalized =
+    toOptionalText(value);
+
+  return normalized || null;
+};
+
 const toBoolean = (
   value: unknown
 ): boolean =>
@@ -181,6 +194,15 @@ const mapAccessOption = (
   ),
   description: toOptionalText(
     option.sDescripcionOpcion
+  ),
+  urlBI: toNullableText(
+    option.sUrlBI
+  ),
+  image: toNullableText(
+    option.sImagenOpcion
+  ),
+  email: toNullableText(
+    option.sEmailOpcion
   ),
   icon: toOptionalText(
     option.sIcono

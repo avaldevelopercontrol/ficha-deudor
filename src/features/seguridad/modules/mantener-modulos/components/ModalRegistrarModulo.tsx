@@ -42,6 +42,11 @@ import {
 } from '../utils/registrarModulo.utils';
 
 import {
+  POWER_BI_DEFAULT_ICON,
+  POWER_BI_PARENT_OPTION_ID,
+} from '../utils/powerBiModulo.utils';
+
+import {
   normalizeRegistrarModuloForm,
   validateRegistrarModuloForm,
 } from '../validations/registrarModulo.validation';
@@ -80,10 +85,19 @@ export const ModalRegistrarModulo = ({
   const codeWasEditedRef =
     useRef(false);
 
+  const previousParentIdRef =
+    useRef<number | null>(null);
+
+  const previousIconRef =
+    useRef<string>('');
+
   useEffect(() => {
     if (!isOpen) {
       codeWasEditedRef.current =
         false;
+      previousParentIdRef.current =
+        null;
+      previousIconRef.current = '';
     }
   }, [isOpen]);
 
@@ -94,6 +108,13 @@ export const ModalRegistrarModulo = ({
           modulosExistentes
         ),
       [modulosExistentes]
+    );
+
+  const powerBiParentAvailable =
+    modulosExistentes.some(
+      (modulo) =>
+        modulo.idModulo ===
+        POWER_BI_PARENT_OPTION_ID
     );
 
   const parentOptions =
@@ -196,6 +217,82 @@ export const ModalRegistrarModulo = ({
       [handleChange]
     );
 
+  const handlePowerBIChange =
+    useCallback(
+      (enabled: boolean) => {
+        if (enabled) {
+          previousParentIdRef.current =
+            form.padreId !==
+            POWER_BI_PARENT_OPTION_ID
+              ? form.padreId
+              : previousParentIdRef.current;
+
+          handleChange(
+            'esPowerBI',
+            true
+          );
+          handleChange(
+            'padreId',
+            POWER_BI_PARENT_OPTION_ID
+          );
+
+          previousIconRef.current =
+            form.icono.trim();
+
+          handleChange(
+            'icono',
+            POWER_BI_DEFAULT_ICON
+          );
+
+          return;
+        }
+
+        handleChange(
+          'esPowerBI',
+          false
+        );
+        handleChange(
+          'urlBI',
+          ''
+        );
+        handleChange(
+          'imagenOpcion',
+          ''
+        );
+        handleChange(
+          'emailOpcion',
+          ''
+        );
+        handleChange(
+          'icono',
+          previousIconRef.current
+        );
+
+        const previousParentId =
+          previousParentIdRef.current;
+
+        if (
+          previousParentId !== null &&
+          modulosExistentes.some(
+            (modulo) =>
+              modulo.idModulo ===
+              previousParentId
+          )
+        ) {
+          handleChange(
+            'padreId',
+            previousParentId
+          );
+        }
+      },
+      [
+        form.icono,
+        form.padreId,
+        handleChange,
+        modulosExistentes,
+      ]
+    );
+
   const {
     visibleDisabled,
     onVisibleChange,
@@ -253,6 +350,14 @@ export const ModalRegistrarModulo = ({
             parentOptions={
               parentOptions
             }
+            powerBiDisabled={
+              !powerBiParentAvailable
+            }
+            powerBiDisabledMessage={
+              !powerBiParentAvailable
+                ? 'Primero registre el módulo Reportería para poder crear tableros Power BI.'
+                : undefined
+            }
             onNombreChange={
               handleNombreChange
             }
@@ -271,6 +376,30 @@ export const ModalRegistrarModulo = ({
                 value
               );
             }}
+            onEsPowerBIChange={
+              handlePowerBIChange
+            }
+            onUrlBIChange={(value) => {
+              handleChange(
+                'urlBI',
+                value
+              );
+            }}
+            onImagenOpcionChange={(value) => {
+              handleChange(
+                'imagenOpcion',
+                value
+              );
+            }}
+            onEmailOpcionChange={(value) => {
+              handleChange(
+                'emailOpcion',
+                value
+              );
+            }}
+            parentDisabled={
+              form.esPowerBI
+            }
             onPadreChange={(value) => {
               handleChange(
                 'padreId',

@@ -79,6 +79,10 @@ export const buildRegistrarModuloInitialForm = (
   descripcion: '',
   codigo: '',
   icono: '',
+  esPowerBI: false,
+  urlBI: '',
+  imagenOpcion: '',
+  emailOpcion: '',
   padreId:
     resolveDefaultParentId(
       opciones

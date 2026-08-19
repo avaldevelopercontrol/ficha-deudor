@@ -76,6 +76,8 @@ const option = (
   code,
   name,
   description: '',
+  urlBI: null,
+  image: null,
   icon: 'module-default',
   type,
   parentId,
@@ -761,6 +763,58 @@ export const suite = defineSuite(
           /más de un acceso especial registrado/i
         );
       }
-    )
+    ),
+    test(
+      'conserva los Power BI autorizados en menuTree y los excluye del sidebar',
+      () => {
+        const snapshot =
+          buildAccessControlSnapshot(
+            9,
+            [
+              option(1, 'Root', 'Root', 1, 0, 0),
+              option(24, 'mGestionAnalitica', 'Gestión Analítica', 2, 1, 1),
+              option(25, 'mReporteria', 'Reportería', 3, 24, 1),
+              option(26, 'mBackusCobranza', 'Backus Cobranza', 4, 25, 1, {
+                urlBI: 'https://app.powerbi.com/view?r=demo',
+                image: '/logos/backus.webp',
+                icon: 'analytics',
+              }),
+            ],
+            [
+              allow(1, 9, 24),
+              allow(2, 9, 25),
+              allow(3, 9, 26),
+            ]
+          );
+
+        const reporteriaMenu =
+          snapshot.menuTree[0]?.children[0];
+        const reportMenu =
+          reporteriaMenu?.children[0];
+
+        assert.equal(reporteriaMenu?.id, 25);
+        assert.equal(reportMenu?.id, 26);
+        assert.equal(
+          reportMenu?.urlBI,
+          'https://app.powerbi.com/view?r=demo'
+        );
+        assert.equal(
+          reportMenu?.image,
+          '/logos/backus.webp'
+        );
+
+        const reporteriaNavigation =
+          snapshot.navigationTree[0]?.children[0];
+
+        assert.equal(
+          reporteriaNavigation?.id,
+          25
+        );
+        assert.deepEqual(
+          reporteriaNavigation?.children,
+          []
+        );
+      }
+    ),
   ]
 );

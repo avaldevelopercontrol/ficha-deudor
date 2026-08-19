@@ -3,6 +3,10 @@ export interface ModuloFormData {
   descripcion: string;
   codigo: string;
   icono: string;
+  esPowerBI: boolean;
+  urlBI: string;
+  imagenOpcion: string;
+  emailOpcion?: string;
   padreId: number;
   visible: boolean;
   estado: boolean;

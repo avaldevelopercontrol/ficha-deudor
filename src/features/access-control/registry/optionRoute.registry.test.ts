@@ -41,6 +41,14 @@ export const suite = defineSuite(
         assert.equal(
           getOptionRoute(
             APPLICATION_OPTION_IDS
+              .REPORTERIA
+          ),
+          '/analytics/reporteria'
+        );
+
+        assert.equal(
+          getOptionRoute(
+            APPLICATION_OPTION_IDS
               .MANTENER_ACCESOS_POR_PERFIL
           ),
           '/seguridad/mantener-accesos-por-perfil'

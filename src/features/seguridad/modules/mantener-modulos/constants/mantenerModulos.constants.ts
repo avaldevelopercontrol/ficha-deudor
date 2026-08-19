@@ -3,7 +3,7 @@ export const MANTENER_MODULOS_TEXTS = {
     'Módulos registrados',
 
   sectionDescription:
-    'Consulte la estructura configurada y verifique qué módulos ya tienen una implementación React asociada por Id.',
+    'Consulte la estructura configurada y el tipo de implementación de cada módulo.',
 
   loadingMessage:
     'Cargando módulos...',

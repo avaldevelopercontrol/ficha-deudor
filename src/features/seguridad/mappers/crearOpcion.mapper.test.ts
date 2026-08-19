@@ -19,6 +19,8 @@ const root: Modulo = {
   descripcion: '',
   codigo: 'Root',
   ruta: 'root/',
+  urlBI: null,
+  imagenOpcion: null,
   icono: '',
   tipo: 1,
   idPadre: 0,
@@ -45,6 +47,9 @@ export const suite = defineSuite(
                 'Descripción de prueba',
               codigo: 'mMantenerGrupo',
               icono: '',
+              esPowerBI: false,
+              urlBI: '',
+              imagenOpcion: '',
               padreId: 1,
               visible: true,
               estado: false,
@@ -74,7 +79,11 @@ export const suite = defineSuite(
         );
         assert.equal(
           request.sUrlBI,
-          ''
+          null
+        );
+        assert.equal(
+          request.sEmailOpcion,
+          null
         );
         assert.equal(
           request.dFechaCrea,
@@ -104,6 +113,9 @@ export const suite = defineSuite(
                 'Contenedor pendiente de implementación.',
               codigo: 'mOperaciones',
               icono: '',
+              esPowerBI: false,
+              urlBI: '',
+              imagenOpcion: '',
               padreId: 30,
               visible: true,
               estado: true,
@@ -125,7 +137,7 @@ export const suite = defineSuite(
         );
         assert.equal(
           request.sUrlBI,
-          ''
+          null
         );
         assert.equal(
           request.nId_OpcionPadre,
@@ -135,6 +147,73 @@ export const suite = defineSuite(
           request.nTipo,
           3
         );
+      }
+    ),
+    test(
+      'registra un Power BI debajo de Reportería sin requerir una ruta React propia',
+      () => {
+        const gestionAnalitica: Modulo = {
+          ...root,
+          idModulo: 24,
+          nombre: 'Gestión Analítica',
+          codigo: 'mGestionAnalitica',
+          ruta: 'root/mGestionAnalitica/',
+          tipo: 2,
+          idPadre: 1,
+          orden: 9,
+        };
+
+        const reporteria: Modulo = {
+          ...root,
+          idModulo: 25,
+          nombre: 'Reportería',
+          codigo: 'mReporteria',
+          ruta: 'root/mGestionAnalitica/mReporteria/',
+          icono: 'client-reports',
+          tipo: 3,
+          idPadre: 24,
+          orden: 2,
+        };
+
+        const request = buildCreateOpcionRequest(
+          {
+            nombre: 'Backus Cobranza',
+            descripcion: 'Seguimiento de cobranza.',
+            codigo: 'mBackusCobranza',
+            icono: 'database',
+            esPowerBI: true,
+            urlBI: 'https://app.powerbi.com/view?r=demo',
+            imagenOpcion: '/imgs_webp/logo-backus.webp',
+            emailOpcion: 'ngutierrez@avalperu.com',
+            // El mapper debe forzar Reportería aunque el formulario haya quedado con otro padre.
+            padreId: 1,
+            visible: true,
+            estado: true,
+          },
+          [root, gestionAnalitica, reporteria],
+          '16068',
+          new Date('2026-08-19T15:00:00.000Z')
+        );
+
+        assert.equal(request.nId_OpcionPadre, 25);
+        assert.equal(request.nTipo, 4);
+        assert.equal(
+          request.sUrlOpcion,
+          'root/mGestionAnalitica/mReporteria/mBackusCobranza/'
+        );
+        assert.equal(
+          request.sUrlBI,
+          'https://app.powerbi.com/view?r=demo'
+        );
+        assert.equal(
+          request.sImagenOpcion,
+          '/imgs_webp/logo-backus.webp'
+        );
+        assert.equal(
+          request.sEmailOpcion,
+          'ngutierrez@avalperu.com'
+        );
+        assert.equal(request.sIcono, 'analytics');
       }
     ),
   ]

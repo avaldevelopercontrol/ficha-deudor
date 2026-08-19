@@ -11,9 +11,10 @@ export type ModuloIndicador =
   | 'No';
 
 export type ModuloImplementacion =
-  | 'IMPLEMENTADA'
-  | 'ESTRUCTURA'
-  | 'SIN PANTALLA';
+  | 'IMPLEMENTADO'
+  | 'POWER BI'
+  | 'AGRUPADOR'
+  | 'SIN IMPLEMENTAR';
 
 /**
  * Estructura recibida desde
@@ -27,6 +28,8 @@ export interface OpcionApi {
   sUrlOpcion: string | null;
   sUrlBI: string | null;
   sIcono?: string | null;
+  sImagenOpcion?: string | null;
+  sEmailOpcion?: string | null;
   nTipo: number;
   nId_OpcionPadre: number;
   sCodigoOpcionPadre?: string | null;
@@ -50,8 +53,12 @@ export interface Modulo {
   descripcion: string;
   codigo: string;
   ruta: string;
-  /** Valor interno de API; la UI de Mantener módulo todavía no lo administra. */
-  urlBI?: string;
+  /** URL externa del tablero Power BI. Null cuando la opción no es BI. */
+  urlBI: string | null;
+  /** URL o ruta del logo mostrado en la tarjeta de reportería. */
+  imagenOpcion: string | null;
+  /** Correo de contacto del tablero. Null cuando la opción no es Power BI. */
+  emailOpcion?: string | null;
   icono: string;
   tipo: number;
   idPadre: number;

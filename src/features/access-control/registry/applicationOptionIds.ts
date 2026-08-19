@@ -17,6 +17,7 @@ export const APPLICATION_OPTION_IDS = {
   MANTENER_GRUPO: 21,
   MANTENER_ACCESOS_POR_USUARIO: 22,
   PORTFOLIO_CONTROL_CENTER: 23,
+  REPORTERIA: 25,
 } as const;
 
 export type ApplicationOptionId =

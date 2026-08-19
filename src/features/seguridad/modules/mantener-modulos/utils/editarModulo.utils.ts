@@ -204,6 +204,18 @@ export const mapOpcionApiToEditarModuloForm = (
     icono:
       modulo.sIcono?.trim() ?? '',
 
+    esPowerBI:
+      Boolean(modulo.sUrlBI?.trim()),
+
+    urlBI:
+      modulo.sUrlBI?.trim() ?? '',
+
+    imagenOpcion:
+      modulo.sImagenOpcion?.trim() ?? '',
+
+    emailOpcion:
+      modulo.sEmailOpcion?.trim() ?? '',
+
     padreId:
       Number(modulo.nId_OpcionPadre) || 0,
 
