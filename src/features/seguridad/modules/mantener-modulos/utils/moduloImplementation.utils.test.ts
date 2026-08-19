@@ -22,6 +22,8 @@ const buildModulo = (
   codigo: 'mCartera',
   ruta:
     'root/mGestionDeCobranzas/mCartera/',
+  urlBI: null,
+  imagenOpcion: null,
   icono: '',
   tipo: 3,
   idPadre: 4,
@@ -41,7 +43,7 @@ export const suite = defineSuite(
   'estado de implementación de módulos',
   [
     test(
-      'identifica una pantalla React por nId_Opcion',
+      'identifica un módulo implementado por nId_Opcion',
       () => {
         const modulo =
           buildModulo({
@@ -53,7 +55,7 @@ export const suite = defineSuite(
             modulo,
             [modulo]
           ),
-          'IMPLEMENTADA'
+          'IMPLEMENTADO'
         );
       }
     ),
@@ -77,7 +79,7 @@ export const suite = defineSuite(
             padre,
             [padre, hijo]
           ),
-          'ESTRUCTURA'
+          'AGRUPADOR'
         );
 
         const root =
@@ -92,7 +94,7 @@ export const suite = defineSuite(
             root,
             [root]
           ),
-          'ESTRUCTURA'
+          'AGRUPADOR'
         );
       }
     ),
@@ -107,7 +109,22 @@ export const suite = defineSuite(
             modulo,
             [modulo]
           ),
-          'SIN PANTALLA'
+          'SIN IMPLEMENTAR'
+        );
+      }
+    ),
+    test(
+      'identifica un tablero configurado mediante sUrlBI',
+      () => {
+        const modulo = buildModulo({
+          idModulo: 26,
+          urlBI: 'https://app.powerbi.com/view?r=demo',
+          imagenOpcion: '/logos/backus.webp',
+        });
+
+        assert.equal(
+          resolveModuloImplementacion(modulo, [modulo]),
+          'POWER BI'
         );
       }
     ),

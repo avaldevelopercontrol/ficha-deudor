@@ -4,6 +4,10 @@ import {
   type ReactNode,
 } from 'react';
 
+import {
+  hasRegisteredOptionRoute,
+} from '@features/access-control/registry/optionRoute.registry';
+
 import Modal from '@shared/components/modals/Modal';
 
 import {
@@ -45,6 +49,7 @@ import {
   resolveOrderAfterParentChange,
 } from '../utils/editarModulo.utils';
 
+
 import {
   useModuloAvailabilityControls,
 } from '../hooks/useModuloAvailabilityControls';
@@ -82,6 +87,10 @@ const EMPTY_EDIT_FORM:
     descripcion: '',
     codigo: '',
     icono: '',
+    esPowerBI: false,
+    urlBI: '',
+    imagenOpcion: '',
+    emailOpcion: '',
     padreId: 0,
     orden: 0,
     visible: true,
@@ -96,6 +105,11 @@ export const ModalEditarModulo = ({
   onClose,
   onGuardar,
 }: ModalEditarModuloProps): ReactNode => {
+  const isImplementedModule =
+    hasRegisteredOptionRoute(
+      moduloId
+    );
+
   const fetcher =
     useCallback(
       (
@@ -141,9 +155,12 @@ export const ModalEditarModulo = ({
           {
             modulosExistentes,
             moduloIdActual: moduloId,
+            isImplemented:
+              isImplementedModule,
           }
         ),
       [
+        isImplementedModule,
         moduloId,
         modulosExistentes,
       ]
@@ -416,7 +433,11 @@ export const ModalEditarModulo = ({
                   }
                   codeDisabled
                   parentDisabled={
-                    isRootModule
+                    isRootModule ||
+                    form.esPowerBI
+                  }
+                  showPowerBiTypeSelector={
+                    false
                   }
                   onNombreChange={
                     handleNombreChange
@@ -436,6 +457,24 @@ export const ModalEditarModulo = ({
                   onIconoChange={(value) => {
                     handleChange(
                       'icono',
+                      value
+                    );
+                  }}
+                  onUrlBIChange={(value) => {
+                    handleChange(
+                      'urlBI',
+                      value
+                    );
+                  }}
+                  onImagenOpcionChange={(value) => {
+                    handleChange(
+                      'imagenOpcion',
+                      value
+                    );
+                  }}
+                  onEmailOpcionChange={(value) => {
+                    handleChange(
+                      'emailOpcion',
                       value
                     );
                   }}

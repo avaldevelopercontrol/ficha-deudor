@@ -58,6 +58,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             title="Cerrar sesión"
           >
             <LogoutIcon />
+            <span className="app-header__logout-label">
+              Cerrar sesión
+            </span>
           </button>
         )}
 

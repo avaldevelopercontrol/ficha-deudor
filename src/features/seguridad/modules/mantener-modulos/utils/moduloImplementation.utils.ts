@@ -16,7 +16,11 @@ export const resolveModuloImplementacion = (
       modulo.idModulo
     )
   ) {
-    return 'IMPLEMENTADA';
+    return 'IMPLEMENTADO';
+  }
+
+  if (modulo.urlBI?.trim()) {
+    return 'POWER BI';
   }
 
   const tieneHijos =
@@ -30,8 +34,8 @@ export const resolveModuloImplementacion = (
     modulo.tipo === 1 ||
     tieneHijos
   ) {
-    return 'ESTRUCTURA';
+    return 'AGRUPADOR';
   }
 
-  return 'SIN PANTALLA';
+  return 'SIN IMPLEMENTAR';
 };

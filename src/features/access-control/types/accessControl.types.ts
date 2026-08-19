@@ -24,6 +24,9 @@ export interface AccessOptionSource {
   code: string;
   name: string;
   description: string;
+  urlBI: string | null;
+  image: string | null;
+  email?: string | null;
   icon: string;
   type: number;
   parentId: number;
@@ -54,6 +57,9 @@ export interface AuthorizedOption {
   code: string;
   name: string;
   description: string;
+  urlBI: string | null;
+  image: string | null;
+  email?: string | null;
   icon: SisgesIconName;
   type: number;
   parentId: number;

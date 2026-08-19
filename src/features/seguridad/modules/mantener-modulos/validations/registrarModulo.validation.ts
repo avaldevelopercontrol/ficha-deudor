@@ -2,6 +2,10 @@ import {
   isSupportedSisgesIconValue,
 } from '@shared/icons/sisges';
 
+import {
+  isValidEmailValue,
+} from '@shared/utils/validators';
+
 import type {
   Modulo,
 } from '../../../types/opcion.types';
@@ -21,6 +25,14 @@ import {
 } from '../utils/editarModulo.utils';
 
 import {
+  hasModuloChildren,
+  isValidOptionImageSource,
+  isValidPowerBiUrl,
+  POWER_BI_DEFAULT_ICON,
+  POWER_BI_PARENT_OPTION_ID,
+} from '../utils/powerBiModulo.utils';
+
+import {
   normalizeModuloAvailability,
   validateModuloAvailabilityTransition,
 } from '../utils/moduloAvailability.utils';
@@ -31,6 +43,9 @@ interface ModuloFormValidationOptions {
 
   moduloIdActual?:
     number;
+
+  isImplemented?:
+    boolean;
 }
 
 const normalizeComparableValue = (
@@ -61,7 +76,27 @@ export const normalizeModuloForm = <
       form.codigo.trim(),
 
     icono:
-      form.icono.trim(),
+      form.esPowerBI
+        ? POWER_BI_DEFAULT_ICON
+        : form.icono.trim(),
+
+    esPowerBI:
+      Boolean(form.esPowerBI),
+
+    urlBI:
+      form.esPowerBI
+        ? form.urlBI.trim()
+        : '',
+
+    imagenOpcion:
+      form.esPowerBI
+        ? form.imagenOpcion.trim()
+        : '',
+
+    emailOpcion:
+      form.esPowerBI
+        ? (form.emailOpcion ?? '').trim()
+        : '',
   });
 
 export const normalizeRegistrarModuloForm = (
@@ -74,6 +109,7 @@ const validateCommonModuloFields = (
   {
     modulosExistentes = [],
     moduloIdActual,
+    isImplemented = false,
   }: ModuloFormValidationOptions = {}
 ): Record<string, string> => {
   const errors:
@@ -206,6 +242,71 @@ const validateCommonModuloFields = (
     }
   }
 
+  if (normalizedForm.esPowerBI) {
+    if (
+      normalizedForm.padreId !==
+      POWER_BI_PARENT_OPTION_ID
+    ) {
+      errors.padreId =
+        'Los módulos Power BI deben pertenecer a Reportería.';
+    }
+
+    if (!normalizedForm.urlBI) {
+      errors.urlBI =
+        'La URL de Power BI es obligatoria.';
+    } else if (
+      !isValidPowerBiUrl(
+        normalizedForm.urlBI
+      )
+    ) {
+      errors.urlBI =
+        'Ingrese una URL válida que utilice http o https.';
+    }
+
+    if (!normalizedForm.emailOpcion) {
+      errors.emailOpcion =
+        'El correo de contacto es obligatorio para un módulo Power BI.';
+    } else if (
+      !isValidEmailValue(
+        normalizedForm.emailOpcion
+      )
+    ) {
+      errors.emailOpcion =
+        'Ingrese un correo electrónico válido.';
+    }
+
+    if (
+      normalizedForm.imagenOpcion &&
+      !isValidOptionImageSource(
+        normalizedForm.imagenOpcion
+      )
+    ) {
+      errors.imagenOpcion =
+        'Ingrese una URL http/https o una ruta relativa que inicie con /.';
+    }
+
+    if (isRootModule) {
+      errors.esPowerBI =
+        'La opción raíz no puede configurarse como Power BI.';
+    }
+
+    if (isImplemented) {
+      errors.esPowerBI =
+        'Un módulo ya implementado en SISGES no puede convertirse en Power BI.';
+    }
+
+    if (
+      moduloIdActual !== undefined &&
+      hasModuloChildren(
+        moduloIdActual,
+        modulosExistentes
+      )
+    ) {
+      errors.esPowerBI =
+        'Un módulo con opciones hijas no puede convertirse en Power BI.';
+    }
+  }
+
   if (
     typeof normalizedForm.visible !==
     'boolean'
@@ -256,6 +357,7 @@ export const validateEditarModuloForm = (
   {
     modulosExistentes = [],
     moduloIdActual,
+    isImplemented = false,
   }: ModuloFormValidationOptions = {}
 ): Record<string, string> => {
   const errors =
@@ -264,6 +366,7 @@ export const validateEditarModuloForm = (
       {
         modulosExistentes,
         moduloIdActual,
+        isImplemented,
       }
     );
 

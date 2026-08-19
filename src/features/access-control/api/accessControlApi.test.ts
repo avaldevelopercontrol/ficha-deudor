@@ -67,6 +67,9 @@ export const suite = defineSuite(
                   sNombreOpcion:
                     'Mantener perfil',
                   sDescripcionOpcion: '',
+                  sUrlBI: 'https://app.powerbi.com/view?r=demo',
+                  sImagenOpcion: '/logos/demo.webp',
+                  sEmailOpcion: 'reportes@avalperu.com',
                   sIcono: '',
                   nTipo: 3,
                   nId_OpcionPadre: 2,
@@ -150,6 +153,18 @@ export const suite = defineSuite(
           assert.equal(
             result.userGroupAssignments.length,
             1
+          );
+          assert.equal(
+            result.options[0]?.urlBI,
+            'https://app.powerbi.com/view?r=demo'
+          );
+          assert.equal(
+            result.options[0]?.image,
+            '/logos/demo.webp'
+          );
+          assert.equal(
+            result.options[0]?.email,
+            'reportes@avalperu.com'
           );
           assert.deepEqual(
             result.userGroupAssignments[0],

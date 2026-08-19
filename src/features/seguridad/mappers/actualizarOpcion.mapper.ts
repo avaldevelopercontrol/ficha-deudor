@@ -11,6 +11,11 @@ import {
 } from '../modules/mantener-modulos/utils/registrarModulo.utils';
 
 import {
+  POWER_BI_DEFAULT_ICON,
+  POWER_BI_PARENT_OPTION_ID,
+} from '../modules/mantener-modulos/utils/powerBiModulo.utils';
+
+import {
   assertModuloAvailabilityTransition,
   normalizeModuloAvailability,
 } from '../modules/mantener-modulos/utils/moduloAvailability.utils';
@@ -30,7 +35,9 @@ interface MutableModulo {
   nombre: string;
   descripcion: string;
   ruta: string;
-  urlBI: string;
+  urlBI: string | null;
+  imagenOpcion: string | null;
+  emailOpcion: string | null;
   icono: string;
   tipo: number;
   idPadre: number;
@@ -64,7 +71,11 @@ const mapModuloToMutable = (
   nombre: modulo.nombre,
   descripcion: modulo.descripcion,
   ruta: modulo.ruta,
-  urlBI: modulo.urlBI?.trim() ?? '',
+  urlBI: modulo.urlBI?.trim() || null,
+  imagenOpcion:
+    modulo.imagenOpcion?.trim() || null,
+  emailOpcion:
+    modulo.emailOpcion?.trim() || null,
   icono: modulo.icono,
   tipo: modulo.tipo,
   idPadre: modulo.idPadre,
@@ -86,7 +97,11 @@ const mapOpcionApiToMutable = (
   ruta:
     modulo.sUrlOpcion?.trim() ?? '',
   urlBI:
-    modulo.sUrlBI?.trim() ?? '',
+    modulo.sUrlBI?.trim() || null,
+  imagenOpcion:
+    modulo.sImagenOpcion?.trim() || null,
+  emailOpcion:
+    modulo.sEmailOpcion?.trim() || null,
   icono:
     modulo.sIcono?.trim() ?? '',
   tipo: Number(modulo.nTipo) || 0,
@@ -106,6 +121,8 @@ const hasChanged = (
   original.descripcion !== updated.descripcion ||
   original.ruta !== updated.ruta ||
   original.urlBI !== updated.urlBI ||
+  original.imagenOpcion !== updated.imagenOpcion ||
+  original.emailOpcion !== updated.emailOpcion ||
   original.icono !== updated.icono ||
   original.tipo !== updated.tipo ||
   original.idPadre !== updated.idPadre ||
@@ -525,6 +542,8 @@ const toUpdateRequest = (
   sUrlOpcion: modulo.ruta,
   sUrlBI: modulo.urlBI,
   sIcono: modulo.icono,
+  sImagenOpcion: modulo.imagenOpcion,
+  sEmailOpcion: modulo.emailOpcion,
   nTipo: modulo.tipo,
   nId_OpcionPadre: modulo.idPadre,
   nOrden: modulo.orden,
@@ -589,9 +608,14 @@ export const buildUpdateOpcionRequests = (
   const originalParentId =
     originalCurrent.idPadre;
 
+  const targetParentId =
+    normalizedForm.esPowerBI
+      ? POWER_BI_PARENT_OPTION_ID
+      : normalizedForm.padreId;
+
   if (
     originalParentId === 0 &&
-    normalizedForm.padreId !== 0
+    targetParentId !== 0
   ) {
     throw new Error(
       'La opción raíz no puede asignarse a otro padre.'
@@ -599,14 +623,14 @@ export const buildUpdateOpcionRequests = (
   }
 
   const parentOption =
-    normalizedForm.padreId === 0
+    targetParentId === 0
       ? null
       : modulesById.get(
-          normalizedForm.padreId
+          targetParentId
         );
 
   if (
-    normalizedForm.padreId !== 0 &&
+    targetParentId !== 0 &&
     !parentOption
   ) {
     throw new Error(
@@ -626,7 +650,7 @@ export const buildUpdateOpcionRequests = (
 
   const hierarchyChanged =
     originalCurrent.idPadre !==
-      normalizedForm.padreId ||
+      targetParentId ||
     originalCurrent.codigo !== codigo;
 
   const updatedRoute =
@@ -651,13 +675,31 @@ export const buildUpdateOpcionRequests = (
       descripcion:
         normalizedForm.descripcion.trim(),
       ruta: updatedRoute,
-      icono: normalizedForm.icono.trim(),
+      urlBI:
+        normalizedForm.esPowerBI
+          ? normalizedForm.urlBI.trim()
+          : null,
+      imagenOpcion:
+        normalizedForm.esPowerBI
+          ? (
+              normalizedForm.imagenOpcion.trim() ||
+              null
+            )
+          : null,
+      emailOpcion:
+        normalizedForm.esPowerBI
+          ? (normalizedForm.emailOpcion ?? '').trim()
+          : null,
+      icono:
+        normalizedForm.esPowerBI
+          ? POWER_BI_DEFAULT_ICON
+          : normalizedForm.icono.trim(),
       tipo: parentOption
         ? parentOption.tipo + 1
         : originalCurrent.tipo,
-      idPadre: normalizedForm.padreId,
+      idPadre: targetParentId,
       orden:
-        normalizedForm.padreId === 0
+        targetParentId === 0
           ? 0
           : normalizedForm.orden,
       visible: normalizedForm.visible,

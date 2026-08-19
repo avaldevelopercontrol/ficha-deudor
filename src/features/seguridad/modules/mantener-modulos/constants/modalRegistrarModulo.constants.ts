@@ -34,6 +34,18 @@ export const MODAL_REGISTRAR_MODULO_LABELS = {
   icono:
     'Icono',
 
+  esPowerBI:
+    'Tipo de módulo',
+
+  urlBI:
+    'URL Power BI',
+
+  imagenOpcion:
+    'Logo del reporte',
+
+  emailOpcion:
+    'Correo de contacto',
+
   padre:
     'Padre',
 
@@ -56,6 +68,22 @@ export const MODAL_REGISTRAR_MODULO_PLACEHOLDERS = {
 
   icono:
     'Seleccionar icono',
+
+  urlBI:
+    'https://app.powerbi.com/...',
+
+  emailOpcion:
+    'correo@empresa.com',
+
+} as const;
+
+
+export const MODAL_REGISTRAR_MODULO_HELP = {
+  imagenOpcion:
+    'Opcional. Seleccione uno de los logos disponibles. Si necesita otro, puede indicar una URL desde el selector.',
+
+  powerBIParent:
+    'Los módulos Power BI pertenecen siempre a Reportería.',
 } as const;
 
 export const MODAL_REGISTRAR_MODULO_VISIBLE_OPTIONS:

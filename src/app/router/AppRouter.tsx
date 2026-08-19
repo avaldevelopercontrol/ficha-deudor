@@ -28,6 +28,10 @@ import {
 } from '../../features/analytics/constants/analyticsRoutes.constants';
 
 import {
+  REPORTERIA_ROUTES,
+} from '../../features/analytics/constants/reporteriaRoutes.constants';
+
+import {
   AUTH_ROUTES,
 } from '../../features/auth/constants';
 
@@ -91,6 +95,20 @@ const PortfolioControlCenterPage = lazy(
   () =>
     import(
       '../../features/analytics/pages/PortfolioControlCenterPage'
+    )
+);
+
+const ReporteriaPage = lazy(
+  () =>
+    import(
+      '../../features/analytics/pages/ReporteriaPage'
+    )
+);
+
+const PowerBiViewerPage = lazy(
+  () =>
+    import(
+      '../../features/analytics/pages/PowerBiViewerPage'
     )
 );
 
@@ -214,7 +232,7 @@ function LegacyFichaDeudorRedirect() {
 
 function PrivateAppLayout() {
   const {
-    navigationTree,
+    menuTree,
   } = useAccessControl();
 
   const resolveBreadcrumb =
@@ -222,9 +240,9 @@ function PrivateAppLayout() {
       (pathname: string) =>
         getAppBreadcrumb(
           pathname,
-          navigationTree
+          menuTree
         ),
-      [navigationTree]
+      [menuTree]
     );
 
   return (
@@ -238,6 +256,9 @@ function PrivateAppLayout() {
 
         FICHA_DEUDOR_ROUTES
           .FICHA_DEUDOR,
+
+        REPORTERIA_ROUTES
+          .POWER_BI,
       ]}
     />
   );
@@ -318,6 +339,40 @@ export function AppRouter() {
                     }
                   >
                     <PortfolioControlCenterPage />
+                  </OptionAccessRoute>
+                }
+              />
+
+              <Route
+                path={
+                  REPORTERIA_ROUTES
+                    .ROOT
+                }
+                element={
+                  <OptionAccessRoute
+                    optionId={
+                      APPLICATION_OPTION_IDS
+                        .REPORTERIA
+                    }
+                  >
+                    <ReporteriaPage />
+                  </OptionAccessRoute>
+                }
+              />
+
+              <Route
+                path={
+                  REPORTERIA_ROUTES
+                    .POWER_BI
+                }
+                element={
+                  <OptionAccessRoute
+                    optionId={
+                      APPLICATION_OPTION_IDS
+                        .REPORTERIA
+                    }
+                  >
+                    <PowerBiViewerPage />
                   </OptionAccessRoute>
                 }
               />

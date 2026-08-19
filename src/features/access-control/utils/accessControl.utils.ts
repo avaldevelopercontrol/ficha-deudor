@@ -260,6 +260,9 @@ export const buildAccessControlSnapshot = (
       name: option.name,
       description:
         option.description,
+      urlBI: option.urlBI,
+      image: option.image,
+      email: option.email?.trim() || null,
       icon:
         normalizeSisgesIconName(
           option.icon
