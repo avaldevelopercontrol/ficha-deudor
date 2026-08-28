@@ -25,6 +25,8 @@ const row: Modulo = {
   descripcion: '',
   codigo: 'mAdministrarPerfiles',
   ruta: 'root/mSeguridad/mAdministrarPerfiles/',
+  urlBI: null,
+  imagenOpcion: null,
   icono: '',
   tipo: 3,
   idPadre: 2,
@@ -35,7 +37,7 @@ const row: Modulo = {
   visible: 'Sí',
   estadoActivo: true,
   estado: 'Activo',
-  implementacion: 'IMPLEMENTADA',
+  implementacion: 'IMPLEMENTADO',
 };
 
 const ColumnsTable = () => {
@@ -68,7 +70,7 @@ const StructureColumnsTable = () => {
     codigoPadre: 'Root',
     padre: 'Root',
     orden: 9,
-    implementacion: 'ESTRUCTURA',
+    implementacion: 'AGRUPADOR',
   };
 
   const childRow: Modulo = {
@@ -122,7 +124,7 @@ const PendingScreenColumnsTable = () => {
     padre:
       'Gestión de cobranzas',
     orden: 2,
-    implementacion: 'SIN PANTALLA',
+    implementacion: 'SIN IMPLEMENTAR',
     estadoActivo: false,
     estado: 'Inactivo',
   };
@@ -144,7 +146,7 @@ export const suite = defineSuite(
   'columnas de mantener módulos',
   [
     test(
-      'oculta código y ruta, y mantiene el estado de implementación React',
+      'oculta código y ruta, y mantiene el tipo de implementación',
       () => {
         const html =
           renderToStaticMarkup(
@@ -173,7 +175,7 @@ export const suite = defineSuite(
         );
         assert.match(
           html,
-          /IMPLEMENTADA/
+          /IMPLEMENTADO/
         );
         assert.match(html, />Visible</);
         assert.match(html, />Estado</);
@@ -196,11 +198,11 @@ export const suite = defineSuite(
 
         assert.match(
           structureHtml,
-          /ESTRUCTURA/
+          /AGRUPADOR/
         );
         assert.match(
           pendingHtml,
-          /SIN PANTALLA/
+          /SIN IMPLEMENTAR/
         );
       }
     ),

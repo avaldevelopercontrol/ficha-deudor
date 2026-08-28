@@ -311,3 +311,39 @@
 .expired-password-modal__actions .btn {
   min-width: 150px;
 }
+
+/* ========== CLIENTE SELECTOR: AÑO Y CARTERAS ========== */
+
+.cliente-selector__year-field {
+  margin-top: 14px;
+}
+
+.cliente-selector__year-field .form-group {
+  gap: 8px;
+}
+
+.cliente-selector__loading--compact,
+.cliente-selector__error--compact {
+  padding: 14px 0 0;
+}
+
+.cliente-selector__carteras-table {
+  margin-top: 18px;
+}
+
+.cliente-selector__carteras-title {
+  margin-bottom: 8px;
+  color: var(--ap-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cliente-selector__carteras-table .data-table th,
+.cliente-selector__carteras-table .data-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.cliente-selector__carteras-table input[type='radio'] {
+  cursor: pointer;
+}

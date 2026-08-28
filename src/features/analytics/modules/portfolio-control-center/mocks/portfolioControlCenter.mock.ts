@@ -26,6 +26,11 @@ export const PORTFOLIO_CONTROL_CENTER_MOCK: PortfolioControlCenterMockData = {
     subPortfolioId: null,
   },
   updatedAt: '2026-08-12T15:45:00-05:00',
+  freshness: {
+    operationAsOfAt: '2026-08-12T15:40:00-05:00',
+    portfolioBaseRefreshedAt: '2026-08-12T06:30:00-05:00',
+    refreshedAt: '2026-08-12T15:45:00-05:00',
+  },
   summary: {
     assignedPortfolio: 125420,
     managedPortfolio: 78230,

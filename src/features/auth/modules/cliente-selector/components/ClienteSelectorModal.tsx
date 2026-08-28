@@ -4,8 +4,12 @@ import Modal from '@shared/components/modals/Modal';
 import { SelectField } from '@shared/components/ui';
 
 import type { Cliente, Usuario } from '../../../types';
-import { clienteToSelectOptions } from '../../../utils/clienteOptions.utils';
+import {
+  aniosToSelectOptions,
+  clienteToSelectOptions,
+} from '../../../utils/clienteOptions.utils';
 import { useClienteSelector } from '../hooks/useClienteSelector';
+import { CarteraParametrosTable } from './CarteraParametrosTable';
 
 interface ClienteSelectorModalProps {
   isOpen: boolean;
@@ -22,13 +26,43 @@ export const ClienteSelectorModal: React.FC<ClienteSelectorModalProps> = ({
 }) => {
   const {
     clientes,
-    selectedCliente,
-    selectedClienteId,
+    selectedClienteKey,
+    anios,
+    selectedAnio,
+    carteras,
+    selectedCarteraKey,
     isLoading,
+    isAniosLoading,
+    isCarterasLoading,
+    hasLoadedAnios,
+    hasLoadedCarteras,
     error,
+    aniosError,
+    carterasError,
+    canContinue,
     handleContinue,
     handleSelectCliente,
-  } = useClienteSelector({ isOpen, usuario, onContinue });
+    handleSelectAnio,
+    handleSelectCartera,
+  } = useClienteSelector({
+    isOpen,
+    usuarioId: usuario.id_usuario,
+    onContinue,
+  });
+
+  const shouldShowAnioField =
+    Boolean(selectedClienteKey) &&
+    (isAniosLoading || anios.length > 0 || Boolean(aniosError));
+
+  const shouldShowCarterasTable =
+    selectedAnio !== '' &&
+    hasLoadedCarteras &&
+    carteras.length > 1;
+
+  const hasNoCarteras =
+    selectedAnio !== '' &&
+    hasLoadedCarteras &&
+    carteras.length === 0;
 
   return (
     <Modal
@@ -62,22 +96,63 @@ export const ClienteSelectorModal: React.FC<ClienteSelectorModalProps> = ({
             <SelectField
               label="Cliente"
               options={clienteToSelectOptions(clientes)}
-              value={selectedClienteId}
+              value={selectedClienteKey}
               onChange={handleSelectCliente}
               placeholder="Seleccione un cliente..."
               required
             />
 
-            {selectedCliente && (
-              <div className="cliente-selector__detail">
-                <span className="cliente-selector__code">
-                  {selectedCliente.codigo}
-                </span>
-
-                <span className="cliente-selector__status">
-                  {selectedCliente.activa ? '● Activa' : '○ Inactiva'}
-                </span>
+            {shouldShowAnioField && (
+              <div className="cliente-selector__year-field">
+                <SelectField<number | ''>
+                  label="Año"
+                  options={aniosToSelectOptions(anios)}
+                  value={selectedAnio}
+                  onChange={handleSelectAnio}
+                  placeholder={
+                    isAniosLoading
+                      ? 'Cargando años...'
+                      : 'Seleccione un año...'
+                  }
+                  disabled={isAniosLoading || anios.length === 0}
+                  error={aniosError ?? undefined}
+                  required
+                />
               </div>
+            )}
+
+            {selectedClienteKey &&
+              hasLoadedAnios &&
+              anios.length === 0 && (
+                <p className="cliente-selector__detail">
+                  El cliente no tiene años configurados. Puede continuar.
+                </p>
+              )}
+
+            {isCarterasLoading && (
+              <div className="cliente-selector__loading cliente-selector__loading--compact">
+                Cargando carteras...
+              </div>
+            )}
+
+            {carterasError && (
+              <div className="cliente-selector__error cliente-selector__error--compact">
+                {carterasError}
+              </div>
+            )}
+
+            {hasNoCarteras && (
+              <div className="cliente-selector__error cliente-selector__error--compact">
+                No se encontraron carteras para el cliente y año seleccionados.
+              </div>
+            )}
+
+            {shouldShowCarterasTable && (
+              <CarteraParametrosTable
+                carteras={carteras}
+                selectedCarteraKey={selectedCarteraKey}
+                onSelect={handleSelectCartera}
+              />
             )}
           </>
         )}
@@ -95,7 +170,7 @@ export const ClienteSelectorModal: React.FC<ClienteSelectorModalProps> = ({
           <button
             className="btn btn-primary btn-sm"
             onClick={handleContinue}
-            disabled={!selectedClienteId || isLoading}
+            disabled={!canContinue}
             type="button"
           >
             Continuar

@@ -12,12 +12,15 @@ import {
   SisgesIconPicker,
 } from '@shared/icons/sisges';
 
+import PowerBiImagePicker from './PowerBiImagePicker';
+
 import type {
   SelectOption,
 } from '@shared/types';
 
 import {
   MODAL_REGISTRAR_MODULO_ESTADO_OPTIONS,
+  MODAL_REGISTRAR_MODULO_HELP,
   MODAL_REGISTRAR_MODULO_LABELS,
   MODAL_REGISTRAR_MODULO_PLACEHOLDERS,
   MODAL_REGISTRAR_MODULO_SECTIONS,
@@ -36,6 +39,9 @@ interface ModuloFormFieldsProps {
   codeDisabled?: boolean;
   parentDisabled?: boolean;
   visibleDisabled?: boolean;
+  powerBiDisabled?: boolean;
+  powerBiDisabledMessage?: string;
+  showPowerBiTypeSelector?: boolean;
   orderControl?: ReactNode;
   onNombreChange: (
     value: string
@@ -47,6 +53,18 @@ interface ModuloFormFieldsProps {
     value: string
   ) => void;
   onIconoChange: (
+    value: string
+  ) => void;
+  onEsPowerBIChange?: (
+    value: boolean
+  ) => void;
+  onUrlBIChange: (
+    value: string
+  ) => void;
+  onImagenOpcionChange: (
+    value: string
+  ) => void;
+  onEmailOpcionChange?: (
     value: string
   ) => void;
   onPadreChange: (
@@ -68,11 +86,18 @@ export const ModuloFormFields = ({
   codeDisabled = false,
   parentDisabled = false,
   visibleDisabled = false,
+  powerBiDisabled = false,
+  powerBiDisabledMessage,
+  showPowerBiTypeSelector = true,
   orderControl,
   onNombreChange,
   onDescripcionChange,
   onCodigoChange,
   onIconoChange,
+  onEsPowerBIChange,
+  onUrlBIChange,
+  onImagenOpcionChange,
+  onEmailOpcionChange,
   onPadreChange,
   onVisibleChange,
   onEstadoChange,
@@ -155,35 +180,172 @@ export const ModuloFormFields = ({
             rows={3}
           />
 
-          <SisgesIconPicker
-            id="modulo-icono"
-            label={
-              MODAL_REGISTRAR_MODULO_LABELS
-                .icono
-            }
-            layout="inline"
-            value={form.icono}
-            placeholder={
-              MODAL_REGISTRAR_MODULO_PLACEHOLDERS
-                .icono
-            }
-            onChange={onIconoChange}
-            error={errors.icono}
-          />
+          {showPowerBiTypeSelector && (
+            <div className="registrar-modulo-form__power-bi-row">
+              <span className="form-label form-label--inline">
+                {
+                  MODAL_REGISTRAR_MODULO_LABELS
+                    .esPowerBI
+                }
+              </span>
 
-          <SelectField<number>
-            label={
-              MODAL_REGISTRAR_MODULO_LABELS
-                .padre
-            }
-            layout="inline"
-            value={form.padreId}
-            options={parentOptions}
-            onChange={onPadreChange}
-            error={errors.padreId}
-            disabled={parentDisabled}
-            hidePlaceholder
-          />
+              <div className="registrar-modulo-form__power-bi-control">
+                <label
+                  className={[
+                    'registrar-modulo-form__power-bi-toggle',
+                    powerBiDisabled
+                      ? 'registrar-modulo-form__power-bi-toggle--disabled'
+                      : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  <input
+                    type="checkbox"
+                    checked={form.esPowerBI}
+                    disabled={powerBiDisabled}
+                    onChange={(event) => {
+                      onEsPowerBIChange?.(
+                        event.target.checked
+                      );
+                    }}
+                  />
+                  <span>
+                    Tablero Power BI
+                  </span>
+                </label>
+
+                {powerBiDisabled &&
+                  powerBiDisabledMessage && (
+                    <small className="registrar-modulo-form__field-help">
+                      {powerBiDisabledMessage}
+                    </small>
+                  )}
+
+                {errors.esPowerBI && (
+                  <span className="form-error">
+                    {errors.esPowerBI}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {form.esPowerBI && (
+            <>
+              <InputField
+                id="modulo-url-bi"
+                label={
+                  MODAL_REGISTRAR_MODULO_LABELS
+                    .urlBI
+                }
+                layout="inline"
+                value={form.urlBI}
+                onChange={(event) => {
+                  onUrlBIChange(
+                    event.target.value
+                  );
+                }}
+                placeholder={
+                  MODAL_REGISTRAR_MODULO_PLACEHOLDERS
+                    .urlBI
+                }
+                error={errors.urlBI}
+                autoComplete="off"
+                inputMode="url"
+                required
+              />
+
+              <InputField
+                id="modulo-email-opcion"
+                label={
+                  MODAL_REGISTRAR_MODULO_LABELS
+                    .emailOpcion
+                }
+                layout="inline"
+                type="email"
+                value={form.emailOpcion ?? ''}
+                onChange={(event) => {
+                  onEmailOpcionChange?.(
+                    event.target.value
+                  );
+                }}
+                placeholder={
+                  MODAL_REGISTRAR_MODULO_PLACEHOLDERS
+                    .emailOpcion
+                }
+                error={errors.emailOpcion}
+                autoComplete="email"
+                inputMode="email"
+                required
+              />
+
+              <div className="registrar-modulo-form__image-field">
+                <PowerBiImagePicker
+                  id="modulo-imagen-opcion"
+                  label={
+                    MODAL_REGISTRAR_MODULO_LABELS
+                      .imagenOpcion
+                  }
+                  value={form.imagenOpcion}
+                  onChange={
+                    onImagenOpcionChange
+                  }
+                  error={errors.imagenOpcion}
+                />
+
+                <div className="registrar-modulo-form__image-help">
+                  {
+                    MODAL_REGISTRAR_MODULO_HELP
+                      .imagenOpcion
+                  }
+                </div>
+              </div>
+            </>
+          )}
+
+          {!form.esPowerBI && (
+            <SisgesIconPicker
+              id="modulo-icono"
+              label={
+                MODAL_REGISTRAR_MODULO_LABELS
+                  .icono
+              }
+              layout="inline"
+              value={form.icono}
+              placeholder={
+                MODAL_REGISTRAR_MODULO_PLACEHOLDERS
+                  .icono
+              }
+              onChange={onIconoChange}
+              error={errors.icono}
+            />
+          )}
+
+          <div>
+            <SelectField<number>
+              label={
+                MODAL_REGISTRAR_MODULO_LABELS
+                  .padre
+              }
+              layout="inline"
+              value={form.padreId}
+              options={parentOptions}
+              onChange={onPadreChange}
+              error={errors.padreId}
+              disabled={parentDisabled}
+              hidePlaceholder
+            />
+
+            {form.esPowerBI && (
+              <div className="registrar-modulo-form__parent-help">
+                {
+                  MODAL_REGISTRAR_MODULO_HELP
+                    .powerBIParent
+                }
+              </div>
+            )}
+          </div>
 
           {orderControl}
 

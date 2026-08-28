@@ -20,10 +20,6 @@ import {
   useAuth,
 } from '@features/auth/hooks/useAuth';
 
-import type {
-  AuthorizedOption,
-} from '@features/access-control';
-
 import {
   MENU_MODULOS_ROUTES,
 } from '../constants/menuModulosRoutes.constants';
@@ -32,67 +28,9 @@ import type {
   MenuModulo,
 } from '../types';
 
-const AVAILABLE_BADGE =
-  'Disponible';
-
-const UPCOMING_BADGE =
-  'Próximamente';
-
-const NO_ACCESS_BADGE =
-  'Sin permiso';
-
-const hasNavigableDestination = (
-  option: AuthorizedOption
-): boolean =>
-  option.route !== null ||
-  option.children.some(
-    hasNavigableDestination
-  );
-
-const buildDescription = (
-  option: AuthorizedOption
-): string =>
-  option.description ||
-  `Acceso disponible a ${option.name}.`;
-
-const mapAuthorizedOptionToMenuModulo = (
-  option: AuthorizedOption
-): MenuModulo => {
-  const hasDestination =
-    hasNavigableDestination(
-      option
-    );
-
-  const isEnabled =
-    hasDestination &&
-    option.permissions.consultar;
-
-  const badge =
-    !hasDestination
-      ? UPCOMING_BADGE
-      : option.permissions
-          .consultar
-        ? AVAILABLE_BADGE
-        : NO_ACCESS_BADGE;
-
-  return {
-    key: String(option.id),
-    label: option.name,
-    descripcion: buildDescription(
-      option
-    ),
-    icon: option.icon,
-    path: option.route ?? undefined,
-    children:
-      option.children.length > 0
-        ? option.children.map(
-            mapAuthorizedOptionToMenuModulo
-          )
-        : undefined,
-    isEnabled,
-    badge,
-  };
-};
+import {
+  buildMenuModulos,
+} from '../utils/menuModulos.utils';
 
 export const useMenuModulos = () => {
   const location = useLocation();
@@ -129,8 +67,8 @@ export const useMenuModulos = () => {
 
   const modulos = useMemo(
     () =>
-      menuTree.map(
-        mapAuthorizedOptionToMenuModulo
+      buildMenuModulos(
+        menuTree
       ),
     [menuTree]
   );

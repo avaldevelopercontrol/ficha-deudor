@@ -9,6 +9,8 @@ import type {
 } from '../../../types/portfolioControlCenter.types';
 import {
   getLatestPortfolioCampaign,
+  getPortfolioCampaignMonthOptions,
+  getPortfolioCampaignYearOptions,
   getPortfolioFilterDateBounds,
   getPortfolioSupervisorOptionsForContext,
   keepDateWithinBounds,
@@ -27,6 +29,8 @@ const OPTIONS: PortfolioControlCenterFilterOptions = {
     {
       id: '2026-07',
       label: 'Julio 2026',
+      year: 2026,
+      month: 7,
       startDate: '2026-07-01',
       endDate: '2026-07-31',
       availableDateFrom: '2026-07-01',
@@ -35,6 +39,8 @@ const OPTIONS: PortfolioControlCenterFilterOptions = {
     {
       id: '2026-08',
       label: 'Agosto 2026',
+      year: 2026,
+      month: 8,
       startDate: '2026-08-01',
       endDate: '2026-08-31',
       availableDateFrom: '2026-08-01',
@@ -93,6 +99,23 @@ const OPTIONS: PortfolioControlCenterFilterOptions = {
   },
 };
 
+const MULTI_YEAR_OPTIONS: PortfolioControlCenterFilterOptions = {
+  ...OPTIONS,
+  campaigns: [
+    ...OPTIONS.campaigns,
+    {
+      id: '2025-12',
+      label: 'Diciembre 2025',
+      year: 2025,
+      month: 12,
+      startDate: '2025-12-01',
+      endDate: '2025-12-31',
+      availableDateFrom: '2025-12-01',
+      availableDateTo: '2025-12-31',
+    },
+  ],
+};
+
 export const suite = defineSuite(
   'portfolioFilterContext.utils',
   [
@@ -102,6 +125,56 @@ export const suite = defineSuite(
         assert.equal(
           getLatestPortfolioCampaign(OPTIONS)?.id,
           '2026-08'
+        );
+      }
+    ),
+    test(
+      'expone años de campaña únicos y ordenados sin parsear el nombre',
+      () => {
+        assert.deepEqual(
+          getPortfolioCampaignYearOptions(
+            MULTI_YEAR_OPTIONS
+          ),
+          [
+            { id: '2026', label: '2026' },
+            { id: '2025', label: '2025' },
+          ]
+        );
+      }
+    ),
+    test(
+      'expone meses separados del año y mantiene el código canonical como id',
+      () => {
+        assert.deepEqual(
+          getPortfolioCampaignMonthOptions(
+            OPTIONS,
+            2026
+          ),
+          [
+            { id: '2026-08', label: 'Agosto' },
+            { id: '2026-07', label: 'Julio' },
+          ]
+        );
+      }
+    ),
+    test(
+      'resuelve el último mes disponible dentro de un año y subcartera',
+      () => {
+        assert.equal(
+          getLatestPortfolioCampaign(
+            MULTI_YEAR_OPTIONS,
+            null,
+            2025
+          )?.id,
+          '2025-12'
+        );
+        assert.equal(
+          getLatestPortfolioCampaign(
+            OPTIONS,
+            '10',
+            2026
+          )?.id,
+          '2026-07'
         );
       }
     ),

@@ -1,8 +1,24 @@
 import {
   useCallback,
   useMemo,
+  useState,
   type ReactNode,
 } from 'react';
+
+import {
+  hasRegisteredOptionRoute,
+} from '@features/access-control/registry/optionRoute.registry';
+
+import {
+  getAnalyticsOptionGroups,
+  getAnalyticsOptionReportClientEmbeds,
+  type AnalyticsOptionReportClientPublication,
+  type AnalyticsReportClientPublicationInput,
+} from '@features/analytics/access/api/analyticsAccessAdmin.api';
+
+import {
+  fetchGruposListado,
+} from '@features/seguridad/api/gruposApi';
 
 import Modal from '@shared/components/modals/Modal';
 
@@ -45,6 +61,7 @@ import {
   resolveOrderAfterParentChange,
 } from '../utils/editarModulo.utils';
 
+
 import {
   useModuloAvailabilityControls,
 } from '../hooks/useModuloAvailabilityControls';
@@ -60,9 +77,19 @@ import ModuloFormFields from './ModuloFormFields';
 
 import ModuloOrderControl from './ModuloOrderControl';
 
+import PowerBiGroupSelector from './PowerBiGroupSelector';
+
+import PowerBiReportClientPublications from './PowerBiReportClientPublications';
+
+import './PowerBiGroupSelector.css';
+
 import {
   getMantenerModulosPermissionMessage,
 } from '../utils/mantenerModulosPermissions';
+
+import {
+  isValidPowerBiPublishToWebUrl,
+} from '../utils/powerBiModulo.utils';
 
 interface ModalEditarModuloProps {
   isOpen: boolean;
@@ -72,7 +99,10 @@ interface ModalEditarModuloProps {
   onClose: () => void;
   onGuardar: (
     modulo: OpcionApi,
-    data: EditarModuloFormData
+    data: EditarModuloFormData,
+    groupIds: readonly number[],
+    reportClientPublications:
+      readonly AnalyticsReportClientPublicationInput[] | null
   ) => Promise<void> | void;
 }
 
@@ -82,11 +112,88 @@ const EMPTY_EDIT_FORM:
     descripcion: '',
     codigo: '',
     icono: '',
+    esPowerBI: false,
+    urlBI: '',
+    imagenOpcion: '',
+    emailOpcion: '',
     padreId: 0,
     orden: 0,
     visible: true,
     estado: true,
   };
+
+const serializeReportClientPublications = (
+  publications: readonly AnalyticsOptionReportClientPublication[]
+): string =>
+  publications
+    .map((publication) => ({
+      clientId: publication.clientId,
+      name: publication.name.trim(),
+      groupIds: publication.groupIds
+        .slice()
+        .sort((a, b) => a - b),
+      embedUrl:
+        publication.embedUrl?.trim() ?? '',
+    }))
+    .sort(
+      (left, right) =>
+        left.name.localeCompare(
+          right.name,
+          'es-PE',
+          { sensitivity: 'base' }
+        ) ||
+        left.clientId - right.clientId
+    )
+    .map(
+      (publication) =>
+        `${publication.clientId}:${publication.name}:${publication.groupIds.join(',')}:${publication.embedUrl}`
+    )
+    .join('\n');
+
+const getChangedReportClientPublications = (
+  current: readonly AnalyticsOptionReportClientPublication[],
+  configured: readonly AnalyticsOptionReportClientPublication[]
+): AnalyticsReportClientPublicationInput[] => {
+  const configuredByKey = new Map(
+    configured.map((publication) => [
+      `${publication.clientId}:${publication.name.toLocaleLowerCase('es-PE')}`,
+      publication,
+    ])
+  );
+
+  return current
+    .filter((publication) => publication.isAvailable)
+    .filter((publication) => {
+      const configuredPublication =
+        configuredByKey.get(
+          `${publication.clientId}:${publication.name.toLocaleLowerCase('es-PE')}`
+        );
+
+      if (!configuredPublication) {
+        return true;
+      }
+
+      return (
+        publication.embedUrl?.trim() !==
+          configuredPublication.embedUrl?.trim() ||
+        publication.groupIds
+          .slice()
+          .sort((a, b) => a - b)
+          .join(',') !==
+          configuredPublication.groupIds
+            .slice()
+            .sort((a, b) => a - b)
+            .join(',')
+      );
+    })
+    .map((publication) => ({
+      clientId: publication.clientId,
+      name: publication.name.trim(),
+      groupIds: publication.groupIds,
+      embedUrl:
+        publication.embedUrl?.trim() ?? '',
+    }));
+};
 
 export const ModalEditarModulo = ({
   isOpen,
@@ -96,6 +203,32 @@ export const ModalEditarModulo = ({
   onClose,
   onGuardar,
 }: ModalEditarModuloProps): ReactNode => {
+  const [
+    editedGroupIds,
+    setEditedGroupIds,
+  ] = useState<number[] | null>(
+    null
+  );
+
+  const [
+    editedReportClientPublications,
+    setEditedReportClientPublications,
+  ] = useState<
+    AnalyticsOptionReportClientPublication[] | null
+  >(null);
+
+  const [
+    groupSelectionError,
+    setGroupSelectionError,
+  ] = useState<string | null>(
+    null
+  );
+
+  const isImplementedModule =
+    hasRegisteredOptionRoute(
+      moduloId
+    );
+
   const fetcher =
     useCallback(
       (
@@ -119,6 +252,167 @@ export const ModalEditarModulo = ({
       [moduloId]
     );
 
+  const isPowerBiModule =
+    Boolean(
+      moduloDetalle?.sUrlBI?.trim()
+    );
+
+  const analyticsGroupsFetcher =
+    useCallback(
+      (
+        signal: AbortSignal
+      ) =>
+        getAnalyticsOptionGroups(
+          moduloId,
+          signal
+        ),
+      [moduloId]
+    );
+
+  const {
+    data: activeGroups,
+    isLoading:
+      isLoadingActiveGroups,
+    error: activeGroupsError,
+    refetch:
+      refetchActiveGroups,
+  } = useApiResource(
+    fetchGruposListado,
+    [moduloId],
+    {
+      enabled:
+        isOpen &&
+        isPowerBiModule,
+      initialLoading: false,
+    }
+  );
+
+  const powerBiGroups =
+    useMemo(
+      () =>
+        (activeGroups ?? []).filter(
+          (group) =>
+            group.estado === 'Activo' &&
+            group.idCliente > 0
+        ),
+      [activeGroups]
+    );
+
+  const {
+    data: analyticsOptionGroups,
+    isLoading:
+      isLoadingAnalyticsGroups,
+    error: analyticsGroupsError,
+    refetch:
+      refetchAnalyticsGroups,
+  } = useApiResource(
+    analyticsGroupsFetcher,
+    [moduloId],
+    {
+      enabled:
+        isOpen &&
+        isPowerBiModule,
+      initialLoading: false,
+    }
+  );
+
+  const analyticsReportClientEmbedsFetcher =
+    useCallback(
+      (
+        signal: AbortSignal
+      ) =>
+        getAnalyticsOptionReportClientEmbeds(
+          moduloId,
+          signal
+        ),
+      [moduloId]
+    );
+
+  const {
+    data: analyticsReportClientEmbeds,
+    isLoading:
+      isLoadingReportClientEmbeds,
+    error:
+      reportClientEmbedsError,
+    refetch:
+      refetchReportClientEmbeds,
+  } = useApiResource(
+    analyticsReportClientEmbedsFetcher,
+    [moduloId],
+    {
+      enabled:
+        isOpen &&
+        isPowerBiModule,
+      initialLoading: false,
+    }
+  );
+
+  const configuredReportClientPublications =
+    useMemo(
+      () =>
+        analyticsReportClientEmbeds
+          ?.clients ?? [],
+      [analyticsReportClientEmbeds]
+    );
+
+  const reportClientPublications =
+    editedReportClientPublications ??
+    configuredReportClientPublications;
+
+  const hasReportClientConfiguration =
+    configuredReportClientPublications.length > 0;
+
+  const hasInvalidReportClientPublication =
+    reportClientPublications.some(
+      (publication) => {
+        if (!publication.isAvailable) {
+          return false;
+        }
+
+        const embedUrl =
+          publication.embedUrl?.trim() ?? '';
+
+        return (
+          (
+            embedUrl.length > 0 &&
+            !isValidPowerBiPublishToWebUrl(
+              embedUrl
+            )
+          ) ||
+          (
+            embedUrl.length > 0 &&
+            publication.groupIds.length === 0
+          )
+        );
+      }
+    );
+
+  const configuredGroupIds =
+    useMemo(
+      () =>
+        [
+          ...new Set(
+            analyticsOptionGroups
+              ?.groupIds ??
+              []
+          ),
+        ].sort(
+          (a, b) => a - b
+        ),
+      [analyticsOptionGroups]
+    );
+
+  const selectedGroupIds =
+    editedGroupIds ??
+    configuredGroupIds;
+
+  const hasValidGroupSelection =
+    selectedGroupIds.length === 1 &&
+    Number.isSafeInteger(
+      selectedGroupIds[0]
+    ) &&
+    selectedGroupIds[0] > 0;
+
   const mapEntityToForm =
     useCallback(
       (
@@ -141,9 +435,12 @@ export const ModalEditarModulo = ({
           {
             modulosExistentes,
             moduloIdActual: moduloId,
+            isImplemented:
+              isImplementedModule,
           }
         ),
       [
+        isImplementedModule,
         moduloId,
         modulosExistentes,
       ]
@@ -187,14 +484,96 @@ export const ModalEditarModulo = ({
           );
         }
 
+        if (
+          data.esPowerBI &&
+          !hasValidGroupSelection
+        ) {
+          const message =
+            'Seleccione un grupo para el tablero Power BI.';
+
+          setGroupSelectionError(
+            message
+          );
+
+          throw new Error(
+            message
+          );
+        }
+
+        setGroupSelectionError(
+          null
+        );
+
+        const changedReportClientPublications =
+          data.esPowerBI &&
+          hasReportClientConfiguration
+            ? getChangedReportClientPublications(
+                reportClientPublications,
+                configuredReportClientPublications
+              )
+            : [];
+
+        const reportClientPublicationsForSave:
+          AnalyticsReportClientPublicationInput[] | null =
+          changedReportClientPublications.length > 0
+            ? changedReportClientPublications
+            : null;
+
         await onGuardar(
           moduloDetalle,
           normalizeModuloForm(
             data
-          )
+          ),
+          data.esPowerBI
+            ? selectedGroupIds
+            : [],
+          reportClientPublicationsForSave
         );
       },
     });
+
+  const groupsDirty =
+    form.esPowerBI &&
+    editedGroupIds !== null &&
+    editedGroupIds
+      .slice()
+      .sort((a, b) => a - b)
+      .join(',') !==
+      configuredGroupIds.join(',');
+
+  const reportClientPublicationsDirty =
+    form.esPowerBI &&
+    editedReportClientPublications !== null &&
+    serializeReportClientPublications(
+      editedReportClientPublications
+    ) !==
+      serializeReportClientPublications(
+        configuredReportClientPublications
+      );
+
+  const analyticsReportClientEmbedsBusy =
+    form.esPowerBI &&
+    isLoadingReportClientEmbeds;
+
+  const analyticsReportClientEmbedsUnavailable =
+    form.esPowerBI &&
+    Boolean(
+      reportClientEmbedsError
+    );
+
+  const analyticsGroupsBusy =
+    form.esPowerBI &&
+    (
+      isLoadingActiveGroups ||
+      isLoadingAnalyticsGroups
+    );
+
+  const analyticsGroupsUnavailable =
+    form.esPowerBI &&
+    Boolean(
+      activeGroupsError ||
+      analyticsGroupsError
+    );
 
   const parentOptions =
     useMemo(
@@ -357,7 +736,9 @@ export const ModalEditarModulo = ({
           .join(' ')}
         aria-busy={
           isLoading ||
-          isSubmitting
+          isSubmitting ||
+          analyticsGroupsBusy ||
+          analyticsReportClientEmbedsBusy
         }
       >
         {isLoading && (
@@ -416,7 +797,11 @@ export const ModalEditarModulo = ({
                   }
                   codeDisabled
                   parentDisabled={
-                    isRootModule
+                    isRootModule ||
+                    form.esPowerBI
+                  }
+                  showPowerBiTypeSelector={
+                    false
                   }
                   onNombreChange={
                     handleNombreChange
@@ -436,6 +821,24 @@ export const ModalEditarModulo = ({
                   onIconoChange={(value) => {
                     handleChange(
                       'icono',
+                      value
+                    );
+                  }}
+                  onUrlBIChange={(value) => {
+                    handleChange(
+                      'urlBI',
+                      value
+                    );
+                  }}
+                  onImagenOpcionChange={(value) => {
+                    handleChange(
+                      'imagenOpcion',
+                      value
+                    );
+                  }}
+                  onEmailOpcionChange={(value) => {
+                    handleChange(
+                      'emailOpcion',
                       value
                     );
                   }}
@@ -482,6 +885,132 @@ export const ModalEditarModulo = ({
                   }
                 />
 
+                {form.esPowerBI && (
+                  <>
+                    <div className="power-bi-group-selector-spacing">
+                      <PowerBiGroupSelector
+                        groups={
+                          powerBiGroups
+                        }
+                        value={
+                          selectedGroupIds
+                        }
+                        disabled={
+                          isSubmitting ||
+                          analyticsGroupsBusy ||
+                          analyticsGroupsUnavailable
+                        }
+                        error={
+                          activeGroupsError
+                            ? 'No se pudieron cargar los grupos activos.'
+                            : analyticsGroupsError
+                              ? 'No se pudo cargar la configuración de grupos del tablero.'
+                              : groupSelectionError
+                        }
+                        onChange={(
+                          groupIds
+                        ) => {
+                          setEditedGroupIds(
+                            groupIds
+                          );
+                          setGroupSelectionError(
+                            null
+                          );
+                        }}
+                      />
+                    </div>
+
+                    {analyticsGroupsUnavailable && (
+                      <div className="editar-modulo-modal__resource-actions">
+                        <ActionButton
+                          label="Reintentar grupos"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            refetchActiveGroups();
+                            refetchAnalyticsGroups();
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {hasReportClientConfiguration && (
+                      <PowerBiReportClientPublications
+                        clients={
+                          reportClientPublications
+                        }
+                        disabled={
+                          isSubmitting ||
+                          analyticsReportClientEmbedsBusy
+                        }
+                        onEmbedUrlChange={(
+                          clientId,
+                          name,
+                          embedUrl
+                        ) => {
+                          setEditedReportClientPublications(
+                            reportClientPublications.map(
+                              (publication) =>
+                                publication.clientId ===
+                                  clientId &&
+                                publication.name ===
+                                  name
+                                  ? {
+                                      ...publication,
+                                      embedUrl,
+                                    }
+                                  : publication
+                            )
+                          );
+                        }}
+                        onGroupIdsChange={(
+                          clientId,
+                          name,
+                          groupIds
+                        ) => {
+                          setEditedReportClientPublications(
+                            reportClientPublications.map(
+                              (publication) =>
+                                publication.clientId ===
+                                  clientId &&
+                                publication.name ===
+                                  name
+                                  ? {
+                                      ...publication,
+                                      groupIds: [...groupIds],
+                                    }
+                                  : publication
+                            )
+                          );
+                        }}
+                      />
+                    )}
+
+                    {reportClientEmbedsError && (
+                      <div className="editar-modulo-modal__resource-error">
+                        <FeedbackMessage
+                          variant="error"
+                          title="No se pudieron cargar las publicaciones por cartera"
+                          message={
+                            reportClientEmbedsError
+                          }
+                        />
+
+                        <div className="editar-modulo-modal__resource-actions">
+                          <ActionButton
+                            label="Reintentar publicaciones"
+                            variant="secondary"
+                            size="sm"
+                            onClick={
+                              refetchReportClientEmbeds
+                            }
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
                 <ModuloFormErrorSummary
                   errors={errors}
                   title={
@@ -519,8 +1048,21 @@ export const ModalEditarModulo = ({
                   onClick={handleSubmit}
                   disabled={
                     isSubmitting ||
-                    !isDirty ||
-                    !canEdit
+                    (
+                      !isDirty &&
+                      !groupsDirty &&
+                      !reportClientPublicationsDirty
+                    ) ||
+                    !canEdit ||
+                    analyticsGroupsBusy ||
+                    analyticsGroupsUnavailable ||
+                    analyticsReportClientEmbedsBusy ||
+                    analyticsReportClientEmbedsUnavailable ||
+                    hasInvalidReportClientPublication ||
+                    (
+                      form.esPowerBI &&
+                      !hasValidGroupSelection
+                    )
                   }
                   title={
                     !canEdit

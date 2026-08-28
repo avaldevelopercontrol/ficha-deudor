@@ -46,6 +46,7 @@ export const suite = defineSuite('authSession.guard', [
     assert.equal(parsed?.state.usuario?.id_usuario, '16068');
     assert.equal(parsed?.state.usuario?.nombre, 'Carlos');
     assert.equal(parsed?.state.clienteSeleccionada?.id_cliente, '95');
+    assert.equal(parsed?.state.clienteSeleccionada?.id_grupo, 156);
     assert.equal(parsed?.state.isAuthenticated, true);
     assert.equal(parsed?.state.isLoading, false);
     assert.equal(parsed?.state.error, null);
@@ -95,7 +96,26 @@ export const suite = defineSuite('authSession.guard', [
       null
     );
     assert.equal(
-      normalizeStoredCliente({ ...createCliente(), activa: 1 }),
+      normalizeStoredCliente(createCliente({ id_grupo: 0 })),
+      null
+    );
+    assert.equal(
+      normalizeStoredCliente({ ...createCliente(), nombre: 123 }),
+      null
+    );
+  }),
+  test('rechaza sesiones versionadas del esquema anterior sin id_grupo', () => {
+    const legacyVersioned = {
+      ...buildStoredAuthSession(createAuthState(), NOW),
+      version: 1,
+      clienteSeleccionada: {
+        id_cliente: '95',
+        nombre: 'CLARO CORPORATIVO',
+      },
+    };
+
+    assert.equal(
+      parseStoredAuthSession(JSON.stringify(legacyVersioned), NOW),
       null
     );
   }),

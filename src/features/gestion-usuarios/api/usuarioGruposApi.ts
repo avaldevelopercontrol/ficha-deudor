@@ -293,6 +293,67 @@ export const createUsuarioGrupo = async (
   }
 };
 
+export const activateUsuarioGrupo = async (
+  grupo: UsuarioGrupoItem
+): Promise<void> => {
+  if (
+    grupo.idUsuarioGrupo === null ||
+    !Number.isInteger(
+      grupo.idUsuarioGrupo
+    ) ||
+    grupo.idUsuarioGrupo <= 0
+  ) {
+    throw new Error(
+      `No se pudo identificar la asignación existente del grupo "${grupo.nombre}".`
+    );
+  }
+
+  assertUsuarioId(grupo.idUsuario);
+
+  const now = getMutationDate();
+
+  const body:
+    UpdateUsuarioGrupoRequestApi = {
+    nId_UGrupo:
+      grupo.idUsuarioGrupo,
+    nId_Usuario:
+      grupo.idUsuario,
+    nId_Grupo:
+      grupo.idGrupo,
+    dUGrupo_FecIni: now,
+    dUGrupo_FecFin: now,
+    bEstado: true,
+    bActivo: true,
+    bGestion: true,
+  };
+
+  try {
+    const result =
+      await apiClient<
+        UsuarioGrupoMutationApiResponse
+      >(
+        GESTION_USUARIOS_API_ENDPOINTS
+          .usuarioGrupo,
+        {
+          method: 'PUT',
+          body,
+        }
+      );
+
+    assertSuccessfulResponse(
+      result,
+      'No se pudo reactivar el grupo del usuario.'
+    );
+  } catch (error) {
+    throw new Error(
+      resolveApiError(
+        error,
+        'No se pudo reactivar el grupo del usuario.'
+      )
+    );
+  }
+};
+
 export const removeUsuarioGrupo = async (
   grupo: UsuarioGrupoItem
 ): Promise<void> => {
@@ -323,7 +384,7 @@ export const removeUsuarioGrupo = async (
       dUGrupo_FecIni: now,
       dUGrupo_FecFin: now,
       bEstado: false,
-      bActivo: false,
+      bActivo: true,
       bGestion: false,
     };
 

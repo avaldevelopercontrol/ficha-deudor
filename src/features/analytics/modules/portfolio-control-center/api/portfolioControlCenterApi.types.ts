@@ -8,6 +8,8 @@ export interface PortfolioFilterOptionsApiResponse {
   campaigns: readonly {
     code: string;
     name: string;
+    year?: number;
+    month?: number;
     startDate: string;
     endDate: string;
     availableDateFrom: string;
@@ -49,6 +51,11 @@ export interface PortfolioSummaryApiResponse {
     snapshotDate: string;
   };
   updatedAt: string | null;
+  freshness?: {
+    operationAsOfAt: string | null;
+    portfolioBaseRefreshedAt: string | null;
+    refreshedAt: string | null;
+  };
   summary: {
     assignedPortfolio: number;
     managedPortfolio: number;

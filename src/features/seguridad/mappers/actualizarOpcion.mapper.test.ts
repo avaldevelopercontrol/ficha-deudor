@@ -22,6 +22,8 @@ const createModule = (
   descripcion: '',
   codigo: 'Root',
   ruta: 'root/',
+  urlBI: null,
+  imagenOpcion: null,
   icono: '',
   tipo: 1,
   idPadre: 0,
@@ -114,6 +116,9 @@ const inactiveForm = {
     'Módulo de seguridad actualizado',
   codigo: 'mSeguridad',
   icono: '/candado.ico',
+  esPowerBI: false,
+  urlBI: '',
+  imagenOpcion: '',
   padreId: 1,
   orden: 1,
   visible: true,
@@ -198,6 +203,9 @@ export const suite = defineSuite(
               codigo:
                 'mSeguridadAdministrativa',
               icono: '/candado.ico',
+              esPowerBI: false,
+              urlBI: '',
+              imagenOpcion: '',
               padreId: 1,
               orden: 1,
               visible: true,
@@ -283,6 +291,9 @@ export const suite = defineSuite(
               descripcion: '',
               codigo: 'RootSisges',
               icono: '',
+              esPowerBI: false,
+              urlBI: '',
+              imagenOpcion: '',
               padreId: 0,
               orden: 999,
               visible: true,
@@ -372,6 +383,9 @@ export const suite = defineSuite(
               codigo:
                 'mPortfolioControlCenter',
               icono: 'analytics',
+              esPowerBI: false,
+              urlBI: '',
+              imagenOpcion: '',
               padreId: 1,
               orden: 2,
               visible: true,
@@ -441,6 +455,9 @@ export const suite = defineSuite(
             descripcion: 'Consulta usuarios.',
             codigo: 'mAdministrarUsuarios',
             icono: 'user',
+            esPowerBI: false,
+            urlBI: '',
+            imagenOpcion: '',
             padreId: 5,
             orden: 3,
             visible: true,
@@ -531,6 +548,9 @@ export const suite = defineSuite(
               codigo:
                 'mPortfolioControlCenter',
               icono: 'analytics',
+              esPowerBI: false,
+              urlBI: '',
+              imagenOpcion: '',
               padreId: 2,
               orden: 2,
               visible: true,
@@ -601,6 +621,103 @@ export const suite = defineSuite(
         assert.equal(
           childRequest.nTipo,
           4
+        );
+      }
+    ),
+    test(
+      'actualiza URL e imagen de un Power BI conservando su nId_Opcion y padre Reportería',
+      () => {
+        const gestionAnalitica = createModule({
+          idModulo: 24,
+          nombre: 'Gestión Analítica',
+          codigo: 'mGestionAnalitica',
+          ruta: 'root/mGestionAnalitica/',
+          tipo: 2,
+          idPadre: 1,
+          orden: 9,
+        });
+
+        const reporteria = createModule({
+          idModulo: 25,
+          nombre: 'Reportería',
+          codigo: 'mReporteria',
+          ruta: 'root/mGestionAnalitica/mReporteria/',
+          icono: 'client-reports',
+          tipo: 3,
+          idPadre: 24,
+          orden: 2,
+        });
+
+        const powerBi = createModule({
+          idModulo: 26,
+          nombre: 'Backus Cobranza',
+          codigo: 'mBackusCobranza',
+          ruta: 'root/mGestionAnalitica/mReporteria/mBackusCobranza/',
+          urlBI: 'https://app.powerbi.com/view?r=anterior',
+          imagenOpcion: '/imgs_webp/logo-backus-cre.webp',
+          emailOpcion: 'anterior@avalperu.com',
+          icono: 'analytics',
+          tipo: 4,
+          idPadre: 25,
+          orden: 1,
+        });
+
+        const powerBiDetail: OpcionApi = {
+          ...detail,
+          nId_Opcion: 26,
+          sCodigoOpcion: 'mBackusCobranza',
+          sNombreOpcion: 'Backus Cobranza',
+          sDescripcionOpcion: 'Seguimiento de cobranza.',
+          sUrlOpcion: powerBi.ruta,
+          sUrlBI: 'https://app.powerbi.com/view?r=anterior',
+          sIcono: 'analytics',
+          sImagenOpcion: '/imgs_webp/logo-backus-cre.webp',
+          sEmailOpcion: 'anterior@avalperu.com',
+          nTipo: 4,
+          nId_OpcionPadre: 25,
+          sCodigoOpcionPadre: 'mReporteria',
+          sNombreOpcionPadre: 'Reportería',
+          nOrden: 1,
+        };
+
+        const request = buildUpdateOpcionRequests(
+          powerBiDetail,
+          {
+            nombre: 'Backus Cobranza',
+            descripcion: 'Seguimiento de cobranza.',
+            codigo: 'mBackusCobranza',
+            icono: 'database',
+            esPowerBI: true,
+            urlBI: 'https://app.powerbi.com/view?r=nuevo',
+            imagenOpcion: '/imgs_webp/logo-backus.webp',
+            emailOpcion: 'nuevo@avalperu.com',
+            padreId: 25,
+            orden: 1,
+            visible: true,
+            estado: true,
+          },
+          [root, gestionAnalitica, reporteria, powerBi],
+          '16068'
+        ).find((item) => item.nId_Opcion === 26);
+
+        assert.ok(request);
+        assert.equal(request.nId_Opcion, 26);
+        assert.equal(request.nId_OpcionPadre, 25);
+        assert.equal(
+          request.sUrlBI,
+          'https://app.powerbi.com/view?r=nuevo'
+        );
+        assert.equal(
+          request.sImagenOpcion,
+          '/imgs_webp/logo-backus.webp'
+        );
+        assert.equal(
+          request.sEmailOpcion,
+          'nuevo@avalperu.com'
+        );
+        assert.equal(
+          request.sIcono,
+          'analytics'
         );
       }
     ),

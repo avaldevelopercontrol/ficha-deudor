@@ -29,6 +29,16 @@ const toTrimmedString = (
   return String(value).trim();
 };
 
+
+const toNullableTrimmedString = (
+  value: unknown
+): string | null => {
+  const normalized =
+    toTrimmedString(value);
+
+  return normalized || null;
+};
+
 const toBooleanValue = (
   value: unknown
 ): boolean =>
@@ -125,8 +135,16 @@ const mapOpcion = (
       opcion.sUrlOpcion
     ),
 
-    urlBI: toTrimmedString(
+    urlBI: toNullableTrimmedString(
       opcion.sUrlBI
+    ),
+
+    imagenOpcion: toNullableTrimmedString(
+      opcion.sImagenOpcion
+    ),
+
+    emailOpcion: toNullableTrimmedString(
+      opcion.sEmailOpcion
     ),
 
     icono: toTrimmedString(

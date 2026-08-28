@@ -1,7 +1,6 @@
-import { env } from '@app/config/env';
 import {
-  apiClient,
-} from '@shared/api/apiClient';
+  analyticsApiClient,
+} from '@shared/api/analyticsApiClient';
 
 import type {
   PortfolioControlCenterFilters,
@@ -217,13 +216,10 @@ export const buildPortfolioAdvisorPerformanceEndpoint = (
 export const fetchPortfolioControlCenterFilterOptions = (
   signal: AbortSignal
 ): Promise<PortfolioFilterOptionsApiResponse> => {
-  return apiClient<PortfolioFilterOptionsApiResponse>(
+  return analyticsApiClient.get<PortfolioFilterOptionsApiResponse>(
     ANALYTICS_ENDPOINTS.filterOptions,
     {
-      method: 'GET',
       signal,
-      baseUrl: env.analyticsApiBaseUrl,
-      useMock: false,
     }
   );
 };
@@ -232,13 +228,10 @@ export const fetchPortfolioControlCenterSummary = (
   filters: PortfolioControlCenterFilters,
   signal: AbortSignal
 ): Promise<PortfolioSummaryApiResponse> => {
-  return apiClient<PortfolioSummaryApiResponse>(
+  return analyticsApiClient.get<PortfolioSummaryApiResponse>(
     buildPortfolioSummaryEndpoint(filters),
     {
-      method: 'GET',
       signal,
-      baseUrl: env.analyticsApiBaseUrl,
-      useMock: false,
     }
   );
 };
@@ -249,17 +242,14 @@ export const fetchPortfolioTargetProgress = (
   subPortfolioId: string | null,
   signal: AbortSignal
 ): Promise<PortfolioTargetProgressApiResponse> => {
-  return apiClient<PortfolioTargetProgressApiResponse>(
+  return analyticsApiClient.get<PortfolioTargetProgressApiResponse>(
     buildPortfolioTargetProgressEndpoint(
       campaignCode,
       dateTo,
       subPortfolioId
     ),
     {
-      method: 'GET',
       signal,
-      baseUrl: env.analyticsApiBaseUrl,
-      useMock: false,
     }
   );
 };
@@ -269,16 +259,13 @@ export const fetchPortfolioPromises = (
   subPortfolioId: string | null,
   signal: AbortSignal
 ): Promise<PortfolioPromisesApiResponse> => {
-  return apiClient<PortfolioPromisesApiResponse>(
+  return analyticsApiClient.get<PortfolioPromisesApiResponse>(
     buildPortfolioPromisesEndpoint(
       campaignCode,
       subPortfolioId
     ),
     {
-      method: 'GET',
       signal,
-      baseUrl: env.analyticsApiBaseUrl,
-      useMock: false,
     }
   );
 };
@@ -289,16 +276,13 @@ export const fetchPortfolioOverduePromises = (
   subPortfolioId: string | null,
   signal: AbortSignal
 ): Promise<PortfolioOverduePromisesApiResponse> => {
-  return apiClient<PortfolioOverduePromisesApiResponse>(
+  return analyticsApiClient.get<PortfolioOverduePromisesApiResponse>(
     buildPortfolioOverduePromisesEndpoint(
       campaignCode,
       subPortfolioId
     ),
     {
-      method: 'GET',
       signal,
-      baseUrl: env.analyticsApiBaseUrl,
-      useMock: false,
     }
   );
 };
@@ -308,16 +292,13 @@ export const fetchPortfolioDueTodayPromises = (
   subPortfolioId: string | null,
   signal: AbortSignal
 ): Promise<PortfolioDueTodayPromisesApiResponse> => {
-  return apiClient<PortfolioDueTodayPromisesApiResponse>(
+  return analyticsApiClient.get<PortfolioDueTodayPromisesApiResponse>(
     buildPortfolioDueTodayPromisesEndpoint(
       campaignCode,
       subPortfolioId
     ),
     {
-      method: 'GET',
       signal,
-      baseUrl: env.analyticsApiBaseUrl,
-      useMock: false,
     }
   );
 };
@@ -329,7 +310,7 @@ export const fetchPortfolioEvolution = (
   subPortfolioId: string | null,
   signal: AbortSignal
 ): Promise<PortfolioEvolutionApiResponse> => {
-  return apiClient<PortfolioEvolutionApiResponse>(
+  return analyticsApiClient.get<PortfolioEvolutionApiResponse>(
     buildPortfolioEvolutionEndpoint(
       campaignCode,
       dateFrom,
@@ -337,10 +318,7 @@ export const fetchPortfolioEvolution = (
       subPortfolioId
     ),
     {
-      method: 'GET',
       signal,
-      baseUrl: env.analyticsApiBaseUrl,
-      useMock: false,
     }
   );
 };
@@ -352,7 +330,7 @@ export const fetchPortfolioCampaignPerformance = (
   subPortfolioId: string | null,
   signal: AbortSignal
 ): Promise<PortfolioCampaignPerformanceApiResponse> => {
-  return apiClient<PortfolioCampaignPerformanceApiResponse>(
+  return analyticsApiClient.get<PortfolioCampaignPerformanceApiResponse>(
     buildPortfolioCampaignPerformanceEndpoint(
       campaignCode,
       dateFrom,
@@ -360,10 +338,7 @@ export const fetchPortfolioCampaignPerformance = (
       subPortfolioId
     ),
     {
-      method: 'GET',
       signal,
-      baseUrl: env.analyticsApiBaseUrl,
-      useMock: false,
     }
   );
 };
@@ -377,7 +352,7 @@ export const fetchPortfolioSupervisorPerformance = (
   supervisorId: string | null,
   signal: AbortSignal
 ): Promise<PortfolioSupervisorPerformanceApiResponse> => {
-  return apiClient<PortfolioSupervisorPerformanceApiResponse>(
+  return analyticsApiClient.get<PortfolioSupervisorPerformanceApiResponse>(
     buildPortfolioSupervisorPerformanceEndpoint(
       campaignCode,
       dateFrom,
@@ -386,10 +361,7 @@ export const fetchPortfolioSupervisorPerformance = (
       supervisorId
     ),
     {
-      method: 'GET',
       signal,
-      baseUrl: env.analyticsApiBaseUrl,
-      useMock: false,
     }
   );
 };
@@ -402,7 +374,7 @@ export const fetchPortfolioAdvisorPerformance = (
   supervisorId: string | null,
   signal: AbortSignal
 ): Promise<PortfolioAdvisorPerformanceApiResponse> => {
-  return apiClient<PortfolioAdvisorPerformanceApiResponse>(
+  return analyticsApiClient.get<PortfolioAdvisorPerformanceApiResponse>(
     buildPortfolioAdvisorPerformanceEndpoint(
       campaignCode,
       dateFrom,
@@ -411,10 +383,7 @@ export const fetchPortfolioAdvisorPerformance = (
       supervisorId
     ),
     {
-      method: 'GET',
       signal,
-      baseUrl: env.analyticsApiBaseUrl,
-      useMock: false,
     }
   );
 };

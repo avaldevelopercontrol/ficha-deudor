@@ -6,10 +6,12 @@ import {
 } from '../../../test/testHarness';
 
 import {
+  activateUsuarioGrupo,
   createUsuarioGrupo,
   fetchGruposByUsuario,
   removeUsuarioGrupo,
 } from './usuarioGruposApi';
+
 
 const createJsonResponse = (
   body: unknown,
@@ -242,11 +244,93 @@ export const suite = defineSuite(
           );
           assert.equal(
             capturedBody.bActivo,
-            false
+            true
           );
           assert.equal(
             capturedBody.bGestion,
             false
+          );
+        } finally {
+          globalThis.fetch =
+            originalFetch;
+        }
+      }
+    ),
+    test(
+      'reactiva una asignación existente mediante PUT',
+      async () => {
+        const originalFetch =
+          globalThis.fetch;
+
+        let capturedMethod = '';
+        let capturedBody:
+          Record<string, unknown> = {};
+
+        globalThis.fetch = async (
+          _input,
+          init
+        ) => {
+          capturedMethod =
+            init?.method ?? '';
+
+          capturedBody = JSON.parse(
+            String(init?.body)
+          ) as Record<string, unknown>;
+
+          return createJsonResponse({
+            code: '00',
+            message: 'OK',
+            messageUser: 'OK',
+            statusCode: 200,
+            response: {
+              nId_UGrupo: 38029,
+              nId_Usuario: 16068,
+              nId_Grupo: 156,
+            },
+          });
+        };
+
+        try {
+          await activateUsuarioGrupo({
+            idUsuarioGrupo: 38029,
+            idUsuario: 16068,
+            idGrupo: 156,
+            nombre: 'CLARO CORPORATIVO',
+          });
+
+          assert.equal(
+            capturedMethod,
+            'PUT'
+          );
+
+          assert.equal(
+            capturedBody.nId_UGrupo,
+            38029
+          );
+
+          assert.equal(
+            capturedBody.nId_Usuario,
+            16068
+          );
+
+          assert.equal(
+            capturedBody.nId_Grupo,
+            156
+          );
+
+          assert.equal(
+            capturedBody.bEstado,
+            true
+          );
+
+          assert.equal(
+            capturedBody.bActivo,
+            true
+          );
+
+          assert.equal(
+            capturedBody.bGestion,
+            true
           );
         } finally {
           globalThis.fetch =

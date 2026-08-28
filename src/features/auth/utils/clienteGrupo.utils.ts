@@ -1,25 +1,20 @@
 import {
-  CLIENTE_GRUPO_TEMPORAL,
+  CLIENTE_GRUPO_SELECTION_SEPARATOR,
 } from '../constants/clienteGrupo.constants';
 
-import type {
-  Cliente,
-} from '../types/auth.types';
+import type { Cliente } from '../types/auth.types';
+
+export const buildClienteGrupoSelectionKey = (
+  cliente: Pick<Cliente, 'id_cliente' | 'id_grupo'>
+): string =>
+  `${cliente.id_cliente}${CLIENTE_GRUPO_SELECTION_SEPARATOR}${cliente.id_grupo}`;
 
 export const resolveClienteGrupoId = (
   cliente: Cliente | null | undefined
 ): number | null => {
-  if (!cliente) {
-    return null;
-  }
+  const groupId = cliente?.id_grupo;
 
-  const groupId =
-    CLIENTE_GRUPO_TEMPORAL[
-      cliente.id_cliente
-    ];
-
-  return Number.isSafeInteger(groupId) &&
-    Number(groupId) > 0
+  return Number.isSafeInteger(groupId) && Number(groupId) > 0
     ? Number(groupId)
     : null;
 };

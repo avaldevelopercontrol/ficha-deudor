@@ -1,54 +1,46 @@
 import assert from 'node:assert/strict';
 
-import {
-  defineSuite,
-  test,
-} from '../../../test/testHarness';
-
-import type {
-  Cliente,
-} from '../types/auth.types';
+import { defineSuite, test } from '../../../test/testHarness';
+import { createCliente } from '../../../test/factories/auth.factory';
 
 import {
+  buildClienteGrupoSelectionKey,
   resolveClienteGrupoId,
 } from './clienteGrupo.utils';
 
-const createCliente = (
-  idCliente: string
-): Cliente => ({
-  id_cliente: idCliente,
-  nombre:
-    idCliente === '95'
-      ? 'CLARO CORPORATIVO'
-      : 'OTRO',
-  codigo: 'TEST',
-  activa: true,
-});
-
-export const suite = defineSuite(
-  'clienteGrupo.utils',
-  [
-    test(
-      'resuelve temporalmente cliente 95 como grupo 156',
-      () => {
-        assert.equal(
-          resolveClienteGrupoId(
-            createCliente('95')
-          ),
-          156
-        );
-      }
-    ),
-    test(
-      'no inventa un grupo para clientes sin equivalencia temporal',
-      () => {
-        assert.equal(
-          resolveClienteGrupoId(
-            createCliente('100')
-          ),
-          null
-        );
-      }
-    ),
-  ]
-);
+export const suite = defineSuite('clienteGrupo.utils', [
+  test('usa el grupo real recibido para el cliente seleccionado', () => {
+    assert.equal(
+      resolveClienteGrupoId(
+        createCliente({
+          id_cliente: '95',
+          id_grupo: 156,
+        })
+      ),
+      156
+    );
+  }),
+  test('no inventa un grupo cuando el valor recibido no es válido', () => {
+    assert.equal(
+      resolveClienteGrupoId(
+        createCliente({
+          id_cliente: '95',
+          id_grupo: 0,
+        })
+      ),
+      null
+    );
+    assert.equal(resolveClienteGrupoId(null), null);
+  }),
+  test('construye una identidad estable por cliente y grupo', () => {
+    assert.equal(
+      buildClienteGrupoSelectionKey(
+        createCliente({
+          id_cliente: '27',
+          id_grupo: 168,
+        })
+      ),
+      '27:168'
+    );
+  }),
+]);

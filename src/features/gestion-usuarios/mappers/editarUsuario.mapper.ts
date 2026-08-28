@@ -404,7 +404,10 @@ export const mapUsuarioGrupoAsignado = (
 export const mapUsuarioGrupoFaltante = (
   item: UsuarioGrupoFaltanteApi
 ): UsuarioGrupoItem => ({
-  idUsuarioGrupo: null,
+  idUsuarioGrupo:
+    item.nId_UGrupo > 0
+      ? item.nId_UGrupo
+      : null,
   idUsuario:
     item.nId_Usuario,
   idGrupo:

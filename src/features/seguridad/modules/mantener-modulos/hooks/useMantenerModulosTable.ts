@@ -8,6 +8,12 @@ import {
 } from '@features/auth/hooks/useAuth';
 
 import {
+  replaceAnalyticsOptionReportClientEmbeds,
+  syncAnalyticsOption,
+  type AnalyticsReportClientPublicationInput,
+} from '@features/analytics/access/api/analyticsAccessAdmin.api';
+
+import {
   APPLICATION_OPTION_IDS,
   useAccessControl,
   useOptionPermissions,
@@ -131,7 +137,9 @@ export const useMantenerModulosTable = () => {
     useCallback(
       async (
         form:
-          RegistrarModuloFormData
+          RegistrarModuloFormData,
+        groupIds:
+          readonly number[] = []
       ): Promise<void> => {
         clearFeedback();
 
@@ -149,11 +157,46 @@ export const useMantenerModulosTable = () => {
           );
         }
 
-        await createOpcion(
-          form,
-          allData,
-          authenticatedUserId
-        );
+        const created =
+          await createOpcion(
+            form,
+            allData,
+            authenticatedUserId
+          );
+
+        if (form.esPowerBI) {
+          try {
+            await syncAnalyticsOption({
+              optionId:
+                created.nId_Opcion,
+              optionCode:
+                form.codigo,
+              optionName:
+                form.nombre,
+              isActive:
+                form.estado,
+              groupIds,
+            });
+          } catch (error) {
+            setPageNumber(
+              1
+            );
+            refetch();
+            await refreshAccessControl();
+
+            const detail =
+              error instanceof Error &&
+              error.message.trim()
+                ? ` ${error.message}`
+                : '';
+
+            throw new Error(
+              'El módulo fue creado correctamente en SISGES, pero no se pudo completar su configuración de grupos en Analytics.' +
+                detail +
+                ' No vuelva a registrarlo; complete la configuración de grupos Analytics para la opción creada.'
+            );
+          }
+        }
 
         setPageNumber(
           1
@@ -189,7 +232,11 @@ export const useMantenerModulosTable = () => {
           OpcionApi,
 
         form:
-          EditarModuloFormData
+          EditarModuloFormData,
+        groupIds:
+          readonly number[] = [],
+        reportClientPublications:
+          readonly AnalyticsReportClientPublicationInput[] | null = null
       ): Promise<void> => {
         clearFeedback();
 
@@ -213,6 +260,62 @@ export const useMantenerModulosTable = () => {
           allData,
           authenticatedUserId
         );
+
+        if (form.esPowerBI) {
+          try {
+            await syncAnalyticsOption({
+              optionId:
+                moduloDetalle
+                  .nId_Opcion,
+              optionCode:
+                form.codigo,
+              optionName:
+                form.nombre,
+              isActive:
+                form.estado,
+              groupIds,
+            });
+          } catch (error) {
+            refetch();
+            await refreshAccessControl();
+
+            const detail =
+              error instanceof Error &&
+              error.message.trim()
+                ? ` ${error.message}`
+                : '';
+
+            throw new Error(
+              'El módulo fue actualizado correctamente en SISGES, pero no se pudo completar su configuración de grupos en Analytics.' +
+                detail +
+                ' Vuelva a editar el módulo y reintente el guardado del grupo.'
+            );
+          }
+
+          if (reportClientPublications !== null) {
+            try {
+              await replaceAnalyticsOptionReportClientEmbeds(
+                moduloDetalle.nId_Opcion,
+                reportClientPublications
+              );
+            } catch (error) {
+              refetch();
+              await refreshAccessControl();
+
+              const detail =
+                error instanceof Error &&
+                error.message.trim()
+                  ? ` ${error.message}`
+                  : '';
+
+              throw new Error(
+                'El módulo y su grupo fueron actualizados correctamente, pero no se pudieron guardar las publicaciones por cartera en Analytics.' +
+                  detail +
+                  ' Vuelva a editar el módulo y reintente el guardado de la configuración por cartera.'
+              );
+            }
+          }
+        }
 
         refetch();
         await refreshAccessControl();

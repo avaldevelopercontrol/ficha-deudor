@@ -3,6 +3,10 @@ import {
 } from '@features/analytics/constants/analyticsRoutes.constants';
 
 import {
+  REPORTERIA_ROUTES,
+} from '@features/analytics/constants/reporteriaRoutes.constants';
+
+import {
   AUTH_ROUTES,
 } from '@features/auth/constants';
 
@@ -46,6 +50,15 @@ const APPLICATION_OPTION_REGISTRY:
       path:
         ANALYTICS_ROUTES
           .PORTFOLIO_CONTROL_CENTER,
+      enabled: true,
+    },
+    {
+      optionId:
+        APPLICATION_OPTION_IDS
+          .REPORTERIA,
+      path:
+        REPORTERIA_ROUTES
+          .ROOT,
       enabled: true,
     },
     {

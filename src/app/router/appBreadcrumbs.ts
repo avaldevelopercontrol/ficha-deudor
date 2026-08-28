@@ -5,6 +5,10 @@ import {
   type AuthorizedOption,
 } from '@features/access-control';
 
+import {
+  REPORTERIA_ROUTES,
+} from '@features/analytics/constants/reporteriaRoutes.constants';
+
 import { AUTH_ROUTES } from '@features/auth/constants';
 import { FICHA_DEUDOR_ROUTES } from '@features/ficha-deudor/shared/constants/fichaDeudorRoutes.constants';
 
@@ -73,7 +77,7 @@ const formatOptionPath = (
 
 export const getAppBreadcrumb = (
   pathname: string,
-  navigationTree: readonly AuthorizedOption[] = []
+  menuTree: readonly AuthorizedOption[] = []
 ): string => {
   if (
     matchesPath(
@@ -96,7 +100,7 @@ export const getAppBreadcrumb = (
   ) {
     const gestionDeudorPath =
       findOptionPath(
-        navigationTree,
+        menuTree,
         (option) =>
           option.id ===
           APPLICATION_OPTION_IDS
@@ -113,8 +117,53 @@ export const getAppBreadcrumb = (
     return `${parentBreadcrumb} › ${FICHA_DEUDOR_HEADER}`;
   }
 
+  const reportMatch = matchPath(
+    {
+      path: REPORTERIA_ROUTES.POWER_BI,
+      end: true,
+    },
+    pathname
+  );
+
+  if (reportMatch) {
+    const optionId = Number(
+      reportMatch.params.optionId
+    );
+
+    const reportPath =
+      Number.isSafeInteger(optionId) &&
+      optionId > 0
+        ? findOptionPath(
+            menuTree,
+            (option) =>
+              option.id === optionId
+          )
+        : null;
+
+    if (reportPath) {
+      return formatOptionPath(
+        reportPath
+      );
+    }
+
+    const reporteriaPath =
+      findOptionPath(
+        menuTree,
+        (option) =>
+          option.id ===
+          APPLICATION_OPTION_IDS
+            .REPORTERIA
+      );
+
+    return reporteriaPath
+      ? formatOptionPath(
+          reporteriaPath
+        )
+      : 'GESTIÓN ANALÍTICA › REPORTERÍA';
+  }
+
   const optionPath = findOptionPath(
-    navigationTree,
+    menuTree,
     (option) =>
       matchesPath(
         option.route,

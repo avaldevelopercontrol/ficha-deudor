@@ -1,0 +1,297 @@
+.power-bi-report-client-publications {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-top: 14px;
+  overflow: hidden;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 8px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.power-bi-report-client-publications__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  color: var(--ap-navy);
+  background: var(--ap-gray-50);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.power-bi-report-client-publications[open]
+  .power-bi-report-client-publications__summary {
+  border-bottom: 1px solid var(--ap-gray-200);
+  border-radius: 8px 8px 0 0;
+}
+
+.power-bi-report-client-publications__counter {
+  flex: 0 0 auto;
+  color: var(--ap-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.power-bi-report-client-publications__body {
+  padding: 12px 14px 14px;
+}
+
+.power-bi-report-client-publications__help {
+  margin: 0 0 10px;
+  color: var(--ap-text-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.power-bi-report-client-publications__list {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.power-bi-report-client-publications__row {
+  display: grid;
+  grid-template-columns:
+    minmax(115px, 0.8fr)
+    minmax(0, 1.6fr)
+    auto;
+  grid-template-areas:
+    'identity access status'
+    'field field field';
+  align-items: start;
+  gap: 7px 9px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 7px;
+  box-sizing: border-box;
+}
+
+.power-bi-report-client-publications__row--unavailable {
+  background: var(--ap-gray-50);
+  opacity: 0.78;
+}
+
+.power-bi-report-client-publications__identity,
+.power-bi-report-client-publications__access,
+.power-bi-report-client-publications__field {
+  min-width: 0;
+}
+
+.power-bi-report-client-publications__identity {
+  grid-area: identity;
+}
+
+.power-bi-report-client-publications__access {
+  grid-area: access;
+}
+
+.power-bi-report-client-publications__field {
+  grid-area: field;
+}
+
+.power-bi-report-client-publications__name {
+  display: block;
+  overflow: hidden;
+  color: var(--ap-navy);
+  font-size: 11px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.power-bi-report-client-publications__client-id {
+  display: block;
+  margin-top: 2px;
+  color: var(--ap-text-muted);
+  font-size: 9px;
+}
+
+.power-bi-report-client-publications__source-note {
+  display: block;
+  margin-top: 5px;
+  color: var(--ap-text-muted);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.power-bi-report-client-publications__access {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.power-bi-report-client-publications__selected-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.power-bi-report-client-publications__group-chip {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+  padding: 3px 6px;
+  overflow: hidden;
+  color: var(--ap-navy);
+  background: var(--ap-gray-50);
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.power-bi-report-client-publications__auto-note,
+.power-bi-report-client-publications__access-warning {
+  color: var(--ap-text-muted);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.power-bi-report-client-publications__access-warning {
+  color: #7a5b00;
+  font-weight: 700;
+}
+
+.power-bi-report-client-publications__group-picker {
+  width: 100%;
+  min-width: 0;
+}
+
+.power-bi-report-client-publications__group-picker > summary {
+  max-width: 100%;
+  color: var(--ap-red);
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.power-bi-report-client-publications__group-options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 5px;
+  padding: 6px;
+  background: var(--ap-gray-50);
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 6px;
+}
+
+.power-bi-report-client-publications__group-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--ap-navy);
+  font-size: 9px;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.power-bi-report-client-publications__group-option input {
+  margin-top: 1px;
+}
+
+.power-bi-report-client-publications__field input {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  padding: 7px 9px;
+  color: var(--ap-navy);
+  background: #fff;
+  border: 1px solid var(--ap-gray-300);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 10px;
+  box-sizing: border-box;
+}
+
+.power-bi-report-client-publications__field input:focus {
+  border-color: var(--ap-navy);
+  outline: 2px solid rgba(26, 37, 64, 0.12);
+  outline-offset: 1px;
+}
+
+.power-bi-report-client-publications__field input[aria-invalid='true'] {
+  border-color: var(--ap-red);
+}
+
+.power-bi-report-client-publications__field input:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.power-bi-report-client-publications__error {
+  display: block;
+  margin-top: 4px;
+  color: var(--ap-red);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.power-bi-report-client-publications__status {
+  grid-area: status;
+  justify-self: end;
+  align-self: center;
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.power-bi-report-client-publications__status--configured {
+  color: #17633a;
+  background: #e9f7ef;
+}
+
+.power-bi-report-client-publications__status--pending,
+.power-bi-report-client-publications__status--warning {
+  color: #7a5b00;
+  background: #fff5d6;
+}
+
+.power-bi-report-client-publications__status--error {
+  color: var(--ap-red);
+  background: #fdecef;
+}
+
+.power-bi-report-client-publications__status--unavailable {
+  color: var(--ap-text-muted);
+  background: var(--ap-gray-100);
+}
+
+@media (max-width: 600px) {
+  .power-bi-report-client-publications__summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .power-bi-report-client-publications__row {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'identity'
+      'access'
+      'field'
+      'status';
+  }
+
+  .power-bi-report-client-publications__status {
+    justify-self: start;
+  }
+}

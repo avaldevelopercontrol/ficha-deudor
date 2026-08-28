@@ -12,8 +12,10 @@ export interface UpdateOpcionRequestApi {
   sNombreOpcion: string;
   sDescripcionOpcion: string;
   sUrlOpcion: string;
-  sUrlBI: string;
+  sUrlBI: string | null;
   sIcono: string;
+  sImagenOpcion: string | null;
+  sEmailOpcion: string | null;
   nTipo: number;
   nId_OpcionPadre: number;
   nOrden: number;

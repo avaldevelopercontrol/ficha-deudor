@@ -11,6 +11,11 @@ import {
   calculateNextOrder,
 } from '../modules/mantener-modulos/utils/registrarModulo.utils';
 
+import {
+  POWER_BI_DEFAULT_ICON,
+  POWER_BI_PARENT_OPTION_ID,
+} from '../modules/mantener-modulos/utils/powerBiModulo.utils';
+
 import type {
   CreateOpcionRequestApi,
 } from '../types/crearOpcion.types';
@@ -45,10 +50,15 @@ export const buildCreateOpcionRequest = (
   authenticatedUserId: string,
   currentDate = new Date()
 ): CreateOpcionRequestApi => {
+  const parentId =
+    form.esPowerBI
+      ? POWER_BI_PARENT_OPTION_ID
+      : form.padreId;
+
   const parentOption = opciones.find(
     (opcion) =>
       opcion.idModulo ===
-      form.padreId
+      parentId
   );
 
   if (!parentOption) {
@@ -78,10 +88,28 @@ export const buildCreateOpcionRequest = (
         codigo
       ),
 
-    sUrlBI: '',
+    sUrlBI:
+      form.esPowerBI
+        ? form.urlBI.trim()
+        : null,
 
     sIcono:
-      form.icono.trim(),
+      form.esPowerBI
+        ? POWER_BI_DEFAULT_ICON
+        : form.icono.trim(),
+
+    sImagenOpcion:
+      form.esPowerBI
+        ? (
+            form.imagenOpcion.trim() ||
+            null
+          )
+        : null,
+
+    sEmailOpcion:
+      form.esPowerBI
+        ? (form.emailOpcion ?? '').trim()
+        : null,
 
     nTipo:
       parentOption.tipo + 1,

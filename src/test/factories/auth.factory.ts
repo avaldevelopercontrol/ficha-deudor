@@ -23,9 +23,8 @@ export const createCliente = (
   overrides: Partial<Cliente> = {}
 ): Cliente => ({
   id_cliente: '95',
+  id_grupo: 156,
   nombre: 'CLARO CORPORATIVO',
-  codigo: 'CLARO',
-  activa: true,
   ...overrides,
 });
 

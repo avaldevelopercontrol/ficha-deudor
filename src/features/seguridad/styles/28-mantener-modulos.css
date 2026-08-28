@@ -780,3 +780,318 @@
       repeat(3, minmax(0, 1fr));
   }
 }
+
+/* =========================================================
+   CONFIGURACIÓN POWER BI
+   ========================================================= */
+.registrar-modulo-form__power-bi-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.registrar-modulo-form__power-bi-control {
+  min-width: 0;
+}
+
+.registrar-modulo-form__power-bi-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  min-height: 34px;
+
+  color: var(--ap-navy);
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.registrar-modulo-form__power-bi-toggle input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+
+  accent-color: var(--ap-red);
+}
+
+.registrar-modulo-form__power-bi-toggle--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.registrar-modulo-form__field-help,
+.registrar-modulo-form__image-help,
+.registrar-modulo-form__parent-help {
+  display: block;
+
+  margin-top: 5px;
+
+  color: var(--ap-text-muted);
+
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.registrar-modulo-form__field-error {
+  display: block;
+
+  margin-top: 5px;
+
+  color: var(--ap-red);
+
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.registrar-modulo-form__image-field {
+  min-width: 0;
+}
+
+
+@media (max-width: 620px) {
+  .registrar-modulo-form__power-bi-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+/* =========================================================
+   SELECTOR DE LOGOS POWER BI
+   ========================================================= */
+.power-bi-image-picker {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.power-bi-image-picker__trigger {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  min-height: 46px;
+  padding: 5px 10px;
+
+  color: var(--ap-navy);
+  background: #fff;
+  border: 1px solid var(--ap-gray-300);
+  border-radius: 6px;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.power-bi-image-picker__trigger:hover,
+.power-bi-image-picker__trigger--open {
+  border-color: var(--ap-navy);
+}
+
+.power-bi-image-picker__trigger--error {
+  border-color: var(--ap-red);
+}
+
+.power-bi-image-picker__trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.power-bi-image-picker__selection-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 54px;
+  height: 34px;
+  overflow: hidden;
+
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 5px;
+  background: var(--ap-gray-50);
+
+  color: var(--ap-text-muted);
+  font-size: 18px;
+}
+
+.power-bi-image-picker__selection-preview img {
+  display: block;
+  max-width: 48px;
+  max-height: 28px;
+  object-fit: contain;
+}
+
+.power-bi-image-picker__selection-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.power-bi-image-picker__selection-label {
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.power-bi-image-picker__selection-help {
+  margin-top: 2px;
+  color: var(--ap-text-muted);
+  font-size: 10px;
+}
+
+.power-bi-image-picker__chevron {
+  color: var(--ap-text-muted);
+  font-size: 9px;
+}
+
+.power-bi-image-picker__panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+
+  padding: 10px;
+
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(15, 31, 61, 0.16);
+}
+
+.power-bi-image-picker__search,
+.power-bi-image-picker__custom input {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+
+  color: var(--ap-navy);
+  border: 1px solid var(--ap-gray-300);
+  border-radius: 5px;
+  outline: none;
+
+  font: inherit;
+  font-size: 11px;
+}
+
+.power-bi-image-picker__search:focus,
+.power-bi-image-picker__custom input:focus {
+  border-color: var(--ap-navy);
+}
+
+.power-bi-image-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+
+  max-height: 280px;
+  margin-top: 9px;
+  padding-right: 2px;
+
+  overflow-y: auto;
+}
+
+.power-bi-image-picker__option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  min-width: 0;
+  min-height: 82px;
+  padding: 6px;
+
+  color: var(--ap-navy);
+  background: #fff;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 6px;
+
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.power-bi-image-picker__option:hover,
+.power-bi-image-picker__option--selected {
+  border-color: var(--ap-navy);
+  background: var(--ap-gray-50);
+}
+
+.power-bi-image-picker__option-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 48px;
+  padding: 3px;
+}
+
+.power-bi-image-picker__option-image img {
+  display: block;
+  max-width: 100%;
+  max-height: 42px;
+  object-fit: contain;
+}
+
+.power-bi-image-picker__option-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 48px;
+
+  color: var(--ap-text-muted);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.power-bi-image-picker__empty-message {
+  margin: 10px 0 2px;
+  color: var(--ap-text-muted);
+  font-size: 10px;
+  text-align: center;
+}
+
+.power-bi-image-picker__custom {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--ap-gray-200);
+}
+
+.power-bi-image-picker__custom label,
+.power-bi-image-picker__custom small {
+  display: block;
+}
+
+.power-bi-image-picker__custom label {
+  margin-bottom: 5px;
+  color: var(--ap-navy);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.power-bi-image-picker__custom small {
+  margin-top: 4px;
+  color: var(--ap-text-muted);
+  font-size: 9px;
+}
+
+@media (max-width: 620px) {
+  .power-bi-image-picker__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

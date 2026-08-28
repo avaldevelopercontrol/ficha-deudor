@@ -23,6 +23,8 @@ const createOption = (
   descripcion: '',
   codigo: 'Root',
   ruta: 'root/',
+  urlBI: null,
+  imagenOpcion: null,
   icono: '',
   tipo: 1,
   idPadre: 0,

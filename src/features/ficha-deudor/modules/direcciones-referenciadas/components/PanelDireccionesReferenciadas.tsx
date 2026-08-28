@@ -109,20 +109,24 @@ const PanelDireccionesReferenciadas: React.FC<Props> = ({
         />
       </PanelLayout>
 
-      <ModalRegistrarDireccion
-        isOpen={showRegistrar}
-        onClose={handleCloseRegistrar}
-        direccionesExistentes={allData}
-        onRegistrar={handleRegistrar}
-      />
+      {showRegistrar && (
+        <ModalRegistrarDireccion
+          isOpen
+          onClose={handleCloseRegistrar}
+          direccionesExistentes={allData}
+          onRegistrar={handleRegistrar}
+        />
+      )}
 
-      <ModalEditarDireccion
-        isOpen={showEditar}
-        onClose={handleCloseEditar}
-        direccionId={direccionEditarId}
-        direccionesExistentes={allData}
-        onGuardar={handleGuardarEdicion}
-      />
+      {showEditar && (
+        <ModalEditarDireccion
+          isOpen
+          onClose={handleCloseEditar}
+          direccionId={direccionEditarId}
+          direccionesExistentes={allData}
+          onGuardar={handleGuardarEdicion}
+        />
+      )}
     </>
   );
 };

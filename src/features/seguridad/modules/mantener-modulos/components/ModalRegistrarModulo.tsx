@@ -3,8 +3,17 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type ReactNode,
 } from 'react';
+
+import {
+  fetchGruposListado,
+} from '@features/seguridad/api/gruposApi';
+
+import {
+  useApiResource,
+} from '@shared/hooks/useApiResource';
 
 import type {
   SelectOption,
@@ -42,6 +51,11 @@ import {
 } from '../utils/registrarModulo.utils';
 
 import {
+  POWER_BI_DEFAULT_ICON,
+  POWER_BI_PARENT_OPTION_ID,
+} from '../utils/powerBiModulo.utils';
+
+import {
   normalizeRegistrarModuloForm,
   validateRegistrarModuloForm,
 } from '../validations/registrarModulo.validation';
@@ -49,6 +63,10 @@ import {
 import ModuloFormErrorSummary from './ModuloFormErrorSummary';
 
 import ModuloFormFields from './ModuloFormFields';
+
+import PowerBiGroupSelector from './PowerBiGroupSelector';
+
+import './PowerBiGroupSelector.css';
 
 import {
   getMantenerModulosPermissionMessage,
@@ -66,7 +84,9 @@ interface ModalRegistrarModuloProps {
 
   onRegistrar: (
     data:
-      RegistrarModuloFormData
+      RegistrarModuloFormData,
+    groupIds:
+      readonly number[]
   ) => Promise<void> | void;
 }
 
@@ -77,13 +97,39 @@ export const ModalRegistrarModulo = ({
   onClose,
   onRegistrar,
 }: ModalRegistrarModuloProps): ReactNode => {
+  const [
+    selectedGroupIds,
+    setSelectedGroupIds,
+  ] = useState<number[]>([]);
+
+  const [
+    groupSelectionError,
+    setGroupSelectionError,
+  ] = useState<string | null>(null);
+
+  const hasValidGroupSelection =
+    selectedGroupIds.length === 1 &&
+    Number.isSafeInteger(
+      selectedGroupIds[0]
+    ) &&
+    selectedGroupIds[0] > 0;
+
   const codeWasEditedRef =
     useRef(false);
+
+  const previousParentIdRef =
+    useRef<number | null>(null);
+
+  const previousIconRef =
+    useRef<string>('');
 
   useEffect(() => {
     if (!isOpen) {
       codeWasEditedRef.current =
         false;
+      previousParentIdRef.current =
+        null;
+      previousIconRef.current = '';
     }
   }, [isOpen]);
 
@@ -94,6 +140,13 @@ export const ModalRegistrarModulo = ({
           modulosExistentes
         ),
       [modulosExistentes]
+    );
+
+  const powerBiParentAvailable =
+    modulosExistentes.some(
+      (modulo) =>
+        modulo.idModulo ===
+        POWER_BI_PARENT_OPTION_ID
     );
 
   const parentOptions =
@@ -152,13 +205,63 @@ export const ModalRegistrarModulo = ({
       onSubmit: async (
         data
       ) => {
+        if (
+          data.esPowerBI &&
+          !hasValidGroupSelection
+        ) {
+          const message =
+            'Seleccione un grupo para el tablero Power BI.';
+
+          setGroupSelectionError(
+            message
+          );
+
+          throw new Error(
+            message
+          );
+        }
+
+        setGroupSelectionError(
+          null
+        );
+
         await onRegistrar(
           normalizeRegistrarModuloForm(
             data
-          )
+          ),
+          data.esPowerBI
+            ? selectedGroupIds
+            : []
         );
       },
     });
+
+  const {
+    data: activeGroups,
+    isLoading:
+      isLoadingActiveGroups,
+    error: activeGroupsError,
+  } = useApiResource(
+    fetchGruposListado,
+    [],
+    {
+      enabled:
+        isOpen &&
+        form.esPowerBI,
+      initialLoading: false,
+    }
+  );
+
+  const powerBiGroups =
+    useMemo(
+      () =>
+        (activeGroups ?? []).filter(
+          (group) =>
+            group.estado === 'Activo' &&
+            group.idCliente > 0
+        ),
+      [activeGroups]
+    );
 
   const handleNombreChange =
     useCallback(
@@ -194,6 +297,90 @@ export const ModalRegistrarModulo = ({
         );
       },
       [handleChange]
+    );
+
+  const handlePowerBIChange =
+    useCallback(
+      (enabled: boolean) => {
+        setGroupSelectionError(
+          null
+        );
+
+        if (enabled) {
+          previousParentIdRef.current =
+            form.padreId !==
+            POWER_BI_PARENT_OPTION_ID
+              ? form.padreId
+              : previousParentIdRef.current;
+
+          handleChange(
+            'esPowerBI',
+            true
+          );
+          handleChange(
+            'padreId',
+            POWER_BI_PARENT_OPTION_ID
+          );
+
+          previousIconRef.current =
+            form.icono.trim();
+
+          handleChange(
+            'icono',
+            POWER_BI_DEFAULT_ICON
+          );
+
+          return;
+        }
+
+        handleChange(
+          'esPowerBI',
+          false
+        );
+        handleChange(
+          'urlBI',
+          ''
+        );
+        handleChange(
+          'imagenOpcion',
+          ''
+        );
+        handleChange(
+          'emailOpcion',
+          ''
+        );
+        handleChange(
+          'icono',
+          previousIconRef.current
+        );
+
+        setSelectedGroupIds(
+          []
+        );
+
+        const previousParentId =
+          previousParentIdRef.current;
+
+        if (
+          previousParentId !== null &&
+          modulosExistentes.some(
+            (modulo) =>
+              modulo.idModulo ===
+              previousParentId
+          )
+        ) {
+          handleChange(
+            'padreId',
+            previousParentId
+          );
+        }
+      },
+      [
+        form.icono,
+        form.padreId,
+        handleChange,
+        modulosExistentes,
+      ]
     );
 
   const {
@@ -253,6 +440,14 @@ export const ModalRegistrarModulo = ({
             parentOptions={
               parentOptions
             }
+            powerBiDisabled={
+              !powerBiParentAvailable
+            }
+            powerBiDisabledMessage={
+              !powerBiParentAvailable
+                ? 'Primero registre el módulo Reportería para poder crear tableros Power BI.'
+                : undefined
+            }
             onNombreChange={
               handleNombreChange
             }
@@ -271,6 +466,30 @@ export const ModalRegistrarModulo = ({
                 value
               );
             }}
+            onEsPowerBIChange={
+              handlePowerBIChange
+            }
+            onUrlBIChange={(value) => {
+              handleChange(
+                'urlBI',
+                value
+              );
+            }}
+            onImagenOpcionChange={(value) => {
+              handleChange(
+                'imagenOpcion',
+                value
+              );
+            }}
+            onEmailOpcionChange={(value) => {
+              handleChange(
+                'emailOpcion',
+                value
+              );
+            }}
+            parentDisabled={
+              form.esPowerBI
+            }
             onPadreChange={(value) => {
               handleChange(
                 'padreId',
@@ -287,6 +506,41 @@ export const ModalRegistrarModulo = ({
               onEstadoChange
             }
           />
+
+          {form.esPowerBI && (
+            <div className="power-bi-group-selector-spacing">
+              <PowerBiGroupSelector
+                groups={
+                  powerBiGroups
+                }
+                value={
+                  selectedGroupIds
+                }
+                disabled={
+                  isSubmitting ||
+                  isLoadingActiveGroups ||
+                  Boolean(
+                    activeGroupsError
+                  )
+                }
+                error={
+                  activeGroupsError
+                    ? 'No se pudieron cargar los grupos activos.'
+                    : groupSelectionError
+                }
+                onChange={(
+                  groupIds
+                ) => {
+                  setSelectedGroupIds(
+                    groupIds
+                  );
+                  setGroupSelectionError(
+                    null
+                  );
+                }}
+              />
+            </div>
+          )}
 
           <ModuloFormErrorSummary
             errors={errors}
@@ -329,7 +583,11 @@ export const ModalRegistrarModulo = ({
             }
             disabled={
               isSubmitting ||
-              !canInsert
+              !canInsert ||
+              (
+                form.esPowerBI &&
+                !hasValidGroupSelection
+              )
             }
             title={
               !canInsert

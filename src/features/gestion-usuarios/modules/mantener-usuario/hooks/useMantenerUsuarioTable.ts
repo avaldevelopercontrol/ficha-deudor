@@ -12,6 +12,7 @@ import {
 } from '@shared/hooks/useOperationFeedback';
 
 import {
+  activateUsuarioGrupo,
   createUsuarioGrupo,
   fetchGruposByUsuario,
   removeUsuarioGrupo,
@@ -196,17 +197,17 @@ export const useMantenerUsuarioTable = () => {
 
             for (const grupo of agregar) {
               if (
-                persistidosPorGrupo.has(
-                  grupo.idGrupo
-                )
+                grupo.idUsuarioGrupo !== null
               ) {
-                continue;
+                await activateUsuarioGrupo(
+                  grupo
+                );
+              } else {
+                await createUsuarioGrupo(
+                  payload.original.idUsuario,
+                  grupo.idGrupo
+                );
               }
-
-              await createUsuarioGrupo(
-                payload.original.idUsuario,
-                grupo.idGrupo
-              );
 
               persistidosPorGrupo.set(
                 grupo.idGrupo,

@@ -101,14 +101,16 @@ export const useMantenerModulosColumns = ({
         render: (row) => {
           const label =
             row.implementacion ??
-            'SIN PANTALLA';
+            'SIN IMPLEMENTAR';
 
           const variant =
-            label === 'IMPLEMENTADA'
+            label === 'IMPLEMENTADO'
               ? 'success'
-              : label === 'ESTRUCTURA'
+              : label === 'POWER BI'
                 ? 'info'
-                : 'warning';
+                : label === 'AGRUPADOR'
+                  ? 'neutral'
+                  : 'warning';
 
           return (
             <Badge

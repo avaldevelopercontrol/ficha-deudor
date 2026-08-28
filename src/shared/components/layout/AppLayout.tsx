@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import AppSidebar from './AppSidebar';
 import AppHeader from './AppHeader';
 import { AppLayoutContext } from './AppLayoutContext';
+import { matchesWithoutSidebarPath } from './appLayout.utils';
 import '../../styles/components/app-layout.css';
 
 interface AppLayoutProps {
@@ -20,7 +21,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [headerActions, setHeaderActions] =
     useState<React.ReactNode>(null);
-  const isSidebarHidden = withoutSidebarPaths.includes(location.pathname);
+  const isSidebarHidden =
+    matchesWithoutSidebarPath(
+      location.pathname,
+      withoutSidebarPaths
+    );
   const breadcrumb = useMemo(
     () => resolveBreadcrumb(location.pathname),
     [location.pathname, resolveBreadcrumb]

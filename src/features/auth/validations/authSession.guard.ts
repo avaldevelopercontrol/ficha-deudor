@@ -95,23 +95,21 @@ export const normalizeStoredUsuario = (
 export const normalizeStoredCliente = (
   value: unknown
 ): Cliente | null => {
-  if (!isRecord(value) || typeof value.activa !== 'boolean') {
+  if (!isRecord(value)) {
     return null;
   }
 
   try {
     const nombre = normalizeOptionalText(value.nombre);
-    const codigo = normalizeRequiredText(value.codigo);
 
-    if (!nombre || !codigo) {
+    if (!nombre) {
       return null;
     }
 
     return {
       id_cliente: String(toRequiredId(value.id_cliente, 'id_cliente')),
+      id_grupo: toRequiredId(value.id_grupo, 'id_grupo'),
       nombre,
-      codigo,
-      activa: value.activa,
     };
   } catch {
     return null;
