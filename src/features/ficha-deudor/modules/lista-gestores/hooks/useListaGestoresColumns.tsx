@@ -5,6 +5,7 @@ import type { Column } from '@shared/types';
 
 import {
   LISTA_GESTORES_POPUP_COLUMNS,
+  LISTA_GESTORES_POPUP_FALLBACK_TEXT,
   LISTA_GESTORES_POPUP_COLUMN_WIDTHS,
   LISTA_GESTORES_POPUP_TEXTS,
 } from '../constants/listaGestoresPopup.constants';
@@ -29,25 +30,29 @@ export const useListaGestoresColumns = ({
         key: 'nombre',
         label: LISTA_GESTORES_POPUP_COLUMNS.nombre,
         width: LISTA_GESTORES_POPUP_COLUMN_WIDTHS.nombre,
-        render: (row: Gestor) => row.nombre || '—',
+        render: (row: Gestor) =>
+          row.nombre || LISTA_GESTORES_POPUP_FALLBACK_TEXT,
       },
       {
         key: 'perfil',
         label: LISTA_GESTORES_POPUP_COLUMNS.perfil,
         width: LISTA_GESTORES_POPUP_COLUMN_WIDTHS.perfil,
-        render: (row: Gestor) => row.perfil || '—',
+        render: (row: Gestor) =>
+          row.perfil || LISTA_GESTORES_POPUP_FALLBACK_TEXT,
       },
       {
         key: 'login',
         label: LISTA_GESTORES_POPUP_COLUMNS.login,
         width: LISTA_GESTORES_POPUP_COLUMN_WIDTHS.login,
-        render: (row: Gestor) => row.login || '—',
+        render: (row: Gestor) =>
+          row.login || LISTA_GESTORES_POPUP_FALLBACK_TEXT,
       },
       {
         key: 'subZona',
         label: LISTA_GESTORES_POPUP_COLUMNS.subZona,
         width: LISTA_GESTORES_POPUP_COLUMN_WIDTHS.subZona,
-        render: (row: Gestor) => row.subZona || '—',
+        render: (row: Gestor) =>
+          row.subZona || LISTA_GESTORES_POPUP_FALLBACK_TEXT,
       },
       {
         key: 'codRecaudacion',
@@ -55,7 +60,7 @@ export const useListaGestoresColumns = ({
         width:
           LISTA_GESTORES_POPUP_COLUMN_WIDTHS.codRecaudacion,
         render: (row: Gestor) =>
-          row.codRecaudacion || '—',
+          row.codRecaudacion || LISTA_GESTORES_POPUP_FALLBACK_TEXT,
       },
       {
         key: 'acciones',

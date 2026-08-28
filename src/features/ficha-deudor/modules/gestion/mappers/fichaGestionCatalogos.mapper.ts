@@ -1,15 +1,17 @@
 import type {
   GestionEstadoApi,
-  GestionEstadoList,
   GestionTipoApi,
-  GestionTipoList,
   GestionPaletaRespuestaApi,
-  GestionPaletaRespuestaList,
   GestionEstadoClaroApi,
-  GestionEstadoClaroList,
   GestionMotivoNoPagoApi,
+} from '../types/fichaGestionApi.types';
+import type {
+  GestionEstadoList,
+  GestionTipoList,
+  GestionPaletaRespuestaList,
+  GestionEstadoClaroList,
   GestionMotivoNoPagoList,
-} from '../types/fichaGestion.types';
+} from '../types/fichaGestionCatalogos.types';
 
 export const mapGestionEstados = (
   data: GestionEstadoApi[] | null | undefined

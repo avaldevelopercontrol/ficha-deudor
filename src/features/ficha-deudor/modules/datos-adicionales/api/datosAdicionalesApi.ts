@@ -4,10 +4,6 @@ import type {
   DatoAdicionalApi,
   ColumnApi,
 } from '../../../shared/types';
-import type {
-  ApiResponse,
-  ApiResponseSimple
-} from '@shared/types/indexApi';
 import {
   DATOS_ADICIONALES_ENDPOINTS,
   DATOS_ADICIONALES_ERROR_MESSAGES,
@@ -19,70 +15,80 @@ import {
   unwrapApiArrayResponse,
   unwrapApiObjectResponse,
 } from '../../../shared/utils/apiResponse.utils';
+import {
+  isCabeceraDatosAdicionalesApi,
+  isDatoAdicionalApi,
+} from './datosAdicionalesApi.validators';
 
-const buildCabeceraDatosAdicionalesParams = (
-  id_cliente: string,
-  pantalla: number
-) => {
+export interface FetchCabeceraDatosAdicionalesParams {
+  idCliente: string;
+  pantalla: number;
+}
+
+export interface FetchDatosAdicionalesParams {
+  idCliente: string;
+  idCartera: string;
+  idDeudor: string;
+}
+
+const buildCabeceraDatosAdicionalesParams = ({
+  idCliente,
+  pantalla,
+}: FetchCabeceraDatosAdicionalesParams) => {
   return new URLSearchParams({
-    nId_Cliente: id_cliente,
+    nId_Cliente: idCliente,
     pantalla: String(pantalla),
   });
 };
 
-const buildDatosAdicionalesParams = (
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string
-) => {
+const buildDatosAdicionalesParams = ({
+  idCliente,
+  idCartera,
+  idDeudor,
+}: FetchDatosAdicionalesParams) => {
   return new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
-    nId_Persdeudor: id_deudor,
+    nId_Cliente: idCliente,
+    nId_Cartera: idCartera,
+    nId_Persdeudor: idDeudor,
     PageNumber: String(DATOS_ADICIONALES_FETCH_PAGE_NUMBER),
     PageSize: String(DATOS_ADICIONALES_FETCH_PAGE_SIZE),
   });
 };
 
 export async function fetchCabeceraDatosAdicionales(
-  id_cliente: string,
-  pantalla: number,
+  params: FetchCabeceraDatosAdicionalesParams,
   signal?: AbortSignal
 ): Promise<ColumnApi[]> {
-  const params = buildCabeceraDatosAdicionalesParams(id_cliente, pantalla);
+  const searchParams = buildCabeceraDatosAdicionalesParams(params);
 
-  const result = await apiClient<ApiResponseSimple<CabeceraDatosAdicionalesApi>>(
-    `${DATOS_ADICIONALES_ENDPOINTS.CABECERA}?${params.toString()}`,
+  const result = await apiClient<unknown>(
+    `${DATOS_ADICIONALES_ENDPOINTS.CABECERA}?${searchParams.toString()}`,
     { signal }
   );
 
   const cabecera = unwrapApiObjectResponse<CabeceraDatosAdicionalesApi>(
     result,
-    DATOS_ADICIONALES_ERROR_MESSAGES.META
+    DATOS_ADICIONALES_ERROR_MESSAGES.META,
+    isCabeceraDatosAdicionalesApi
   );
 
   return mapCabeceraDatosAdicionalesToColumns(cabecera);
 }
 
 export async function fetchAllDatosAdicionales(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
+  params: FetchDatosAdicionalesParams,
   signal?: AbortSignal
 ): Promise<DatoAdicionalApi[]> {
-  const params = buildDatosAdicionalesParams(
-    id_cliente,
-    id_cartera,
-    id_deudor
-  );
+  const searchParams = buildDatosAdicionalesParams(params);
 
-  const result = await apiClient<ApiResponse<DatoAdicionalApi[]>>(
-    `${DATOS_ADICIONALES_ENDPOINTS.DATA}?${params.toString()}`,
+  const result = await apiClient<unknown>(
+    `${DATOS_ADICIONALES_ENDPOINTS.DATA}?${searchParams.toString()}`,
     { signal }
   );
 
   return unwrapApiArrayResponse<DatoAdicionalApi>(
     result,
-    DATOS_ADICIONALES_ERROR_MESSAGES.DATA
+    DATOS_ADICIONALES_ERROR_MESSAGES.DATA,
+    isDatoAdicionalApi
   );
 }

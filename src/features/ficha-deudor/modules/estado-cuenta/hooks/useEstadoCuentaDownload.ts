@@ -87,11 +87,14 @@ export const useEstadoCuentaDownload = ({
 
       try {
         const result =
-          await exportGestionEstadoCuenta({
-            idCliente,
-            idCartera,
-            idDeudor,
-          });
+          await exportGestionEstadoCuenta(
+            {
+              idCliente,
+              idCartera,
+              idDeudor,
+            },
+            abortController.signal
+          );
 
         const fileName =
           result.fileName ??

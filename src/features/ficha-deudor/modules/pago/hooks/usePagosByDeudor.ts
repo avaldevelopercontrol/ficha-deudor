@@ -27,8 +27,15 @@ export function usePagosByDeudor(
   );
 
   const fetcher = useCallback(
-    (signal?: AbortSignal) =>
-      fetchPagosByDeudor(id_cliente, id_cartera, id_deudor, signal),
+    (signal: AbortSignal) =>
+      fetchPagosByDeudor(
+        {
+          idCliente: id_cliente,
+          idCartera: id_cartera,
+          idDeudor: id_deudor,
+        },
+        signal
+      ),
     [id_cliente, id_cartera, id_deudor]
   );
 

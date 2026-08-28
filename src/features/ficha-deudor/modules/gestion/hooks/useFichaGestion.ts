@@ -14,7 +14,7 @@ import type {
   GestionPaletaRespuestaList,
   GestionEstadoClaroList,
   GestionMotivoNoPagoList,
-} from '../types/fichaGestion.types';
+} from '../types/fichaGestionCatalogos.types';
 import {
   CLIENTE_CLARO_ID,
   TIPO_GESTION_PALETA,
@@ -33,7 +33,7 @@ export function useGestionEstados(idCliente: string) {
         return resolveEmptyList<GestionEstadoList>();
       }
 
-      return fetchGestionEstados(idCliente, signal);
+      return fetchGestionEstados({ idCliente }, signal);
     },
     [idCliente]
   );
@@ -97,7 +97,7 @@ export function useGestionEstadoGestionClaro(
         return resolveEmptyList<GestionEstadoClaroList>();
       }
 
-      return fetchGestionEstadoGestionClaro(idCliente, idCartera, signal);
+      return fetchGestionEstadoGestionClaro({ idCliente, idCartera }, signal);
     },
     [idCliente, idCartera]
   );
@@ -115,7 +115,7 @@ export function useGestionMotivoNoPago(
         return resolveEmptyList<GestionMotivoNoPagoList>();
       }
 
-      return fetchGestionMotivoNoPago(idCliente, idCartera, signal);
+      return fetchGestionMotivoNoPago({ idCliente, idCartera }, signal);
     },
     [idCliente, idCartera]
   );

@@ -2,7 +2,7 @@ import React from 'react';
 
 import type { DocumentoApi } from '../../../shared/types';
 import { useFichaGestionViewModel } from '../hooks/useFichaGestionViewModel';
-import type { GestionFormClaro } from '../types/fichaGestion.types';
+import type { GestionFormClaro } from '../types/fichaGestionForm.types';
 import type { FichaDeudorGestionFormParams } from '../../../shared/types/fichaDeudor.types';
 import FichaGestionDatosPrincipales from './FichaGestionDatosPrincipales';
 import FichaGestionAccionesTomar from './FichaGestionAccionesTomar';

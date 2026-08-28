@@ -63,8 +63,7 @@ export function useDireccionesReferenciadas(
   const fetchDireccionesReferenciadasData = useCallback(
     (signal: AbortSignal) => {
       return fetchDireccionesReferenciadas(
-        id_cliente,
-        id_deudor,
+        { idCliente: id_cliente, idDeudor: id_deudor },
         signal
       );
     },
@@ -101,7 +100,12 @@ export function useDireccionesReferenciadas(
   const create = useCallback(
     async (formData: DireccionFormData) => {
       try {
-        await createDireccion(id_cliente, id_deudor, id_usuario, formData);
+        await createDireccion({
+          idCliente: id_cliente,
+          idDeudor: id_deudor,
+          idUsuario: id_usuario,
+          data: formData,
+        });
         await refetch();
       } catch (error) {
         setError(
@@ -120,7 +124,13 @@ export function useDireccionesReferenciadas(
   const update = useCallback(
     async (id: string, formData: DireccionEditFormData) => {
       try {
-        await updateDireccion(id_cliente, id_deudor, id_usuario, id, formData);
+        await updateDireccion({
+          idCliente: id_cliente,
+          idDeudor: id_deudor,
+          idUsuario: id_usuario,
+          idDireccion: id,
+          data: formData,
+        });
         await refetch();
       } catch (error) {
         setError(
@@ -161,7 +171,7 @@ export function useDireccionesReferenciadas(
 
 export function useDireccionById(idDireccion: string | null) {
   const fetcher = useCallback(
-    (id: string, signal: AbortSignal) => fetchDireccionById(id, signal),
+    (id: string, signal: AbortSignal) => fetchDireccionById({ idDireccion: id }, signal),
     []
   );
 
@@ -183,7 +193,7 @@ export function useProvincias(idDepartamento: string | null) {
         return Promise.resolve([] as Provincia[]);
       }
 
-      return fetchProvincias(idDepartamento, signal);
+      return fetchProvincias({ idDepartamento }, signal);
     },
     [idDepartamento]
   );
@@ -201,7 +211,7 @@ export function useDistritos(
         return Promise.resolve([] as Distrito[]);
       }
 
-      return fetchDistritos(idDepartamento, idProvincia, signal);
+      return fetchDistritos({ idDepartamento, idProvincia }, signal);
     },
     [idDepartamento, idProvincia]
   );

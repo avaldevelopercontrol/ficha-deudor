@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import type { GestionFormClaro } from '../types/fichaGestion.types';
+import type { GestionFormClaro } from '../types/fichaGestionForm.types';
 
 
 const INITIAL_FICHA_GESTION_FORM: GestionFormClaro = {

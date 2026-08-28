@@ -1,7 +1,7 @@
 import type { FichaDeudorPanel } from '../constants/fichaDeudorPanels.constants';
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { GestionFormClaro } from '../../modules/gestion/types/fichaGestion.types';
+import type { GestionFormClaro } from '../../modules/gestion/types/fichaGestionForm.types';
 import { AUTH_ROUTES } from '@features/auth/constants';
 import { ActionButton } from '@shared/components/ui/ActionButton';
 import { useAppLayout } from '@shared/components/layout/AppLayoutContext';

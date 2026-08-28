@@ -3,15 +3,29 @@ import {
   assertApiSuccess,
   getApiErrorMessage,
   isSuccessfulStatusCode,
-  normalizeApiCollectionResponse,
   unwrapApiArrayResponse,
   unwrapApiObjectResponse,
+  unwrapApiPaginatedArrayResponse,
   unwrapApiResponse,
 } from './apiResponse.utils';
 import {
   defineSuite,
   test,
 } from '../../../../test/testHarness';
+
+
+interface TestItem {
+  id: number;
+}
+
+const isTestItem = (value: unknown): value is TestItem => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    typeof (value as Record<string, unknown>).id === 'number'
+  );
+};
 
 const createEnvelope = <T>(
   response: T,
@@ -221,88 +235,111 @@ export const suite = defineSuite('apiResponse.utils', [
   }),
   test('valida respuestas de arreglo sin convertir errores en listas vacías', () => {
     assert.deepEqual(
-      unwrapApiArrayResponse<{ id: number }>(
+      unwrapApiArrayResponse(
         createEnvelope([{ id: 1 }, { id: 2 }]),
-        'Error consultando lista'
+        'Error consultando lista',
+        isTestItem
       ),
       [{ id: 1 }, { id: 2 }]
     );
 
     assert.throws(
       () =>
-        unwrapApiArrayResponse<{ id: number }>(
+        unwrapApiArrayResponse(
+          createEnvelope([{ id: '1' }]),
+          'Error consultando lista',
+          isTestItem
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+
+    assert.throws(
+      () =>
+        unwrapApiArrayResponse(
           createEnvelope({ items: [] }),
-          'Error consultando lista'
+          'Error consultando lista',
+          isTestItem
         ),
       /respuesta del servidor no contiene datos válidos/i
     );
 
     assert.throws(
       () =>
-        unwrapApiArrayResponse<{ id: number }>(
+        unwrapApiArrayResponse(
           createEnvelope([{ id: 1 }, null]),
-          'Error consultando lista'
+          'Error consultando lista',
+          isTestItem
         ),
       /respuesta del servidor no contiene datos válidos/i
     );
 
     assert.throws(
       () =>
-        unwrapApiArrayResponse<{ id: number }>(
+        unwrapApiArrayResponse(
           createEnvelope([1, 2]),
-          'Error consultando lista'
+          'Error consultando lista',
+          isTestItem
         ),
       /respuesta del servidor no contiene datos válidos/i
     );
   }),
   test('valida respuestas de objeto y rechaza nulos o arreglos', () => {
     assert.deepEqual(
-      unwrapApiObjectResponse<{ id: number }>(
+      unwrapApiObjectResponse(
         createEnvelope({ id: 7 }),
-        'Error consultando detalle'
+        'Error consultando detalle',
+        isTestItem
       ),
       { id: 7 }
     );
 
     assert.throws(
       () =>
-        unwrapApiObjectResponse<{ id: number }>(
+        unwrapApiObjectResponse(
           createEnvelope(null),
-          'Error consultando detalle'
+          'Error consultando detalle',
+          isTestItem
         ),
       /respuesta del servidor no contiene datos válidos/i
     );
 
     assert.throws(
       () =>
-        unwrapApiObjectResponse<{ id: number }>(
+        unwrapApiObjectResponse(
           createEnvelope([]),
-          'Error consultando detalle'
+          'Error consultando detalle',
+          isTestItem
         ),
       /respuesta del servidor no contiene datos válidos/i
     );
   }),
-  test('normaliza colecciones solo cuando contienen registros válidos', () => {
+  test('devuelve datos y paginación solo cuando ambos contratos son válidos', () => {
     assert.deepEqual(
-      normalizeApiCollectionResponse<{ id: number }>(
-        { id: 8 },
-        'Error consultando lista'
+      unwrapApiPaginatedArrayResponse(
+        createEnvelope([{ id: 1 }], {
+          pageNumber: 1,
+          pageSize: 20,
+          totalRecords: 1,
+          totalPages: 1,
+        }),
+        'Error consultando lista paginada',
+        isTestItem
       ),
-      [{ id: 8 }]
-    );
-    assert.deepEqual(
-      normalizeApiCollectionResponse<{ id: number }>(
-        null,
-        'Error consultando lista'
-      ),
-      []
+      {
+        data: [{ id: 1 }],
+        pageNumber: 1,
+        pageSize: 20,
+        totalRecords: 1,
+        totalPages: 1,
+      }
     );
 
     assert.throws(
       () =>
-        normalizeApiCollectionResponse<{ id: number }>(
-          [{ id: 1 }, 'inválido'],
-          'Error consultando lista'
+        unwrapApiPaginatedArrayResponse(
+          createEnvelope([{ id: 1 }]),
+          'Error consultando lista paginada',
+          isTestItem
         ),
       /respuesta del servidor no contiene datos válidos/i
     );

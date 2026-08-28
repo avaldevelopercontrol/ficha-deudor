@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import type { ChangeEvent } from 'react';
 
-import type { FichaGestionAccionesTomarProps } from '../types/fichaGestion.types';
+import type { FichaGestionAccionesTomarProps } from '../types/fichaGestionViewModel.types';
 import { buildTimeValue, hasValidDate } from '../../../shared/utils/date.utils';
 import { sanitizeDecimalValue } from '../../../shared/utils/number.utils';
 

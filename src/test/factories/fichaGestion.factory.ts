@@ -1,7 +1,7 @@
 import type { DocumentoApi } from '@features/ficha-deudor/shared/types';
 import type { FichaDeudorGestionFormParams } from '@features/ficha-deudor/shared/types/fichaDeudor.types';
 import type { PaletaRespuestaOption } from '@features/ficha-deudor/shared/utils/selectOptions.utils';
-import type { GestionFormClaro } from '@features/ficha-deudor/modules/gestion/types/fichaGestion.types';
+import type { GestionFormClaro } from '@features/ficha-deudor/modules/gestion/types/fichaGestionForm.types';
 
 export const createGestionForm = (
   overrides: Partial<GestionFormClaro> = {}

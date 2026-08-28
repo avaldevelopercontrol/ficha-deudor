@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import type { FichaGestionValidationErrors } from '../../types/fichaGestion.types';
+import type { FichaGestionValidationErrors } from '../../types/fichaGestionForm.types';
 import { getFichaGestionErrorMessages } from '../../validations/fichaGestionValidation';
 
 interface Props {

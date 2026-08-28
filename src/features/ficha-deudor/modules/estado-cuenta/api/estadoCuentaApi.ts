@@ -19,7 +19,9 @@ export const exportGestionEstadoCuenta = async ({
   idCliente,
   idCartera,
   idDeudor,
-}: ExportEstadoCuentaParams): Promise<ApiFileResult> => {
+}: ExportEstadoCuentaParams,
+  signal?: AbortSignal
+): Promise<ApiFileResult> => {
   const searchParams = new URLSearchParams({
     nId_Cliente: idCliente,
     nId_Cartera: idCartera,
@@ -35,6 +37,7 @@ export const exportGestionEstadoCuenta = async ({
   return apiFileClient(
     `${BASE_GESTION}/ExportGestionEstadoCuenta?${searchParams.toString()}`,
     {
+      signal,
       headers: {
         Accept:
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

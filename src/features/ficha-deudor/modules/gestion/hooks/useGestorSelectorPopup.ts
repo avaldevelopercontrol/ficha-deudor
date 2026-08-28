@@ -11,9 +11,7 @@ import {
 import {
   isGestorSeleccionadoMessage,
 } from '../../lista-gestores/utils/gestorMessaging.utils';
-import type {
-  SetGestionField,
-} from '../types/fichaGestion.types';
+import type { SetGestionField } from '../types/fichaGestionForm.types';
 
 interface UseGestorSelectorPopupParams {
   idCliente: string;

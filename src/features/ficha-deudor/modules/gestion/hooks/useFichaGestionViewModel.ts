@@ -4,10 +4,8 @@ import type { DocumentoApi } from '../../../shared/types';
 import { useFichaGestionActions } from './useFichaGestionActions';
 import { useFichaGestionCatalogos } from './useFichaGestionCatalogos';
 import { useFichaGestionForm } from './useFichaGestionForm';
-import type {
-  FichaGestionViewModel,
-  GestionFormClaro,
-} from '../types/fichaGestion.types';
+import type { FichaGestionViewModel } from '../types/fichaGestionViewModel.types';
+import type { GestionFormClaro } from '../types/fichaGestionForm.types';
 import type { FichaDeudorGestionFormParams } from '../../../shared/types/fichaDeudor.types';
 import { useFichaGestionDerivedValues } from './useFichaGestionDerivedValues';
 import { useSyncTelefonoSeleccionado } from './useSyncTelefonoSeleccionado';
@@ -146,16 +144,17 @@ export const useFichaGestionViewModel = ({
     },
     [onSubmit, resetForm, showSuccess]
   );
-  
-  const handleGestionError =
-  useCallback((message: string) => {
-    showFeedback({
-      variant: 'error',
-      title:
-        'No se pudo registrar la gestión',
-      message,
-    });
-  }, [showFeedback]);
+
+  const handleGestionError = useCallback(
+    (message: string) => {
+      showFeedback({
+        variant: 'error',
+        title: 'No se pudo registrar la gestión',
+        message,
+      });
+    },
+    [showFeedback]
+  );
 
   const {
     agendaValidationErrors,
@@ -166,7 +165,6 @@ export const useFichaGestionViewModel = ({
     validationErrors,
     isSaving,
     handleAgendar,
-    handleOpenWhatsApp,
     handleGuardar,
   } = useFichaGestionActions({
     form,
@@ -178,13 +176,10 @@ export const useFichaGestionViewModel = ({
     np2Options,
     documentosFiltrados,
     np1TipoContacto,
-    requiereCamposClaro:
-      mostrarCamposClaro,
+    requiereCamposClaro: mostrarCamposClaro,
     onGestionGuardada,
-    onSubmit:
-      handleGestionRegistrada,
-    onSaveError:
-      handleGestionError,
+    onSubmit: handleGestionRegistrada,
+    onSaveError: handleGestionError,
   });
 
   const handleAgendarGestion =
@@ -213,13 +208,11 @@ export const useFichaGestionViewModel = ({
     setFields,
     handleNP0Change,
     handleNP1Change,
-    handleOpenWhatsApp,
     telefonoSearch,
     catalogos,
     usuarioActual,
-    
-    handleAgendar:
-      handleAgendarGestion,
+
+    handleAgendar: handleAgendarGestion,
 
     agendaValidationErrors,
     agendaFeedback,

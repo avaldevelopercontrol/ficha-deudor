@@ -6,10 +6,8 @@ import {
 } from '../../../shared/utils/date.utils';
 import { toRequiredId } from '../../../shared/utils/number.utils';
 import { isSinDatoOption } from '../validations/fichaGestionAgendaValidation';
-import type {
-  CreateAgendaPayload,
-  GestionFormClaro,
-} from '../types/fichaGestion.types';
+import type { CreateAgendaPayload } from '../types/fichaGestionApi.types';
+import type { GestionFormClaro } from '../types/fichaGestionForm.types';
 
 interface BuildCreateAgendaPayloadParams {
   form: GestionFormClaro;

@@ -1,37 +1,42 @@
 import { apiClient } from '@shared/api/apiClient';
-import type { ApiResponse } from '@shared/types/indexApi';
 import {
   unwrapApiArrayResponse,
 } from '../../../shared/utils/apiResponse.utils';
-import type { Agenda, AgendaApi } from '../types/agenda.types';
+import type { Agenda } from '../types/agenda.types';
+import { isAgendaApi } from './agendaApi.validators';
 
 const BASE_GESTION = '/v1/Gestion';
 const AGENDAS_ERROR_MESSAGE = 'Error cargando agendas';
 
+export interface FetchAgendasByDeudorParams {
+  idCliente: string;
+  idCartera: string;
+  idDeudor: string;
+  idUsuario: string;
+}
+
 export async function fetchAgendasByDeudor(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
-  id_usuario: string,
+  { idCliente, idCartera, idDeudor, idUsuario }: FetchAgendasByDeudorParams,
   signal?: AbortSignal
 ): Promise<Agenda[]> {
   const params = new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
-    nId_Persdeudor: id_deudor,
-    nId_PerfilUsuario: id_usuario,
+    nId_Cliente: idCliente,
+    nId_Cartera: idCartera,
+    nId_Persdeudor: idDeudor,
+    nId_PerfilUsuario: idUsuario,
     PageNumber: '1',
     PageSize: '1000',
   });
 
-  const result = await apiClient<ApiResponse<AgendaApi[]>>(
+  const result = await apiClient<unknown>(
     `${BASE_GESTION}/GetGestionAgendasDeudor?${params.toString()}`,
     { signal }
   );
 
-  const agendas = unwrapApiArrayResponse<AgendaApi>(
+  const agendas = unwrapApiArrayResponse(
     result,
-    AGENDAS_ERROR_MESSAGE
+    AGENDAS_ERROR_MESSAGE,
+    isAgendaApi
   );
 
   return agendas.map((item) => ({

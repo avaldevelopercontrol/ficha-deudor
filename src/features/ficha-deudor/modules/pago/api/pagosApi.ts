@@ -1,35 +1,40 @@
 import { apiClient } from '@shared/api/apiClient';
-import type { ApiResponse } from '@shared/types/indexApi';
 import {
   unwrapApiArrayResponse,
 } from '../../../shared/utils/apiResponse.utils';
-import type { Pago, PagoApi } from '../types/pago.types';
+import type { Pago } from '../types/pago.types';
+import { isPagoApi } from './pagosApi.validators';
 
 const BASE_GESTION = '/v1/Gestion';
 const PAGOS_ERROR_MESSAGE = 'Error cargando pagos';
 
+export interface FetchPagosByDeudorParams {
+  idCliente: string;
+  idCartera: string;
+  idDeudor: string;
+}
+
 export async function fetchPagosByDeudor(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
+  { idCliente, idCartera, idDeudor }: FetchPagosByDeudorParams,
   signal?: AbortSignal
 ): Promise<Pago[]> {
   const params = new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
-    nId_Persdeudor: id_deudor,
+    nId_Cliente: idCliente,
+    nId_Cartera: idCartera,
+    nId_Persdeudor: idDeudor,
     PageNumber: '1',
     PageSize: '1000',
   });
 
-  const result = await apiClient<ApiResponse<PagoApi[]>>(
+  const result = await apiClient<unknown>(
     `${BASE_GESTION}/GetGestionPagosDeudor?${params.toString()}`,
     { signal }
   );
 
-  const pagos = unwrapApiArrayResponse<PagoApi>(
+  const pagos = unwrapApiArrayResponse(
     result,
-    PAGOS_ERROR_MESSAGE
+    PAGOS_ERROR_MESSAGE,
+    isPagoApi
   );
 
   return pagos.map((item) => ({

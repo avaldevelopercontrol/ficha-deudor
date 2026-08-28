@@ -9,7 +9,13 @@ export const mapCabeceraDatosAdicionalesToColumns = (
   const columns: ColumnApi[] = [];
 
   for (const [key, value] of Object.entries(cabecera)) {
-    if (key === 'idCab') continue;
+    if (
+      key === 'idCab' ||
+      (typeof value !== 'string' &&
+        typeof value !== 'number')
+    ) {
+      continue;
+    }
 
     const label = String(value);
     const type = inferDatosAdicionalesTypeFromLabel(key, label);

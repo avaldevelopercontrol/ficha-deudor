@@ -28,12 +28,14 @@ export function useAgendasByDeudor(
   );
 
   const fetcher = useCallback(
-    (signal?: AbortSignal) =>
+    (signal: AbortSignal) =>
       fetchAgendasByDeudor(
-        id_cliente,
-        id_cartera,
-        id_deudor,
-        id_usuario,
+        {
+          idCliente: id_cliente,
+          idCartera: id_cartera,
+          idDeudor: id_deudor,
+          idUsuario: id_usuario,
+        },
         signal
       ),
     [id_cliente, id_cartera, id_deudor, id_usuario]

@@ -17,7 +17,7 @@ interface UseEmailDeudorModalActionsParams {
   idCliente?: string;
   idDeudor?: string;
   idUsuario?: string;
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 export const useEmailDeudorModalActions = ({
@@ -64,8 +64,13 @@ export const useEmailDeudorModalActions = ({
       }
 
       try {
-        await createEmail(idCliente, idDeudor, idUsuario, formData);
-        refetch();
+        await createEmail({
+          idCliente,
+          idDeudor,
+          idUsuario,
+          data: formData,
+        });
+        await refetch();
 
         showSuccess({
           entity: {
@@ -103,16 +108,16 @@ export const useEmailDeudorModalActions = ({
       }
 
       try {
-        await updateEmail(
+        await updateEmail({
           idCliente,
           idDeudor,
           idUsuario,
-          emailEditarId,
-          formData,
-          formData.dFecRegistro
-        );
+          idEmail: emailEditarId,
+          data: formData,
+          fechaRegistroOriginal: formData.dFecRegistro,
+        });
 
-        refetch();
+        await refetch();
 
         showSuccess({
           entity: {

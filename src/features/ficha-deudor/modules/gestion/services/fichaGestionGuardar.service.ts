@@ -1,4 +1,4 @@
-import type { CreateGestionOpeGesContratosPayload } from '../types/fichaGestion.types';
+import type { CreateGestionOpeGesContratosPayload } from '../types/fichaGestionApi.types';
 import {
   buildCreateGestionPayload,
   buildDocxCobrars,
@@ -7,7 +7,7 @@ import type { FichaDeudorGestionFormParams } from '../../../shared/types/fichaDe
 import type {
   FichaGestionValidationErrors,
   GestionFormClaro,
-} from '../types/fichaGestion.types';
+} from '../types/fichaGestionForm.types';
 import {
   hasFichaGestionErrors,
   validateFichaGestion,

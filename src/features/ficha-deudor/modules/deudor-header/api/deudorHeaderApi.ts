@@ -1,38 +1,48 @@
 import { apiClient } from '@shared/api/apiClient';
-import type { ApiResponseSimple } from '@shared/types/indexApi';
 import {
   unwrapApiObjectResponse,
 } from '../../../shared/utils/apiResponse.utils';
 import type {
-  CabeceraInfoApi,
   CabeceraInfo,
   DeudorInfo,
-  DeudorInfoApi,
 } from '../../../shared/types';
+import {
+  isCabeceraInfoApi,
+  isDeudorInfoApi,
+} from './deudorHeaderApi.validators';
 
 const BASE_GESTION = '/v1/Gestion';
 
+export interface FetchCabeceraHeaderParams {
+  idCliente: string;
+  idCartera: string;
+}
+
+export interface FetchDeudorHeaderParams extends FetchCabeceraHeaderParams {
+  idDeudor: string;
+}
+
 // ─── GET: Cabecera (Zona, Cartera, Campaña) ───
 export async function fetchCabeceraHeader(
-  id_cliente: string,
-  id_cartera: string,
+  { idCliente, idCartera }: FetchCabeceraHeaderParams,
   signal?: AbortSignal
 ): Promise<CabeceraInfo> {
   const params = new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
+    nId_Cliente: idCliente,
+    nId_Cartera: idCartera,
   });
 
-  const result = await apiClient<ApiResponseSimple<CabeceraInfoApi>>(
+  const result = await apiClient<unknown>(
     `${BASE_GESTION}/GetGestionZonaCarteraCampanna?${params.toString()}`,
     {
       signal,
     }
   );
 
-  const api = unwrapApiObjectResponse<CabeceraInfoApi>(
+  const api = unwrapApiObjectResponse(
     result,
-    'Error cargando información de cabecera'
+    'Error cargando información de cabecera',
+    isCabeceraInfoApi
   );
 
   return {
@@ -44,27 +54,26 @@ export async function fetchCabeceraHeader(
 
 // ─── GET: Información del Deudor ───
 export async function fetchDeudorHeader(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
+  { idCliente, idCartera, idDeudor }: FetchDeudorHeaderParams,
   signal?: AbortSignal
 ): Promise<DeudorInfo> {
   const params = new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
-    nId_Persdeudor: id_deudor,
+    nId_Cliente: idCliente,
+    nId_Cartera: idCartera,
+    nId_Persdeudor: idDeudor,
   });
 
-  const result = await apiClient<ApiResponseSimple<DeudorInfoApi>>(
+  const result = await apiClient<unknown>(
     `${BASE_GESTION}/GetGestionDeudor?${params.toString()}`,
     {
       signal,
     }
   );
 
-  const api = unwrapApiObjectResponse<DeudorInfoApi>(
+  const api = unwrapApiObjectResponse(
     result,
-    'Error cargando información del deudor'
+    'Error cargando información del deudor',
+    isDeudorInfoApi
   );
 
   return {

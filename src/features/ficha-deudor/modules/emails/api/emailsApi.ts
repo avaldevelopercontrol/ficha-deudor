@@ -1,14 +1,16 @@
 import { apiClient } from '@shared/api/apiClient';
 
-import type {
-  ApiResponse,
-  ApiResponseSimple,
-} from '@shared/types/indexApi';
-
 import {
   unwrapApiArrayResponse,
   unwrapApiObjectResponse,
 } from '../../../shared/utils/apiResponse.utils';
+import {
+  isCreateEmailResponse,
+  isEmailApi,
+  isEmailByIdApi,
+  isEmailStatusApi,
+  isUpdateEmailResponse,
+} from './emailsApi.validators';
 
 import {
   buildCreateEmailRequest,
@@ -18,12 +20,10 @@ import {
 import type {
   CreateEmailResponse,
   Email,
-  EmailApi,
   EmailByIdApi,
   EmailEditFormData,
   EmailFormData,
   EmailStatus,
-  EmailStatusApi,
   UpdateEmailResponse,
 } from '../types/email.types';
 
@@ -45,45 +45,64 @@ const EMAIL_API_ERROR_MESSAGES = {
     'Error al actualizar email',
 } as const;
 
+export interface FetchEmailsByDeudorParams {
+  idCliente: string;
+  idDeudor: string;
+}
+
+export interface CreateEmailParams extends FetchEmailsByDeudorParams {
+  idUsuario: string;
+  data: EmailFormData;
+}
+
+export interface FetchEmailByIdParams {
+  idEmail: string;
+}
+
+export interface UpdateEmailParams extends FetchEmailsByDeudorParams {
+  idUsuario: string;
+  idEmail: string;
+  data: EmailEditFormData;
+  fechaRegistroOriginal: string;
+}
+
 export async function fetchEmailsByDeudor(
-  id_cliente: string,
-  id_deudor: string,
+  { idCliente, idDeudor }: FetchEmailsByDeudorParams,
   signal?: AbortSignal
 ): Promise<Email[]> {
   const params = new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Persdeudor: id_deudor,
+    nId_Cliente: idCliente,
+    nId_Persdeudor: idDeudor,
     PageNumber: '1',
     PageSize: '1000',
   });
 
   const result =
-    await apiClient<
-      ApiResponse<EmailApi[]>
-    >(
+    await apiClient<unknown>(
       `${BASE_EMAIL}/GetEmailsByIdDeudor?${params.toString()}`,
       {
         signal,
       }
     );
 
-  const emails = unwrapApiArrayResponse<EmailApi>(
+  const emails = unwrapApiArrayResponse(
     result,
-    EMAIL_API_ERROR_MESSAGES.list
+    EMAIL_API_ERROR_MESSAGES.list,
+    isEmailApi
   );
 
   return emails.map((item) => ({
     id: String(item.nId_PersEmail),
-    email: item.email,
+    email: item.email ?? '',
     fechaActivacion:
-      item.fechaActivacion,
-    estado: item.estado,
-    status: item.status,
-    fuente: item.fuente,
-    baseCliente: item.baseCliente,
-    contacto: item.contacto,
-    prioridad: item.prioridad,
-    comentario: item.comentario,
+      item.fechaActivacion ?? '',
+    estado: item.estado ?? '',
+    status: item.status ?? '',
+    fuente: item.fuente ?? '',
+    baseCliente: item.baseCliente ?? '',
+    contacto: item.contacto ?? '',
+    prioridad: item.prioridad ?? null,
+    comentario: item.comentario ?? '',
   }));
 }
 
@@ -91,20 +110,17 @@ export async function fetchEmailStatuses(
   signal?: AbortSignal
 ): Promise<EmailStatus[]> {
   const result =
-    await apiClient<
-      ApiResponseSimple<
-        EmailStatusApi[]
-      >
-    >(
+    await apiClient<unknown>(
       `${BASE_EMAIL}/GetStatus`,
       {
         signal,
       }
     );
 
-  const statuses = unwrapApiArrayResponse<EmailStatusApi>(
+  const statuses = unwrapApiArrayResponse(
     result,
-    EMAIL_API_ERROR_MESSAGES.statuses
+    EMAIL_API_ERROR_MESSAGES.statuses,
+    isEmailStatusApi
   );
 
   return statuses.map((item) => ({
@@ -118,85 +134,85 @@ export async function fetchEmailStatuses(
 }
 
 export async function createEmail(
-  id_cliente: string,
-  id_deudor: string,
-  id_usuario: string,
-  data: EmailFormData
+  { idCliente, idDeudor, idUsuario, data }: CreateEmailParams,
+  signal?: AbortSignal
 ): Promise<CreateEmailResponse> {
   const body = buildCreateEmailRequest(
-    id_cliente,
-    id_deudor,
-    id_usuario,
+    idCliente,
+    idDeudor,
+    idUsuario,
     data
   );
 
   const result =
-    await apiClient<
-      ApiResponse<CreateEmailResponse>
-    >(
+    await apiClient<unknown>(
       BASE_EMAIL,
       {
         method: 'POST',
         body,
+        signal,
       }
     );
 
-  return unwrapApiObjectResponse<CreateEmailResponse>(
+  return unwrapApiObjectResponse(
     result,
-    EMAIL_API_ERROR_MESSAGES.create
+    EMAIL_API_ERROR_MESSAGES.create,
+    isCreateEmailResponse
   );
 }
 
 export async function fetchEmailById(
-  idEmail: string,
+  { idEmail }: FetchEmailByIdParams,
   signal?: AbortSignal
 ): Promise<EmailByIdApi> {
   const result =
-    await apiClient<
-      ApiResponse<EmailByIdApi>
-    >(
+    await apiClient<unknown>(
       `${BASE_EMAIL}/${idEmail}`,
       {
         signal,
       }
     );
 
-  return unwrapApiObjectResponse<EmailByIdApi>(
+  return unwrapApiObjectResponse(
     result,
-    EMAIL_API_ERROR_MESSAGES.byId
+    EMAIL_API_ERROR_MESSAGES.byId,
+    isEmailByIdApi
   );
 }
 
 export async function updateEmail(
-  id_cliente: string,
-  id_deudor: string,
-  id_usuario: string,
-  id_email: string,
-  data: EmailEditFormData,
-  dFecRegistroOriginal: string
+  {
+    idCliente,
+    idDeudor,
+    idUsuario,
+    idEmail,
+    data,
+    fechaRegistroOriginal,
+  }: UpdateEmailParams,
+  signal?: AbortSignal
 ): Promise<UpdateEmailResponse> {
   const body = buildUpdateEmailRequest(
-    id_cliente,
-    id_deudor,
-    id_usuario,
-    id_email,
+    idCliente,
+    idDeudor,
+    idUsuario,
+    idEmail,
     data,
-    dFecRegistroOriginal
+    fechaRegistroOriginal
   );
 
   const result =
-    await apiClient<
-      ApiResponse<UpdateEmailResponse>
-    >(
+    await apiClient<unknown>(
       BASE_EMAIL,
       {
         method: 'PUT',
         body,
+        signal,
       }
     );
 
-  return unwrapApiObjectResponse<UpdateEmailResponse>(
+  return unwrapApiObjectResponse(
     result,
-    EMAIL_API_ERROR_MESSAGES.update
+    EMAIL_API_ERROR_MESSAGES.update,
+    isUpdateEmailResponse
   );
 }

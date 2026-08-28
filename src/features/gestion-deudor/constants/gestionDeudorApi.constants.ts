@@ -1,6 +1,6 @@
 export const GESTION_DEUDOR_API_ENDPOINTS = {
   baseDeudor: '/v1/Deudor',
-  getDeudor: '/GetDeudorAsync',
+  getDeudor: '/GetDeudor',
 } as const;
 
 export const GESTION_DEUDOR_API_DEFAULTS = {

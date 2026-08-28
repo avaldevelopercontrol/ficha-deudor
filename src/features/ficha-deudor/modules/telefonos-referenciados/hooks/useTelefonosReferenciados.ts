@@ -83,8 +83,7 @@ export function useTelefonosReferenciados(
   const fetchTelefonosReferenciadosData = useCallback(
     (signal: AbortSignal) => {
       return fetchTelefonosReferenciados(
-        id_cliente,
-        id_deudor,
+        { idCliente: id_cliente, idDeudor: id_deudor },
         signal
       );
     },
@@ -120,7 +119,12 @@ export function useTelefonosReferenciados(
   const create = useCallback(
     async (formData: TelefonoFormData) => {
       try {
-        await createTelefono(id_cliente, id_deudor, id_usuario, formData);
+        await createTelefono({
+          idCliente: id_cliente,
+          idDeudor: id_deudor,
+          idUsuario: id_usuario,
+          data: formData,
+        });
         await refetch();
       } catch (error) {
         setError(
@@ -139,7 +143,13 @@ export function useTelefonosReferenciados(
   const update = useCallback(
     async (id: number, formData: TelefonoFormData) => {
       try {
-        await updateTelefono(id_cliente, id_deudor, id_usuario, id, formData);
+        await updateTelefono({
+          idCliente: id_cliente,
+          idDeudor: id_deudor,
+          idUsuario: id_usuario,
+          idTelefono: id,
+          data: formData,
+        });
         await refetch();
       } catch (error) {
         setError(
@@ -179,7 +189,7 @@ export function useTelefonosReferenciados(
 
 export function useTelefonoById(idTelefono: number | null) {
   const fetcher = useCallback(
-    (id: number, signal: AbortSignal) => fetchTelefonoById(id, signal),
+    (id: number, signal: AbortSignal) => fetchTelefonoById({ idTelefono: id }, signal),
     []
   );
 

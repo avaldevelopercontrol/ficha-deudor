@@ -1,13 +1,15 @@
+import type { FichaGestionCatalogos } from '../types/fichaGestionCatalogos.types';
 import type {
-  FichaGestionCatalogos,
   FichaGestionTelefonoSearchProps,
-  FichaGestionValidationErrors,
   FichaGestionViewModel,
+} from '../types/fichaGestionViewModel.types';
+import type {
+  FichaGestionValidationErrors,
   GestionFeedback,
   GestionFormClaro,
   SetGestionField,
   SetGestionFields,
-} from '../types/fichaGestion.types';
+} from '../types/fichaGestionForm.types';
 
 interface BuildFichaGestionViewModelPropsParams {
   idCliente: string;
@@ -23,8 +25,6 @@ interface BuildFichaGestionViewModelPropsParams {
   handleNP1Change: (
     value: string
   ) => void;
-
-  handleOpenWhatsApp: () => void;
 
   telefonoSearch: FichaGestionTelefonoSearchProps;
 
@@ -69,7 +69,6 @@ export const buildFichaGestionViewModelProps = ({
 
   handleNP0Change,
   handleNP1Change,
-  handleOpenWhatsApp,
   telefonoSearch,
 
   catalogos,
@@ -128,7 +127,6 @@ export const buildFichaGestionViewModelProps = ({
 
       handleNP0Change,
       handleNP1Change,
-      handleOpenWhatsApp,
       telefonoSearch,
 
       catalogos: {

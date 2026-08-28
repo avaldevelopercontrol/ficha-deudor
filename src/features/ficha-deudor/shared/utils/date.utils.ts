@@ -218,13 +218,6 @@ const parseDateAndTime = (
     : null;
 };
 
-/**
- * Alias temporal para evitar romper otros consumidores
- * que todavía importen getCurrentDateTime.
- */
-export const getCurrentDateTime =
-  getCurrentPeruDateTime;
-
 export const splitTime = (
   time: string | null | undefined
 ) => {
@@ -330,9 +323,6 @@ export const toPeruApiDateTimeOrNull = (
     : null;
 };
 
-export const toApiDateTimeOrNull =
-  toPeruApiDateTimeOrNull;
-
 export const toPeruApiDateTimeOrCurrent = (
   date: string | null | undefined,
   currentDate = new Date()
@@ -343,10 +333,7 @@ export const toPeruApiDateTimeOrCurrent = (
   );
 };
 
-export const toApiDateTimeOrCurrent =
-  toPeruApiDateTimeOrCurrent;
-
-export const toRequiredApiDateTime = (
+export const toRequiredPeruApiDateTime = (
   date: string | null | undefined,
   fieldName: string
 ): string => {
@@ -361,13 +348,6 @@ export const toRequiredApiDateTime = (
 
   return normalizedDate;
 };
-
-/**
- * Garantiza que una fecha de auditoría llegue a la API
- * como hora local de Perú.
- */
-export const toRequiredPeruApiDateTime =
-  toRequiredApiDateTime;
 
 /**
  * Combina una fecha y una hora de formulario como hora

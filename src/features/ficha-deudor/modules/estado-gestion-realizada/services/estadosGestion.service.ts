@@ -27,9 +27,7 @@ export const loadEstadosGestionResumidos = async (
   signal: AbortSignal
 ): Promise<EstadoGestion[]> => {
   const result = await fetchEstadosGestion(
-    idCliente,
-    idCartera,
-    idDeudor,
+    { idCliente, idCartera, idDeudor },
     signal
   );
 
@@ -49,11 +47,13 @@ export const loadTodosLosEstadosGestionHistoricos = (
       ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_NUMBER,
     fetchPage: (pageNumber) =>
       fetchEstadosGestionHistoricos(
-        idCliente,
-        idCartera,
-        idDeudor,
-        pageNumber,
-        ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_SIZE,
+        {
+          idCliente,
+          idCartera,
+          idDeudor,
+          pageNumber,
+          pageSize: ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_SIZE,
+        },
         signal
       ),
     getItems: (page) => page.completo,

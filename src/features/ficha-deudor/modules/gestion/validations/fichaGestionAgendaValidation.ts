@@ -4,7 +4,7 @@ import { toNumberOrZero } from '../../../shared/utils/number.utils';
 import type {
   FichaGestionValidationErrors,
   GestionFormClaro,
-} from '../types/fichaGestion.types';
+} from '../types/fichaGestionForm.types';
 
 interface ValidateFichaGestionAgendaParams {
   form: GestionFormClaro;

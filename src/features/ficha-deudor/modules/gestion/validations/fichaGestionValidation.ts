@@ -2,7 +2,7 @@ import { TIPO_CONTACTO, TIPO_GESTION } from '../constants/fichaGestion.constants
 import type {
   FichaGestionValidationErrors,
   GestionFormClaro,
-} from '../types/fichaGestion.types';
+} from '../types/fichaGestionForm.types';
 import {
   toDecimalNumber,
   toNumberOrZero,

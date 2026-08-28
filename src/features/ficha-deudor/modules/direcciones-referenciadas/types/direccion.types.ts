@@ -76,9 +76,6 @@ export interface Distrito {
 export interface DireccionUbicacionApi {
   nId_PersRefUbi: number;
   cNombre_PersRefUbi: string;
-  cSigla_PersRefUbi?: string;
-  bEstado: boolean;
-  nGestionMovil: number;
 }
 
 export interface DireccionUbicacion {
@@ -114,19 +111,13 @@ export interface CreateDireccionResponse {
 // ─── GET /v1/Direccion/{nId_PersDirecc} ───
 export interface DireccionByIdApi {
   nId_PersDirecc: number;
-  cNombre_PersRefUbi: string;
   cDirecc_Nomb: string;
   nombreAval: string;
-  estado: string;              // ← string: "OK", "INACTIVO", etc.
   nId_PersRefUbi: number;
   cDirecc_Coment: string;
-  bEstado: boolean;
+  bEstado?: boolean | null;
   bOrigen_Base: boolean;
-  nId_PersTitDeudor: number;
   cTipoCoDeudor: string;
-  nid_CalifDirecc: number;
-  cDescrip_Fija: string;
-  nId_Ubigeo: number;
   nId_Departamento: number;
   nId_Provincia: number;
   nId_Distrito: number;

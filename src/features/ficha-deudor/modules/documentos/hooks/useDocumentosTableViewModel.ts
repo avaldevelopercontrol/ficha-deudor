@@ -47,7 +47,6 @@ export const useDocumentosTableViewModel = ({
   } = useDocumentosTableColumns({
     columns: documentos.columns,
     allData: documentos.allData,
-    paginatedData: documentos.paginatedData,
   });
 
   return {
