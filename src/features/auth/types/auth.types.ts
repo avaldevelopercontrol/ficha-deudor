@@ -1,4 +1,7 @@
-import type { ApiResponseSimple } from '@shared/types/indexApi';
+import type {
+  ApiResponse,
+  ApiResponseSimple,
+} from '@shared/types/indexApi';
 
 // ─────────────────────────────────────────────
 // ENTIDADES
@@ -6,10 +9,46 @@ import type { ApiResponseSimple } from '@shared/types/indexApi';
 
 export interface Cliente {
   id_cliente: string;
+  id_grupo: number;
   nombre: string;
-  codigo: string;
-  activa: boolean;
 }
+
+export interface GrupoClienteInicialApi {
+  nId_Cliente: number;
+  cCli_Nombre: string | null;
+  swt_estadoGest: number;
+  ntip_campanna: number;
+  nId_Grupo: number;
+  nId_UGrupo: number;
+}
+
+export type GetGruposClienteInicialResponse = ApiResponse<
+  GrupoClienteInicialApi[]
+>;
+
+export interface AnioCarteraApi {
+  anio: number;
+}
+
+export type GetAniosByClienteResponse = ApiResponse<AnioCarteraApi[]>;
+
+export interface CarteraParametroApi {
+  campanna: number;
+  anio: number;
+  desEstado: string;
+  numero: number;
+}
+
+export interface CarteraParametro {
+  campania: number;
+  anio: number;
+  estado: string;
+  numero: number;
+}
+
+export type GetCarterasParametrosByClienteAnioResponse = ApiResponse<
+  CarteraParametroApi[]
+>;
 
 export interface Usuario {
   id_usuario: string;
@@ -122,11 +161,6 @@ export interface ExpiredPasswordChallenge {
 
 export interface PasswordExpiryWarning {
   message: string;
-}
-
-export interface ClientesResponse {
-  success: boolean;
-  clientes: Cliente[];
 }
 
 // ─────────────────────────────────────────────

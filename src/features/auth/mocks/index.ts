@@ -1,5 +1,9 @@
 export {
+  aniosCarteraMock,
+  carterasParametrosMock,
   clientesMock,
-  mockGetClientesByUsuario,
+  mockGetAniosByCliente,
+  mockGetCarterasParametrosByClienteAnio,
+  mockGetGruposClienteInicial,
   mockLogin,
 } from './authMocks';

@@ -1,9 +1,5 @@
 /**
- * Relación temporal entre el cliente seleccionado y el grupo operativo.
- *
- * Cuando el backend incluya nId_Grupo en la selección de cliente, esta
- * tabla debe eliminarse y la aplicación deberá usar el valor recibido.
+ * Separador interno para identificar una relación cliente-grupo en controles UI.
+ * No forma parte del contrato con el backend.
  */
-export const CLIENTE_GRUPO_TEMPORAL: Readonly<Record<string, number>> = {
-  '95': 156,
-};
+export const CLIENTE_GRUPO_SELECTION_SEPARATOR = ':';

@@ -43,6 +43,10 @@ export const mapGrupo = (
     grupo.cNombre_Grupo
   ),
 
+  idCliente: toNumberValue(
+    grupo.nid_cliente
+  ),
+
   cliente: toTrimmedString(
     grupo.cCli_Nombre
   ),

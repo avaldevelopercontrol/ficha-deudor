@@ -1,4 +1,9 @@
-import type { Cliente, LoginResponse, Usuario, ClientesResponse } from '../types';
+import type {
+  CarteraParametro,
+  Cliente,
+  LoginResponse,
+  Usuario,
+} from '../types';
 
 // ─────────────────────────────────────────────
 // USUARIOS MOCK
@@ -52,10 +57,17 @@ const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
 export const clientesMock: Cliente[] = [
   {
     id_cliente: '95',
+    id_grupo: 156,
     nombre: 'CLARO CORPORATIVO',
-    codigo: 'CLARO',
-    activa: true,
   },
+];
+
+export const aniosCarteraMock = [2026, 2025, 2024] as const;
+
+export const carterasParametrosMock: CarteraParametro[] = [
+  { campania: 8, anio: 2026, estado: 'Vigente', numero: 0 },
+  { campania: 7, anio: 2026, estado: 'Vigente', numero: 0 },
+  { campania: 5, anio: 2026, estado: 'Vigente', numero: 0 },
 ];
 
 // ─────────────────────────────────────────────
@@ -130,20 +142,28 @@ export const mockLogin = async (payload: {
 };
 
 /**
- * Simula la carga de clientes disponibles.
- * Ya no filtra por usuario.
+ * Simula el listado inicial de relaciones grupo-cliente en desarrollo local.
  */
-export const mockGetClientesByUsuario = async (
-  _id_usuario?: string,
+export const mockGetGruposClienteInicial = async (
   signal?: AbortSignal
-): Promise<ClientesResponse> => {
-  void _id_usuario;
+): Promise<Cliente[]> => {
   await waitForMockDelay(500, signal);
 
-  const clientesActivos = clientesMock.filter((cliente) => cliente.activa);
+  return clientesMock;
+};
 
-  return {
-    success: true,
-    clientes: clientesActivos,
-  };
+export const mockGetAniosByCliente = async (
+  signal?: AbortSignal
+): Promise<number[]> => {
+  await waitForMockDelay(300, signal);
+
+  return [...aniosCarteraMock];
+};
+
+export const mockGetCarterasParametrosByClienteAnio = async (
+  signal?: AbortSignal
+): Promise<CarteraParametro[]> => {
+  await waitForMockDelay(300, signal);
+
+  return carterasParametrosMock.map((cartera) => ({ ...cartera }));
 };

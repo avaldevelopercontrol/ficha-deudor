@@ -23,6 +23,8 @@
 }
 
 .portfolio-control-center__header {
+  position: relative;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -96,6 +98,8 @@
 }
 
 .portfolio-control-center__freshness {
+  position: relative;
+  z-index: 2;
   display: flex;
   min-width: 0;
   align-items: center;
@@ -127,6 +131,106 @@
   height: 15px;
 }
 
+.portfolio-control-center__freshness-copy {
+  min-width: 0;
+}
+
+.portfolio-control-center__freshness-value-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.portfolio-control-center__freshness-help {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.portfolio-control-center__freshness-help-button {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ap-text-muted);
+  cursor: help;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.portfolio-control-center__freshness-help-button:hover,
+.portfolio-control-center__freshness-help-button:focus-visible {
+  color: var(--ap-red);
+  outline: none;
+}
+
+.portfolio-control-center__freshness-help-button:focus-visible {
+  box-shadow: 0 0 0 2px rgba(192, 0, 30, 0.16);
+}
+
+.portfolio-control-center__freshness-tooltip {
+  position: absolute;
+  z-index: 100;
+  top: calc(100% + 9px);
+  right: 0;
+  display: grid;
+  width: max-content;
+  min-width: 270px;
+  max-width: min(330px, calc(100vw - 28px));
+  gap: 7px;
+  padding: 11px 12px;
+  visibility: hidden;
+  border: 1px solid rgba(26, 37, 64, 0.12);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(26, 37, 64, 0.16);
+  color: var(--ap-text);
+  opacity: 0;
+  pointer-events: none;
+  text-align: left;
+  transform: translateY(-3px);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease,
+    visibility 140ms ease;
+}
+
+.portfolio-control-center__freshness-help:hover
+  .portfolio-control-center__freshness-tooltip,
+.portfolio-control-center__freshness-help:focus-within
+  .portfolio-control-center__freshness-tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.portfolio-control-center__freshness-tooltip-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.portfolio-control-center__freshness-tooltip-row > span {
+  color: var(--ap-text-muted);
+  font-weight: 650;
+}
+
+.portfolio-control-center__freshness-tooltip-row strong {
+  color: var(--ap-navy);
+  font-weight: 750;
+  white-space: nowrap;
+}
+
 .portfolio-control-center__freshness-label,
 .portfolio-control-center__freshness-value {
   display: block;
@@ -149,6 +253,8 @@
 }
 
 .portfolio-control-center__sections {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -292,12 +398,13 @@
 .portfolio-filter-grid {
   display: grid;
   grid-template-columns:
+    minmax(170px, 1fr)
+    minmax(180px, 1.05fr)
+    minmax(105px, 0.58fr)
+    minmax(140px, 0.78fr)
     minmax(120px, 0.68fr)
     minmax(120px, 0.68fr)
-    minmax(180px, 1fr)
-    minmax(190px, 1.08fr)
-    minmax(210px, 1.22fr)
-    minmax(180px, 1fr);
+    minmax(170px, 0.95fr);
   gap: 9px 12px;
   align-items: end;
   padding: 10px;
@@ -308,11 +415,12 @@
 
 .portfolio-filter-grid--without-supervisor {
   grid-template-columns:
-    minmax(125px, 0.68fr)
-    minmax(125px, 0.68fr)
-    minmax(190px, 1fr)
-    minmax(205px, 1.08fr)
-    minmax(235px, 1.28fr);
+    minmax(180px, 1fr)
+    minmax(190px, 1.05fr)
+    minmax(110px, 0.62fr)
+    minmax(150px, 0.84fr)
+    minmax(120px, 0.68fr)
+    minmax(120px, 0.68fr);
 }
 
 .portfolio-filter-grid .form-group {
@@ -1618,6 +1726,21 @@
     width: 100%;
     justify-content: flex-start;
     text-align: left;
+  }
+
+  .portfolio-control-center__freshness-value-row {
+    justify-content: flex-start;
+  }
+
+  .portfolio-control-center__freshness-help {
+    position: static;
+  }
+
+  .portfolio-control-center__freshness-tooltip {
+    right: 8px;
+    left: 8px;
+    width: auto;
+    min-width: 0;
   }
 
   .portfolio-control-center__title {

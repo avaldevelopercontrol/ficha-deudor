@@ -119,20 +119,24 @@ const PanelTelefonosReferenciados: React.FC<
         />
       </PanelLayout>
 
-      <ModalRegistrarTelefono
-        isOpen={showRegistrar}
-        onClose={handleCloseRegistrar}
-        telefonosExistentes={allData}
-        onRegistrar={handleRegistrar}
-      />
+      {showRegistrar && (
+        <ModalRegistrarTelefono
+          isOpen
+          onClose={handleCloseRegistrar}
+          telefonosExistentes={allData}
+          onRegistrar={handleRegistrar}
+        />
+      )}
 
-      <ModalEditarTelefono
-        isOpen={showEditar}
-        onClose={handleCloseEditar}
-        telefonoId={telefonoEditarId}
-        telefonosExistentes={allData}
-        onGuardar={handleGuardarEdicion}
-      />
+      {showEditar && (
+        <ModalEditarTelefono
+          isOpen
+          onClose={handleCloseEditar}
+          telefonoId={telefonoEditarId}
+          telefonosExistentes={allData}
+          onGuardar={handleGuardarEdicion}
+        />
+      )}
     </>
   );
 };

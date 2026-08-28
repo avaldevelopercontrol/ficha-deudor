@@ -73,6 +73,7 @@ export interface UsuarioGrupoApi {
 }
 
 export interface UsuarioGrupoFaltanteApi {
+  nId_UGrupo: number;
   nId_Usuario: number;
   nid_grupo: number;
   cNombre_Grupo: string;

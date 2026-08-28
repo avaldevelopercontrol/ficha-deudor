@@ -31,7 +31,7 @@ export async function fetchGestoresByCliente(
   });
 
   const result = await apiClient<ApiResponse<GestorApi[]>>(
-    `/v1/Usuario/GetUsuariosGrupo?${params.toString()}`,
+    `/v1/UGrupo/GetUsuariosGrupo?${params.toString()}`,
     {
       method: 'GET',
       signal,

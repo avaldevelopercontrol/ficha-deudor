@@ -2,17 +2,54 @@ import type React from 'react';
 
 import { SisgesIcon } from '@shared/icons/sisges';
 
+import type {
+  PortfolioControlCenterFreshness,
+} from '../../../types/portfolioControlCenter.types';
+import {
+  formatPortfolioUpdatedAt,
+} from '../utils/portfolioControlCenter.formatters';
+
 interface PortfolioControlCenterHeaderProps {
-  updatedAt: string | null;
+  freshness: PortfolioControlCenterFreshness | null;
   isLoading?: boolean;
 }
 
+const formatFreshnessValue = (
+  value: string | null | undefined,
+  fallback = 'No disponible'
+): string => {
+  if (!value) {
+    return fallback;
+  }
+
+  return formatPortfolioUpdatedAt(value);
+};
+
+const formatTooltipFreshnessValue = (
+  value: string | null | undefined
+): string => {
+  return formatFreshnessValue(value).replace(', ', ' ');
+};
+
 export const PortfolioControlCenterHeader: React.FC<
   PortfolioControlCenterHeaderProps
-> = ({ updatedAt, isLoading = false }) => {
-  const freshnessValue = isLoading
+> = ({ freshness, isLoading = false }) => {
+  const operationValue = isLoading
     ? 'Actualizando información...'
-    : updatedAt ?? 'Pendiente de fuente analítica';
+    : formatFreshnessValue(
+        freshness?.operationAsOfAt,
+        'Pendiente de fuente analítica'
+      );
+
+  const operationDetail = formatTooltipFreshnessValue(
+    freshness?.operationAsOfAt
+  );
+  const portfolioBaseDetail = formatTooltipFreshnessValue(
+    freshness?.portfolioBaseRefreshedAt
+  );
+  const refreshedAtDetail = formatTooltipFreshnessValue(
+    freshness?.refreshedAt
+  );
 
   return (
     <header className="portfolio-control-center__header">
@@ -43,14 +80,46 @@ export const PortfolioControlCenterHeader: React.FC<
           <SisgesIcon name="history" />
         </span>
 
-        <div>
+        <div className="portfolio-control-center__freshness-copy">
           <span className="portfolio-control-center__freshness-label">
-            Datos actualizados hasta
+            Información operativa hasta
           </span>
 
-          <strong className="portfolio-control-center__freshness-value">
-            {freshnessValue}
-          </strong>
+          <div className="portfolio-control-center__freshness-value-row">
+            <strong className="portfolio-control-center__freshness-value">
+              {operationValue}
+            </strong>
+
+            <span className="portfolio-control-center__freshness-help">
+              <button
+                type="button"
+                className="portfolio-control-center__freshness-help-button"
+                aria-label="Ver detalle de actualización de la información"
+                aria-describedby="portfolio-control-center-freshness-tooltip"
+              >
+                ⓘ
+              </button>
+
+              <span
+                id="portfolio-control-center-freshness-tooltip"
+                className="portfolio-control-center__freshness-tooltip"
+                role="tooltip"
+              >
+                <span className="portfolio-control-center__freshness-tooltip-row">
+                  <span>Operación:</span>
+                  <strong>{operationDetail}</strong>
+                </span>
+                <span className="portfolio-control-center__freshness-tooltip-row">
+                  <span>Cartera base:</span>
+                  <strong>{portfolioBaseDetail}</strong>
+                </span>
+                <span className="portfolio-control-center__freshness-tooltip-row">
+                  <span>Último refresh:</span>
+                  <strong>{refreshedAtDetail}</strong>
+                </span>
+              </span>
+            </span>
+          </div>
         </div>
       </div>
     </header>

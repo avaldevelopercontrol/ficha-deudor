@@ -38,9 +38,8 @@ const authValue: AuthContextValue = {
   },
   clienteSeleccionada: {
     id_cliente: '1',
+    id_grupo: 1,
     nombre: 'CLARO CORPORATIVO',
-    codigo: 'CLARO',
-    activa: true,
   },
   isLoading: false,
   error: null,

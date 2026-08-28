@@ -653,6 +653,8 @@ export const buildPortfolioControlCenterMockData = (
       },
       updatedAt:
         PORTFOLIO_CONTROL_CENTER_MOCK.updatedAt,
+      freshness:
+        PORTFOLIO_CONTROL_CENTER_MOCK.freshness,
       summary: buildEmptySummary(),
       target: null,
       promises: buildEmptyPromiseStatus(),
@@ -711,6 +713,11 @@ export const buildPortfolioControlCenterMockData = (
       subPortfolioId: filters.subPortfolioId,
     },
     updatedAt: `${cutoff.period}T15:45:00-05:00`,
+    freshness: {
+      operationAsOfAt: `${cutoff.period}T15:40:00-05:00`,
+      portfolioBaseRefreshedAt: `${cutoff.period}T06:30:00-05:00`,
+      refreshedAt: `${cutoff.period}T15:45:00-05:00`,
+    },
     summary,
     target,
     promises,

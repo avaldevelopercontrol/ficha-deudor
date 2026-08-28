@@ -3,8 +3,17 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type ReactNode,
 } from 'react';
+
+import {
+  fetchGruposListado,
+} from '@features/seguridad/api/gruposApi';
+
+import {
+  useApiResource,
+} from '@shared/hooks/useApiResource';
 
 import type {
   SelectOption,
@@ -55,6 +64,10 @@ import ModuloFormErrorSummary from './ModuloFormErrorSummary';
 
 import ModuloFormFields from './ModuloFormFields';
 
+import PowerBiGroupSelector from './PowerBiGroupSelector';
+
+import './PowerBiGroupSelector.css';
+
 import {
   getMantenerModulosPermissionMessage,
 } from '../utils/mantenerModulosPermissions';
@@ -71,7 +84,9 @@ interface ModalRegistrarModuloProps {
 
   onRegistrar: (
     data:
-      RegistrarModuloFormData
+      RegistrarModuloFormData,
+    groupIds:
+      readonly number[]
   ) => Promise<void> | void;
 }
 
@@ -82,6 +97,23 @@ export const ModalRegistrarModulo = ({
   onClose,
   onRegistrar,
 }: ModalRegistrarModuloProps): ReactNode => {
+  const [
+    selectedGroupIds,
+    setSelectedGroupIds,
+  ] = useState<number[]>([]);
+
+  const [
+    groupSelectionError,
+    setGroupSelectionError,
+  ] = useState<string | null>(null);
+
+  const hasValidGroupSelection =
+    selectedGroupIds.length === 1 &&
+    Number.isSafeInteger(
+      selectedGroupIds[0]
+    ) &&
+    selectedGroupIds[0] > 0;
+
   const codeWasEditedRef =
     useRef(false);
 
@@ -173,13 +205,63 @@ export const ModalRegistrarModulo = ({
       onSubmit: async (
         data
       ) => {
+        if (
+          data.esPowerBI &&
+          !hasValidGroupSelection
+        ) {
+          const message =
+            'Seleccione un grupo para el tablero Power BI.';
+
+          setGroupSelectionError(
+            message
+          );
+
+          throw new Error(
+            message
+          );
+        }
+
+        setGroupSelectionError(
+          null
+        );
+
         await onRegistrar(
           normalizeRegistrarModuloForm(
             data
-          )
+          ),
+          data.esPowerBI
+            ? selectedGroupIds
+            : []
         );
       },
     });
+
+  const {
+    data: activeGroups,
+    isLoading:
+      isLoadingActiveGroups,
+    error: activeGroupsError,
+  } = useApiResource(
+    fetchGruposListado,
+    [],
+    {
+      enabled:
+        isOpen &&
+        form.esPowerBI,
+      initialLoading: false,
+    }
+  );
+
+  const powerBiGroups =
+    useMemo(
+      () =>
+        (activeGroups ?? []).filter(
+          (group) =>
+            group.estado === 'Activo' &&
+            group.idCliente > 0
+        ),
+      [activeGroups]
+    );
 
   const handleNombreChange =
     useCallback(
@@ -220,6 +302,10 @@ export const ModalRegistrarModulo = ({
   const handlePowerBIChange =
     useCallback(
       (enabled: boolean) => {
+        setGroupSelectionError(
+          null
+        );
+
         if (enabled) {
           previousParentIdRef.current =
             form.padreId !==
@@ -266,6 +352,10 @@ export const ModalRegistrarModulo = ({
         handleChange(
           'icono',
           previousIconRef.current
+        );
+
+        setSelectedGroupIds(
+          []
         );
 
         const previousParentId =
@@ -417,6 +507,41 @@ export const ModalRegistrarModulo = ({
             }
           />
 
+          {form.esPowerBI && (
+            <div className="power-bi-group-selector-spacing">
+              <PowerBiGroupSelector
+                groups={
+                  powerBiGroups
+                }
+                value={
+                  selectedGroupIds
+                }
+                disabled={
+                  isSubmitting ||
+                  isLoadingActiveGroups ||
+                  Boolean(
+                    activeGroupsError
+                  )
+                }
+                error={
+                  activeGroupsError
+                    ? 'No se pudieron cargar los grupos activos.'
+                    : groupSelectionError
+                }
+                onChange={(
+                  groupIds
+                ) => {
+                  setSelectedGroupIds(
+                    groupIds
+                  );
+                  setGroupSelectionError(
+                    null
+                  );
+                }}
+              />
+            </div>
+          )}
+
           <ModuloFormErrorSummary
             errors={errors}
             title={
@@ -458,7 +583,11 @@ export const ModalRegistrarModulo = ({
             }
             disabled={
               isSubmitting ||
-              !canInsert
+              !canInsert ||
+              (
+                form.esPowerBI &&
+                !hasValidGroupSelection
+              )
             }
             title={
               !canInsert

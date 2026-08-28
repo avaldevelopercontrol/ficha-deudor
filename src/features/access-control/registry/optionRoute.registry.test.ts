@@ -35,7 +35,15 @@ export const suite = defineSuite(
             APPLICATION_OPTION_IDS
               .PORTFOLIO_CONTROL_CENTER
           ),
-          '/analytics/portfolio-control-center'
+          '/analytics/portfolio-control-centerz'
+        );
+
+        assert.equal(
+          getOptionRoute(
+            APPLICATION_OPTION_IDS
+              .REPORTERIA
+          ),
+          '/analytics/reporteria'
         );
 
         assert.equal(

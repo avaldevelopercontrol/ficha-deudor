@@ -26,6 +26,7 @@ export interface GrupoApi {
 export interface Grupo {
   idGrupo: number;
   nombreGrupo: string;
+  idCliente: number;
   cliente: string;
   estado: GrupoEstado;
 }

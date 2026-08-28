@@ -14,6 +14,9 @@ import type {
   PortfolioFilterOption,
 } from '../../../types/portfolioControlCenter.types';
 import {
+  getLatestPortfolioCampaign,
+  getPortfolioCampaignMonthOptions,
+  getPortfolioCampaignYearOptions,
   getPortfolioFilterDateBounds,
   keepDateWithinBounds,
 } from '../utils/portfolioFilterContext.utils';
@@ -53,28 +56,60 @@ export const PortfolioFilters: React.FC<
   onClear,
   onRetry,
 }) => {
-  const campaignOptions = useMemo(
-    () =>
-      options.campaigns
-        .filter((campaign) => {
-          if (!filters.subPortfolioId) {
-            return true;
-          }
+  const effectiveCampaign = useMemo(() => {
+    const selectedCampaign = filters.campaignId
+      ? options.campaigns.find(
+          (campaign) =>
+            campaign.id === filters.campaignId &&
+            (!filters.subPortfolioId ||
+              options.availability.subPortfolioCampaigns.some(
+                (item) =>
+                  item.subPortfolioId ===
+                    filters.subPortfolioId &&
+                  item.campaignId === campaign.id
+              ))
+        ) ?? null
+      : null;
 
-          return options.availability.subPortfolioCampaigns.some(
-            (item) =>
-              item.subPortfolioId === filters.subPortfolioId &&
-              item.campaignId === campaign.id
-          );
-        })
-        .map((item) => ({
-          id: item.id,
-          label: item.label,
-        })),
+    return (
+      selectedCampaign ??
+      (useLatestCampaignFallback
+        ? getLatestPortfolioCampaign(
+            options,
+            filters.subPortfolioId
+          )
+        : null)
+    );
+  }, [
+    filters.campaignId,
+    filters.subPortfolioId,
+    options,
+    useLatestCampaignFallback,
+  ]);
+
+  const campaignYearOptions = useMemo(
+    () =>
+      getPortfolioCampaignYearOptions(
+        options,
+        filters.subPortfolioId
+      ),
+    [filters.subPortfolioId, options]
+  );
+
+  const selectedCampaignYear =
+    effectiveCampaign?.year ?? null;
+
+  const campaignMonthOptions = useMemo(
+    () =>
+      getPortfolioCampaignMonthOptions(
+        options,
+        selectedCampaignYear,
+        filters.subPortfolioId
+      ),
     [
       filters.subPortfolioId,
-      options.availability.subPortfolioCampaigns,
-      options.campaigns,
+      options,
+      selectedCampaignYear,
     ]
   );
 
@@ -220,20 +255,16 @@ export const PortfolioFilters: React.FC<
     });
   };
 
-  const updateCampaign = (
-    campaignId: string
+  const applyCampaign = (
+    campaignId: string | null
   ) => {
-    const normalized = normalizeFilterValue(
-      campaignId
-    );
-
     const supervisorStillAvailable =
-      !normalized ||
+      !campaignId ||
       !filters.supervisorId ||
       options.availability.supervisorContexts.some(
         (item) =>
           item.supervisorId === filters.supervisorId &&
-          item.campaignId === normalized &&
+          item.campaignId === campaignId &&
           (!filters.subPortfolioId ||
             item.subPortfolioId === filters.subPortfolioId)
       );
@@ -241,7 +272,7 @@ export const PortfolioFilters: React.FC<
     const nextDateBounds =
       getPortfolioFilterDateBounds(
         options,
-        normalized,
+        campaignId,
         useLatestCampaignFallback,
         filters.subPortfolioId
       );
@@ -256,11 +287,38 @@ export const PortfolioFilters: React.FC<
         filters.dateTo,
         nextDateBounds
       ),
-      campaignId: normalized,
+      campaignId,
       supervisorId: supervisorStillAvailable
         ? filters.supervisorId
         : null,
     });
+  };
+
+  const updateCampaignYear = (
+    campaignYear: string
+  ) => {
+    const normalized =
+      normalizeFilterValue(campaignYear);
+
+    if (!normalized) {
+      applyCampaign(null);
+      return;
+    }
+
+    const latestCampaignForYear =
+      getLatestPortfolioCampaign(
+        options,
+        filters.subPortfolioId,
+        Number(normalized)
+      );
+
+    applyCampaign(latestCampaignForYear?.id ?? null);
+  };
+
+  const updateCampaignMonth = (
+    campaignId: string
+  ) => {
+    applyCampaign(normalizeFilterValue(campaignId));
   };
 
   const updateSupervisor = (
@@ -323,6 +381,59 @@ export const PortfolioFilters: React.FC<
             .filter(Boolean)
             .join(' ')}
         >
+          <SelectField
+            label="Cartera"
+            value={portfolioOption?.id ?? ''}
+            options={portfolioOptions}
+            hidePlaceholder
+            disabled={isLoading || !portfolioOption}
+            onChange={() => undefined}
+          />
+
+          <SelectField
+            label="Sub cartera"
+            value={filters.subPortfolioId ?? ''}
+            options={subPortfolioOptions}
+            placeholder="Todas"
+            disabled={isLoading}
+            onChange={updateSubPortfolio}
+          />
+
+          <SelectField
+            label="Año"
+            value={
+              selectedCampaignYear !== null
+                ? String(selectedCampaignYear)
+                : ''
+            }
+            options={campaignYearOptions}
+            placeholder="Todos"
+            hidePlaceholder={useLatestCampaignFallback}
+            disabled={
+              isLoading || campaignYearOptions.length === 0
+            }
+            onChange={updateCampaignYear}
+          />
+
+          <SelectField
+            label="Mes"
+            value={effectiveCampaign?.id ?? ''}
+            options={campaignMonthOptions}
+            placeholder={
+              selectedCampaignYear === null
+                ? 'Selecciona año'
+                : 'Todos'
+            }
+            hidePlaceholder={
+              useLatestCampaignFallback &&
+              selectedCampaignYear !== null
+            }
+            disabled={
+              isLoading || selectedCampaignYear === null
+            }
+            onChange={updateCampaignMonth}
+          />
+
           <InputField
             label="Desde"
             type="date"
@@ -363,37 +474,6 @@ export const PortfolioFilters: React.FC<
                 ),
               });
             }}
-          />
-
-          <SelectField
-            label="Cartera"
-            value={portfolioOption?.id ?? ''}
-            options={portfolioOptions}
-            placeholder="No disponible"
-            disabled={isLoading || !portfolioOption}
-            onChange={() => undefined}
-          />
-
-          <SelectField
-            label="Sub cartera"
-            value={filters.subPortfolioId ?? ''}
-            options={subPortfolioOptions}
-            placeholder="Todas"
-            disabled={isLoading}
-            onChange={updateSubPortfolio}
-          />
-
-          <SelectField
-            label="Campaña"
-            value={filters.campaignId ?? ''}
-            options={campaignOptions}
-            placeholder={
-              useLatestCampaignFallback
-                ? 'Última disponible'
-                : 'Todas'
-            }
-            disabled={isLoading}
-            onChange={updateCampaign}
           />
 
           {!restrictSupervisorFilter && (

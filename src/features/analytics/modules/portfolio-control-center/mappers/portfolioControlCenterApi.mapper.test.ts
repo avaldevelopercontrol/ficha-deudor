@@ -37,6 +37,8 @@ const FILTER_OPTIONS_RESPONSE: PortfolioFilterOptionsApiResponse = {
     {
       code: '2026-08',
       name: 'Agosto 2026',
+      year: 2026,
+      month: 8,
       startDate: '2026-08-01',
       endDate: '2026-08-31',
       availableDateFrom: '2026-08-01',
@@ -87,6 +89,11 @@ const SUMMARY_RESPONSE: PortfolioSummaryApiResponse = {
     snapshotDate: '2026-08-12',
   },
   updatedAt: '2026-08-14T16:00:00Z',
+  freshness: {
+    operationAsOfAt: '2026-08-14T10:47:00-05:00',
+    portfolioBaseRefreshedAt: '2026-08-14T11:30:00Z',
+    refreshedAt: '2026-08-14T15:55:00Z',
+  },
   summary: {
     assignedPortfolio: 42904,
     managedPortfolio: 37938,
@@ -376,6 +383,8 @@ export const suite = defineSuite(
           label: 'Subcartera real',
         });
         assert.equal(result.campaigns[0]?.id, '2026-08');
+        assert.equal(result.campaigns[0]?.year, 2026);
+        assert.equal(result.campaigns[0]?.month, 8);
         assert.deepEqual(
           result.availability.supervisorContexts[0],
           {
@@ -386,6 +395,31 @@ export const suite = defineSuite(
             availableDateTo: '2026-08-13',
           }
         );
+      }
+    ),
+    test(
+      'mantiene compatibilidad con Filter Options previo sin year/month',
+      () => {
+        const legacyResponse: PortfolioFilterOptionsApiResponse = {
+          ...FILTER_OPTIONS_RESPONSE,
+          campaigns: FILTER_OPTIONS_RESPONSE.campaigns.map(
+            (campaign) => ({
+              code: campaign.code,
+              name: campaign.name,
+              startDate: campaign.startDate,
+              endDate: campaign.endDate,
+              availableDateFrom: campaign.availableDateFrom,
+              availableDateTo: campaign.availableDateTo,
+            })
+          ),
+        };
+
+        const result = mapPortfolioFilterOptionsResponse(
+          legacyResponse
+        );
+
+        assert.equal(result.campaigns[0]?.year, 2026);
+        assert.equal(result.campaigns[0]?.month, 8);
       }
     ),
     test(
@@ -578,6 +612,11 @@ export const suite = defineSuite(
           result.updatedAt,
           '2026-08-14T16:09:00Z'
         );
+        assert.deepEqual(result.freshness, {
+          operationAsOfAt: '2026-08-14T10:47:00-05:00',
+          portfolioBaseRefreshedAt: '2026-08-14T11:30:00Z',
+          refreshedAt: '2026-08-14T15:55:00Z',
+        });
         assert.deepEqual(result.context, {
           campaignId: '2026-08',
           dateFrom: '2026-08-01',
@@ -626,6 +665,27 @@ export const suite = defineSuite(
           result.updatedAt,
           '2026-08-14T16:09:00Z'
         );
+      }
+    ),
+    test(
+      'mantiene compatibilidad durante despliegue si Summary aún no expone freshness',
+      () => {
+        const result = mapPortfolioOperationalResponses(
+          { ...SUMMARY_RESPONSE, freshness: undefined },
+          TARGET_RESPONSE,
+          PROMISES_RESPONSE,
+          EVOLUTION_RESPONSE,
+          CAMPAIGN_PERFORMANCE_RESPONSE,
+          SUPERVISOR_PERFORMANCE_RESPONSE,
+          ADVISOR_PERFORMANCE_RESPONSE,
+          null
+        );
+
+        assert.deepEqual(result.freshness, {
+          operationAsOfAt: null,
+          portfolioBaseRefreshedAt: null,
+          refreshedAt: null,
+        });
       }
     ),
     test(

@@ -1,10 +1,18 @@
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { SisgesIcon } from '@shared/icons/sisges';
 
 import { env } from '@app/config/env';
-import { useAuth } from '@features/auth/hooks/useAuth';
+
+import {
+  AnalyticsScopesEmpty,
+  CrmClientSelector,
+  useAnalyticsAccess,
+} from '../access';
+import type {
+  AnalyticsScope,
+} from '../access';
 
 import {
   PortfolioAttentionPanel,
@@ -43,9 +51,6 @@ import {
   usePortfolioPerformanceDetail,
 } from '../modules/portfolio-control-center/hooks/usePortfolioPerformanceDetail';
 import {
-  formatPortfolioUpdatedAt,
-} from '../modules/portfolio-control-center/utils/portfolioControlCenter.formatters';
-import {
   getPortfolioSupervisorOptionsForContext,
   PORTFOLIO_UNASSIGNED_SUPERVISOR_FILTER_ID,
 } from '../modules/portfolio-control-center/utils/portfolioFilterContext.utils';
@@ -55,8 +60,21 @@ import type {
 
 import '../styles/32-portfolio-control-center.css';
 
-export const PortfolioControlCenterPage: React.FC = () => {
-  const { clienteSeleccionada } = useAuth();
+const PORTFOLIO_AUTO_REFRESH_MS = 5 * 60 * 1000;
+
+interface PortfolioControlCenterContentProps {
+  scopes: readonly AnalyticsScope[];
+  selectedCrmClientId: number;
+  onCrmClientChange: (crmClientId: number) => void;
+}
+
+const PortfolioControlCenterContent: React.FC<
+  PortfolioControlCenterContentProps
+> = ({
+  scopes,
+  selectedCrmClientId,
+  onCrmClientChange,
+}) => {
   const useLatestCampaignFallback =
     !env.analyticsUseMocks;
   const restrictSupervisorFilter =
@@ -84,9 +102,17 @@ export const PortfolioControlCenterPage: React.FC = () => {
     refetch: refetchFilterOptions,
   } = usePortfolioControlCenterFilterOptions();
 
-  const updatedAt = data?.updatedAt
-    ? formatPortfolioUpdatedAt(data.updatedAt)
-    : null;
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        void refetch();
+      }
+    }, PORTFOLIO_AUTO_REFRESH_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [refetch]);
 
   const portfolioOption = useMemo(() => {
     const scope = filterOptions.portfolio;
@@ -95,16 +121,23 @@ export const PortfolioControlCenterPage: React.FC = () => {
       return null;
     }
 
-    const selectedClientMatchesScope =
-      clienteSeleccionada?.id_cliente === scope.id;
+    const selectedScope = scopes.find(
+      (item) =>
+        item.crmClientId ===
+        selectedCrmClientId
+    );
 
     return {
       id: scope.id,
-      label: selectedClientMatchesScope
-        ? clienteSeleccionada.nombre
-        : `Cartera ${scope.id}`,
+      label:
+        selectedScope?.name ||
+        `Cartera ${scope.id}`,
     };
-  }, [clienteSeleccionada, filterOptions.portfolio]);
+  }, [
+    filterOptions.portfolio,
+    scopes,
+    selectedCrmClientId,
+  ]);
 
   const hasUnassignedAdvisors = Boolean(
     data?.advisors.some(
@@ -187,11 +220,17 @@ export const PortfolioControlCenterPage: React.FC = () => {
     <main className="portfolio-control-center">
       <div className="portfolio-control-center__content">
         <PortfolioControlCenterHeader
-          updatedAt={updatedAt}
+          freshness={data?.freshness ?? null}
           isLoading={isLoading}
         />
 
         <div className="portfolio-control-center__sections">
+          <CrmClientSelector
+            scopes={scopes}
+            value={selectedCrmClientId}
+            onChange={onCrmClientChange}
+          />
+
           <PortfolioFilters
             filters={filters}
             options={filterOptions}
@@ -314,6 +353,76 @@ export const PortfolioControlCenterPage: React.FC = () => {
         </div>
       </div>
     </main>
+  );
+};
+
+const PORTFOLIO_CONTROL_CENTER_OPTION_ID = 23;
+
+export const PortfolioControlCenterPage: React.FC = () => {
+  const {
+    scopes,
+    loading,
+    error,
+    selectedCrmClientId,
+    selectCrmClientId,
+    refresh,
+  } = useAnalyticsAccess(
+    PORTFOLIO_CONTROL_CENTER_OPTION_ID
+  );
+
+  if (loading) {
+    return (
+      <main className="portfolio-control-center">
+        <div className="portfolio-control-center__content">
+          <section className="portfolio-control-center__section">
+            Cargando carteras autorizadas...
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="portfolio-control-center">
+        <div className="portfolio-control-center__content">
+          <section className="portfolio-control-center__section">
+            <p>
+              No se pudieron cargar las carteras autorizadas.
+            </p>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                void refresh();
+              }}
+            >
+              Reintentar
+            </button>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  if (
+    scopes.length === 0 ||
+    selectedCrmClientId === null
+  ) {
+    return <AnalyticsScopesEmpty />;
+  }
+
+  return (
+    <PortfolioControlCenterContent
+      key={selectedCrmClientId}
+      scopes={scopes}
+      selectedCrmClientId={
+        selectedCrmClientId
+      }
+      onCrmClientChange={
+        selectCrmClientId
+      }
+    />
   );
 };
 

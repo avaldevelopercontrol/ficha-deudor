@@ -116,9 +116,16 @@ export interface PortfolioPerformanceDetailData {
   advisors: readonly AdvisorPerformanceItem[];
 }
 
+export interface PortfolioControlCenterFreshness {
+  operationAsOfAt: string | null;
+  portfolioBaseRefreshedAt: string | null;
+  refreshedAt: string | null;
+}
+
 export interface PortfolioControlCenterData {
   context: PortfolioOperationalContext;
   updatedAt: string | null;
+  freshness: PortfolioControlCenterFreshness;
   summary: PortfolioSummaryMetrics;
   target: PortfolioTargetProgress | null;
   promises: PortfolioPromiseStatus;
@@ -144,6 +151,8 @@ export interface PortfolioFilterOption {
 
 export interface PortfolioCampaignFilterOption
   extends PortfolioFilterOption {
+  year: number;
+  month: number;
   startDate: string;
   endDate: string;
   availableDateFrom: string;

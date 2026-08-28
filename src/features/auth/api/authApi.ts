@@ -14,7 +14,12 @@ import {
   AUTH_LOGIN_CODES,
 } from '../constants/authApi.constants';
 import { mapUsuarioApiToUsuario } from '../mappers';
-import { mockGetClientesByUsuario, mockLogin } from '../mocks';
+import {
+  mockGetAniosByCliente,
+  mockGetCarterasParametrosByClienteAnio,
+  mockGetGruposClienteInicial,
+  mockLogin,
+} from '../mocks';
 import {
   buildLoginErrorResponse,
   getLoginRequestErrorMessage,
@@ -22,10 +27,16 @@ import {
 import { buildLoginEndpoint } from '../utils/loginRequest.utils';
 import {
   isLoginUsuarioApi,
-  normalizeClientesResponse,
+  normalizeAniosByClienteResponse,
+  normalizeCarterasParametrosByClienteAnioResponse,
+  normalizeGruposClienteInicialResponse,
 } from '../validations';
 import type {
-  ClientesResponse,
+  CarteraParametro,
+  Cliente,
+  GetAniosByClienteResponse,
+  GetCarterasParametrosByClienteAnioResponse,
+  GetGruposClienteInicialResponse,
   LoginPayload,
   LoginResponse,
   LoginUsuarioApiResponse,
@@ -230,28 +241,116 @@ export const login = async (
   }
 };
 
-export async function fetchClientesByUsuario(
+export async function fetchGruposClienteInicial(
   idUsuario: string,
   signal?: AbortSignal
-): Promise<ClientesResponse> {
-  let normalizedUsuarioId: string;
+): Promise<Cliente[]> {
+  let normalizedUsuarioId: number;
 
   try {
-    normalizedUsuarioId = String(
-      toRequiredId(idUsuario, 'id_usuario')
+    normalizedUsuarioId = toRequiredId(
+      idUsuario,
+      'nId_Usuario'
     );
   } catch {
     throw new Error(AUTH_API_MESSAGES.CLIENTES_INVALID_USER);
   }
 
-  if (env.useMocks || env.useClientesMock) {
-    return normalizeClientesResponse(
-      await mockGetClientesByUsuario(
-        normalizedUsuarioId,
-        signal
-      )
-    );
+  if (env.useMocks) {
+    return mockGetGruposClienteInicial(signal);
   }
 
-  throw new Error(AUTH_API_MESSAGES.CLIENTES_ENDPOINT_NOT_CONFIGURED);
+  const params = new URLSearchParams({
+    nId_Usuario: String(normalizedUsuarioId),
+  });
+
+  const result = await apiClient<GetGruposClienteInicialResponse>(
+    `${AUTH_API_ENDPOINTS.GRUPOS_CLIENTE_INICIAL}?${params.toString()}`,
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+  return normalizeGruposClienteInicialResponse(result);
+}
+
+export async function fetchAniosByCliente(
+  idCliente: string,
+  signal?: AbortSignal
+): Promise<number[]> {
+  let normalizedClienteId: number;
+
+  try {
+    normalizedClienteId = toRequiredId(
+      idCliente,
+      'nId_Cliente'
+    );
+  } catch {
+    throw new Error(AUTH_API_MESSAGES.ANIOS_INVALID_CLIENT);
+  }
+
+  if (env.useMocks) {
+    return mockGetAniosByCliente(signal);
+  }
+
+  const params = new URLSearchParams({
+    nId_Cliente: String(normalizedClienteId),
+  });
+
+  const result = await apiClient<GetAniosByClienteResponse>(
+    `${AUTH_API_ENDPOINTS.ANIOS_BY_CLIENTE}?${params.toString()}`,
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+  return normalizeAniosByClienteResponse(result);
+}
+
+
+export async function fetchCarterasParametrosByClienteAnio(
+  idCliente: string,
+  anio: number,
+  signal?: AbortSignal
+): Promise<CarteraParametro[]> {
+  let normalizedClienteId: number;
+
+  try {
+    normalizedClienteId = toRequiredId(
+      idCliente,
+      'nId_Cliente'
+    );
+  } catch {
+    throw new Error(AUTH_API_MESSAGES.CARTERAS_INVALID_CLIENT);
+  }
+
+  if (
+    !Number.isSafeInteger(anio) ||
+    anio < 1900 ||
+    anio > 9999
+  ) {
+    throw new Error(AUTH_API_MESSAGES.CARTERAS_INVALID_ANIO);
+  }
+
+  if (env.useMocks) {
+    return mockGetCarterasParametrosByClienteAnio(signal);
+  }
+
+  const params = new URLSearchParams({
+    nId_Cliente: String(normalizedClienteId),
+    anio: String(anio),
+  });
+
+  const result =
+    await apiClient<GetCarterasParametrosByClienteAnioResponse>(
+      `${AUTH_API_ENDPOINTS.CARTERAS_PARAMETROS_BY_CLIENTE_ANIO}?${params.toString()}`,
+      {
+        method: 'GET',
+        signal,
+      }
+    );
+
+  return normalizeCarterasParametrosByClienteAnioResponse(result);
 }

@@ -33,6 +33,7 @@ export const suite = defineSuite(
             idGrupo: 219,
             nombreGrupo:
               'ADEX INSTITUTO',
+            idCliente: 178,
             cliente:
               'ADEX INSTITUTO',
             estado: 'Activo',

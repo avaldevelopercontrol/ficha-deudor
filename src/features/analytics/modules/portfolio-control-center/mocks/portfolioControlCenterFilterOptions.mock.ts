@@ -20,6 +20,8 @@ export const PORTFOLIO_CONTROL_CENTER_FILTER_OPTIONS_MOCK: PortfolioControlCente
     {
       id: 'campaign-001',
       label: 'Cartera Consumo - Agosto',
+      year: 2026,
+      month: 8,
       startDate: '2026-08-01',
       endDate: '2026-08-31',
       availableDateFrom: '2026-08-08',
@@ -28,6 +30,8 @@ export const PORTFOLIO_CONTROL_CENTER_FILTER_OPTIONS_MOCK: PortfolioControlCente
     {
       id: 'campaign-002',
       label: 'Cartera Temprana',
+      year: 2026,
+      month: 8,
       startDate: '2026-08-01',
       endDate: '2026-08-31',
       availableDateFrom: '2026-08-08',
@@ -36,6 +40,8 @@ export const PORTFOLIO_CONTROL_CENTER_FILTER_OPTIONS_MOCK: PortfolioControlCente
     {
       id: 'campaign-003',
       label: 'Recuperación Masiva',
+      year: 2026,
+      month: 8,
       startDate: '2026-08-01',
       endDate: '2026-08-31',
       availableDateFrom: '2026-08-08',
@@ -44,6 +50,8 @@ export const PORTFOLIO_CONTROL_CENTER_FILTER_OPTIONS_MOCK: PortfolioControlCente
     {
       id: 'campaign-004',
       label: 'Cartera Especial',
+      year: 2026,
+      month: 8,
       startDate: '2026-08-01',
       endDate: '2026-08-31',
       availableDateFrom: '2026-08-08',

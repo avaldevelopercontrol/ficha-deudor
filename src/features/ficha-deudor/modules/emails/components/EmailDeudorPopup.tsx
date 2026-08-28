@@ -145,22 +145,26 @@ const EmailDeudorPopupContent: React.FC<
         />
       </PopupPageLayout>
 
-      <ModalRegistrarEmail
-        isOpen={showRegistrar}
-        onClose={handleCloseRegistrar}
-        emailsExistentes={allData}
-        onRegistrar={handleRegistrar}
-        deudorData={deudorData}
-      />
+      {showRegistrar && (
+        <ModalRegistrarEmail
+          isOpen
+          onClose={handleCloseRegistrar}
+          emailsExistentes={allData}
+          onRegistrar={handleRegistrar}
+          deudorData={deudorData}
+        />
+      )}
 
-      <ModalEditarEmail
-        isOpen={showEditar}
-        onClose={handleCloseEditar}
-        emailId={emailEditarId}
-        emailsExistentes={allData}
-        onGuardar={handleGuardarEdicion}
-        deudorData={deudorData}
-      />
+      {showEditar && (
+        <ModalEditarEmail
+          isOpen
+          onClose={handleCloseEditar}
+          emailId={emailEditarId}
+          emailsExistentes={allData}
+          onGuardar={handleGuardarEdicion}
+          deudorData={deudorData}
+        />
+      )}
     </>
   );
 };

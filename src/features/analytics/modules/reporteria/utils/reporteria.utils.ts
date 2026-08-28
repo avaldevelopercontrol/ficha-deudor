@@ -74,6 +74,38 @@ export const filterPowerBiReports = (
   });
 };
 
+const POWER_BI_HOST = 'app.powerbi.com';
+const POWER_BI_PUBLISH_PATH = '/view';
+
+export const resolvePowerBiPublishToWebUrl = (
+  value: string | null
+): string | null => {
+  const normalized = value?.trim() ?? '';
+
+  if (!normalized) {
+    return null;
+  }
+
+  try {
+    const url = new URL(normalized);
+
+    if (
+      url.protocol !== 'https:' ||
+      url.hostname.toLocaleLowerCase('en-US') !==
+        POWER_BI_HOST ||
+      url.pathname.toLocaleLowerCase('en-US') !==
+        POWER_BI_PUBLISH_PATH ||
+      !url.searchParams.get('r')
+    ) {
+      return null;
+    }
+
+    return url.toString();
+  } catch {
+    return null;
+  }
+};
+
 export const resolvePowerBiEmbedUrl = (
   value: string | null
 ): string | null => {

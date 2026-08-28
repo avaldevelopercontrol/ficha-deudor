@@ -14,6 +14,7 @@ import {
   findAuthorizedOptionById,
   getAuthorizedPowerBiReports,
   resolvePowerBiEmbedUrl,
+  resolvePowerBiPublishToWebUrl,
   resolveReportImageSource,
 } from './reporteria.utils';
 
@@ -144,6 +145,24 @@ export const suite = defineSuite(
             'https://app.powerbi.com/view?r=demo'
           ) ?? '',
           /^https:\/\/app\.powerbi\.com\//
+        );
+        assert.match(
+          resolvePowerBiPublishToWebUrl(
+            'https://app.powerbi.com/view?r=demo'
+          ) ?? '',
+          /^https:\/\/app\.powerbi\.com\/view/
+        );
+        assert.equal(
+          resolvePowerBiPublishToWebUrl(
+            'https://app.powerbi.com/reportEmbed?reportId=demo'
+          ),
+          null
+        );
+        assert.equal(
+          resolvePowerBiPublishToWebUrl(
+            'https://example.com/view?r=demo'
+          ),
+          null
         );
         assert.equal(
           resolveReportImageSource('/logos/backus.webp'),

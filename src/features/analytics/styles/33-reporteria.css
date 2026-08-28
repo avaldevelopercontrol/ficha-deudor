@@ -730,3 +730,83 @@
     padding: 4px;
   }
 }
+
+.reporteria-client-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.reporteria-client-selector__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reporteria-client-selector__intro strong {
+  color: var(--ap-navy);
+  font-size: 15px;
+}
+
+.reporteria-client-selector__intro p {
+  margin: 0;
+  color: var(--ap-text-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.reporteria-client-selector__state {
+  min-height: 86px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--ap-gray-300);
+  border-radius: 10px;
+  background: var(--ap-gray-100);
+  color: var(--ap-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.reporteria-client-selector__state--error {
+  border-color: rgba(192, 0, 30, 0.28);
+  background: rgba(192, 0, 30, 0.04);
+  color: var(--ap-red);
+}
+
+.reporteria-client-selector__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 520px) {
+  .reporteria-client-selector__actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .reporteria-client-selector__actions .btn {
+    width: 100%;
+  }
+}
+
+.reporteria-viewer__state-action {
+  border-radius: 6px;
+  color: var(--ap-red);
+  font-size: 12px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.reporteria-viewer__state-action:hover {
+  text-decoration: underline;
+}
+
+.reporteria-viewer__state-action:focus-visible {
+  outline: 2px solid rgba(192, 0, 30, 0.28);
+  outline-offset: 3px;
+}

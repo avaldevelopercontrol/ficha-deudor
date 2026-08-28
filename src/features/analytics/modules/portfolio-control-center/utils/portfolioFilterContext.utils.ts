@@ -1,6 +1,7 @@
 import type {
   PortfolioCampaignFilterOption,
   PortfolioControlCenterFilterOptions,
+  PortfolioFilterOption,
   PortfolioSupervisorFilterOption,
 } from '../../../types/portfolioControlCenter.types';
 
@@ -12,6 +13,21 @@ export interface PortfolioFilterDateBounds {
   min: string | null;
   max: string | null;
 }
+
+const PORTFOLIO_CAMPAIGN_MONTH_LABELS = [
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
+] as const;
 
 const compareCampaignRecency = (
   left: PortfolioCampaignFilterOption,
@@ -42,12 +58,15 @@ const isCampaignAvailableForPortfolio = (
 
 export const getLatestPortfolioCampaign = (
   options: PortfolioControlCenterFilterOptions,
-  subPortfolioId: string | null = null
+  subPortfolioId: string | null = null,
+  campaignYear: number | null = null
 ): PortfolioCampaignFilterOption | null => {
   return options.campaigns.reduce<
     PortfolioCampaignFilterOption | null
   >((latest, campaign) => {
     if (
+      (campaignYear !== null &&
+        campaign.year !== campaignYear) ||
       !isCampaignAvailableForPortfolio(
         options,
         campaign.id,
@@ -65,6 +84,88 @@ export const getLatestPortfolioCampaign = (
       ? campaign
       : latest;
   }, null);
+};
+
+
+const getPortfolioCampaignsForContext = (
+  options: PortfolioControlCenterFilterOptions,
+  subPortfolioId: string | null
+): readonly PortfolioCampaignFilterOption[] => {
+  return options.campaigns.filter((campaign) =>
+    isCampaignAvailableForPortfolio(
+      options,
+      campaign.id,
+      subPortfolioId
+    )
+  );
+};
+
+export const getPortfolioCampaignYearOptions = (
+  options: PortfolioControlCenterFilterOptions,
+  subPortfolioId: string | null = null
+): PortfolioFilterOption[] => {
+  const years = new Set(
+    getPortfolioCampaignsForContext(
+      options,
+      subPortfolioId
+    ).map((campaign) => campaign.year)
+  );
+
+  return [...years]
+    .sort((left, right) => right - left)
+    .map((year) => ({
+      id: String(year),
+      label: String(year),
+    }));
+};
+
+export const getPortfolioCampaignMonthOptions = (
+  options: PortfolioControlCenterFilterOptions,
+  campaignYear: number | null,
+  subPortfolioId: string | null = null
+): PortfolioFilterOption[] => {
+  if (campaignYear === null) {
+    return [];
+  }
+
+  const campaigns = getPortfolioCampaignsForContext(
+    options,
+    subPortfolioId
+  )
+    .filter((campaign) => campaign.year === campaignYear)
+    .sort((left, right) => {
+      if (left.month !== right.month) {
+        return right.month - left.month;
+      }
+
+      return compareCampaignRecency(right, left);
+    });
+
+  const campaignCountByMonth = campaigns.reduce<
+    Map<number, number>
+  >((countByMonth, campaign) => {
+    countByMonth.set(
+      campaign.month,
+      (countByMonth.get(campaign.month) ?? 0) + 1
+    );
+
+    return countByMonth;
+  }, new Map());
+
+  return campaigns.map((campaign) => {
+    const monthLabel =
+      PORTFOLIO_CAMPAIGN_MONTH_LABELS[
+        campaign.month - 1
+      ] ?? `Mes ${campaign.month}`;
+
+    return {
+      id: campaign.id,
+      label:
+        (campaignCountByMonth.get(campaign.month) ?? 0) > 1
+          ? `${monthLabel} — ${campaign.label}`
+          : monthLabel,
+    };
+  });
 };
 
 const getSubPortfolioCampaignAvailability = (

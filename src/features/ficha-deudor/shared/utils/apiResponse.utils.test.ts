@@ -3,6 +3,7 @@ import {
   assertApiSuccess,
   getApiErrorMessage,
   isSuccessfulStatusCode,
+  normalizeApiCollectionResponse,
   unwrapApiArrayResponse,
   unwrapApiObjectResponse,
   unwrapApiResponse,
@@ -15,11 +16,17 @@ import {
 const createEnvelope = <T>(
   response: T,
   overrides: Partial<{
+    code: unknown;
     statusCode: unknown;
     message: unknown;
     messageUser: unknown;
+    pageNumber: unknown;
+    pageSize: unknown;
+    totalRecords: unknown;
+    totalPages: unknown;
   }> = {}
 ) => ({
+  code: '00',
   statusCode: 200,
   message: '',
   messageUser: '',
@@ -88,6 +95,110 @@ export const suite = defineSuite('apiResponse.utils', [
       /Solicitud inválida/
     );
   }),
+  test('acepta únicamente códigos de negocio exitosos conocidos', () => {
+    assert.doesNotThrow(() =>
+      assertApiSuccess(
+        createEnvelope([], { code: '00' }),
+        'Error consultando datos'
+      )
+    );
+    assert.doesNotThrow(() =>
+      assertApiSuccess(
+        createEnvelope([], { code: ' 200 ' }),
+        'Error consultando datos'
+      )
+    );
+
+    assert.throws(
+      () =>
+        assertApiSuccess(
+          createEnvelope([], {
+            code: '99',
+            messageUser: 'Operación rechazada',
+          }),
+          'Error consultando datos'
+        ),
+      /Operación rechazada/
+    );
+  }),
+  test('rechaza sobres incompletos o con tipos inválidos', () => {
+    assert.throws(
+      () =>
+        assertApiSuccess(
+          {
+            statusCode: 200,
+            message: '',
+            messageUser: '',
+            response: [],
+          },
+          'Error consultando datos'
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+
+    assert.throws(
+      () =>
+        assertApiSuccess(
+          createEnvelope([], { code: 0 }),
+          'Error consultando datos'
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+
+    assert.throws(
+      () =>
+        assertApiSuccess(
+          createEnvelope([], { statusCode: '200' }),
+          'Error consultando datos'
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+
+    assert.throws(
+      () =>
+        assertApiSuccess(
+          createEnvelope([], { message: { error: true } }),
+          'Error consultando datos'
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+  }),
+  test('valida todos los metadatos de paginación cuando están presentes', () => {
+    assert.doesNotThrow(() =>
+      assertApiSuccess(
+        createEnvelope([], {
+          pageNumber: 0,
+          pageSize: 20,
+          totalRecords: 35,
+          totalPages: 2,
+        }),
+        'Error consultando datos'
+      )
+    );
+
+    assert.throws(
+      () =>
+        assertApiSuccess(
+          createEnvelope([], {
+            pageNumber: 1,
+            pageSize: 20,
+            totalRecords: -1,
+            totalPages: 0,
+          }),
+          'Error consultando datos'
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+
+    assert.throws(
+      () =>
+        assertApiSuccess(
+          createEnvelope([], { pageNumber: 1 }),
+          'Error consultando datos'
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+  }),
   test('desenvuelve respuestas simples no nulas', () => {
     const response = { id: 10, nombre: 'Dato' };
 
@@ -98,20 +209,47 @@ export const suite = defineSuite('apiResponse.utils', [
       ),
       response
     );
+
+    assert.throws(
+      () =>
+        unwrapApiResponse(
+          createEnvelope(undefined),
+          'Error consultando datos'
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
   }),
   test('valida respuestas de arreglo sin convertir errores en listas vacías', () => {
     assert.deepEqual(
-      unwrapApiArrayResponse<number>(
-        createEnvelope([1, 2, 3]),
+      unwrapApiArrayResponse<{ id: number }>(
+        createEnvelope([{ id: 1 }, { id: 2 }]),
         'Error consultando lista'
       ),
-      [1, 2, 3]
+      [{ id: 1 }, { id: 2 }]
     );
 
     assert.throws(
       () =>
-        unwrapApiArrayResponse<number>(
+        unwrapApiArrayResponse<{ id: number }>(
           createEnvelope({ items: [] }),
+          'Error consultando lista'
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+
+    assert.throws(
+      () =>
+        unwrapApiArrayResponse<{ id: number }>(
+          createEnvelope([{ id: 1 }, null]),
+          'Error consultando lista'
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+
+    assert.throws(
+      () =>
+        unwrapApiArrayResponse<{ id: number }>(
+          createEnvelope([1, 2]),
           'Error consultando lista'
         ),
       /respuesta del servidor no contiene datos válidos/i
@@ -140,6 +278,31 @@ export const suite = defineSuite('apiResponse.utils', [
         unwrapApiObjectResponse<{ id: number }>(
           createEnvelope([]),
           'Error consultando detalle'
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+  }),
+  test('normaliza colecciones solo cuando contienen registros válidos', () => {
+    assert.deepEqual(
+      normalizeApiCollectionResponse<{ id: number }>(
+        { id: 8 },
+        'Error consultando lista'
+      ),
+      [{ id: 8 }]
+    );
+    assert.deepEqual(
+      normalizeApiCollectionResponse<{ id: number }>(
+        null,
+        'Error consultando lista'
+      ),
+      []
+    );
+
+    assert.throws(
+      () =>
+        normalizeApiCollectionResponse<{ id: number }>(
+          [{ id: 1 }, 'inválido'],
+          'Error consultando lista'
         ),
       /respuesta del servidor no contiene datos válidos/i
     );

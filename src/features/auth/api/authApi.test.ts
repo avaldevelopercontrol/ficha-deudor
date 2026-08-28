@@ -2,7 +2,12 @@ import assert from 'node:assert/strict';
 import { defineSuite, test } from '../../../test/testHarness';
 import { env } from '@app/config/env';
 import { createLoginUsuarioApi } from '../../../test/factories/auth.factory';
-import { fetchClientesByUsuario, login } from './authApi';
+import {
+  fetchAniosByCliente,
+  fetchCarterasParametrosByClienteAnio,
+  fetchGruposClienteInicial,
+  login,
+} from './authApi';
 
 interface CapturedRequest {
   input: RequestInfo | URL;
@@ -370,28 +375,230 @@ export const suite = defineSuite('authApi', [
       }
     );
   }),
-  test('rechaza identificadores de usuario inválidos antes de cargar clientes', async () => {
+  test('obtiene y normaliza las relaciones grupo-cliente del usuario', async () => {
+    const previousUseMocks = env.useMocks;
+    const controller = new AbortController();
+    env.useMocks = false;
+
+    try {
+      await withFetchResponse(
+        createJsonResponse({
+          code: '00',
+          message: 'OK',
+          messageUser: 'OK',
+          statusCode: 200,
+          pageNumber: 0,
+          pageSize: 0,
+          totalRecords: 0,
+          totalPages: 0,
+          response: [
+            {
+              nId_Cliente: 178,
+              cCli_Nombre: ' ADEX INSTITUTO ',
+              swt_estadoGest: 0,
+              ntip_campanna: 0,
+              nId_Grupo: 219,
+              nId_UGrupo: 40416,
+            },
+            {
+              nId_Cliente: 95,
+              cCli_Nombre: 'CLARO CORPORATIVO',
+              swt_estadoGest: 1,
+              ntip_campanna: 1,
+              nId_Grupo: 156,
+              nId_UGrupo: 38029,
+            },
+          ],
+        }),
+        async (request) => {
+          const result = await fetchGruposClienteInicial(
+            '16068',
+            controller.signal
+          );
+          const url = new URL(String(request.input), 'http://localhost');
+
+          assert.deepEqual(result, [
+            {
+              id_cliente: '178',
+              id_grupo: 219,
+              nombre: 'ADEX INSTITUTO',
+            },
+            {
+              id_cliente: '95',
+              id_grupo: 156,
+              nombre: 'CLARO CORPORATIVO',
+            },
+          ]);
+          assert.equal(
+            url.pathname,
+            '/v1/Grupo/GetGruposClienteInicial'
+          );
+          assert.equal(url.searchParams.get('nId_Usuario'), '16068');
+          assert.equal(request.init?.method, 'GET');
+          assert.equal(request.init?.signal, controller.signal);
+        }
+      );
+    } finally {
+      env.useMocks = previousUseMocks;
+    }
+  }),
+  test('rechaza una respuesta grupo-cliente sin un grupo válido', async () => {
+    const previousUseMocks = env.useMocks;
+    env.useMocks = false;
+
+    try {
+      await withFetchResponse(
+        createJsonResponse({
+          code: '00',
+          message: 'OK',
+          messageUser: 'OK',
+          statusCode: 200,
+          response: [
+            {
+              nId_Cliente: 95,
+              cCli_Nombre: 'CLARO CORPORATIVO',
+              nId_Grupo: 0,
+            },
+          ],
+        }),
+        async () => {
+          await assert.rejects(
+            fetchGruposClienteInicial('16068'),
+            /clientes no contiene datos válidos/i
+          );
+        }
+      );
+    } finally {
+      env.useMocks = previousUseMocks;
+    }
+  }),
+  test('rechaza usuarios inválidos antes de consultar grupo-cliente', async () => {
     for (const idUsuario of ['', '0', '-1', '1.5', 'abc']) {
       await assert.rejects(
-        fetchClientesByUsuario(idUsuario),
+        fetchGruposClienteInicial(idUsuario),
         /usuario válido/i
       );
     }
   }),
-  test('propaga la cancelación al mock del selector de clientes', async () => {
-    const previousUseClientesMock = env.useClientesMock;
+  test('obtiene los años de cartera enviando el cliente seleccionado', async () => {
+    const previousUseMocks = env.useMocks;
     const controller = new AbortController();
-    controller.abort();
-    env.useClientesMock = true;
+    env.useMocks = false;
 
     try {
-      await assert.rejects(
-        fetchClientesByUsuario('16068', controller.signal),
-        (error: unknown) =>
-          error instanceof Error && error.name === 'AbortError'
+      await withFetchResponse(
+        createJsonResponse({
+          code: '00',
+          message: 'OK',
+          messageUser: 'OK',
+          statusCode: 200,
+          pageNumber: 0,
+          pageSize: 0,
+          totalRecords: 0,
+          totalPages: 0,
+          response: [
+            { anio: 2026 },
+            { anio: 2025 },
+            { anio: 2024 },
+          ],
+        }),
+        async (request) => {
+          const result = await fetchAniosByCliente(
+            '59',
+            controller.signal
+          );
+          const url = new URL(String(request.input), 'http://localhost');
+
+          assert.deepEqual(result, [2026, 2025, 2024]);
+          assert.equal(
+            url.pathname,
+            '/v1/Cartera/GetAnioByIdCliente'
+          );
+          assert.equal(url.searchParams.get('nId_Cliente'), '59');
+          assert.equal(request.init?.method, 'GET');
+          assert.equal(request.init?.signal, controller.signal);
+        }
       );
     } finally {
-      env.useClientesMock = previousUseClientesMock;
+      env.useMocks = previousUseMocks;
+    }
+  }),
+  test('rechaza clientes inválidos antes de consultar sus años', async () => {
+    for (const idCliente of ['', '0', '-1', '1.5', 'abc']) {
+      await assert.rejects(
+        fetchAniosByCliente(idCliente),
+        /cliente válido/i
+      );
+    }
+  }),
+  test('obtiene las carteras de parámetros enviando cliente y año', async () => {
+    const previousUseMocks = env.useMocks;
+    const controller = new AbortController();
+    env.useMocks = false;
+
+    try {
+      await withFetchResponse(
+        createJsonResponse({
+          code: '00',
+          message: 'OK',
+          messageUser: 'OK',
+          statusCode: 200,
+          pageNumber: 0,
+          pageSize: 0,
+          totalRecords: 0,
+          totalPages: 0,
+          response: [
+            {
+              campanna: 1,
+              anio: 2026,
+              desEstado: 'Vigente',
+              numero: 0,
+            },
+          ],
+        }),
+        async (request) => {
+          const result = await fetchCarterasParametrosByClienteAnio(
+            '95',
+            2026,
+            controller.signal
+          );
+          const url = new URL(String(request.input), 'http://localhost');
+
+          assert.deepEqual(result, [
+            {
+              campania: 1,
+              anio: 2026,
+              estado: 'Vigente',
+              numero: 0,
+            },
+          ]);
+          assert.equal(
+            url.pathname,
+            '/v1/Cartera/GetCarterasParametrosByIdClienteAnnio'
+          );
+          assert.equal(url.searchParams.get('nId_Cliente'), '95');
+          assert.equal(url.searchParams.get('anio'), '2026');
+          assert.equal(request.init?.method, 'GET');
+          assert.equal(request.init?.signal, controller.signal);
+        }
+      );
+    } finally {
+      env.useMocks = previousUseMocks;
+    }
+  }),
+  test('rechaza cliente o año inválidos antes de consultar carteras', async () => {
+    for (const idCliente of ['', '0', '-1', '1.5', 'abc']) {
+      await assert.rejects(
+        fetchCarterasParametrosByClienteAnio(idCliente, 2026),
+        /cliente válido/i
+      );
+    }
+
+    for (const anio of [0, 1899, 2026.5, 10000]) {
+      await assert.rejects(
+        fetchCarterasParametrosByClienteAnio('95', anio),
+        /año válido/i
+      );
     }
   }),
 ]);

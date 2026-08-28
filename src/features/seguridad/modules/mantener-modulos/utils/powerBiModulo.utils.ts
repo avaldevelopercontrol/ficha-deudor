@@ -66,3 +66,28 @@ export const isValidOptionImageSource = (
     return false;
   }
 };
+
+export const isValidPowerBiPublishToWebUrl = (
+  value: string
+): boolean => {
+  const normalized = value.trim();
+
+  if (!normalized) {
+    return false;
+  }
+
+  try {
+    const url = new URL(normalized);
+
+    return (
+      url.protocol === 'https:' &&
+      url.hostname.toLocaleLowerCase('en-US') ===
+        'app.powerbi.com' &&
+      url.pathname.toLocaleLowerCase('en-US') ===
+        '/view' &&
+      Boolean(url.searchParams.get('r'))
+    );
+  } catch {
+    return false;
+  }
+};

@@ -30,7 +30,7 @@ const createAuthValue = (idUsuario = '5', idCliente = '1'): AuthContextValue => 
     id_usuario: idUsuario, nombre: 'Usuario', apellido: 'Prueba',
     username: 'usuario', email: 'usuario@example.com', perfil: 'GESTOR', perfilId: 1,
   },
-  clienteSeleccionada: { id_cliente: idCliente, nombre: 'Cliente', codigo: 'CLI', activa: true },
+  clienteSeleccionada: { id_cliente: idCliente, id_grupo: 156, nombre: 'Cliente' },
   isLoading: false, error: null,
   expiredPasswordChallenge: null,
   passwordExpiryWarning: null,
