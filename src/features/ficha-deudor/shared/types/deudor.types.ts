@@ -1,5 +1,4 @@
 export interface CabeceraInfoApi {
-  zona: string;
   ciudad: string;
   cCar_Nombre: string;
   cCampanna: string;
@@ -12,7 +11,6 @@ export interface CabeceraInfo {
 }
 
 export interface DeudorInfoApi {
-  nId_PersDeudor: number;
   dni: string;
   ruc: string;
   nombre: string;
@@ -20,21 +18,13 @@ export interface DeudorInfoApi {
   gradoInstruccion: string;
   edad: string;
   correo: string;
-  informacionAdicional: boolean;
-  pagos: boolean;
-  agendas: boolean;
-  llamadas: boolean;
-  fechaConsulta: string;
-  codigo: string;
   asesorPostVenta: string;
   correoAsesorPostVenta: string;
   asesorComercial: string;
   correoAsesorComercial: string;
-  validaCronograma: boolean;
   clientePorVision: string;
   clienteListaBlanca: string;
   clienteConSinPe: string;
-  nGra_Instruccion: string;
 }
 
 export interface DeudorInfo {

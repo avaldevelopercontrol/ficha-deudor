@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 
 import type { TelefonoReferenciado } from '../../telefonos-referenciados/types/telefono.types';
 import { normalizeTelefonoForComparison } from '../../telefonos-referenciados/utils/telefonoNormalization.utils';
-import type { FichaGestionValidationErrors } from '../types/fichaGestion.types';
+import type { FichaGestionValidationErrors } from '../types/fichaGestionForm.types';
 import { useAutoClearValidationErrors } from './useAutoClearValidationErrors';
 
 interface UseBuscarTelefonoDeudorParams {

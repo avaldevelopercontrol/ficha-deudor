@@ -1,3 +1,6 @@
+import type { RuntimeTypeGuard } from './runtimeTypeGuards.utils';
+import { isObjectRecord } from './runtimeTypeGuards.utils';
+
 interface ApiResponseStatus {
   code: unknown;
   statusCode: unknown;
@@ -5,13 +8,16 @@ interface ApiResponseStatus {
   messageUser?: unknown;
 }
 
-interface ApiResponseEnvelope<T = unknown>
-  extends ApiResponseStatus {
-  response: T;
-  pageNumber?: unknown;
-  pageSize?: unknown;
-  totalRecords?: unknown;
-  totalPages?: unknown;
+export interface ApiPagination {
+  pageNumber: number;
+  pageSize: number;
+  totalRecords: number;
+  totalPages: number;
+}
+
+export interface ApiPaginatedData<T>
+  extends ApiPagination {
+  data: T[];
 }
 
 const SUCCESS_BUSINESS_CODES = new Set(['00', '200']);
@@ -25,16 +31,6 @@ const PAGINATION_FIELDS = [
 
 const INVALID_RESPONSE_SUFFIX =
   'La respuesta del servidor no contiene datos válidos.';
-
-const isObjectRecord = (
-  value: unknown
-): value is Record<string, unknown> => {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value)
-  );
-};
 
 const getNonEmptyMessage = (
   value: unknown
@@ -109,6 +105,47 @@ const assertValidPagination = (
   }
 };
 
+const getValidResponseEnvelope = (
+  result: unknown,
+  fallbackMessage: string
+): Record<string, unknown> => {
+  assertApiSuccess(result, fallbackMessage);
+
+  if (!isObjectRecord(result)) {
+    return throwInvalidResponse(fallbackMessage);
+  }
+
+  return result;
+};
+
+const getRequiredPagination = (
+  result: Record<string, unknown>,
+  fallbackMessage: string
+): ApiPagination => {
+  const {
+    pageNumber,
+    pageSize,
+    totalRecords,
+    totalPages,
+  } = result;
+
+  if (
+    !isNonNegativeInteger(pageNumber) ||
+    !isNonNegativeInteger(pageSize) ||
+    !isNonNegativeInteger(totalRecords) ||
+    !isNonNegativeInteger(totalPages)
+  ) {
+    return throwInvalidResponse(fallbackMessage);
+  }
+
+  return {
+    pageNumber,
+    pageSize,
+    totalRecords,
+    totalPages,
+  };
+};
+
 export const isSuccessfulStatusCode = (
   statusCode: unknown
 ): statusCode is number => {
@@ -175,110 +212,100 @@ export const assertApiSuccess = (
   assertValidPagination(result, fallbackMessage);
 };
 
-export const unwrapApiResponse = <T>(
-  result: ApiResponseEnvelope<T>,
+export const unwrapApiResponse = (
+  result: unknown,
   fallbackMessage: string
-): NonNullable<T> => {
-  assertApiSuccess(result, fallbackMessage);
+): unknown => {
+  const envelope = getValidResponseEnvelope(
+    result,
+    fallbackMessage
+  );
 
   if (
-    !Object.hasOwn(result, 'response') ||
-    result.response === null ||
-    result.response === undefined
+    !Object.hasOwn(envelope, 'response') ||
+    envelope.response === null ||
+    envelope.response === undefined
   ) {
     return throwInvalidResponse(fallbackMessage);
   }
 
-  return result.response as NonNullable<T>;
+  return envelope.response;
 };
 
-export const ensureArrayResponse = <T extends object>(
+export const ensureArrayResponse = <T>(
   response: unknown,
-  fallbackMessage: string
+  fallbackMessage: string,
+  isItem: RuntimeTypeGuard<T>
 ): T[] => {
   if (
     !Array.isArray(response) ||
-    !response.every(isObjectRecord)
+    !response.every(isItem)
   ) {
     return throwInvalidResponse(fallbackMessage);
   }
 
-  return response as T[];
+  return response;
 };
 
-export const ensureObjectResponse = <
-  T extends object,
->(
+export const ensureObjectResponse = <T>(
   response: unknown,
-  fallbackMessage: string
+  fallbackMessage: string,
+  isObject: RuntimeTypeGuard<T>
 ): T => {
-  if (!isObjectRecord(response)) {
+  if (!isObject(response)) {
     return throwInvalidResponse(fallbackMessage);
   }
 
-  return response as T;
+  return response;
 };
 
-export const normalizeApiCollectionResponse = <
-  T extends object,
->(
-  response: unknown,
-  fallbackMessage: string
+export const unwrapApiArrayResponse = <T>(
+  result: unknown,
+  fallbackMessage: string,
+  isItem: RuntimeTypeGuard<T>
 ): T[] => {
-  if (response === null || response === undefined) {
-    return [];
+  return ensureArrayResponse(
+    unwrapApiResponse(result, fallbackMessage),
+    fallbackMessage,
+    isItem
+  );
+};
+
+export const unwrapApiObjectResponse = <T>(
+  result: unknown,
+  fallbackMessage: string,
+  isObject: RuntimeTypeGuard<T>
+): T => {
+  return ensureObjectResponse(
+    unwrapApiResponse(result, fallbackMessage),
+    fallbackMessage,
+    isObject
+  );
+};
+
+export const unwrapApiPaginatedArrayResponse = <T>(
+  result: unknown,
+  fallbackMessage: string,
+  isItem: RuntimeTypeGuard<T>
+): ApiPaginatedData<T> => {
+  const envelope = getValidResponseEnvelope(
+    result,
+    fallbackMessage
+  );
+
+  if (!Object.hasOwn(envelope, 'response')) {
+    return throwInvalidResponse(fallbackMessage);
   }
 
-  if (Array.isArray(response)) {
-    return ensureArrayResponse<T>(
-      response,
+  return {
+    data: ensureArrayResponse(
+      envelope.response,
+      fallbackMessage,
+      isItem
+    ),
+    ...getRequiredPagination(
+      envelope,
       fallbackMessage
-    );
-  }
-
-  if (isObjectRecord(response)) {
-    return [response as T];
-  }
-
-  return throwInvalidResponse(fallbackMessage);
-};
-
-export const unwrapApiArrayResponse = <T extends object>(
-  result: ApiResponseEnvelope<unknown>,
-  fallbackMessage: string
-): T[] => {
-  return ensureArrayResponse<T>(
-    unwrapApiResponse(result, fallbackMessage),
-    fallbackMessage
-  );
-};
-
-export const unwrapApiObjectResponse = <
-  T extends object,
->(
-  result: ApiResponseEnvelope<unknown>,
-  fallbackMessage: string
-): T => {
-  return ensureObjectResponse<T>(
-    unwrapApiResponse(result, fallbackMessage),
-    fallbackMessage
-  );
-};
-
-export const unwrapApiCollectionResponse = <
-  T extends object,
->(
-  result: ApiResponseEnvelope<unknown>,
-  fallbackMessage: string
-): T[] => {
-  assertApiSuccess(result, fallbackMessage);
-
-  if (!Object.hasOwn(result, 'response')) {
-    return throwInvalidResponse(fallbackMessage);
-  }
-
-  return normalizeApiCollectionResponse<T>(
-    result.response,
-    fallbackMessage
-  );
+    ),
+  };
 };

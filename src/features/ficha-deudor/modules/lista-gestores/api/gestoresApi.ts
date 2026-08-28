@@ -1,5 +1,4 @@
 import { apiClient } from '@shared/api/apiClient';
-import type { ApiResponse } from '@shared/types/indexApi';
 import {
   unwrapApiArrayResponse,
 } from '../../../shared/utils/apiResponse.utils';
@@ -7,9 +6,14 @@ import type {
   Gestor,
   GestorApi,
 } from '../types/gestor.types';
+import { isGestorApi } from './gestoresApi.validators';
 
 const GESTORES_ERROR_MESSAGE =
   'Error cargando gestores';
+
+export interface FetchGestoresByClienteParams {
+  idCliente: string;
+}
 
 const mapGestor = (item: GestorApi): Gestor => ({
   id: String(item.id ?? ''),
@@ -21,7 +25,7 @@ const mapGestor = (item: GestorApi): Gestor => ({
 });
 
 export async function fetchGestoresByCliente(
-  idCliente: string,
+  { idCliente }: FetchGestoresByClienteParams,
   signal?: AbortSignal
 ): Promise<Gestor[]> {
   const params = new URLSearchParams({
@@ -30,7 +34,7 @@ export async function fetchGestoresByCliente(
     PageSize: '1000',
   });
 
-  const result = await apiClient<ApiResponse<GestorApi[]>>(
+  const result = await apiClient<unknown>(
     `/v1/UGrupo/GetUsuariosGrupo?${params.toString()}`,
     {
       method: 'GET',
@@ -38,8 +42,9 @@ export async function fetchGestoresByCliente(
     }
   );
 
-  return unwrapApiArrayResponse<GestorApi>(
+  return unwrapApiArrayResponse(
     result,
-    GESTORES_ERROR_MESSAGE
+    GESTORES_ERROR_MESSAGE,
+    isGestorApi
   ).map(mapGestor);
 }

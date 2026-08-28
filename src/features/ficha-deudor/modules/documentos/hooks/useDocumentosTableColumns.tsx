@@ -13,22 +13,18 @@ import {
 interface UseDocumentosTableColumnsParams {
   columns: ColumnApi[];
   allData: DocumentoApi[];
-  paginatedData: DocumentoApi[];
 }
 
 export const useDocumentosTableColumns = ({
   columns,
   allData,
-  paginatedData,
 }: UseDocumentosTableColumnsParams) => {
   const columnWidths = useMemo(() => {
-    const rowsForWidth = allData.length > 0 ? allData : paginatedData;
-
     return columns.reduce<Record<string, string>>((acc, column) => {
-      acc[column.key] = calculateDynamicColumnWidth(column, rowsForWidth);
+      acc[column.key] = calculateDynamicColumnWidth(column, allData);
       return acc;
     }, {});
-  }, [columns, allData, paginatedData]);
+  }, [columns, allData]);
 
   const tableStyles = useMemo(() => {
     return buildDocumentosTableStyles(columns, columnWidths);

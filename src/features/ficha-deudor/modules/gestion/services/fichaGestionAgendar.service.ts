@@ -1,11 +1,11 @@
 import type { FichaDeudorGestionFormParams } from '../../../shared/types/fichaDeudor.types';
 import type { PaletaRespuestaOption } from '../../../shared/utils/selectOptions.utils';
 import { buildCreateAgendaPayload } from '../mappers/fichaGestionAgenda.mapper';
+import type { CreateAgendaPayload } from '../types/fichaGestionApi.types';
 import type {
-  CreateAgendaPayload,
   FichaGestionValidationErrors,
   GestionFormClaro,
-} from '../types/fichaGestion.types';
+} from '../types/fichaGestionForm.types';
 import { validateFichaGestionAgenda } from '../validations/fichaGestionAgendaValidation';
 
 interface BuildAgendaRequestParams {

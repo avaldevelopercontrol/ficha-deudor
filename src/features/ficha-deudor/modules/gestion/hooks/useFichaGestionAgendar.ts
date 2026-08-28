@@ -12,7 +12,7 @@ import type {
   FichaGestionValidationErrors,
   GestionFormClaro,
   SetGestionField,
-} from '../types/fichaGestion.types';
+} from '../types/fichaGestionForm.types';
 import { useAutoClearValidationErrors } from './useAutoClearValidationErrors';
 import { useOperationFeedback } from '@shared/hooks/useOperationFeedback';
 import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
@@ -117,7 +117,7 @@ export const useFichaGestionAgendar = ({
       }
 
       const result = await executeSchedule(
-        () => createAgenda(agendaRequest.payload)
+        () => createAgenda({ payload: agendaRequest.payload })
       );
 
       if (result.status === 'skipped') {

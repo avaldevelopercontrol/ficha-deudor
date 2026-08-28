@@ -29,7 +29,7 @@ interface UseDocumentosReturn {
   totalPages: number;
   setPageNumber: (page: number) => void;
   setPageSize: (size: number) => void;
-  refetch: () => void;
+  refetch: () => Promise<void>;
   textFilters: TextFilters;
   selectedFilters: SelectedFilters;
   onTextFilterChange: (columnKey: string, value: string) => void;
@@ -52,14 +52,21 @@ export function useDocumentos(
     isLoading: metaLoading,
     error: metaError,
     refetch: refetchMetadata,
-  } = useDocumentosMetadata(params);
+  } = useDocumentosMetadata({
+    id_cliente,
+    id_contrato,
+  });
 
   const {
     rawData,
     isLoading: dataLoading,
     error: dataError,
     refetch: refetchData,
-  } = useDocumentosData(params);
+  } = useDocumentosData({
+    id_cliente,
+    id_cartera,
+    id_deudor,
+  });
 
   const documentosTable = useDocumentosTableData({
     columns,
@@ -70,9 +77,11 @@ export function useDocumentos(
   const isLoading = metaLoading || dataLoading;
   const error = metaError || dataError;
 
-  const refetch = useCallback(() => {
-    refetchMetadata();
-    refetchData();
+  const refetch = useCallback(async () => {
+    await Promise.all([
+      refetchMetadata(),
+      refetchData(),
+    ]);
   }, [
     refetchMetadata,
     refetchData,

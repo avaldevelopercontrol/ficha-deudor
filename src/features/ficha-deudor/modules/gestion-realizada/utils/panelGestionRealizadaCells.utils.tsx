@@ -35,24 +35,7 @@ export const renderOperacionBadgeCell = (operacion: string) => {
   );
 };
 
-export const renderResultadoGestionCell = (value: string) => {
-  const isContactado = value.includes(CONTACTADO_TEXT);
-
-  return (
-    <WrapCell
-      color={
-        isContactado
-          ? RESULTADO_COLOR.CONTACTADO
-          : RESULTADO_COLOR.NO_CONTACTADO
-      }
-      weight={500}
-    >
-      {value}
-    </WrapCell>
-  );
-};
-
-export const renderResultadoExpandableCell = (value: string) => {
+const renderResultadoExpandableCell = (value: string) => {
   const isContactado = value.includes(CONTACTADO_TEXT);
 
   return (
@@ -70,7 +53,7 @@ export const renderResultadoExpandableCell = (value: string) => {
   );
 };
 
-export const renderRespuestaCell = (respuesta: string) => {
+const renderRespuestaCell = (respuesta: string) => {
   const isContactado = respuesta.includes(CONTACTADO_TEXT);
 
   return (

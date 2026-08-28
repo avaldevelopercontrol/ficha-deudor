@@ -1,7 +1,7 @@
 import type {
   GestionFormClaro,
   SetGestionField,
-} from '../types/fichaGestion.types';
+} from '../types/fichaGestionForm.types';
 import type {
   DocumentoApi,
   FichaDeudorGestionFormParams,
@@ -9,7 +9,6 @@ import type {
 import type { PaletaRespuestaOption } from '../../../shared/utils/selectOptions.utils';
 import { useFichaGestionAgendar } from './useFichaGestionAgendar';
 import { useFichaGestionGuardar } from './useFichaGestionGuardar';
-import { useFichaGestionWhatsapp } from './useFichaGestionWhatsapp';
 
 interface UseFichaGestionActionsParams {
   form: GestionFormClaro;
@@ -29,9 +28,7 @@ interface UseFichaGestionActionsParams {
     data: GestionFormClaro,
     fechaFinGestion: string
   ) => void;
-  onSaveError?: (
-  message: string
-) => void;
+  onSaveError?: (message: string) => void;
 }
 
 export const useFichaGestionActions = ({
@@ -66,11 +63,6 @@ export const useFichaGestionActions = ({
     np2Options,
   });
 
-  const { handleOpenWhatsApp } =
-    useFichaGestionWhatsapp({
-      telefono: form.telefono,
-    });
-
   const {
     validationErrors,
     isSaving,
@@ -95,7 +87,6 @@ export const useFichaGestionActions = ({
     validationErrors,
     isSaving,
     handleAgendar,
-    handleOpenWhatsApp,
     handleGuardar,
   };
 };

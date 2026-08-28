@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react';
 
 import {
-  createEmail,
   fetchEmailById,
   fetchEmailsByDeudor,
   fetchEmailStatuses,
@@ -9,7 +8,6 @@ import {
 import type {
   Email,
   EmailByIdApi,
-  EmailFormData,
 } from '../types/email.types';
 import { useApiResource } from '@shared/hooks/useApiResource';
 import { useNullableResourceById } from '@shared/hooks/useNullableResourceById';
@@ -42,7 +40,10 @@ export function useEmailsByDeudor(
 
   const fetcher = useCallback(
     (signal: AbortSignal) =>
-      fetchEmailsByDeudor(id_cliente, id_deudor, signal),
+      fetchEmailsByDeudor(
+        { idCliente: id_cliente, idDeudor: id_deudor },
+        signal
+      ),
     [id_cliente, id_deudor]
   );
 
@@ -65,25 +66,10 @@ export function useEmailStatuses() {
   return useApiResource(fetcher, []);
 }
 
-export function useCreateEmail(
-  id_cliente: string,
-  id_deudor: string,
-  id_usuario: string
-) {
-  const create = useCallback(
-    async (formData: EmailFormData) => {
-      return createEmail(id_cliente, id_deudor, id_usuario, formData);
-    },
-    [id_cliente, id_deudor, id_usuario]
-  );
-
-  return { create };
-}
-
 export function useEmailById(idEmail: string | null) {
   const fetcher = useCallback(
     (id: string, signal: AbortSignal) =>
-      fetchEmailById(id, signal),
+      fetchEmailById({ idEmail: id }, signal),
     []
   );
 

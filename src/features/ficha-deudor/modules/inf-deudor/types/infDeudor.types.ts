@@ -1,10 +1,15 @@
 export interface InfDeudorCabeceraApi {
-  [key: `cNombre_Param${string}`]: string;
-  bTipo_Cabecera?: boolean;
+  [key: `cNombre_Param${string}`]:
+    | string
+    | null
+    | undefined;
 }
 
 export interface InfDeudorParamApi {
-  [key: `cPersInf_Param${string}`]: string;
+  [key: `cPersInf_Param${string}`]:
+    | string
+    | null
+    | undefined;
 }
 
 export interface InfDeudorTableRow {

@@ -1,10 +1,10 @@
-import type { CreateGestionOpeGesContratosPayload } from '../types/fichaGestion.types';
+import type { CreateGestionOpeGesContratosPayload } from '../types/fichaGestionApi.types';
 import { SISTEMA_GESTION } from '../constants/fichaGestion.constants';
-import type { GestionFormClaro } from '../types/fichaGestion.types';
+import type { GestionFormClaro } from '../types/fichaGestionForm.types';
 import {
   splitTime,
-  toApiDateTimeOrCurrent,
-  toApiDateTimeOrNull,
+  toPeruApiDateTimeOrCurrent,
+  toPeruApiDateTimeOrNull,
   toRequiredPeruApiDateTime,
 } from '../../../shared/utils/date.utils';
 import {
@@ -137,7 +137,7 @@ const buildGestionCompromisoPayload = (
   form: GestionFormClaro
 ): GestionCompromisoPayload => {
   return {
-    dFECHACOMPROMISO: toApiDateTimeOrNull(form.fechaCompromisoPago),
+    dFECHACOMPROMISO: toPeruApiDateTimeOrNull(form.fechaCompromisoPago),
     nMONTOSOLES: toDecimalNumber(form.compromisoSoles),
     nMONTODOLARES: toDecimalNumber(form.compromisoUSD),
   };
@@ -149,7 +149,7 @@ const buildGestionAgendaPayload = (
   const nuevaGestionTime = splitTime(form.horaNuevaGestion);
 
   return {
-    dFECHANUEVAGESTION: toApiDateTimeOrNull(form.fechaNuevaGestion),
+    dFECHANUEVAGESTION: toPeruApiDateTimeOrNull(form.fechaNuevaGestion),
     cHORANUEVAGESTION: nuevaGestionTime.hour,
     cMINUTONUEVAGESTION: nuevaGestionTime.minute,
   };
@@ -161,7 +161,7 @@ const buildGestionActualPayload = (
   const gestionTime = splitTime(form.horaGestion);
 
   return {
-    dFECHAGESTION: toApiDateTimeOrCurrent(form.fechaGestion),
+    dFECHAGESTION: toPeruApiDateTimeOrCurrent(form.fechaGestion),
     cHORAGESTION: gestionTime.hour,
     cMINUTOGESTION: gestionTime.minute,
     cOBSERVACION: form.observaciones.trim(),

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import type { PaletaRespuestaOption } from '../../../shared/utils/selectOptions.utils';
-import type { SetGestionField } from '../types/fichaGestion.types';
+import type { SetGestionField } from '../types/fichaGestionForm.types';
 
 interface UseSyncDefaultNP2OptionParams {
   np1: string;

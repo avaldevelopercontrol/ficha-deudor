@@ -1,13 +1,7 @@
 import { apiClient } from '@shared/api/apiClient';
 import type {
-  ApiResponse,
-  ApiResponseSimple
-} from '@shared/types/indexApi';
-import type {
   EstadoGestion,
-  EstadoGestionApi,
   EstadoGestionCompleta,
-  EstadoGestionHistoricaApi,
 } from '../types/estadoGestion.types';
 import {
   ESTADOS_GESTION_ENDPOINTS,
@@ -23,58 +17,69 @@ import {
 } from '../mappers/estadosGestion.mapper';
 import {
   unwrapApiArrayResponse,
+  unwrapApiPaginatedArrayResponse,
 } from '../../../shared/utils/apiResponse.utils';
+import {
+  isEstadoGestionApi,
+  isEstadoGestionHistoricaApi,
+} from './estadosGestionApi.validators';
 
-const buildEstadosGestionParams = (
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string
-) => {
+export interface EstadosGestionParams {
+  idCliente: string;
+  idCartera: string;
+  idDeudor: string;
+}
+
+export interface EstadosGestionHistoricosParams extends EstadosGestionParams {
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+const buildEstadosGestionParams = ({
+  idCliente,
+  idCartera,
+  idDeudor,
+}: EstadosGestionParams) => {
   return new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
-    nId_Persdeudor: id_deudor,
+    nId_Cliente: idCliente,
+    nId_Cartera: idCartera,
+    nId_Persdeudor: idDeudor,
     PageNumber: String(ESTADOS_GESTION_FETCH_PAGE_NUMBER),
     PageSize: String(ESTADOS_GESTION_FETCH_PAGE_SIZE),
   });
 };
 
-const buildEstadosGestionHistoricosParams = (
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
-  pageNumber: number,
-  pageSize: number
-) => {
+const buildEstadosGestionHistoricosParams = ({
+  idCliente,
+  idCartera,
+  idDeudor,
+  pageNumber = ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_NUMBER,
+  pageSize = ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_SIZE,
+}: EstadosGestionHistoricosParams) => {
   return new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Cartera: id_cartera,
-    nId_PersDeudor: id_deudor,
+    nId_Cliente: idCliente,
+    nId_Cartera: idCartera,
+    nId_PersDeudor: idDeudor,
     PageNumber: String(pageNumber),
     PageSize: String(pageSize),
   });
 };
 
 export async function fetchEstadosGestion(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
+  params: EstadosGestionParams,
   signal?: AbortSignal
 ): Promise<{ resumido: EstadoGestion[] }> {
-  const params = buildEstadosGestionParams(
-    id_cliente,
-    id_cartera,
-    id_deudor
-  );
+  const searchParams = buildEstadosGestionParams(params);
 
-  const result = await apiClient<ApiResponseSimple<EstadoGestionApi[]>>(
-    `${ESTADOS_GESTION_ENDPOINTS.RESUMIDOS}?${params.toString()}`,
+  const result = await apiClient<unknown>(
+    `${ESTADOS_GESTION_ENDPOINTS.RESUMIDOS}?${searchParams.toString()}`,
     { signal }
   );
 
-  const estados = unwrapApiArrayResponse<EstadoGestionApi>(
+  const estados = unwrapApiArrayResponse(
     result,
-    ESTADOS_GESTION_ERROR_MESSAGES.RESUMIDOS
+    ESTADOS_GESTION_ERROR_MESSAGES.RESUMIDOS,
+    isEstadoGestionApi
   );
 
   return {
@@ -83,11 +88,7 @@ export async function fetchEstadosGestion(
 }
 
 export async function fetchEstadosGestionHistoricos(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
-  pageNumber = ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_NUMBER,
-  pageSize = ESTADOS_GESTION_HISTORICOS_DEFAULT_PAGE_SIZE,
+  params: EstadosGestionHistoricosParams,
   signal?: AbortSignal
 ): Promise<{
   completo: EstadoGestionCompleta[];
@@ -96,29 +97,30 @@ export async function fetchEstadosGestionHistoricos(
   totalRecords: number;
   totalPages: number;
 }> {
-  const params = buildEstadosGestionHistoricosParams(
-    id_cliente,
-    id_cartera,
-    id_deudor,
-    pageNumber,
-    pageSize
-  );
+  const searchParams = buildEstadosGestionHistoricosParams(params);
 
-  const result = await apiClient<ApiResponse<EstadoGestionHistoricaApi[]>>(
-    `${ESTADOS_GESTION_ENDPOINTS.HISTORICOS}?${params.toString()}`,
+  const result = await apiClient<unknown>(
+    `${ESTADOS_GESTION_ENDPOINTS.HISTORICOS}?${searchParams.toString()}`,
     { signal }
   );
 
-  const estadosHistoricos = unwrapApiArrayResponse<EstadoGestionHistoricaApi>(
+  const {
+    data: estadosHistoricos,
+    pageNumber: responsePageNumber,
+    pageSize: responsePageSize,
+    totalRecords,
+    totalPages,
+  } = unwrapApiPaginatedArrayResponse(
     result,
-    ESTADOS_GESTION_ERROR_MESSAGES.HISTORICOS
+    ESTADOS_GESTION_ERROR_MESSAGES.HISTORICOS,
+    isEstadoGestionHistoricaApi
   );
 
   return {
     completo: mapEstadosGestionHistoricos(estadosHistoricos),
-    pageNumber: result.pageNumber,
-    pageSize: result.pageSize,
-    totalRecords: result.totalRecords,
-    totalPages: result.totalPages,
+    pageNumber: responsePageNumber,
+    pageSize: responsePageSize,
+    totalRecords,
+    totalPages,
   };
 }

@@ -1,13 +1,7 @@
 import { apiClient } from '@shared/api/apiClient';
 import type {
-  ApiResponse,
-  ApiResponseSimple
-} from '@shared/types/indexApi';
-import type {
   GestionRealizada,
-  GestionRealizadaApi,
   GestionCompleta,
-  GestionHistoricaApi,
 } from '../types/gestionRealizada.types';
 import {
   GESTIONES_HISTORICAS_DEFAULT_PAGE_NUMBER,
@@ -23,16 +17,21 @@ import {
 } from '../mappers/gestionesRealizadas.mapper';
 import {
   unwrapApiArrayResponse,
+  unwrapApiPaginatedArrayResponse,
 } from '../../../shared/utils/apiResponse.utils';
+import {
+  isGestionHistoricaApi,
+  isGestionRealizadaApi,
+} from './gestionesRealizadasApi.validators';
 
-interface GestionesRealizadasParams {
+export interface GestionesRealizadasParams {
   idCliente: string;
   idCartera: string;
   idDeudor: string;
   idUsuario: string;
 }
 
-interface GestionesHistoricasParams {
+export interface GestionesHistoricasParams {
   idCliente: string;
   idCartera: string;
   idDeudor: string;
@@ -73,27 +72,20 @@ const buildGestionesHistoricasParams = ({
 };
 
 export async function fetchGestionesRealizadas(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
-  id_usuario: string,
+  params: GestionesRealizadasParams,
   signal?: AbortSignal
 ): Promise<{ resumido: GestionRealizada[] }> {
-  const params = buildGestionesRealizadasParams({
-    idCliente: id_cliente,
-    idCartera: id_cartera,
-    idDeudor: id_deudor,
-    idUsuario: id_usuario,
-  });
+  const searchParams = buildGestionesRealizadasParams(params);
 
-  const result = await apiClient<ApiResponseSimple<GestionRealizadaApi[]>>(
-    `${GESTIONES_REALIZADAS_ENDPOINTS.RESUMIDAS}?${params.toString()}`,
+  const result = await apiClient<unknown>(
+    `${GESTIONES_REALIZADAS_ENDPOINTS.RESUMIDAS}?${searchParams.toString()}`,
     { signal }
   );
 
-  const gestiones = unwrapApiArrayResponse<GestionRealizadaApi>(
+  const gestiones = unwrapApiArrayResponse(
     result,
-    GESTIONES_REALIZADAS_ERROR_MESSAGES.RESUMIDAS
+    GESTIONES_REALIZADAS_ERROR_MESSAGES.RESUMIDAS,
+    isGestionRealizadaApi
   );
 
   return {
@@ -102,11 +94,13 @@ export async function fetchGestionesRealizadas(
 }
 
 export async function fetchGestionesHistoricas(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
-  pageNumber: number = GESTIONES_HISTORICAS_DEFAULT_PAGE_NUMBER,
-  pageSize: number = GESTIONES_HISTORICAS_DEFAULT_PAGE_SIZE,
+  {
+    idCliente,
+    idCartera,
+    idDeudor,
+    pageNumber = GESTIONES_HISTORICAS_DEFAULT_PAGE_NUMBER,
+    pageSize = GESTIONES_HISTORICAS_DEFAULT_PAGE_SIZE,
+  }: GestionesHistoricasParams,
   signal?: AbortSignal
 ): Promise<{
   completo: GestionCompleta[];
@@ -116,28 +110,35 @@ export async function fetchGestionesHistoricas(
   totalPages: number;
 }> {
   const params = buildGestionesHistoricasParams({
-    idCliente: id_cliente,
-    idCartera: id_cartera,
-    idDeudor: id_deudor,
+    idCliente,
+    idCartera,
+    idDeudor,
     pageNumber,
     pageSize,
   });
 
-  const result = await apiClient<ApiResponse<GestionHistoricaApi[]>>(
+  const result = await apiClient<unknown>(
     `${GESTIONES_REALIZADAS_ENDPOINTS.HISTORICAS}?${params.toString()}`,
     { signal }
   );
 
-  const gestionesHistoricas = unwrapApiArrayResponse<GestionHistoricaApi>(
+  const {
+    data: gestionesHistoricas,
+    pageNumber: responsePageNumber,
+    pageSize: responsePageSize,
+    totalRecords,
+    totalPages,
+  } = unwrapApiPaginatedArrayResponse(
     result,
-    GESTIONES_REALIZADAS_ERROR_MESSAGES.HISTORICAS
+    GESTIONES_REALIZADAS_ERROR_MESSAGES.HISTORICAS,
+    isGestionHistoricaApi
   );
 
   return {
     completo: mapGestionesHistoricas(gestionesHistoricas),
-    pageNumber: result.pageNumber,
-    pageSize: result.pageSize,
-    totalRecords: result.totalRecords,
-    totalPages: result.totalPages,
+    pageNumber: responsePageNumber,
+    pageSize: responsePageSize,
+    totalRecords,
+    totalPages,
   };
 }

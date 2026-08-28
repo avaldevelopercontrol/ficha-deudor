@@ -18,7 +18,7 @@ interface UseInfDeudorReturn {
   rows: InfDeudorTableRow[];
   isLoading: boolean;
   error: string | null;
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 export function useInfDeudor(
@@ -36,7 +36,7 @@ export function useInfDeudor(
         fetchInfDeudorCabeceraFalse(signal),
         fetchInfDeudorCabeceraTrue(signal),
         fetchInfDeudorParams(
-          id_deudor,
+          { idDeudor: id_deudor },
           signal
         ),
       ]);

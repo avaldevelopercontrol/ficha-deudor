@@ -1,25 +1,18 @@
 import { apiClient } from '@shared/api/apiClient';
 import type {
-  GestionEstadoApi,
   GestionEstadoList,
-  GestionTipoApi,
   GestionTipoList,
-  GestionPaletaRespuestaApi,
   GestionPaletaRespuestaList,
   GestionPaletaRespuestaParams,
-  GestionEstadoClaroApi,
   GestionEstadoClaroList,
-  GestionMotivoNoPagoApi,
   GestionMotivoNoPagoList,
+} from '../types/fichaGestionCatalogos.types';
+import type {
   CreateGestionOpeGesContratosPayload,
   CreateGestionOpeGesContratosResponse,
   CreateAgendaPayload,
   CreateAgendaResponse,
-} from '../types/fichaGestion.types';
-import type {
-  ApiResponse,
-  ApiResponseSimple,
-} from '@shared/types/indexApi';
+} from '../types/fichaGestionApi.types';
 import { TIPO_GESTION_PALETA } from '../constants/fichaGestion.constants';
 import {
   FICHA_GESTION_ENDPOINTS,
@@ -36,24 +29,51 @@ import {
   unwrapApiArrayResponse,
   unwrapApiObjectResponse,
 } from '../../../shared/utils/apiResponse.utils';
+import {
+  isCreateAgendaResponse,
+  isCreateGestionOpeGesContratosResponse,
+  isGestionEstadoApi,
+  isGestionEstadoClaroApi,
+  isGestionMotivoNoPagoApi,
+  isGestionPaletaRespuestaApi,
+  isGestionTipoApi,
+} from './fichaGestionApi.validators';
+
+export interface FetchGestionEstadosParams {
+  idCliente: string;
+}
+
+export interface FetchGestionClienteCarteraParams {
+  idCliente: string;
+  idCartera: string;
+}
+
+export interface CreateGestionParams {
+  payload: CreateGestionOpeGesContratosPayload;
+}
+
+export interface CreateAgendaParams {
+  payload: CreateAgendaPayload;
+}
 
 
 export async function fetchGestionEstados(
-  idCliente: string,
+  { idCliente }: FetchGestionEstadosParams,
   signal?: AbortSignal
 ): Promise<GestionEstadoList[]> {
   const params = new URLSearchParams({
     nId_Cliente: idCliente,
   });
 
-  const result = await apiClient<ApiResponse<GestionEstadoApi[]>>(
+  const result = await apiClient<unknown>(
     `${FICHA_GESTION_ENDPOINTS.ESTADOS}?${params.toString()}`,
     { signal }
   );
 
-  const estados = unwrapApiArrayResponse<GestionEstadoApi>(
+  const estados = unwrapApiArrayResponse(
     result,
-    FICHA_GESTION_ERROR_MESSAGES.ESTADOS
+    FICHA_GESTION_ERROR_MESSAGES.ESTADOS,
+    isGestionEstadoApi
   );
 
   return mapGestionEstados(estados);
@@ -62,14 +82,15 @@ export async function fetchGestionEstados(
 export async function fetchGestionTipos(
   signal?: AbortSignal
 ): Promise<GestionTipoList[]> {
-  const result = await apiClient<ApiResponse<GestionTipoApi[]>>(
+  const result = await apiClient<unknown>(
     FICHA_GESTION_ENDPOINTS.TIPOS,
     { signal }
   );
 
-  const tipos = unwrapApiArrayResponse<GestionTipoApi>(
+  const tipos = unwrapApiArrayResponse(
     result,
-    FICHA_GESTION_ERROR_MESSAGES.TIPOS
+    FICHA_GESTION_ERROR_MESSAGES.TIPOS,
+    isGestionTipoApi
   );
 
   return mapGestionTipos(tipos);
@@ -87,22 +108,22 @@ export async function fetchGestionPaletaRespuesta(
     nId_TipoGestion: String(params.idTipoGestion ?? TIPO_GESTION_PALETA),
   });
 
-  const result = await apiClient<ApiResponse<GestionPaletaRespuestaApi[]>>(
+  const result = await apiClient<unknown>(
     `${FICHA_GESTION_ENDPOINTS.PALETA_RESPUESTA}?${searchParams.toString()}`,
     { signal }
   );
 
-  const respuestas = unwrapApiArrayResponse<GestionPaletaRespuestaApi>(
+  const respuestas = unwrapApiArrayResponse(
     result,
-    FICHA_GESTION_ERROR_MESSAGES.PALETA_RESPUESTA
+    FICHA_GESTION_ERROR_MESSAGES.PALETA_RESPUESTA,
+    isGestionPaletaRespuestaApi
   );
 
   return mapGestionPaletaRespuesta(respuestas);
 }
 
 export async function fetchGestionEstadoGestionClaro(
-  idCliente: string,
-  idCartera: string,
+  { idCliente, idCartera }: FetchGestionClienteCarteraParams,
   signal?: AbortSignal
 ): Promise<GestionEstadoClaroList[]> {
   const params = new URLSearchParams({
@@ -110,22 +131,22 @@ export async function fetchGestionEstadoGestionClaro(
     nId_Cartera: idCartera,
   });
 
-  const result = await apiClient<ApiResponse<GestionEstadoClaroApi[]>>(
+  const result = await apiClient<unknown>(
     `${FICHA_GESTION_ENDPOINTS.ESTADO_GESTION_CLARO}?${params.toString()}`,
     { signal }
   );
 
-  const estadosClaro = unwrapApiArrayResponse<GestionEstadoClaroApi>(
+  const estadosClaro = unwrapApiArrayResponse(
     result,
-    FICHA_GESTION_ERROR_MESSAGES.ESTADO_GESTION_CLARO
+    FICHA_GESTION_ERROR_MESSAGES.ESTADO_GESTION_CLARO,
+    isGestionEstadoClaroApi
   );
 
   return mapGestionEstadoClaro(estadosClaro);
 }
 
 export async function fetchGestionMotivoNoPago(
-  idCliente: string,
-  idCartera: string,
+  { idCliente, idCartera }: FetchGestionClienteCarteraParams,
   signal?: AbortSignal
 ): Promise<GestionMotivoNoPagoList[]> {
   const params = new URLSearchParams({
@@ -133,24 +154,25 @@ export async function fetchGestionMotivoNoPago(
     nId_Cartera: idCartera,
   });
 
-  const result = await apiClient<ApiResponse<GestionMotivoNoPagoApi[]>>(
+  const result = await apiClient<unknown>(
     `${FICHA_GESTION_ENDPOINTS.MOTIVO_NO_PAGO}?${params.toString()}`,
     { signal }
   );
 
-  const motivos = unwrapApiArrayResponse<GestionMotivoNoPagoApi>(
+  const motivos = unwrapApiArrayResponse(
     result,
-    FICHA_GESTION_ERROR_MESSAGES.MOTIVO_NO_PAGO
+    FICHA_GESTION_ERROR_MESSAGES.MOTIVO_NO_PAGO,
+    isGestionMotivoNoPagoApi
   );
 
   return mapGestionMotivoNoPago(motivos);
 }
 
 export async function createGestionOpeGesContratos(
-  payload: CreateGestionOpeGesContratosPayload,
+  { payload }: CreateGestionParams,
   signal?: AbortSignal
-): Promise<ApiResponse<CreateGestionOpeGesContratosResponse[]>> {
-  const result = await apiClient<ApiResponse<CreateGestionOpeGesContratosResponse[]>>(
+): Promise<CreateGestionOpeGesContratosResponse[]> {
+  const result = await apiClient<unknown>(
     FICHA_GESTION_ENDPOINTS.CREATE_GESTION,
     {
       method: 'POST',
@@ -159,24 +181,19 @@ export async function createGestionOpeGesContratos(
     }
   );
 
-  unwrapApiArrayResponse<CreateGestionOpeGesContratosResponse>(
+  return unwrapApiArrayResponse(
     result,
-    FICHA_GESTION_ERROR_MESSAGES.CREATE_GESTION
+    FICHA_GESTION_ERROR_MESSAGES.CREATE_GESTION,
+    isCreateGestionOpeGesContratosResponse
   );
-
-  return result;
 }
 
 export async function createAgenda(
-  payload: CreateAgendaPayload,
+  { payload }: CreateAgendaParams,
   signal?: AbortSignal
-): Promise<
-  ApiResponseSimple<CreateAgendaResponse>
-> {
+): Promise<CreateAgendaResponse> {
   const result =
-    await apiClient<
-      ApiResponseSimple<CreateAgendaResponse>
-    >(
+    await apiClient<unknown>(
       FICHA_GESTION_ENDPOINTS.CREATE_AGENDA,
       {
         method: 'POST',
@@ -185,10 +202,9 @@ export async function createAgenda(
       }
     );
 
-  unwrapApiObjectResponse<CreateAgendaResponse>(
+  return unwrapApiObjectResponse(
     result,
-    FICHA_GESTION_ERROR_MESSAGES.CREATE_AGENDA
+    FICHA_GESTION_ERROR_MESSAGES.CREATE_AGENDA,
+    isCreateAgendaResponse
   );
-
-  return result;
 }

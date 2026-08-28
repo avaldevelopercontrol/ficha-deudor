@@ -3,19 +3,9 @@ import type {
   CreateTelefonoResponse,
   TelefonoEditarApi,
   TelefonoFormData,
-  TelefonoFuenteBusquedaApi,
-  TelefonoHorarioGestionApi,
   TelefonoList,
-  TelefonoOperadorApi,
   TelefonoReferenciado,
-  TelefonoReferenciadoApi,
-  TelefonoResultadoApi,
-  TelefonoUbicacionApi,
 } from '../types/telefono.types';
-import type {
-  ApiResponse,
-  ApiResponseSimple
-} from '@shared/types/indexApi';
 import {
   TELEFONOS_REFERENCIADOS_ENDPOINTS,
   TELEFONOS_REFERENCIADOS_ERROR_MESSAGES,
@@ -36,115 +26,144 @@ import {
   unwrapApiArrayResponse,
   unwrapApiObjectResponse,
 } from '../../../shared/utils/apiResponse.utils';
+import {
+  isCreateTelefonoResponse,
+  isTelefonoEditarApi,
+  isTelefonoFuenteBusquedaApi,
+  isTelefonoHorarioGestionApi,
+  isTelefonoOperadorApi,
+  isTelefonoReferenciadoApi,
+  isTelefonoResultadoApi,
+  isTelefonoUbicacionApi,
+} from './telefonosReferenciadosApi.validators';
 
-const buildTelefonosReferenciadosParams = (
-  id_cliente: string,
-  id_deudor: string
-) => {
+export interface FetchTelefonosReferenciadosParams {
+  idCliente: string;
+  idDeudor: string;
+}
+
+export interface FetchTelefonoByIdParams {
+  idTelefono: number;
+}
+
+export interface CreateTelefonoParams extends FetchTelefonosReferenciadosParams {
+  idUsuario: string;
+  data: TelefonoFormData;
+}
+
+export interface UpdateTelefonoParams extends CreateTelefonoParams {
+  idTelefono: number;
+}
+
+const buildTelefonosReferenciadosParams = ({
+  idCliente,
+  idDeudor,
+}: FetchTelefonosReferenciadosParams) => {
   return new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Persdeudor: id_deudor,
+    nId_Cliente: idCliente,
+    nId_Persdeudor: idDeudor,
     PageNumber: String(TELEFONOS_REFERENCIADOS_FETCH_PAGE_NUMBER),
     PageSize: String(TELEFONOS_REFERENCIADOS_FETCH_PAGE_SIZE),
   });
 };
 
 export async function fetchTelefonosReferenciados(
-  id_cliente: string,
-  id_deudor: string,
+  params: FetchTelefonosReferenciadosParams,
   signal?: AbortSignal
 ): Promise<TelefonoReferenciado[]> {
-  const params = buildTelefonosReferenciadosParams(id_cliente, id_deudor);
+  const searchParams = buildTelefonosReferenciadosParams(params);
 
-  const result = await apiClient<ApiResponse<TelefonoReferenciadoApi[]>>(
-    `${TELEFONOS_REFERENCIADOS_ENDPOINTS.LIST}?${params.toString()}`,
+  const result = await apiClient<unknown>(
+    `${TELEFONOS_REFERENCIADOS_ENDPOINTS.LIST}?${searchParams.toString()}`,
     { signal }
   );
 
-  const telefonos = unwrapApiArrayResponse<TelefonoReferenciadoApi>(
+  const telefonos = unwrapApiArrayResponse(
     result,
-    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.LIST
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.LIST,
+    isTelefonoReferenciadoApi
   );
 
   return mapTelefonosReferenciados(telefonos);
 }
 
 export async function fetchTelefonoById(
-  idTelefono: number,
+  { idTelefono }: FetchTelefonoByIdParams,
   signal?: AbortSignal
 ): Promise<TelefonoEditarApi> {
-  const result = await apiClient<ApiResponseSimple<TelefonoEditarApi>>(
+  const result = await apiClient<unknown>(
     `${TELEFONOS_REFERENCIADOS_ENDPOINTS.BY_ID}/${idTelefono}`,
     { signal }
   );
 
-  return unwrapApiObjectResponse<TelefonoEditarApi>(
+  return unwrapApiObjectResponse(
     result,
-    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.BY_ID_EDIT
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.BY_ID_EDIT,
+    isTelefonoEditarApi
   );
 }
 
 export async function createTelefono(
-  _id_cliente: string,
-  id_deudor: string,
-  id_usuario: string,
-  data: TelefonoFormData
+  { idDeudor, idUsuario, data }: CreateTelefonoParams,
+  signal?: AbortSignal
 ): Promise<CreateTelefonoResponse> {
-  const body = buildCreateTelefonoRequest(id_deudor, id_usuario, data);
+  const body = buildCreateTelefonoRequest(idDeudor, idUsuario, data);
 
-  const result = await apiClient<ApiResponse<CreateTelefonoResponse>>(
+  const result = await apiClient<unknown>(
     TELEFONOS_REFERENCIADOS_ENDPOINTS.CREATE,
     {
       method: 'POST',
       body,
+      signal,
     }
   );
 
-  return unwrapApiObjectResponse<CreateTelefonoResponse>(
+  return unwrapApiObjectResponse(
     result,
-    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.CREATE
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.CREATE,
+    isCreateTelefonoResponse
   );
 }
 
 export async function updateTelefono(
-  _id_cliente: string,
-  id_deudor: string,
-  id_usuario: string,
-  id_telefono: number,
-  data: TelefonoFormData
+  { idDeudor, idUsuario, idTelefono, data }: UpdateTelefonoParams,
+  signal?: AbortSignal
 ): Promise<CreateTelefonoResponse> {
   const body = buildUpdateTelefonoRequest(
-    id_deudor,
-    id_usuario,
-    id_telefono,
+    idDeudor,
+    idUsuario,
+    idTelefono,
     data
   );
 
-  const result = await apiClient<ApiResponse<CreateTelefonoResponse>>(
+  const result = await apiClient<unknown>(
     TELEFONOS_REFERENCIADOS_ENDPOINTS.UPDATE,
     {
       method: 'PUT',
       body,
+      signal,
     }
   );
 
-  return unwrapApiObjectResponse<CreateTelefonoResponse>(
+  return unwrapApiObjectResponse(
     result,
-    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.UPDATE
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.UPDATE,
+    isCreateTelefonoResponse
   );
 }
 
 export async function fetchTelefonoResultados(
   signal?: AbortSignal
 ): Promise<TelefonoList[]> {
-  const result = await apiClient<ApiResponseSimple<TelefonoResultadoApi[]>>(
+  const result = await apiClient<unknown>(
     TELEFONOS_REFERENCIADOS_ENDPOINTS.RESULTADOS,
     { signal }
   );
 
-  const resultados = unwrapApiArrayResponse<TelefonoResultadoApi>(
+  const resultados = unwrapApiArrayResponse(
     result,
-    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.RESULTADOS
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.RESULTADOS,
+    isTelefonoResultadoApi
   );
 
   return mapTelefonoResultados(resultados);
@@ -153,14 +172,15 @@ export async function fetchTelefonoResultados(
 export async function fetchTelefonoOperadores(
   signal?: AbortSignal
 ): Promise<TelefonoList[]> {
-  const result = await apiClient<ApiResponseSimple<TelefonoOperadorApi[]>>(
+  const result = await apiClient<unknown>(
     TELEFONOS_REFERENCIADOS_ENDPOINTS.OPERADORES,
     { signal }
   );
 
-  const operadores = unwrapApiArrayResponse<TelefonoOperadorApi>(
+  const operadores = unwrapApiArrayResponse(
     result,
-    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.OPERADORES
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.OPERADORES,
+    isTelefonoOperadorApi
   );
 
   return mapTelefonoOperadores(operadores);
@@ -169,14 +189,15 @@ export async function fetchTelefonoOperadores(
 export async function fetchTelefonoUbicaciones(
   signal?: AbortSignal
 ): Promise<TelefonoList[]> {
-  const result = await apiClient<ApiResponseSimple<TelefonoUbicacionApi[]>>(
+  const result = await apiClient<unknown>(
     TELEFONOS_REFERENCIADOS_ENDPOINTS.UBICACIONES,
     { signal }
   );
 
-  const ubicaciones = unwrapApiArrayResponse<TelefonoUbicacionApi>(
+  const ubicaciones = unwrapApiArrayResponse(
     result,
-    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.UBICACIONES
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.UBICACIONES,
+    isTelefonoUbicacionApi
   );
 
   return mapTelefonoUbicaciones(ubicaciones);
@@ -185,14 +206,15 @@ export async function fetchTelefonoUbicaciones(
 export async function fetchTelefonoHorarioGestion(
   signal?: AbortSignal
 ): Promise<TelefonoList[]> {
-  const result = await apiClient<ApiResponseSimple<TelefonoHorarioGestionApi[]>>(
+  const result = await apiClient<unknown>(
     TELEFONOS_REFERENCIADOS_ENDPOINTS.HORARIO_GESTION,
     { signal }
   );
 
-  const horarios = unwrapApiArrayResponse<TelefonoHorarioGestionApi>(
+  const horarios = unwrapApiArrayResponse(
     result,
-    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.HORARIO_GESTION
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.HORARIO_GESTION,
+    isTelefonoHorarioGestionApi
   );
 
   return mapTelefonoHorarioGestion(horarios);
@@ -201,14 +223,15 @@ export async function fetchTelefonoHorarioGestion(
 export async function fetchTelefonoFuenteBusqueda(
   signal?: AbortSignal
 ): Promise<TelefonoList[]> {
-  const result = await apiClient<ApiResponseSimple<TelefonoFuenteBusquedaApi[]>>(
+  const result = await apiClient<unknown>(
     TELEFONOS_REFERENCIADOS_ENDPOINTS.FUENTE_BUSQUEDA,
     { signal }
   );
 
-  const fuentes = unwrapApiArrayResponse<TelefonoFuenteBusquedaApi>(
+  const fuentes = unwrapApiArrayResponse(
     result,
-    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.FUENTE_BUSQUEDA
+    TELEFONOS_REFERENCIADOS_ERROR_MESSAGES.FUENTE_BUSQUEDA,
+    isTelefonoFuenteBusquedaApi
   );
 
   return mapTelefonoFuenteBusqueda(fuentes);

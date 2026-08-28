@@ -3,16 +3,9 @@
 // ═══════════════════════════════════════════
 
 export interface CabeceraPantallaApi {
-  idCabeceraPantalla: number;
   tituloCabeceraPantalla: string;
   tipoDato: string;
-  operaTotal?: boolean;
-  compromiso?: boolean;
   orden: number;
-  pantalla: number;
-  alineacionHtml?: string;
-  nId_Contrato: number;
-  nId_Cliente: number;
 }
 
 export interface DocumentoApi {
@@ -33,8 +26,8 @@ export interface DocumentoApi {
 
 /** Cabecera de Datos Adicionales: objeto plano donde key = campo, value = label */
 export interface CabeceraDatosAdicionalesApi {
-  idCab: number;
-  [campo: string]: string | number;
+  idCab?: number | null;
+  [campo: string]: unknown;
 }
 
 /** Registro de Datos Adicionales: campos estaticos + dinamicos */
@@ -63,13 +56,4 @@ export interface BotonApi {
   label: string;
   action?: string;
   popupUrl?: string;
-}
-
-// ─── Estado unificado ───
-export interface TableDataState {
-  columns: ColumnApi[];
-  data: unknown[];
-  botones: BotonApi[];
-  isLoading: boolean;
-  error: string | null;
 }

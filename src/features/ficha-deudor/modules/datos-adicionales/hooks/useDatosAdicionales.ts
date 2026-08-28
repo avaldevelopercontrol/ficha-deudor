@@ -19,6 +19,8 @@ import {
   DATOS_ADICIONALES_INITIAL_PAGE_SIZE,
 } from '../constants/datosAdicionales.constants';
 
+const EMPTY_DATOS_ADICIONALES_COLUMNS: ColumnApi[] = [];
+
 export type { TextFilters, SelectedFilters };
 
 interface UseDatosAdicionalesReturn {
@@ -57,8 +59,7 @@ export function useDatosAdicionales(
   const fetchCabeceraData = useCallback(
     (signal: AbortSignal) =>
       fetchCabeceraDatosAdicionales(
-        id_cliente,
-        pantalla,
+        { idCliente: id_cliente, pantalla },
         signal
       ),
     [id_cliente, pantalla]
@@ -78,14 +79,17 @@ export function useDatosAdicionales(
     }
   );
 
-  const columns = columnsData ?? [];
+  const columns =
+    columnsData ?? EMPTY_DATOS_ADICIONALES_COLUMNS;
 
   const fetchDatosAdicionalesData = useCallback(
     (signal: AbortSignal) => {
       return fetchAllDatosAdicionales(
-        id_cliente,
-        id_cartera,
-        id_deudor,
+        {
+          idCliente: id_cliente,
+          idCartera: id_cartera,
+          idDeudor: id_deudor,
+        },
         signal
       );
     },

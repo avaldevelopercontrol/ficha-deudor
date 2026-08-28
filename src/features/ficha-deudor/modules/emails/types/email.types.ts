@@ -1,14 +1,14 @@
 export interface EmailApi {
   nId_PersEmail: number;
-  email: string;
-  fechaActivacion: string;
-  estado: string;
-  status: string;
-  fuente: string;
-  baseCliente: string;
-  contacto: string;
-  prioridad: number;
-  comentario: string;
+  email?: string | null;
+  fechaActivacion?: string | null;
+  estado?: string | null;
+  status?: string | null;
+  fuente?: string | null;
+  baseCliente?: string | null;
+  contacto?: string | null;
+  prioridad?: number | null;
+  comentario?: string | null;
 }
 
 export interface Email {
@@ -20,7 +20,7 @@ export interface Email {
   fuente: string;
   baseCliente: string;
   contacto: string;
-  prioridad: number;
+  prioridad: number | null;
   comentario: string;
 }
 
@@ -70,21 +70,12 @@ export interface EmailFormData {
 // ─── GET /v1/Email/{nId_PersEmail} ───
 export interface EmailByIdApi {
   nId_PersEmail: number;
-  nId_PersDeudor: number;
   cPers_Email: string;
-  bEstado: boolean;
+  bEstado?: boolean | null;
   cEmail_Coment: string;
   cEmail_Contacto: string;
-  nId_Cliente: number;
-  bBaseCliente: boolean;
   dFecRegistro: string;
-  nId_UsuarioAct: number;
-  dFecActualizacion: string;
   nEmail_Prioridad: number;
-  nId_EstadoEnvioEmail: number;
-  cEstado: string;
-  dFecEstadoEnvio: string;
-  nId_EstadoEnvioEmailGen: number;
   nId_PersEmailOpe: number;
 }
 

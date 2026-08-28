@@ -13,8 +13,5 @@ export const MIN_DYNAMIC_COLUMN_WIDTH = 90;
 export const CHAR_WIDTH_PX = 8;
 export const CELL_EXTRA_WIDTH_PX = 32;
 
-export const DOCUMENTOS_POPUP_WIDTH = 1500;
-export const DOCUMENTOS_POPUP_HEIGHT = 600;
-
 export const DOCUMENTOS_PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 export const DOCUMENTOS_CARRUSEL_SCROLL_PX = 200;

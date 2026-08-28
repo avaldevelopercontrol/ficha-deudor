@@ -8,19 +8,11 @@ import type {
   DireccionEditFormData,
   DireccionFormData,
   DireccionReferenciada,
-  DireccionReferenciadaApi,
   DireccionUbicacion,
-  DireccionUbicacionApi,
   Distrito,
-  DistritoApi,
   Provincia,
-  ProvinciaApi,
   UpdateDireccionResponse
 } from '../types/direccion.types';
-import type {
-  ApiResponse,
-  ApiResponseSimple
-} from '@shared/types/indexApi';
 import {
   DIRECCIONES_REFERENCIADAS_ENDPOINTS,
   DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES,
@@ -39,14 +31,50 @@ import {
   unwrapApiArrayResponse,
   unwrapApiObjectResponse,
 } from '../../../shared/utils/apiResponse.utils';
+import {
+  isCreateDireccionResponse,
+  isDireccionByIdApi,
+  isDireccionReferenciadaApi,
+  isDireccionUbicacionApi,
+  isDistritoApi,
+  isProvinciaApi,
+  isUpdateDireccionResponse,
+} from './direccionesReferenciadasApi.validators';
 
-const buildDireccionesReferenciadasParams = (
-  id_cliente: string,
-  id_deudor: string
-) => {
+export interface FetchDireccionesReferenciadasParams {
+  idCliente: string;
+  idDeudor: string;
+}
+
+export interface CreateDireccionParams extends FetchDireccionesReferenciadasParams {
+  idUsuario: string;
+  data: DireccionFormData;
+}
+
+export interface FetchDireccionByIdParams {
+  idDireccion: string;
+}
+
+export interface UpdateDireccionParams extends CreateDireccionParams {
+  idDireccion: string;
+  data: DireccionEditFormData;
+}
+
+export interface FetchProvinciasParams {
+  idDepartamento: string;
+}
+
+export interface FetchDistritosParams extends FetchProvinciasParams {
+  idProvincia: string;
+}
+
+const buildDireccionesReferenciadasParams = ({
+  idCliente,
+  idDeudor,
+}: FetchDireccionesReferenciadasParams) => {
   return new URLSearchParams({
-    nId_Cliente: id_cliente,
-    nId_Persdeudor: id_deudor,
+    nId_Cliente: idCliente,
+    nId_Persdeudor: idDeudor,
     PageNumber: String(DIRECCIONES_REFERENCIADAS_FETCH_PAGE_NUMBER),
     PageSize: String(DIRECCIONES_REFERENCIADAS_FETCH_PAGE_SIZE),
   });
@@ -59,93 +87,93 @@ const buildDistritosParams = (idProvincia: string) => {
 };
 
 export async function fetchDireccionesReferenciadas(
-  id_cliente: string,
-  id_deudor: string,
+  params: FetchDireccionesReferenciadasParams,
   signal?: AbortSignal
 ): Promise<DireccionReferenciada[]> {
-  const params = buildDireccionesReferenciadasParams(id_cliente, id_deudor);
+  const searchParams = buildDireccionesReferenciadasParams(params);
 
-  const result = await apiClient<ApiResponse<DireccionReferenciadaApi[]>>(
-    `${DIRECCIONES_REFERENCIADAS_ENDPOINTS.LIST}?${params.toString()}`,
+  const result = await apiClient<unknown>(
+    `${DIRECCIONES_REFERENCIADAS_ENDPOINTS.LIST}?${searchParams.toString()}`,
     { signal }
   );
 
-  const direcciones = unwrapApiArrayResponse<DireccionReferenciadaApi>(
+  const direcciones = unwrapApiArrayResponse(
     result,
-    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.LIST
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.LIST,
+    isDireccionReferenciadaApi
   );
 
   return mapDireccionesReferenciadas(direcciones);
 }
 
 export async function createDireccion(
-  id_cliente: string,
-  id_deudor: string,
-  id_usuario: string,
-  data: DireccionFormData
+  { idCliente, idDeudor, idUsuario, data }: CreateDireccionParams,
+  signal?: AbortSignal
 ): Promise<CreateDireccionResponse> {
   const body = buildCreateDireccionRequest(
-    id_cliente,
-    id_deudor,
-    id_usuario,
+    idCliente,
+    idDeudor,
+    idUsuario,
     data
   );
 
-  const result = await apiClient<ApiResponse<CreateDireccionResponse>>(
+  const result = await apiClient<unknown>(
     DIRECCIONES_REFERENCIADAS_ENDPOINTS.CREATE,
     {
       method: 'POST',
       body,
+      signal,
     }
   );
 
-  return unwrapApiObjectResponse<CreateDireccionResponse>(
+  return unwrapApiObjectResponse(
     result,
-    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.CREATE
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.CREATE,
+    isCreateDireccionResponse
   );
 }
 
 export async function fetchDireccionById(
-  idDireccion: string,
+  { idDireccion }: FetchDireccionByIdParams,
   signal?: AbortSignal
 ): Promise<DireccionByIdApi> {
-  const result = await apiClient<ApiResponse<DireccionByIdApi>>(
+  const result = await apiClient<unknown>(
     `${DIRECCIONES_REFERENCIADAS_ENDPOINTS.BY_ID}/${idDireccion}`,
     { signal }
   );
 
-  return unwrapApiObjectResponse<DireccionByIdApi>(
+  return unwrapApiObjectResponse(
     result,
-    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.BY_ID_EDIT
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.BY_ID_EDIT,
+    isDireccionByIdApi
   );
 }
 
 export async function updateDireccion(
-  id_cliente: string,
-  id_deudor: string,
-  id_usuario: string,
-  id_direccion: string,
-  data: DireccionEditFormData
+  { idCliente, idDeudor, idUsuario, idDireccion, data }: UpdateDireccionParams,
+  signal?: AbortSignal
 ): Promise<UpdateDireccionResponse> {
   const body = buildUpdateDireccionRequest(
-    id_cliente,
-    id_deudor,
-    id_usuario,
-    id_direccion,
+    idCliente,
+    idDeudor,
+    idUsuario,
+    idDireccion,
     data
   );
 
-  const result = await apiClient<ApiResponse<UpdateDireccionResponse>>(
+  const result = await apiClient<unknown>(
     DIRECCIONES_REFERENCIADAS_ENDPOINTS.UPDATE,
     {
       method: 'PUT',
       body,
+      signal,
     }
   );
 
-  return unwrapApiObjectResponse<UpdateDireccionResponse>(
+  return unwrapApiObjectResponse(
     result,
-    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.UPDATE
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.UPDATE,
+    isUpdateDireccionResponse
   );
 }
 
@@ -153,10 +181,10 @@ export const fetchDepartamentos =
   fetchDepartamentosCatalogo;
 
 export async function fetchProvincias(
-  idDepartamento: string,
+  { idDepartamento }: FetchProvinciasParams,
   signal?: AbortSignal
 ): Promise<Provincia[]> {
-  const result = await apiClient<ApiResponseSimple<ProvinciaApi[]>>(
+  const result = await apiClient<unknown>(
     DIRECCIONES_REFERENCIADAS_ENDPOINTS.PROVINCIAS,
     {
       signal,
@@ -166,22 +194,22 @@ export async function fetchProvincias(
     }
   );
 
-  const provincias = unwrapApiArrayResponse<ProvinciaApi>(
+  const provincias = unwrapApiArrayResponse(
     result,
-    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.PROVINCIAS
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.PROVINCIAS,
+    isProvinciaApi
   );
 
   return mapProvincias(provincias);
 }
 
 export async function fetchDistritos(
-  idDepartamento: string,
-  idProvincia: string,
+  { idDepartamento, idProvincia }: FetchDistritosParams,
   signal?: AbortSignal
 ): Promise<Distrito[]> {
   const params = buildDistritosParams(idProvincia);
 
-  const result = await apiClient<ApiResponseSimple<DistritoApi[]>>(
+  const result = await apiClient<unknown>(
     `${DIRECCIONES_REFERENCIADAS_ENDPOINTS.DISTRITOS}?${params.toString()}`,
     {
       signal,
@@ -191,9 +219,10 @@ export async function fetchDistritos(
     }
   );
 
-  const distritos = unwrapApiArrayResponse<DistritoApi>(
+  const distritos = unwrapApiArrayResponse(
     result,
-    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.DISTRITOS
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.DISTRITOS,
+    isDistritoApi
   );
 
   return mapDistritos(distritos);
@@ -202,14 +231,15 @@ export async function fetchDistritos(
 export async function fetchDireccionUbicaciones(
   signal?: AbortSignal
 ): Promise<DireccionUbicacion[]> {
-  const result = await apiClient<ApiResponseSimple<DireccionUbicacionApi[]>>(
+  const result = await apiClient<unknown>(
     DIRECCIONES_REFERENCIADAS_ENDPOINTS.UBICACIONES,
     { signal }
   );
 
-  const ubicaciones = unwrapApiArrayResponse<DireccionUbicacionApi>(
+  const ubicaciones = unwrapApiArrayResponse(
     result,
-    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.UBICACIONES
+    DIRECCIONES_REFERENCIADAS_ERROR_MESSAGES.UBICACIONES,
+    isDireccionUbicacionApi
   );
 
   return mapDireccionUbicaciones(ubicaciones);

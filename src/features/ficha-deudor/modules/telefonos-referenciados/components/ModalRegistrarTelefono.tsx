@@ -1,43 +1,43 @@
-import React, {
-  useCallback,
-} from 'react';
+import React from 'react';
 
 import { ModalFormLayout } from '../../../shared/components/modals/ModalFormLayout';
-import { useModalForm } from '@shared/hooks/ui/useModalForm';
-import { useTelefonoCatalogosForm } from '../hooks/useTelefonoCatalogosForm';
-import type { TelefonoFormData, TelefonoReferenciado } from '../types/telefono.types';
-import { validateTelefonoForm } from '../validations/telefonoValidations';
+import { ModalErrorSummary } from '../../../shared/components/modals/common/ModalErrorSummary';
+
 import {
-  MODAL_REGISTRAR_TELEFONO_INITIAL_FORM,
   MODAL_REGISTRAR_TELEFONO_LABELS,
   MODAL_REGISTRAR_TELEFONO_LAYOUT,
   MODAL_REGISTRAR_TELEFONO_LIMITS,
   MODAL_REGISTRAR_TELEFONO_PLACEHOLDERS,
   MODAL_REGISTRAR_TELEFONO_TEXTS,
 } from '../constants/modalRegistrarTelefono.constants';
-import { ModalErrorSummary } from '../../../shared/components/modals/common/ModalErrorSummary';
+import { useModalRegistrarTelefono } from '../hooks/useModalRegistrarTelefono';
+import type {
+  TelefonoFormData,
+  TelefonoReferenciado,
+} from '../types/telefono.types';
 import { TelefonoFormFields } from './TelefonoFormFields';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-
-  telefonosExistentes:
-    readonly TelefonoReferenciado[];
-
-  onRegistrar?: (
-    data: TelefonoFormData
-  ) => Promise<void> | void;
+  telefonosExistentes: readonly TelefonoReferenciado[];
+  onRegistrar?: (data: TelefonoFormData) => Promise<void> | void;
 }
 
-const ModalRegistrarTelefono:
-  React.FC<Props> = ({
-    isOpen,
-    onClose,
-    telefonosExistentes,
-    onRegistrar,
-  }) => {
+const ModalRegistrarTelefono: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  telefonosExistentes,
+  onRegistrar,
+}) => {
   const {
+    form,
+    errors,
+    isSubmitting,
+    submitError,
+    handleChange,
+    handleSubmit,
+    handleCancel,
     resultadosOptions,
     operadoresOptions,
     ubicacionesOptions,
@@ -51,35 +51,10 @@ const ModalRegistrarTelefono:
     errorResultados,
     errorOperadores,
     errorUbicaciones,
-  } = useTelefonoCatalogosForm();
-
-  const validate = useCallback(
-    (data: TelefonoFormData) =>
-      validateTelefonoForm(
-        data,
-        telefonosExistentes
-      ),
-    [telefonosExistentes]
-  );
-
-  const {
-    form,
-    errors,
-    isSubmitting,
-    submitError,
-    handleChange,
-    handleSubmit,
-    handleCancel,
-  } = useModalForm<TelefonoFormData>({
-    initialForm:
-      MODAL_REGISTRAR_TELEFONO_INITIAL_FORM,
+  } = useModalRegistrarTelefono({
+    telefonosExistentes,
     onClose,
-
-    onSubmit: (data) =>
-      onRegistrar?.(data),
-
-    validate,
-    resetOnClose: true,
+    onRegistrar,
   });
 
   if (!isOpen) return null;

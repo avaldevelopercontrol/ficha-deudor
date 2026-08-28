@@ -1,62 +1,35 @@
-import React, {
-  useCallback,
-} from 'react';
+import React from 'react';
 
 import { ModalFormLayout } from '../../../shared/components/modals/ModalFormLayout';
+import { ModalErrorSummary } from '../../../shared/components/modals/common/ModalErrorSummary';
 
-import { useModalForm } from '@shared/hooks/ui/useModalForm';
-
-import type {
-  DireccionFormData,
-  DireccionReferenciada,
-} from '../types/direccion.types';
-
-import { toStringValue } from '@shared/utils/formValueMappers';
-
-import { useDireccionCatalogosForm } from '../hooks/useDireccionCatalogosForm';
-import { useDireccionCascadeFields } from '../hooks/useDireccionCascadeFields';
-
-import { validateDireccionForm } from '../validations/direccionValidations';
 import {
-  MODAL_REGISTRAR_DIRECCION_INITIAL_FORM,
   MODAL_REGISTRAR_DIRECCION_LABELS,
   MODAL_REGISTRAR_DIRECCION_LAYOUT,
   MODAL_REGISTRAR_DIRECCION_LIMITS,
   MODAL_REGISTRAR_DIRECCION_PLACEHOLDERS,
   MODAL_REGISTRAR_DIRECCION_TEXTS,
 } from '../constants/modalRegistrarDireccion.constants';
-import { ModalErrorSummary } from '../../../shared/components/modals/common/ModalErrorSummary';
+import { useModalRegistrarDireccion } from '../hooks/useModalRegistrarDireccion';
+import type {
+  DireccionFormData,
+  DireccionReferenciada,
+} from '../types/direccion.types';
 import { DireccionFormFields } from './DireccionFormFields';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-
-  direccionesExistentes:
-    readonly DireccionReferenciada[];
-
-  onRegistrar?: (
-    data: DireccionFormData
-  ) => Promise<void> | void;
+  direccionesExistentes: readonly DireccionReferenciada[];
+  onRegistrar?: (data: DireccionFormData) => Promise<void> | void;
 }
 
-const ModalRegistrarDireccion:
-  React.FC<Props> = ({
-    isOpen,
-    onClose,
-    direccionesExistentes,
-    onRegistrar,
-  }) => {
-
-  const validate = useCallback(
-    (data: DireccionFormData) =>
-      validateDireccionForm(
-        data,
-        direccionesExistentes
-      ),
-    [direccionesExistentes]
-  );  
-
+const ModalRegistrarDireccion: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  direccionesExistentes,
+  onRegistrar,
+}) => {
   const {
     form,
     errors,
@@ -65,45 +38,24 @@ const ModalRegistrarDireccion:
     handleChange,
     handleSubmit,
     handleCancel,
-  } = useModalForm<DireccionFormData>({
-    initialForm:
-      MODAL_REGISTRAR_DIRECCION_INITIAL_FORM,
-
-    onClose,
-
-    onSubmit: (data) =>
-      onRegistrar?.(data),
-
-    validate,
-    resetOnClose: true,
-  });
-
-  const {
     handleDepartamentoChange,
     handleProvinciaChange,
-  } = useDireccionCascadeFields({
-    handleChange,
-  });
-
-  const {
     departamentos,
     provincias,
     distritos,
     refUbicacionOptions,
+    refUbicacionValue,
     isLoadingDepartamentos,
     isLoadingProvincias,
     isLoadingDistritos,
     isLoadingUbicaciones,
     errorDepartamentos,
     errorUbicaciones,
-  } = useDireccionCatalogosForm(
-    form.departamento || null,
-    form.provincia || null
-  );
-
-  const refUbicacionValue = toStringValue(
-    form.refUbicacion || refUbicacionOptions[0]?.id
-  );
+  } = useModalRegistrarDireccion({
+    direccionesExistentes,
+    onClose,
+    onRegistrar,
+  });
 
   if (!isOpen) return null;
 

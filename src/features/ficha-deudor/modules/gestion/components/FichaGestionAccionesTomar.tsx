@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useFichaGestionAccionesTomar } from '../hooks/useFichaGestionAccionesTomar';
-import type { FichaGestionAccionesTomarProps } from '../types/fichaGestion.types';
+import type { FichaGestionAccionesTomarProps } from '../types/fichaGestionViewModel.types';
 import GestionTimePicker from './shared/GestionTimePicker';
 import { FeedbackMessage } from '@shared/components/ui';
 import FichaGestionValidationSummary from './shared/FichaGestionValidationSummary';

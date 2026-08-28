@@ -5,7 +5,7 @@ import {
   TextAreaField,
 } from '@shared/components/ui';
 
-import type { FichaGestionResultadosLlamadaProps } from '../../types/fichaGestion.types';
+import type { FichaGestionResultadosLlamadaProps } from '../../types/fichaGestionViewModel.types';
 
 type Props = Pick<
   FichaGestionResultadosLlamadaProps,

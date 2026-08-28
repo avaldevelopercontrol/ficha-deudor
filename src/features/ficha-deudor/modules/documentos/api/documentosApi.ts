@@ -1,21 +1,17 @@
 import { env } from '@app/config/env';
 import { apiClient } from '@shared/api/apiClient';
+import { fetchAllPagesInParallel } from '@shared/utils/pagedCollection.utils';
 
 import type {
-  ApiResponse,
-  ApiResponseSimple
-} from '@shared/types/indexApi';
-import type {
   DocumentoApi,
-  CabeceraPantallaApi,
   ColumnApi,
   BotonApi,
 } from '../../../shared/types';
 
 import {
   DOCUMENTOS_ERROR_MESSAGES,
-  DOCUMENTOS_FETCH_ALL_PAGE_NUMBER,
-  DOCUMENTOS_FETCH_ALL_PAGE_SIZE,
+  DOCUMENTOS_FETCH_FIRST_PAGE,
+  DOCUMENTOS_FETCH_PAGE_SIZE,
 } from '../constants/documentos.constants';
 import { DOCUMENTOS_API_ENDPOINTS } from '../constants/documentosApi.constants';
 import { buildDocumentosBotones } from '../constants/documentosBotones.constants';
@@ -23,120 +19,135 @@ import { mapCabecerasToColumns } from '../mappers/documentos.mapper';
 import {
   ensureArrayResponse,
   unwrapApiArrayResponse,
+  unwrapApiPaginatedArrayResponse,
+  type ApiPaginatedData,
 } from '../../../shared/utils/apiResponse.utils';
+import {
+  isBotonApi,
+  isCabeceraPantallaApi,
+  isDocumentoApi,
+} from './documentosApi.validators';
 import {
   buildDocumentosBotonesParams,
   buildDocumentosCabeceraParams,
   buildGestionDocumentosParams,
 } from '../utils/documentosParams.utils';
 
+interface FetchDocumentosColumnasParams {
+  idCliente: string;
+  idContrato: string;
+}
+
+interface FetchDocumentosBotonesParams {
+  idCliente: string;
+}
+
+interface FetchDocumentosParams {
+  idCliente: string;
+  idCartera: string;
+  idDeudor: string;
+}
+
+interface FetchDocumentosPageParams extends FetchDocumentosParams {
+  pageNumber: number;
+  pageSize: number;
+}
+
 export async function fetchColumnas(
-  id_cliente: string,
-  id_contrato: string,
+  { idCliente, idContrato }: FetchDocumentosColumnasParams,
   signal?: AbortSignal
 ): Promise<ColumnApi[]> {
   const params = buildDocumentosCabeceraParams({
-    idCliente: id_cliente,
-    idContrato: id_contrato,
+    idCliente,
+    idContrato,
   });
 
   const result =
-    await apiClient<
-      ApiResponseSimple<CabeceraPantallaApi[]>
-    >(
+    await apiClient<unknown>(
       `${DOCUMENTOS_API_ENDPOINTS.CABECERA}?${params.toString()}`,
       { signal }
     );
 
-  const cabeceras = unwrapApiArrayResponse<CabeceraPantallaApi>(
+  const cabeceras = unwrapApiArrayResponse(
     result,
-    DOCUMENTOS_ERROR_MESSAGES.HEADERS
+    DOCUMENTOS_ERROR_MESSAGES.HEADERS,
+    isCabeceraPantallaApi
   );
 
   return mapCabecerasToColumns(cabeceras);
 }
 
 export async function fetchBotones(
-  id_cliente: string,
+  { idCliente }: FetchDocumentosBotonesParams,
   signal?: AbortSignal
 ): Promise<BotonApi[]> {
-  const params =
-    buildDocumentosBotonesParams(
-      id_cliente
-    );
+  const params = buildDocumentosBotonesParams(idCliente);
 
-  const result = await apiClient<BotonApi[]>(
+  const result = await apiClient<unknown>(
     `${DOCUMENTOS_API_ENDPOINTS.BOTONES}?${params.toString()}`,
     {
       mock: () =>
         buildDocumentosBotones({
-          idCliente: id_cliente,
+          idCliente,
         }),
       useMock: env.useDocumentosMock,
       signal,
     }
   );
 
-  return ensureArrayResponse<BotonApi>(
+  return ensureArrayResponse(
     result,
-    DOCUMENTOS_ERROR_MESSAGES.BUTTONS
+    DOCUMENTOS_ERROR_MESSAGES.BUTTONS,
+    isBotonApi
   );
 }
 
-export async function fetchAllGestiones(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
+const fetchGestionesPage = async (
+  {
+    idCliente,
+    idCartera,
+    idDeudor,
+    pageNumber,
+    pageSize,
+  }: FetchDocumentosPageParams,
   signal?: AbortSignal
-): Promise<DocumentoApi[]> {
-  const params =
-    buildGestionDocumentosParams({
-      idCliente: id_cliente,
-      idCartera: id_cartera,
-      idDeudor: id_deudor,
-      pageNumber:
-        DOCUMENTOS_FETCH_ALL_PAGE_NUMBER,
-      pageSize:
-        DOCUMENTOS_FETCH_ALL_PAGE_SIZE,
-    });
-
-  const result =
-    await apiClient<
-      ApiResponse<DocumentoApi[]>
-    >(
-      `${DOCUMENTOS_API_ENDPOINTS.DOCUMENTOS}?${params.toString()}`,
-      { signal }
-    );
-
-  return unwrapApiArrayResponse<DocumentoApi>(
-    result,
-    DOCUMENTOS_ERROR_MESSAGES.DATA
-  );
-}
-
-export async function fetchGestiones(
-  id_cliente: string,
-  id_cartera: string,
-  id_deudor: string,
-  pageNumber: number,
-  pageSize: number
-): Promise<ApiResponse<DocumentoApi[]>> {
+): Promise<ApiPaginatedData<DocumentoApi>> => {
   const params = buildGestionDocumentosParams({
-    idCliente: id_cliente,
-    idCartera: id_cartera,
-    idDeudor: id_deudor,
+    idCliente,
+    idCartera,
+    idDeudor,
     pageNumber,
     pageSize,
   });
 
-  const result = await apiClient<ApiResponse<DocumentoApi[]>>(
-    `${DOCUMENTOS_API_ENDPOINTS.DOCUMENTOS}?${params.toString()}`
+  const result = await apiClient<unknown>(
+    `${DOCUMENTOS_API_ENDPOINTS.DOCUMENTOS}?${params.toString()}`,
+    { signal }
   );
 
-  unwrapApiArrayResponse<DocumentoApi>(
+  return unwrapApiPaginatedArrayResponse(
     result,
-    DOCUMENTOS_ERROR_MESSAGES.DATA
+    DOCUMENTOS_ERROR_MESSAGES.DATA,
+    isDocumentoApi
   );
+};
 
-  return result;
+export async function fetchAllGestiones(
+  params: FetchDocumentosParams,
+  signal?: AbortSignal
+): Promise<DocumentoApi[]> {
+  return fetchAllPagesInParallel({
+    firstPageNumber: DOCUMENTOS_FETCH_FIRST_PAGE,
+    fetchPage: (pageNumber) =>
+      fetchGestionesPage(
+        {
+          ...params,
+          pageNumber,
+          pageSize: DOCUMENTOS_FETCH_PAGE_SIZE,
+        },
+        signal
+      ),
+    getItems: (page) => page.data,
+    getTotalPages: (page) => page.totalPages,
+  });
 }

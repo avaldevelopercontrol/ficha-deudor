@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { FichaGestionResultadosLlamadaProps } from '../types/fichaGestion.types';
+import type { FichaGestionResultadosLlamadaProps } from '../types/fichaGestionViewModel.types';
 import FichaGestionCamposClaro from './shared/FichaGestionCamposClaro';
 import FichaGestionResultadoFields from './shared/FichaGestionResultadoFields';
 import FichaGestionSubmitSection from './shared/FichaGestionSubmitSection';

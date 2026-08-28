@@ -8,7 +8,7 @@ import {
   normalizeDateValue,
   parsePeruDateTime,
   splitTime,
-  toApiDateTimeOrNull,
+  toPeruApiDateTimeOrNull,
   toPeruApiDateTimeOrCurrent,
   toRequiredPeruApiDateTime,
 } from './date.utils';
@@ -33,30 +33,30 @@ export const suite = defineSuite('date.utils', [
       '2026-08-04T09:15:00'
     );
     assert.equal(
-      toApiDateTimeOrNull('2026-08-04'),
+      toPeruApiDateTimeOrNull('2026-08-04'),
       '2026-08-04T00:00:00'
     );
     assert.equal(
-      toApiDateTimeOrNull('2026-08-04T09:15:00.1'),
+      toPeruApiDateTimeOrNull('2026-08-04T09:15:00.1'),
       '2026-08-04T09:15:00.100'
     );
-    assert.equal(toApiDateTimeOrNull('  '), null);
+    assert.equal(toPeruApiDateTimeOrNull('  '), null);
   }),
   test('rechaza fechas calendario y horas imposibles', () => {
     assert.equal(
-      toApiDateTimeOrNull('2026-02-30'),
+      toPeruApiDateTimeOrNull('2026-02-30'),
       null
     );
     assert.equal(
-      toApiDateTimeOrNull('2026-08-04T24:00:00'),
+      toPeruApiDateTimeOrNull('2026-08-04T24:00:00'),
       null
     );
     assert.equal(
-      toApiDateTimeOrNull('fecha inválida'),
+      toPeruApiDateTimeOrNull('fecha inválida'),
       null
     );
     assert.equal(
-      toApiDateTimeOrNull('2026-02-30T10:00:00.000Z'),
+      toPeruApiDateTimeOrNull('2026-02-30T10:00:00.000Z'),
       null
     );
   }),

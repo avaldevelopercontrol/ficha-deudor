@@ -26,7 +26,7 @@ export interface UsePopupTableResourceReturn<T> {
   totalPages: number;
   setPageNumber: (page: number) => void;
   setPageSize: (size: number) => void;
-  refetch: () => void;
+  refetch: () => Promise<void>;
   textFilters: TextFilters;
   selectedFilters: SelectedFilters;
 
@@ -83,8 +83,8 @@ export const usePopupTableResource = <T,>({
 
   const refetchResource = resource.refetch;
 
-  const refetch = useCallback(() => {
-    void refetchResource();
+  const refetch = useCallback(async () => {
+    await refetchResource();
   }, [refetchResource]);
 
   return {

@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 
-import type {
-  FichaGestionValidationErrors,
-} from '../types/fichaGestion.types';
+import type { FichaGestionValidationErrors } from '../types/fichaGestionForm.types';
 
 const DEFAULT_VALIDATION_DURATION_MS = 15_000;
 

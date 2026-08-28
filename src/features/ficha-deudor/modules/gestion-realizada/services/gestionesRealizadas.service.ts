@@ -32,10 +32,7 @@ export const loadGestionesResumidas = async (
   signal: AbortSignal
 ): Promise<GestionRealizada[]> => {
   const result = await fetchGestionesRealizadas(
-    idCliente,
-    idCartera,
-    idDeudor,
-    idUsuario,
+    { idCliente, idCartera, idDeudor, idUsuario },
     signal
   );
 
@@ -55,11 +52,13 @@ export const loadTodasLasGestionesHistoricas = (
       GESTIONES_HISTORICAS_DEFAULT_PAGE_NUMBER,
     fetchPage: (pageNumber) =>
       fetchGestionesHistoricas(
-        idCliente,
-        idCartera,
-        idDeudor,
-        pageNumber,
-        GESTIONES_HISTORICAS_DEFAULT_PAGE_SIZE,
+        {
+          idCliente,
+          idCartera,
+          idDeudor,
+          pageNumber,
+          pageSize: GESTIONES_HISTORICAS_DEFAULT_PAGE_SIZE,
+        },
         signal
       ),
     getItems: (page) => page.completo,

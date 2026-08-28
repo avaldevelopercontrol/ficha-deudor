@@ -19,10 +19,6 @@ export type FichaDeudorIdentityParams = Pick<
   'id_cliente' | 'id_cartera' | 'id_deudor' | 'id_usuario'
 >;
 
-export type FichaDeudorHeaderParams = Pick<
-  FichaDeudorParams,
-  'id_cliente' | 'id_cartera' | 'id_deudor'
->;
 
 export type FichaDeudorDocumentosParams = Pick<
   FichaDeudorParams,

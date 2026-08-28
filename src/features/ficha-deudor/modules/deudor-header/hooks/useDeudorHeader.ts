@@ -10,8 +10,10 @@ export function useCabeceraHeader(
   const fetcher = useCallback(
     (signal: AbortSignal) =>
       fetchCabeceraHeader(
-        id_cliente,
-        id_cartera,
+        {
+          idCliente: id_cliente,
+          idCartera: id_cartera,
+        },
         signal
       ),
     [id_cliente, id_cartera]
@@ -31,9 +33,11 @@ export function useDeudorHeader(
   const fetcher = useCallback(
     (signal: AbortSignal) =>
       fetchDeudorHeader(
-        id_cliente,
-        id_cartera,
-        id_deudor,
+        {
+          idCliente: id_cliente,
+          idCartera: id_cartera,
+          idDeudor: id_deudor,
+        },
         signal
       ),
     [id_cliente, id_cartera, id_deudor]

@@ -15,7 +15,7 @@ import {
   mapPaletaRespuestaToOptions,
 } from '../../../shared/utils/selectOptions.utils';
 
-import type { FichaGestionCatalogos } from '../types/fichaGestion.types';
+import type { FichaGestionCatalogos } from '../types/fichaGestionCatalogos.types';
 
 export const useFichaGestionCatalogos = (
   idCliente: string,

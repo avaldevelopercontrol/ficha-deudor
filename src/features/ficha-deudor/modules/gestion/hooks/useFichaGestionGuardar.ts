@@ -11,7 +11,7 @@ import { buildGestionSaveRequest } from '../services/fichaGestionGuardar.service
 import type {
   FichaGestionValidationErrors,
   GestionFormClaro,
-} from '../types/fichaGestion.types';
+} from '../types/fichaGestionForm.types';
 import { useAutoClearValidationErrors } from './useAutoClearValidationErrors';
 import { getCurrentPeruDateTime } from '../../../shared/utils/date.utils';
 import { getErrorMessage } from '../../../shared/utils/getErrorMessage';
@@ -100,9 +100,9 @@ export const useFichaGestionGuardar = ({
 
       const result = await executeSave(
         () =>
-          createGestionOpeGesContratos(
-            saveRequest.payload
-          )
+          createGestionOpeGesContratos({
+            payload: saveRequest.payload,
+          })
       );
 
       if (result.status === 'skipped') {

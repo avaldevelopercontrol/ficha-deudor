@@ -1,58 +1,49 @@
-import React, {
-  useCallback,
-} from 'react';
+import React from 'react';
 
 import { ModalFormLayout } from '../../../shared/components/modals/ModalFormLayout';
-import { useModalForm } from '@shared/hooks/ui/useModalForm';
-import { useTelefonoById } from '../hooks/useTelefonosReferenciados';
-import { useTelefonoCatalogosForm } from '../hooks/useTelefonoCatalogosForm';
-import type {
-  TelefonoFormData,
-  TelefonoEditarApi,
-  TelefonoReferenciado,
-} from '../types/telefono.types';
+import { ModalErrorSummary } from '../../../shared/components/modals/common/ModalErrorSummary';
+
 import {
-  MODAL_EDITAR_TELEFONO_INITIAL_FORM,
   MODAL_EDITAR_TELEFONO_LABELS,
   MODAL_EDITAR_TELEFONO_LAYOUT,
   MODAL_EDITAR_TELEFONO_LIMITS,
   MODAL_EDITAR_TELEFONO_PLACEHOLDERS,
   MODAL_EDITAR_TELEFONO_TEXTS,
 } from '../constants/modalEditarTelefono.constants';
-import { mapTelefonoEditarApiToFormData } from '../mappers/modalEditarTelefono.mapper';
-import { validateModalEditarTelefono } from '../validations/modalEditarTelefono.validation';
-import { ModalErrorSummary } from '../../../shared/components/modals/common/ModalErrorSummary';
-import { ModalAsyncStatusLayout } from '../../../shared/components/modals/common/ModalAsyncStatusLayout';
+import { useModalEditarTelefono } from '../hooks/useModalEditarTelefono';
+import type {
+  TelefonoFormData,
+  TelefonoReferenciado,
+} from '../types/telefono.types';
 import { TelefonoFormFields } from './TelefonoFormFields';
+import { ModalEditarTelefonoStatus } from './ModalEditarTelefonoStatus';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   telefonoId: number | null;
-
-  telefonosExistentes:
-    readonly TelefonoReferenciado[];
-
-  onGuardar?: (
-    data: TelefonoFormData
-  ) => Promise<void> | void;
+  telefonosExistentes: readonly TelefonoReferenciado[];
+  onGuardar?: (data: TelefonoFormData) => Promise<void> | void;
 }
 
-const ModalEditarTelefono:
-  React.FC<Props> = ({
-    isOpen,
-    onClose,
-    telefonoId,
-    telefonosExistentes,
-    onGuardar,
-  }) => {
+const ModalEditarTelefono: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  telefonoId,
+  telefonosExistentes,
+  onGuardar,
+}) => {
   const {
-    data: telefonoApi,
-    isLoading: isLoadingTelefono,
-    error: errorTelefono,
-  } = useTelefonoById(telefonoId);
-
-  const {
+    telefonoData,
+    isLoadingTelefono,
+    errorTelefono,
+    form,
+    errors,
+    isSubmitting,
+    submitError,
+    handleChange,
+    handleSubmit,
+    handleCancel,
     resultadosOptions,
     operadoresOptions,
     ubicacionesOptions,
@@ -68,117 +59,65 @@ const ModalEditarTelefono:
     errorUbicaciones,
     errorHorarios,
     errorFuentes,
-  } = useTelefonoCatalogosForm();
-
-  const telefonoEntity = telefonoApi as TelefonoEditarApi | null;
-
-  const validate = useCallback(
-    (data: TelefonoFormData) =>
-      validateModalEditarTelefono(
-        data,
-        telefonosExistentes,
-        telefonoId
-      ),
-    [
-      telefonosExistentes,
-      telefonoId,
-    ]
-  );
-
-  const {
-    form,
-    errors,
-    isSubmitting,
-    submitError,
-    handleChange,
-    handleSubmit,
-    handleCancel,
-  } = useModalForm<
-    TelefonoFormData,
-    TelefonoEditarApi
-  >({
-    initialForm:
-      MODAL_EDITAR_TELEFONO_INITIAL_FORM,
-
-    entity: telefonoEntity,
-
-    mapEntityToForm:
-      mapTelefonoEditarApiToFormData,
-
+  } = useModalEditarTelefono({
+    isOpen,
+    telefonoId,
+    telefonosExistentes,
     onClose,
-
-    onSubmit: (data) =>
-      onGuardar?.(data),
-
-    validate,
-
-    resetOnClose: true,
+    onGuardar,
   });
 
-  if (!isOpen || !telefonoId) return null;
+  if (!isOpen || telefonoId === null) {
+    return null;
+  }
 
   if (isLoadingTelefono) {
     return (
-      <ModalAsyncStatusLayout
+      <ModalEditarTelefonoStatus
         isOpen={isOpen}
-        title={MODAL_EDITAR_TELEFONO_TEXTS.title}
         onClose={handleCancel}
-        submitLabel={MODAL_EDITAR_TELEFONO_TEXTS.submitLabel}
-        minHeight={MODAL_EDITAR_TELEFONO_LAYOUT.minHeight}
         variant="loading"
       >
         {MODAL_EDITAR_TELEFONO_TEXTS.loadingTelefono}
-      </ModalAsyncStatusLayout>
+      </ModalEditarTelefonoStatus>
     );
   }
 
   if (errorTelefono) {
     return (
-      <ModalAsyncStatusLayout
+      <ModalEditarTelefonoStatus
         isOpen={isOpen}
-        title={MODAL_EDITAR_TELEFONO_TEXTS.title}
         onClose={handleCancel}
-        submitLabel={MODAL_EDITAR_TELEFONO_TEXTS.submitLabel}
-        minHeight={MODAL_EDITAR_TELEFONO_LAYOUT.minHeight}
         variant="error"
       >
         {MODAL_EDITAR_TELEFONO_TEXTS.errorTelefonoPrefix}{' '}
-        {String(errorTelefono)}
-      </ModalAsyncStatusLayout>
+        {errorTelefono}
+      </ModalEditarTelefonoStatus>
     );
   }
 
-  if (!telefonoEntity) {
+  if (!telefonoData) {
     return (
-      <ModalAsyncStatusLayout
+      <ModalEditarTelefonoStatus
         isOpen={isOpen}
-        title={MODAL_EDITAR_TELEFONO_TEXTS.title}
         onClose={handleCancel}
-        submitLabel={MODAL_EDITAR_TELEFONO_TEXTS.submitLabel}
-        minHeight={MODAL_EDITAR_TELEFONO_LAYOUT.minHeight}
         variant="error"
       >
         {MODAL_EDITAR_TELEFONO_TEXTS.emptyTelefono}
-      </ModalAsyncStatusLayout>
+      </ModalEditarTelefonoStatus>
     );
   }
 
   return (
     <ModalFormLayout
       isOpen={isOpen}
-      title={
-        MODAL_EDITAR_TELEFONO_TEXTS.title
-      }
+      title={MODAL_EDITAR_TELEFONO_TEXTS.title}
       onClose={handleCancel}
-      submitLabel={
-        MODAL_EDITAR_TELEFONO_TEXTS.submitLabel
-      }
+      submitLabel={MODAL_EDITAR_TELEFONO_TEXTS.submitLabel}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       submitError={submitError}
-      minHeight={
-        MODAL_EDITAR_TELEFONO_LAYOUT.minHeight
-      }
+      minHeight={MODAL_EDITAR_TELEFONO_LAYOUT.minHeight}
     >
       <TelefonoFormFields
         form={form}

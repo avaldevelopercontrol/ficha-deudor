@@ -35,9 +35,9 @@ export function useGestoresByCliente(
   );
 
   const fetcher = useCallback(
-    (signal?: AbortSignal) =>
+    (signal: AbortSignal) =>
       fetchGestoresByCliente(
-        idCliente,
+        { idCliente },
         signal
       ),
     [idCliente]
