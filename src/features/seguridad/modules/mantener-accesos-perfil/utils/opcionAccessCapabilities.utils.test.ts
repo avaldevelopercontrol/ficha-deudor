@@ -61,6 +61,8 @@ export const suite = defineSuite(
           APPLICATION_OPTION_IDS
             .MANTENER_GRUPO,
           APPLICATION_OPTION_IDS
+            .MANTENER_USUARIO,
+          APPLICATION_OPTION_IDS
             .MANTENER_ACCESOS_POR_PERFIL,
           APPLICATION_OPTION_IDS
             .MANTENER_ACCESOS_POR_USUARIO,
@@ -84,6 +86,140 @@ export const suite = defineSuite(
             String(optionId)
           );
         });
+      }
+    ),
+    test(
+      'Mantener usuario habilita consultar insertar y editar, pero no eliminar ni exportar',
+      () => {
+        const option = createOption(
+          APPLICATION_OPTION_IDS
+            .MANTENER_USUARIO
+        );
+
+        assert.deepEqual(
+          getPerfilOpcionPermissionAvailability(
+            option
+          ),
+          {
+            consultar: true,
+            insertar: true,
+            editar: true,
+            eliminar: false,
+            exportar: false,
+          }
+        );
+
+        assert.deepEqual(
+          sanitizePerfilOpcionPermissions(
+            option,
+            {
+              consultar: true,
+              insertar: true,
+              editar: true,
+              eliminar: true,
+              exportar: true,
+            }
+          ),
+          {
+            consultar: true,
+            insertar: true,
+            editar: true,
+            eliminar: false,
+            exportar: false,
+          }
+        );
+      }
+    ),
+    test(
+      'Análisis de Carteras y Reportería solo habilitan consultar',
+      () => {
+        [
+          APPLICATION_OPTION_IDS
+            .PORTFOLIO_CONTROL_CENTER,
+          APPLICATION_OPTION_IDS
+            .REPORTERIA,
+        ].forEach((optionId) => {
+          const option = createOption(
+            optionId
+          );
+
+          assert.deepEqual(
+            getPerfilOpcionPermissionAvailability(
+              option
+            ),
+            {
+              consultar: true,
+              insertar: false,
+              editar: false,
+              eliminar: false,
+              exportar: false,
+            }
+          );
+
+          assert.deepEqual(
+            sanitizePerfilOpcionPermissions(
+              option,
+              {
+                consultar: true,
+                insertar: true,
+                editar: true,
+                eliminar: true,
+                exportar: true,
+              }
+            ),
+            {
+              consultar: true,
+              insertar: false,
+              editar: false,
+              eliminar: false,
+              exportar: false,
+            }
+          );
+        });
+      }
+    ),
+    test(
+      'cualquier módulo Power BI se limita dinámicamente a consultar',
+      () => {
+        const option = {
+          ...createOption(999),
+          nombre: 'Power BI futuro',
+          urlBI:
+            'https://app.powerbi.com/view?r=demo',
+        };
+
+        assert.deepEqual(
+          getPerfilOpcionPermissionAvailability(
+            option
+          ),
+          {
+            consultar: true,
+            insertar: false,
+            editar: false,
+            eliminar: false,
+            exportar: false,
+          }
+        );
+
+        assert.deepEqual(
+          sanitizePerfilOpcionPermissions(
+            option,
+            {
+              consultar: true,
+              insertar: true,
+              editar: true,
+              eliminar: true,
+              exportar: true,
+            }
+          ),
+          {
+            consultar: true,
+            insertar: false,
+            editar: false,
+            eliminar: false,
+            exportar: false,
+          }
+        );
       }
     ),
     test(

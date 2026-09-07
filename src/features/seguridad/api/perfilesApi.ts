@@ -4,6 +4,10 @@ import {
 } from '@shared/api/apiClient';
 
 import {
+  assertApiBusinessSuccess,
+} from '@shared/api/apiResponse.utils';
+
+import {
   SEGURIDAD_API_ENDPOINTS,
 } from '../constants/seguridadRoutes.constants';
 
@@ -125,19 +129,6 @@ const resolvePerfilApiError = (
   return fallbackMessage;
 };
 
-const isSuccessfulResponse = (
-  result: {
-    code: string;
-    statusCode: number;
-  }
-): boolean =>
-  (
-    result.statusCode >= 200 &&
-    result.statusCode < 300
-  ) ||
-  result.code === '00' ||
-  result.code === '200';
-
 const buildPerfilesEndpoint =
   (): string => {
     const searchParams =
@@ -192,17 +183,10 @@ export const fetchPerfiles = async (
         }
       );
 
-    if (
-      !isSuccessfulResponse(
-        result
-      )
-    ) {
-      throw new Error(
-        result.messageUser?.trim() ||
-          result.message?.trim() ||
-          PERFIL_ERROR_MESSAGES.list
-      );
-    }
+    assertApiBusinessSuccess(
+      result,
+      PERFIL_ERROR_MESSAGES.list
+    );
 
     return mapPerfilesResponse(
       result.response
@@ -235,12 +219,12 @@ export const fetchPerfilById = async (
         }
       );
 
-    if (
-      !isSuccessfulResponse(
-        result
-      ) ||
-      !result.response
-    ) {
+    assertApiBusinessSuccess(
+      result,
+      PERFIL_ERROR_MESSAGES.detail
+    );
+
+    if (!result.response) {
       throw new Error(
         result.messageUser?.trim() ||
           result.message?.trim() ||
@@ -283,17 +267,10 @@ export const createPerfil = async (
         }
       );
 
-    if (
-      !isSuccessfulResponse(
-        result
-      )
-    ) {
-      throw new Error(
-        result.messageUser?.trim() ||
-          result.message?.trim() ||
-          PERFIL_ERROR_MESSAGES.create
-      );
-    }
+    assertApiBusinessSuccess(
+      result,
+      PERFIL_ERROR_MESSAGES.create
+    );
 
     return result.response;
   } catch (error) {
@@ -334,17 +311,10 @@ export const updatePerfil = async (
         }
       );
 
-    if (
-      !isSuccessfulResponse(
-        result
-      )
-    ) {
-      throw new Error(
-        result.messageUser?.trim() ||
-          result.message?.trim() ||
-          PERFIL_ERROR_MESSAGES.update
-      );
-    }
+    assertApiBusinessSuccess(
+      result,
+      PERFIL_ERROR_MESSAGES.update
+    );
 
     return result.response;
   } catch (error) {

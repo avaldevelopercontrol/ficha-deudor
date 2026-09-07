@@ -4,7 +4,7 @@ import {
 } from '@shared/api/apiClient';
 
 import {
-  assertApiSuccess,
+  assertApiBusinessSuccess,
   getApiErrorMessage,
   normalizeApiCollectionResponse,
   unwrapApiObjectResponse,
@@ -168,7 +168,7 @@ const fetchListadoPage = async (
       }
     );
 
-  assertApiSuccess(
+  assertApiBusinessSuccess(
     result,
     ERROR_MESSAGES.list
   );
@@ -237,6 +237,11 @@ export const fetchUsuarioGrupoOpcionById = async (
         }
       );
 
+    assertApiBusinessSuccess(
+      result,
+      ERROR_MESSAGES.detail
+    );
+
     const response =
       unwrapApiObjectResponse<UsuarioGrupoOpcionDetalleApi>(
         result,
@@ -290,7 +295,7 @@ const fetchByUserGroupPage = async (
       }
     );
 
-  assertApiSuccess(
+  assertApiBusinessSuccess(
     result,
     ERROR_MESSAGES.byUserGroup
   );
@@ -553,6 +558,11 @@ const createUsuarioGrupoOpcion = async (
       }
     );
 
+  assertApiBusinessSuccess(
+    result,
+    ERROR_MESSAGES.create
+  );
+
   const response =
     unwrapApiObjectResponse<UsuarioGrupoOpcionMutationResponseApi>(
       result,
@@ -579,6 +589,11 @@ const updateUsuarioGrupoOpcion = async (
         signal,
       }
     );
+
+  assertApiBusinessSuccess(
+    result,
+    ERROR_MESSAGES.update
+  );
 
   const response =
     unwrapApiObjectResponse<UsuarioGrupoOpcionMutationResponseApi>(

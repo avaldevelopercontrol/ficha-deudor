@@ -4,6 +4,10 @@ import {
 } from '@shared/api/apiClient';
 
 import {
+  assertApiBusinessSuccess,
+} from '@shared/api/apiResponse.utils';
+
+import {
   SEGURIDAD_API_ENDPOINTS,
 } from '../constants/seguridadRoutes.constants';
 
@@ -117,19 +121,6 @@ const resolveGrupoApiError = (
   return fallbackMessage;
 };
 
-const isSuccessfulResponse = (
-  result: {
-    code: string;
-    statusCode: number;
-  }
-): boolean =>
-  (
-    result.statusCode >= 200 &&
-    result.statusCode < 300
-  ) ||
-  result.code === '00' ||
-  result.code === '200';
-
 const buildGrupoByIdEndpoint = (
   grupoId: number
 ): string => {
@@ -164,17 +155,10 @@ export const fetchGruposListado = async (
         }
       );
 
-    if (
-      !isSuccessfulResponse(
-        result
-      )
-    ) {
-      throw new Error(
-        result.messageUser?.trim() ||
-          result.message?.trim() ||
-          GRUPO_ERROR_MESSAGES.list
-      );
-    }
+    assertApiBusinessSuccess(
+      result,
+      GRUPO_ERROR_MESSAGES.list
+    );
 
     return mapGruposResponse(
       result.response
@@ -210,17 +194,10 @@ export const createGrupo = async (
         }
       );
 
-    if (
-      !isSuccessfulResponse(
-        result
-      )
-    ) {
-      throw new Error(
-        result.messageUser?.trim() ||
-          result.message?.trim() ||
-          GRUPO_ERROR_MESSAGES.create
-      );
-    }
+    assertApiBusinessSuccess(
+      result,
+      GRUPO_ERROR_MESSAGES.create
+    );
 
     return result.response;
   } catch (error) {
@@ -251,12 +228,12 @@ export const fetchGrupoById = async (
         }
       );
 
-    if (
-      !isSuccessfulResponse(
-        result
-      ) ||
-      !result.response
-    ) {
+    assertApiBusinessSuccess(
+      result,
+      GRUPO_ERROR_MESSAGES.detail
+    );
+
+    if (!result.response) {
       throw new Error(
         result.messageUser?.trim() ||
           result.message?.trim() ||
@@ -305,17 +282,10 @@ export const updateGrupo = async (
         }
       );
 
-    if (
-      !isSuccessfulResponse(
-        result
-      )
-    ) {
-      throw new Error(
-        result.messageUser?.trim() ||
-          result.message?.trim() ||
-          GRUPO_ERROR_MESSAGES.update
-      );
-    }
+    assertApiBusinessSuccess(
+      result,
+      GRUPO_ERROR_MESSAGES.update
+    );
 
     return result.response;
   } catch (error) {

@@ -52,6 +52,7 @@ import UsuarioGroupsManager from './UsuarioGroupsManager';
 
 interface ModalEditarUsuarioProps {
   isOpen: boolean;
+  canEdit: boolean;
   idUsuario: number | null;
   onClose: () => void;
   onGuardar: (
@@ -133,6 +134,7 @@ const EditarUsuarioErrorSummary: FC<{
 export const ModalEditarUsuario:
   FC<ModalEditarUsuarioProps> = ({
     isOpen,
+    canEdit,
     idUsuario,
     onClose,
     onGuardar,
@@ -433,12 +435,15 @@ export const ModalEditarUsuario:
                 disabled={
                   isSubmitting ||
                   isRequiredCatalogLoading ||
-                  hasRequiredCatalogError
+                  hasRequiredCatalogError ||
+                  !canEdit
                 }
                 title={
-                  hasRequiredCatalogError
-                    ? 'No se puede guardar hasta cargar los catálogos obligatorios.'
-                    : undefined
+                  !canEdit
+                    ? 'No tiene permiso para editar usuarios.'
+                    : hasRequiredCatalogError
+                      ? 'No se puede guardar hasta cargar los catálogos obligatorios.'
+                      : undefined
                 }
                 className="registrar-usuario-modal__submit-button"
               />

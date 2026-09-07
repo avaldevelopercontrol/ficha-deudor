@@ -131,8 +131,7 @@ export const useFichaGestionViewModel = ({
           label: 'Gestión',
           gender: 'feminine',
         },
-        action: 'create',
-        context: 'record',
+        action: 'save',
         message:
           'La nueva gestión fue guardada y la tabla de Gestión Realizada se actualizó.',
       });
@@ -149,7 +148,7 @@ export const useFichaGestionViewModel = ({
     (message: string) => {
       showFeedback({
         variant: 'error',
-        title: 'No se pudo registrar la gestión',
+        title: 'No se pudo guardar la gestión',
         message,
       });
     },

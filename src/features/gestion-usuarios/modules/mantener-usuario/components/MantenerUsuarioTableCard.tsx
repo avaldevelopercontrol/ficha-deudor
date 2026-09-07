@@ -91,16 +91,11 @@ export const MantenerUsuarioTableCard = ({
   const handleOpenEditModal =
     useCallback(
       (usuario: UsuarioMantenible) => {
-        if (!canEdit) {
-          return;
-        }
-
         clearFeedback();
         setSelectedEditUsuario(usuario);
         onEditUsuario?.(usuario);
       },
       [
-        canEdit,
         clearFeedback,
         onEditUsuario,
       ]
@@ -115,7 +110,6 @@ export const MantenerUsuarioTableCard = ({
     useMantenerUsuarioColumns({
       onEditUsuario:
         handleOpenEditModal,
-      canEdit,
     });
 
   const handleOpenRegisterModal =
@@ -300,6 +294,7 @@ export const MantenerUsuarioTableCard = ({
       {selectedEditUsuario && (
         <ModalEditarUsuario
           isOpen
+          canEdit={canEdit}
           idUsuario={
             selectedEditUsuario.id
           }

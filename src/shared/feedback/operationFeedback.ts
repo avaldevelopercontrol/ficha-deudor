@@ -9,7 +9,9 @@ export type OperationFeedback = {
 export type OperationSuccessAction =
   | 'create'
   | 'update'
-  | 'assign';
+  | 'assign'
+  | 'save'
+  | 'schedule';
 
 export type OperationEntityGender =
   | 'masculine'
@@ -57,8 +59,11 @@ const getGrammar = ({
       registered: 'registradas',
       updated: 'actualizadas',
       assigned: 'asignadas',
+      savedAdjective: 'guardadas',
+      scheduledAdjective: 'agendadas',
       beAvailable: 'se encuentran',
       saved: 'se guardaron',
+      scheduled: 'se agendaron',
       assignedVerb: 'se asignaron',
     };
   }
@@ -71,8 +76,11 @@ const getGrammar = ({
       registered: 'registrados',
       updated: 'actualizados',
       assigned: 'asignados',
+      savedAdjective: 'guardados',
+      scheduledAdjective: 'agendados',
       beAvailable: 'se encuentran',
       saved: 'se guardaron',
+      scheduled: 'se agendaron',
       assignedVerb: 'se asignaron',
     };
   }
@@ -85,8 +93,11 @@ const getGrammar = ({
       registered: 'registrada',
       updated: 'actualizada',
       assigned: 'asignada',
+      savedAdjective: 'guardada',
+      scheduledAdjective: 'agendada',
       beAvailable: 'se encuentra',
       saved: 'se guardó',
+      scheduled: 'se agendó',
       assignedVerb: 'se asignó',
     };
   }
@@ -98,8 +109,11 @@ const getGrammar = ({
     registered: 'registrado',
     updated: 'actualizado',
     assigned: 'asignado',
+    savedAdjective: 'guardado',
+    scheduledAdjective: 'agendado',
     beAvailable: 'se encuentra',
     saved: 'se guardó',
+    scheduled: 'se agendó',
     assignedVerb: 'se asignó',
   };
 };
@@ -131,6 +145,26 @@ export const buildOperationSuccessFeedback = ({
       message:
         message ??
         `${grammar.article} ${entityLabelLower} ${grammar.assignedVerb} correctamente.`,
+    };
+  }
+
+  if (action === 'save') {
+    return {
+      variant: 'success',
+      title: `${entityLabel} ${grammar.savedAdjective} correctamente`,
+      message:
+        message ??
+        `${grammar.article} ${entityLabelLower} ${grammar.saved} correctamente.`,
+    };
+  }
+
+  if (action === 'schedule') {
+    return {
+      variant: 'success',
+      title: `${entityLabel} ${grammar.scheduledAdjective} correctamente`,
+      message:
+        message ??
+        `${grammar.article} ${entityLabelLower} ${grammar.scheduled} correctamente.`,
     };
   }
 

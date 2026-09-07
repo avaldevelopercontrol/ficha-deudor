@@ -17,7 +17,6 @@ interface UseMantenerUsuarioColumnsParams {
   onEditUsuario?: (
     usuario: UsuarioMantenible
   ) => void;
-  canEdit?: boolean;
 }
 
 const getEstadoVariant = (
@@ -39,7 +38,6 @@ const getEstadoVariant = (
 
 export const useMantenerUsuarioColumns = ({
   onEditUsuario,
-  canEdit = true,
 }: UseMantenerUsuarioColumnsParams = {}): Column<UsuarioMantenible>[] => {
   return useMemo(
     () => [
@@ -129,7 +127,6 @@ export const useMantenerUsuarioColumns = ({
               MANTENER_USUARIO_TEXTS
                 .editAction
             }
-            disabled={!canEdit}
             onClick={() => {
               onEditUsuario?.(row);
             }}
@@ -137,6 +134,6 @@ export const useMantenerUsuarioColumns = ({
         ),
       },
     ],
-    [onEditUsuario, canEdit]
+    [onEditUsuario]
   );
 };

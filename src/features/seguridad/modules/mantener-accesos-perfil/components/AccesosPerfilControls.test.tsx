@@ -86,6 +86,19 @@ const secondItem: OpcionTreeItem = {
     '2. Mantener módulo',
 };
 
+const powerBiItem: OpcionTreeItem = {
+  ...item,
+  idModulo: 999,
+  nombre: 'Power BI futuro',
+  codigo: 'mPowerBiFuturo',
+  urlBI:
+    'https://app.powerbi.com/view?r=demo',
+  orden: 3,
+  treeCode: '3',
+  displayLabel:
+    '3. Power BI futuro',
+};
+
 const parentItem: OpcionTreeItem = {
   ...item,
   idModulo: 2,
@@ -204,6 +217,51 @@ export const suite = defineSuite(
           html,
           /aria-label="EXPORTAR"[^>]*disabled=""|disabled=""[^>]*aria-label="EXPORTAR"/
         );
+      }
+    ),
+    test(
+      'un Power BI deja disponible únicamente consultar',
+      () => {
+        const html =
+          renderToStaticMarkup(
+            <AccesosPerfilPermissionsPanel
+              activeOption={powerBiItem}
+              permissionStates={{
+                consultar: 'checked',
+                insertar: 'unchecked',
+                editar: 'unchecked',
+                eliminar: 'unchecked',
+                exportar: 'unchecked',
+              }}
+              selectAllState="checked"
+              titleLabel="Seleccionaste:"
+              noSelectionMessage="Seleccione una opción"
+              selectAllLabel="Seleccionar todo"
+              globalHint="Root no se registra"
+              containerHint="Es un contenedor automático"
+              singleHint="Se aplica solo a esta opción"
+              onPermissionChange={() => undefined}
+              onSelectAll={() => undefined}
+            />
+          );
+
+        assert.doesNotMatch(
+          html,
+          /aria-label="CONSULTAR"[^>]*disabled=""|disabled=""[^>]*aria-label="CONSULTAR"/
+        );
+        [
+          'INSERTAR',
+          'EDITAR',
+          'ELIMINAR',
+          'EXPORTAR',
+        ].forEach((permission) => {
+          assert.match(
+            html,
+            new RegExp(
+              `aria-label="${permission}"[^>]*disabled=""|disabled=""[^>]*aria-label="${permission}"`
+            )
+          );
+        });
       }
     ),
     test(
