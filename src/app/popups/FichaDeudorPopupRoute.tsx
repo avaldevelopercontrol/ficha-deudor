@@ -57,7 +57,7 @@ const POPUP_COMPONENTS = {
   'produccion-gestor-hoy': lazy(
     () =>
       import(
-        '@features/gestion-deudor/modules/produccion-gestor-hoy/components/ProduccionGestorHoyPopup'
+        '@features/gestion-cobranzas/modules/gestion-deudor/modules/produccion-gestor-hoy/components/ProduccionGestorHoyPopup'
       )
   ),
 } satisfies Record<

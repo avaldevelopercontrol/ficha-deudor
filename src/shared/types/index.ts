@@ -40,5 +40,3 @@ export interface Distrito {
   id: string;
   nombre: string;
 }
-
-export * from '../../features/gestion-deudor/types/gestionDeudor.types';

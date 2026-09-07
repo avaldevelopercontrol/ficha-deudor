@@ -5,6 +5,7 @@ import {
   clearFichaDeudorSession,
   isFichaDeudorParams,
   loadFichaDeudorSession,
+  readFichaDeudorSession,
   saveFichaDeudorSession,
 } from './fichaDeudorSession.utils';
 
@@ -46,11 +47,24 @@ export const suite = defineSuite('fichaDeudorSession.utils', [
       assert.deepEqual(loadFichaDeudorSession(), params);
     });
   }),
-  test('descarta y elimina contenido corrupto', () => {
+  test('detecta contenido corrupto sin mutar storage durante la lectura', () => {
     withStorage((storage) => {
       storage.setItem('ficha_deudor_active_context', '{invalid');
+
+      assert.deepEqual(readFichaDeudorSession(), {
+        status: 'invalid',
+        params: null,
+      });
       assert.equal(loadFichaDeudorSession(), null);
-      assert.equal(storage.length, 0);
+      assert.equal(storage.length, 1);
+    });
+  }),
+  test('distingue una sesión vacía de una sesión inválida', () => {
+    withStorage(() => {
+      assert.deepEqual(readFichaDeudorSession(), {
+        status: 'empty',
+        params: null,
+      });
     });
   }),
   test('limpia explícitamente el contexto', () => {

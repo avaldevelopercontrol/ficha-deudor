@@ -1,0 +1,459 @@
+
+/* ── Promesas vencidas: detalle ejecutivo ───────────────────── */
+.portfolio-overdue-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--ap-text);
+}
+
+.portfolio-overdue-modal__intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid rgba(192, 0, 30, 0.12);
+  border-radius: 13px;
+  background:
+    linear-gradient(
+      120deg,
+      rgba(192, 0, 30, 0.055),
+      rgba(255, 255, 255, 0.96) 62%
+    );
+}
+
+.portfolio-overdue-modal__intro-icon {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 38px;
+  border-radius: 11px;
+  background: #ffffff;
+  color: var(--ap-danger);
+  box-shadow: 0 4px 12px rgba(26, 37, 64, 0.07);
+}
+
+.portfolio-overdue-modal__intro-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.portfolio-overdue-modal__eyebrow {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ap-danger);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.portfolio-overdue-modal__intro h3 {
+  margin: 0;
+  color: var(--ap-navy);
+  font-size: 16px;
+  font-weight: 780;
+  line-height: 1.25;
+}
+
+.portfolio-overdue-modal__intro p {
+  margin: 5px 0 0;
+  color: var(--ap-text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.portfolio-overdue-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.portfolio-overdue-summary article {
+  --portfolio-overdue-summary-accent: var(--ap-navy);
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid rgba(26, 37, 64, 0.08);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(26, 37, 64, 0.045);
+}
+
+.portfolio-overdue-summary article:nth-child(1) {
+  --portfolio-overdue-summary-accent: var(--ap-danger);
+}
+
+.portfolio-overdue-summary article:nth-child(2) {
+  --portfolio-overdue-summary-accent: var(--ap-info);
+}
+
+.portfolio-overdue-summary__critical {
+  --portfolio-overdue-summary-accent: var(--ap-red) !important;
+  background:
+    linear-gradient(
+      110deg,
+      rgba(192, 0, 30, 0.045),
+      #ffffff 62%
+    ) !important;
+}
+
+.portfolio-overdue-summary__icon {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 34px;
+  border-radius: 10px;
+  background: color-mix(
+    in srgb,
+    var(--portfolio-overdue-summary-accent) 9%,
+    #ffffff
+  );
+  color: var(--portfolio-overdue-summary-accent);
+}
+
+.portfolio-overdue-summary__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.portfolio-overdue-summary article > div {
+  min-width: 0;
+}
+
+.portfolio-overdue-summary article > div > span {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ap-text-muted);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.portfolio-overdue-summary article > div > strong {
+  display: block;
+  overflow: hidden;
+  color: var(--portfolio-overdue-summary-accent);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-overdue-aging {
+  padding: 12px 13px;
+  border: 1px solid rgba(26, 37, 64, 0.08);
+  border-radius: 13px;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.portfolio-overdue-aging__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.portfolio-overdue-aging__heading > div > span {
+  display: block;
+  color: var(--ap-navy);
+  font-size: 11.5px;
+  font-weight: 780;
+}
+
+.portfolio-overdue-aging__heading small {
+  display: block;
+  margin-top: 2px;
+  color: var(--ap-text-muted);
+  font-size: 9.5px;
+}
+
+.portfolio-overdue-aging__cutoff {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(26, 37, 64, 0.055);
+  color: var(--ap-navy);
+  font-size: 9.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.portfolio-overdue-aging__bars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.portfolio-overdue-aging__row {
+  display: grid;
+  grid-template-columns: auto minmax(60px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.78);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    transform 140ms ease;
+}
+
+.portfolio-overdue-aging__row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(192, 0, 30, 0.13);
+  background: #ffffff;
+}
+
+.portfolio-overdue-aging__row.is-active {
+  border-color: rgba(192, 0, 30, 0.24);
+  background: rgba(192, 0, 30, 0.045);
+}
+
+.portfolio-overdue-aging__row:focus-visible {
+  outline: 2px solid var(--ap-red);
+  outline-offset: 2px;
+}
+
+.portfolio-overdue-aging__label {
+  color: var(--ap-navy);
+  font-size: 9.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.portfolio-overdue-aging__track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(26, 37, 64, 0.08);
+}
+
+.portfolio-overdue-aging__fill {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #d8122f, var(--ap-red));
+  box-shadow: 0 0 8px rgba(192, 0, 30, 0.15);
+}
+
+.portfolio-overdue-aging__row strong {
+  min-width: 20px;
+  color: var(--ap-navy);
+  font-size: 10.5px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.portfolio-overdue-table-section {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(26, 37, 64, 0.09);
+  border-radius: 13px;
+  background: #ffffff;
+}
+
+.portfolio-overdue-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(26, 37, 64, 0.08);
+  background: #f8fafc;
+}
+
+.portfolio-overdue-table-toolbar__filter {
+  display: grid;
+  grid-template-columns: auto minmax(140px, 165px) 32px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.portfolio-overdue-table-toolbar__label,
+.portfolio-overdue-table-toolbar__filter-icon {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+}
+
+.portfolio-overdue-table-toolbar__label {
+  color: var(--ap-navy);
+  font-size: 10.5px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.portfolio-overdue-table-toolbar__select {
+  width: 100%;
+  height: 32px;
+  padding: 0 28px 0 9px;
+  border: 1px solid #cfd6e4;
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--ap-navy);
+  font-size: 10.5px;
+  font-weight: 600;
+  outline: none;
+}
+
+.portfolio-overdue-table-toolbar__select:focus {
+  border-color: var(--ap-red);
+  box-shadow: 0 0 0 2px rgba(192, 0, 30, 0.08);
+}
+
+.portfolio-overdue-table-toolbar__filter-icon {
+  width: 32px;
+  justify-content: center;
+  border: 1px solid rgba(192, 0, 30, 0.2);
+  border-radius: 7px;
+  background: rgba(192, 0, 30, 0.045);
+  color: var(--ap-red);
+}
+
+.portfolio-overdue-table-toolbar__filter-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.portfolio-overdue-table__refreshing {
+  position: absolute;
+  top: 55px;
+  right: 12px;
+  z-index: 2;
+  padding: 4px 7px;
+  border: 1px solid rgba(26, 37, 64, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--ap-text-muted);
+  font-size: 9px;
+  font-weight: 650;
+  box-shadow: 0 3px 10px rgba(26, 37, 64, 0.06);
+}
+
+.portfolio-overdue-table .table-wrapper {
+  border-bottom: 0;
+}
+
+.portfolio-overdue-table .data-table {
+  font-size: 10px;
+}
+
+.portfolio-overdue-table .data-table th {
+  padding: 7px 6px;
+  font-size: 10px;
+}
+
+.portfolio-overdue-table .data-table td {
+  padding: 6px;
+  font-size: 10.5px;
+}
+
+.portfolio-overdue-table .data-table__filter-row th {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background: #1e2b4a;
+}
+
+.portfolio-overdue-table .data-table__filter-row input {
+  height: 29px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  font-size: 10.5px !important;
+}
+
+.portfolio-overdue-table .data-table__filter-row input::placeholder {
+  font-size: 10.5px;
+}
+
+.portfolio-overdue-table .data-table__filter-row button {
+  height: 29px !important;
+  font-size: 10.5px !important;
+}
+
+.portfolio-overdue-days {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 46px;
+  padding: 3px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.portfolio-overdue-days--low {
+  background: #fff7df;
+  color: #9a6700;
+}
+
+.portfolio-overdue-days--medium {
+  background: #fff0e6;
+  color: #b45309;
+}
+
+.portfolio-overdue-days--high {
+  background: var(--ap-danger-bg);
+  color: var(--ap-danger);
+}
+
+.portfolio-overdue-days--unknown {
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--ap-text-muted);
+}
+
+.portfolio-overdue-outstanding {
+  color: var(--ap-danger);
+  font-weight: 800;
+}
+
+.portfolio-overdue-table__pagination {
+  padding: 0 10px 8px;
+  border-top: 1px solid rgba(26, 37, 64, 0.06);
+  background: #ffffff;
+}
+
+@media (max-width: 980px) {
+  .portfolio-overdue-summary,
+  .portfolio-overdue-aging__bars {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-overdue-table-toolbar__filter {
+    grid-template-columns: auto minmax(120px, 155px) 32px;
+  }
+}
+
+@media (max-width: 620px) {
+  .portfolio-overdue-modal__intro {
+    padding: 11px;
+  }
+
+  .portfolio-overdue-modal__intro h3 {
+    font-size: 14px;
+  }
+
+  .portfolio-overdue-aging__heading {
+    flex-direction: column;
+  }
+
+  .portfolio-overdue-aging__row {
+    grid-template-columns: 86px minmax(60px, 1fr) auto;
+  }
+}

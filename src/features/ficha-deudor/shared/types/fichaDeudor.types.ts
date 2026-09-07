@@ -7,13 +7,6 @@ export interface FichaDeudorParams {
   fecha_inicio_gestion: string;
 }
 
-export type FichaDeudorParamKey = keyof FichaDeudorParams;
-
-export type FichaDeudorRequiredParamKey = Exclude<
-  FichaDeudorParamKey,
-  'fecha_inicio_gestion'
->;
-
 export type FichaDeudorIdentityParams = Pick<
   FichaDeudorParams,
   'id_cliente' | 'id_cartera' | 'id_deudor' | 'id_usuario'

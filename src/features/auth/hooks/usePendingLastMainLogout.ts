@@ -10,13 +10,17 @@ import {
   writeMainWindowsRegistry,
   type ProcessPendingLastMainLogoutOptions,
 } from '../utils/authWindowStorage';
-import { resolvePendingLastMainLogout } from '../utils/lastMainWindowLogout.utils';
+import { createAuthWindowSyncChannel } from '../utils/authWindowSyncChannel';
+import {
+  getPendingLastMainLogoutRetryDelay,
+  resolvePendingLastMainLogout,
+} from '../utils/lastMainWindowLogout.utils';
 import {
   closePopupOrRedirectToLogin,
   logoutSession,
 } from '../utils/logoutSession';
 
-export const processPendingLastMainLogout = ({
+const processPendingLastMainLogout = ({
   allowReloadCancel,
   waitGraceBeforeLogout,
 }: ProcessPendingLastMainLogoutOptions) => {
@@ -46,10 +50,14 @@ export const processPendingLastMainLogout = ({
   return true;
 };
 
-const isRelevantWindowStorageEvent = (event: StorageEvent) => {
+const shouldProcessWindowStorageEvent = (event: StorageEvent) => {
+  if (event.key === AUTH_STORAGE_KEYS.PENDING_LAST_MAIN_LOGOUT) {
+    return true;
+  }
+
   return (
-    event.key === AUTH_STORAGE_KEYS.PENDING_LAST_MAIN_LOGOUT ||
-    event.key === AUTH_STORAGE_KEYS.MAIN_WINDOWS
+    event.key === AUTH_STORAGE_KEYS.MAIN_WINDOWS &&
+    readPendingLastMainLogout() !== null
   );
 };
 
@@ -66,29 +74,81 @@ export const usePendingLastMainLogout = (isPopup: boolean) => {
       return;
     }
 
+    let retryTimeoutId: number | null = null;
+    let processTimeoutId: number | null = null;
+
+    const clearRetryTimeout = () => {
+      if (retryTimeoutId !== null) {
+        window.clearTimeout(retryTimeoutId);
+        retryTimeoutId = null;
+      }
+    };
+
     const processForPopup = () => {
-      processPendingLastMainLogout({
+      clearRetryTimeout();
+
+      const didLogout = processPendingLastMainLogout({
         allowReloadCancel: false,
         waitGraceBeforeLogout: true,
       });
+
+      if (didLogout) {
+        return;
+      }
+
+      const retryDelay = getPendingLastMainLogoutRetryDelay(
+        readPendingLastMainLogout()
+      );
+
+      if (retryDelay !== null) {
+        retryTimeoutId = window.setTimeout(processForPopup, retryDelay);
+      }
     };
 
-    const popupIntervalId = window.setInterval(
+    const processForPopupSoon = () => {
+      if (processTimeoutId !== null) {
+        return;
+      }
+
+      processTimeoutId = window.setTimeout(() => {
+        processTimeoutId = null;
+        processForPopup();
+      }, 0);
+    };
+
+    const windowSyncChannel = createAuthWindowSyncChannel((signal) => {
+      if (
+        signal === 'pending-logout' ||
+        readPendingLastMainLogout() !== null
+      ) {
+        processForPopupSoon();
+      }
+    });
+
+    const popupFallbackIntervalId = window.setInterval(
       processForPopup,
-      AUTH_WINDOW_TIMING.HEARTBEAT_MS
+      AUTH_WINDOW_TIMING.POPUP_FALLBACK_CHECK_MS
     );
 
     const handlePopupStorage = (event: StorageEvent) => {
-      if (isRelevantWindowStorageEvent(event)) {
-        processForPopup();
+      if (shouldProcessWindowStorageEvent(event)) {
+        processForPopupSoon();
       }
     };
 
     window.addEventListener('storage', handlePopupStorage);
+    processForPopup();
 
     return () => {
-      window.clearInterval(popupIntervalId);
+      clearRetryTimeout();
+
+      if (processTimeoutId !== null) {
+        window.clearTimeout(processTimeoutId);
+      }
+
+      window.clearInterval(popupFallbackIntervalId);
       window.removeEventListener('storage', handlePopupStorage);
+      windowSyncChannel?.close();
     };
   }, [isPopup]);
 

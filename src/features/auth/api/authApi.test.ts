@@ -89,6 +89,57 @@ export const suite = defineSuite('authApi', [
       }
     );
   }),
+  test('acepta el contrato mínimo de usuario y no depende de campos legacy del backend', async () => {
+    await withFetchResponse(
+      createJsonResponse({
+        code: '00',
+        message: 'Login exitoso',
+        messageUser: '',
+        statusCode: 200,
+        response: {
+          nId_Usuario: 16068,
+          bEstado: true,
+          cUsr_Login: 'cramirez',
+          campoNuevoBackend: 'ignorado',
+        },
+      }),
+      async () => {
+        const result = await login({
+          username: 'cramirez',
+          password: 'secreto',
+        });
+
+        assert.deepEqual(result.usuario, {
+          id_usuario: '16068',
+          nombre: '',
+          apellido: '',
+          username: 'cramirez',
+          email: '',
+          perfil: 'Perfil no definido',
+          perfilId: null,
+        });
+      }
+    );
+  }),
+  test('rechaza un sobre de login que omite response aunque code y statusCode sean válidos', async () => {
+    await withFetchResponse(
+      createJsonResponse({
+        code: '00',
+        message: 'Login exitoso',
+        statusCode: 200,
+      }),
+      async () => {
+        const result = await login({
+          username: 'usuario',
+          password: 'secreto',
+        });
+
+        assert.equal(result.success, false);
+        assert.equal(result.code, 'CLIENT_ERROR');
+        assert.match(result.message, /datos válidos/i);
+      }
+    );
+  }),
   test('prioriza el mensaje de usuario cuando la aplicación rechaza el login', async () => {
     await withFetchResponse(
       createJsonResponse({

@@ -1,0 +1,228 @@
+
+.reporteria-page__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.reporteria-card {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(26, 37, 64, 0.07);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.reporteria-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(192, 0, 30, 0.32);
+  box-shadow: 0 14px 32px rgba(26, 37, 64, 0.12);
+}
+
+.reporteria-card__main {
+  width: 100%;
+  padding: 0;
+  display: block;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.reporteria-card__main:focus-visible,
+.reporteria-card__footer button:focus-visible {
+  outline: 3px solid rgba(192, 0, 30, 0.2);
+  outline-offset: -3px;
+}
+
+.reporteria-card__visual {
+  position: relative;
+  min-height: 170px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--ap-gray-200);
+  background: #f8fafc;
+}
+
+.reporteria-card__image {
+  display: block;
+  max-width: min(78%, 280px);
+  max-height: 112px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.reporteria-card__fallback-icon {
+  width: 78px;
+  height: 78px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 18px;
+  background: #ffffff;
+  color: var(--ap-navy);
+}
+
+.reporteria-card__fallback-icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+.reporteria-card__badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--ap-navy);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.reporteria-card__content {
+  min-height: 92px;
+  padding: 16px 18px;
+}
+
+.reporteria-card__content h2 {
+  margin: 0;
+  color: var(--ap-navy);
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.reporteria-card__content p {
+  margin: 7px 0 0;
+  overflow: hidden;
+  display: -webkit-box;
+  color: var(--ap-text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.reporteria-card__footer {
+  min-height: 48px;
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  border-top: 1px solid var(--ap-gray-200);
+  background: #eef2f8;
+}
+
+.reporteria-card__footer > * + * {
+  border-left: 1px solid rgba(116, 126, 145, 0.2);
+}
+
+.reporteria-card__footer-action,
+.reporteria-card__status {
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.reporteria-card__footer-action {
+  color: #737b8a;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.reporteria-card__footer-action--enter:hover,
+.reporteria-card__footer-action--email:hover {
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--ap-red);
+}
+
+.reporteria-card__footer-action--disabled {
+  color: #a0a6b1;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.reporteria-card__status {
+  color: #19b868;
+  cursor: default;
+  text-transform: none;
+}
+
+.reporteria-card__footer-action svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.reporteria-card__status-icon {
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 14px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: lowercase;
+}
+
+.reporteria-page__state {
+  min-height: 150px;
+  padding: 34px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px dashed var(--ap-gray-300);
+  border-radius: 14px;
+  background: #ffffff;
+  color: var(--ap-text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.reporteria-page__state strong {
+  color: var(--ap-navy);
+  font-size: 16px;
+}
+
+.reporteria-page__state--error {
+  border-color: rgba(192, 0, 30, 0.3);
+  color: var(--ap-red);
+}

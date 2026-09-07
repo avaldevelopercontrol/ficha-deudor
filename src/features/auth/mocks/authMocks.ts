@@ -54,7 +54,7 @@ const usuariosMock: Record<string, { usuario: Usuario; password: string }> = {
 // CLIENTES MOCK
 // ─────────────────────────────────────────────
 
-export const clientesMock: Cliente[] = [
+const clientesMock: Cliente[] = [
   {
     id_cliente: '95',
     id_grupo: 156,
@@ -62,9 +62,9 @@ export const clientesMock: Cliente[] = [
   },
 ];
 
-export const aniosCarteraMock = [2026, 2025, 2024] as const;
+const aniosCarteraMock = [2026, 2025, 2024] as const;
 
-export const carterasParametrosMock: CarteraParametro[] = [
+const carterasParametrosMock: CarteraParametro[] = [
   { campania: 8, anio: 2026, estado: 'Vigente', numero: 0 },
   { campania: 7, anio: 2026, estado: 'Vigente', numero: 0 },
   { campania: 5, anio: 2026, estado: 'Vigente', numero: 0 },
@@ -102,10 +102,7 @@ const waitForMockDelay = (
     signal?.addEventListener('abort', handleAbort, { once: true });
   });
 
-/**
- * Simula el endpoint de login.
- * POST /api/auth/login
- */
+/** Simula el flujo de login durante desarrollo local. */
 export const mockLogin = async (payload: {
   username: string;
   password: string;
@@ -137,7 +134,6 @@ export const mockLogin = async (payload: {
     code: '00',
     message: 'Login exitoso',
     usuario: registro.usuario,
-    token: `mock-jwt-token-${Date.now()}`,
   };
 };
 

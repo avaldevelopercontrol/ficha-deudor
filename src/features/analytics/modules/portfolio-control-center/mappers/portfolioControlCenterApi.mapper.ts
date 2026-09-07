@@ -4,7 +4,6 @@ import type {
   PortfolioControlCenterData,
   PortfolioControlCenterFilterOptions,
   PortfolioEvolutionPoint,
-  PortfolioPerformanceDetailData,
   PortfolioPromiseStatus,
   PortfolioOverduePromisesData,
   PortfolioDueTodayPromisesData,
@@ -13,11 +12,11 @@ import type {
 } from '../../../types/portfolioControlCenter.types';
 import type {
   PortfolioAdvisorPerformanceApiResponse,
-  PortfolioCampaignPerformanceApiResponse,
   PortfolioEvolutionApiResponse,
   PortfolioFilterOptionsApiResponse,
   PortfolioPromisesApiResponse,
   PortfolioOverduePromisesApiResponse,
+  PortfolioOverviewApiResponse,
   PortfolioDueTodayPromisesApiResponse,
   PortfolioSummaryApiResponse,
   PortfolioSupervisorPerformanceApiResponse,
@@ -121,6 +120,12 @@ export const mapPortfolioFilterOptionsResponse = (
     portfolio: {
       id: String(response.portfolio.id),
     },
+    businessUnits: (response.businessUnits ?? []).map((item) => ({
+      id: item.code.trim(),
+      label: item.name.trim(),
+    })),
+    selectedBusinessUnit:
+      response.selectedBusinessUnit?.trim() ?? null,
     subPortfolios: response.subPortfolios.map((item) => ({
       id: String(item.id),
       label: item.name,
@@ -202,6 +207,27 @@ export const mapPortfolioPromisesResponse = (
 };
 
 
+
+const mapPortfolioPagination = (
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  } | undefined,
+  itemCount: number
+) =>
+  pagination ?? {
+    page: 1,
+    pageSize: itemCount || 1,
+    totalItems: itemCount,
+    totalPages: itemCount > 0 ? 1 : 0,
+    hasPreviousPage: false,
+    hasNextPage: false,
+  };
+
 export const mapPortfolioOverduePromisesResponse = (
   response: PortfolioOverduePromisesApiResponse
 ): PortfolioOverduePromisesData => {
@@ -230,6 +256,10 @@ export const mapPortfolioOverduePromisesResponse = (
         name: item.name,
       })),
     },
+    pagination: mapPortfolioPagination(
+      response.pagination,
+      response.items.length
+    ),
     items: response.items.map((item) => ({
       promiseId: String(item.promiseId),
       debtorId: String(item.debtorId),
@@ -284,6 +314,10 @@ export const mapPortfolioDueTodayPromisesResponse = (
       paidAmount: item.paidAmount,
       outstandingAmount: item.outstandingAmount,
     })),
+    pagination: mapPortfolioPagination(
+      response.pagination,
+      response.items.length
+    ),
     items: response.items.map((item) => ({
       promiseId: String(item.promiseId),
       debtorId: String(item.debtorId),
@@ -314,28 +348,6 @@ export const mapPortfolioEvolutionResponse = (
     managedPortfolio: item.managedPortfolio,
     pendingPortfolio: item.pendingPortfolio,
     recoveredAmount: item.recoveredAmount,
-  }));
-};
-
-export const mapPortfolioCampaignPerformanceResponse = (
-  response: PortfolioCampaignPerformanceApiResponse
-): readonly CampaignPerformanceItem[] => {
-  return response.campaigns.map((item) => ({
-    campaignId: item.campaignCode,
-    campaignName: item.campaignName,
-    assignedPortfolio: item.assignedPortfolio,
-    managedPortfolio: item.managedPortfolio,
-    progressRate: item.progressRate,
-    managementCount: item.managementCount,
-    contactabilityRate: item.contactabilityRate,
-    rpcRate: item.rpcRate,
-    closeRate: item.closeRate,
-    promiseCount: item.promiseCount,
-    promiseFulfillmentRate:
-      item.promiseFulfillmentRate,
-    paymentCount: item.paymentCount,
-    recoveredAmount: item.recoveredAmount,
-    targetAmount: item.targetAmount,
   }));
 };
 
@@ -408,21 +420,44 @@ const getLatestUpdatedAt = (
   });
 };
 
-export const mapPortfolioPerformanceDetailResponses = (
-  supervisorPerformanceResponse: PortfolioSupervisorPerformanceApiResponse,
-  advisorPerformanceResponse: PortfolioAdvisorPerformanceApiResponse
-): PortfolioPerformanceDetailData => {
+const roundPercentageLikeSql = (
+  value: number
+): number =>
+  Math.round(value * 10_000) / 10_000;
+
+const mapSelectedCampaignFromOperationalResponses = (
+  summaryResponse: PortfolioSummaryApiResponse,
+  target: PortfolioTargetProgress | null,
+  subPortfolioId: string | null
+): CampaignPerformanceItem => {
+  const summary = summaryResponse.summary;
+
   return {
-    updatedAt: getLatestUpdatedAt([
-      supervisorPerformanceResponse.updatedAt,
-      advisorPerformanceResponse.updatedAt,
-    ]),
-    supervisors: mapPortfolioSupervisorPerformanceResponse(
-      supervisorPerformanceResponse
-    ),
-    advisors: mapPortfolioAdvisorPerformanceResponse(
-      advisorPerformanceResponse
-    ),
+    campaignId: summaryResponse.campaign.code,
+    campaignName: summaryResponse.campaign.name,
+    assignedPortfolio: summary.assignedPortfolio,
+    managedPortfolio: summary.managedPortfolio,
+    progressRate:
+      summary.assignedPortfolio > 0
+        ? roundPercentageLikeSql(
+            (summary.managedPortfolio /
+              summary.assignedPortfolio) *
+              100
+          )
+        : null,
+    managementCount: summary.managementCount,
+    contactabilityRate: summary.contactabilityRate,
+    rpcRate: summary.rpcRate,
+    closeRate: summary.closeRate,
+    promiseCount: summary.promiseCount,
+    promiseFulfillmentRate:
+      summary.promiseFulfillmentRate,
+    paymentCount: summary.paymentCount,
+    recoveredAmount: summary.recoveredAmount,
+    targetAmount:
+      subPortfolioId === null
+        ? target?.monthlyTargetAmount ?? null
+        : null,
   };
 };
 
@@ -431,10 +466,8 @@ export const mapPortfolioOperationalResponses = (
   targetResponse: PortfolioTargetProgressApiResponse,
   promisesResponse: PortfolioPromisesApiResponse,
   evolutionResponse: PortfolioEvolutionApiResponse,
-  campaignPerformanceResponse: PortfolioCampaignPerformanceApiResponse,
-  supervisorPerformanceResponse: PortfolioSupervisorPerformanceApiResponse,
-  advisorPerformanceResponse: PortfolioAdvisorPerformanceApiResponse,
-  subPortfolioId: string | null
+  subPortfolioId: string | null,
+  businessUnit: string | null = null
 ): PortfolioControlCenterData => {
   const target = mapPortfolioTargetProgressResponse(
     targetResponse
@@ -445,21 +478,17 @@ export const mapPortfolioOperationalResponses = (
   const evolution = mapPortfolioEvolutionResponse(
     evolutionResponse
   );
-  const campaigns =
-    mapPortfolioCampaignPerformanceResponse(
-      campaignPerformanceResponse
-    );
-  const supervisors =
-    mapPortfolioSupervisorPerformanceResponse(
-      supervisorPerformanceResponse
-    );
-  const advisors =
-    mapPortfolioAdvisorPerformanceResponse(
-      advisorPerformanceResponse
-    );
+  const campaigns = [
+    mapSelectedCampaignFromOperationalResponses(
+      summaryResponse,
+      target,
+      subPortfolioId
+    ),
+  ];
 
   return {
     context: {
+      businessUnit,
       campaignId: summaryResponse.campaign.code,
       dateFrom: summaryResponse.period.dateFrom,
       dateTo: summaryResponse.period.dateTo,
@@ -470,9 +499,6 @@ export const mapPortfolioOperationalResponses = (
       targetResponse.updatedAt,
       promisesResponse.updatedAt,
       evolutionResponse.updatedAt,
-      campaignPerformanceResponse.updatedAt,
-      supervisorPerformanceResponse.updatedAt,
-      advisorPerformanceResponse.updatedAt,
     ]),
     freshness: {
       operationAsOfAt:
@@ -510,11 +536,25 @@ export const mapPortfolioOperationalResponses = (
     promises,
     evolution,
     campaigns,
-    supervisors,
-    advisors,
+    supervisors: [],
+    advisors: [],
     attention: buildPortfolioOperationalAttention(
       target,
       promises
     ),
   };
 };
+
+export const mapPortfolioOverviewResponse = (
+  response: PortfolioOverviewApiResponse,
+  subPortfolioId: string | null,
+  businessUnit: string | null = null
+): PortfolioControlCenterData =>
+  mapPortfolioOperationalResponses(
+    response.summary,
+    response.targetProgress,
+    response.promises,
+    response.evolution,
+    subPortfolioId,
+    businessUnit
+  );

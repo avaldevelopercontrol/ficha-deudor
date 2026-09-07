@@ -1,0 +1,103 @@
+.reporteria-page {
+  width: 100%;
+  min-height: 100%;
+  background: var(--ap-gray-50);
+  color: var(--ap-text);
+}
+
+.reporteria-page__content {
+  width: min(100%, 1240px);
+  margin: 0 auto;
+  padding: 32px clamp(16px, 3vw, 32px) 44px;
+}
+
+.reporteria-page__hero {
+  margin-bottom: 28px;
+  padding: 28px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--ap-navy), #25375f);
+  box-shadow: 0 16px 40px rgba(26, 37, 64, 0.14);
+  color: #ffffff;
+}
+
+.reporteria-page__eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.reporteria-page__hero h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.reporteria-page__hero p {
+  max-width: 680px;
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.reporteria-page__summary {
+  min-width: 150px;
+  min-height: 88px;
+  padding: 16px 18px;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.reporteria-page__summary strong {
+  color: #ffffff;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.reporteria-page__summary span {
+  margin-top: 7px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+}
+
+.reporteria-page__catalog {
+  min-width: 0;
+}
+
+.reporteria-page__catalog-header {
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.reporteria-page__catalog-header h2 {
+  margin: 0;
+  color: var(--ap-navy);
+  font-size: 19px;
+}
+
+.reporteria-page__catalog-header p {
+  margin: 5px 0 0;
+  color: var(--ap-text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}

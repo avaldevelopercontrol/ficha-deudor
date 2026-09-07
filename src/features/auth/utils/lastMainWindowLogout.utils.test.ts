@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { defineSuite, test } from '../../../test/testHarness';
 import { AUTH_WINDOW_TIMING } from '../constants/authWindow.constants';
 import {
+  getPendingLastMainLogoutRetryDelay,
   resolvePendingLastMainLogout,
   shouldUnregisterMainWindowOnPageHide,
 } from './lastMainWindowLogout.utils';
@@ -94,6 +95,32 @@ export const suite = defineSuite('lastMainWindowLogout.utils', [
 
     assert.equal(waiting.action, 'wait');
     assert.equal(expired.action, 'logout');
+  }),
+  test('calcula un único reintento al finalizar la gracia del logout pendiente', () => {
+    const pendingLogout = {
+      closedWindowId: 'closed-window',
+      requestedAt: NOW,
+    };
+
+    assert.equal(getPendingLastMainLogoutRetryDelay(null, NOW), null);
+    assert.equal(
+      getPendingLastMainLogoutRetryDelay(pendingLogout, NOW),
+      AUTH_WINDOW_TIMING.RELOAD_GRACE_MS + 1
+    );
+    assert.equal(
+      getPendingLastMainLogoutRetryDelay(
+        pendingLogout,
+        NOW + AUTH_WINDOW_TIMING.RELOAD_GRACE_MS
+      ),
+      1
+    );
+    assert.equal(
+      getPendingLastMainLogoutRetryDelay(
+        pendingLogout,
+        NOW + AUTH_WINDOW_TIMING.RELOAD_GRACE_MS + 1
+      ),
+      0
+    );
   }),
   test('no libera una ventana enviada al back-forward cache', () => {
     assert.equal(shouldUnregisterMainWindowOnPageHide(true), false);

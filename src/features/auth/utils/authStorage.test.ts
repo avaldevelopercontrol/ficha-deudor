@@ -12,8 +12,8 @@ import {
   AUTH_STORAGE_VERSION,
 } from '../constants/authStorage.constants';
 import {
+  broadcastAuthLogout,
   clearStoredAuthState,
-  hasStoredAuthState,
   initialAuthState,
   loadStoredAuthState,
   saveStoredAuthState,
@@ -65,7 +65,6 @@ export const suite = defineSuite('authStorage', [
   test('devuelve el estado inicial cuando no existe sesión guardada', () => {
     withBrowserStorage(() => {
       assert.deepEqual(loadStoredAuthState(), initialAuthState);
-      assert.equal(hasStoredAuthState(), false);
     });
   }),
   test('guarda una sesión versionada sin estados transitorios', () => {
@@ -140,38 +139,61 @@ export const suite = defineSuite('authStorage', [
       assert.equal(storage.getItem(AUTH_STORAGE_KEYS.STATE), null);
     });
   }),
-  test('hasStoredAuthState valida el contenido antes de confirmar sesión', () => {
+  test('descarta una sesión estructurada sin una identidad válida', () => {
     withBrowserStorage((storage) => {
       storage.setItem(
         AUTH_STORAGE_KEYS.STATE,
         JSON.stringify({ usuario: { id_usuario: 'abc' } })
       );
 
-      assert.equal(hasStoredAuthState(), false);
+      assert.deepEqual(loadStoredAuthState(), initialAuthState);
       assert.equal(storage.getItem(AUTH_STORAGE_KEYS.STATE), null);
-
-      saveStoredAuthState(createAuthState({ clienteSeleccionada: null }));
-      assert.equal(hasStoredAuthState(), true);
     });
   }),
-  test('limpia token y sesión y publica el motivo del cierre', () => {
+  test('limpia token y sesión sin publicar efectos de logout', () => {
     withBrowserStorage((storage, events) => {
       storage.setItem(AUTH_STORAGE_KEYS.TOKEN, 'token');
       storage.setItem(AUTH_STORAGE_KEYS.STATE, '{}');
 
-      clearStoredAuthState('last-main-window-closed');
+      clearStoredAuthState();
 
-      const logoutEvent = JSON.parse(
+      assert.equal(storage.getItem(AUTH_STORAGE_KEYS.TOKEN), null);
+      assert.equal(storage.getItem(AUTH_STORAGE_KEYS.STATE), null);
+      assert.equal(storage.getItem(AUTH_STORAGE_KEYS.LOGOUT_EVENT), null);
+      assert.deepEqual(events, []);
+    });
+  }),
+  test('publica un logout estructurado sin mezclarlo con la limpieza de sesión', () => {
+    withBrowserStorage((storage, events) => {
+      storage.setItem(AUTH_STORAGE_KEYS.TOKEN, 'token');
+      storage.setItem(AUTH_STORAGE_KEYS.STATE, '{}');
+
+      const logoutEvent = broadcastAuthLogout('last-main-window-closed');
+      const storedLogoutEvent = JSON.parse(
         storage.getItem(AUTH_STORAGE_KEYS.LOGOUT_EVENT) ?? '{}'
       );
       const customEvent = events[0] as CustomEvent;
 
-      assert.equal(storage.getItem(AUTH_STORAGE_KEYS.TOKEN), null);
-      assert.equal(storage.getItem(AUTH_STORAGE_KEYS.STATE), null);
+      assert.equal(storage.getItem(AUTH_STORAGE_KEYS.TOKEN), 'token');
+      assert.equal(storage.getItem(AUTH_STORAGE_KEYS.STATE), '{}');
       assert.equal(logoutEvent.reason, 'last-main-window-closed');
       assert.equal(typeof logoutEvent.at, 'number');
+      assert.deepEqual(storedLogoutEvent, logoutEvent);
       assert.equal(customEvent.type, AUTH_LOGOUT_CUSTOM_EVENT);
       assert.deepEqual(customEvent.detail, logoutEvent);
+    });
+  }),
+  test('permite notificar solo a otras ventanas cuando el proveedor ya reinició su estado local', () => {
+    withBrowserStorage((storage, events) => {
+      const logoutEvent = broadcastAuthLogout('manual', {
+        notifyCurrentWindow: false,
+      });
+
+      assert.deepEqual(
+        JSON.parse(storage.getItem(AUTH_STORAGE_KEYS.LOGOUT_EVENT) ?? '{}'),
+        logoutEvent
+      );
+      assert.deepEqual(events, []);
     });
   }),
 ]);

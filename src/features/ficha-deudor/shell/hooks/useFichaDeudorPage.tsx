@@ -1,19 +1,18 @@
-import type { FichaDeudorPanel } from '../constants/fichaDeudorPanels.constants';
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import type { GestionFormClaro } from '../../modules/gestion/types/fichaGestionForm.types';
-import { AUTH_ROUTES } from '@features/auth/constants';
+
 import { ActionButton } from '@shared/components/ui/ActionButton';
 import { useAppLayout } from '@shared/components/layout/AppLayoutContext';
 
-import type { FichaDeudorIdentityParams } from '../../shared/types/fichaDeudor.types';
-import type { DocumentoApi } from '../../shared/types';
-import { clearFichaDeudorSession } from '../../shared/utils/fichaDeudorSession.utils';
+import type { GestionFormClaro } from '../../modules/gestion/types/fichaGestionForm.types';
 import {
   useCabeceraHeader,
   useDeudorHeader,
 } from '../../modules/deudor-header/hooks/useDeudorHeader';
 import { useTelefonosReferenciados } from '../../modules/telefonos-referenciados/hooks/useTelefonosReferenciados';
+import type { DocumentoApi } from '../../shared/types';
+import type { FichaDeudorIdentityParams } from '../../shared/types/fichaDeudor.types';
+import { useFichaDeudorNavigation } from './useFichaDeudorNavigation';
+import { useFichaDeudorPanels } from './useFichaDeudorPanels';
 
 type UseFichaDeudorPageParams =
   FichaDeudorIdentityParams & {
@@ -21,16 +20,6 @@ type UseFichaDeudorPageParams =
       fechaFinGestion: string
     ) => void;
   };
-  
-const getReturnPath = (state: unknown): string | null => {
-  if (!state || typeof state !== 'object') {
-    return null;
-  }
-
-  const from = (state as { from?: unknown }).from;
-
-  return typeof from === 'string' ? from : null;
-};
 
 export const useFichaDeudorPage = ({
   id_cliente,
@@ -39,33 +28,22 @@ export const useFichaDeudorPage = ({
   id_usuario,
   onGestionRegistrada,
 }: UseFichaDeudorPageParams) => {
-  const navigate = useNavigate();
-
-  const location = useLocation();
-  
   const { setHeaderActions } = useAppLayout();
-
-  const returnPath = getReturnPath(location.state);
-
-  const [contacto, setContacto] = useState('');
-
-  const [panelActivo, setPanelActivo] =
-    useState<FichaDeudorPanel | null>(null);
-
-  const [
+  const {
+    panelActivo,
     panelesInicializados,
-    setPanelesInicializados,
-  ] = useState<Set<FichaDeudorPanel>>(
-    () => new Set()
-  );
+    togglePanel: handleTogglePanel,
+  } = useFichaDeudorPanels();
+  const {
+    handleCancelar,
+    handleGestionGuardada,
+  } = useFichaDeudorNavigation();
 
   const [telefonoSeleccionado, setTelefonoSeleccionado] =
     useState('');
-
   const [documentosFiltrados, setDocumentosFiltrados] = useState<
     DocumentoApi[]
   >([]);
-
   const [gestionRealizadaRefreshKey, setGestionRealizadaRefreshKey] =
     useState(0);
 
@@ -90,28 +68,11 @@ export const useFichaDeudorPage = ({
   );
 
   const telefonosReferenciadosResource =
-  useTelefonosReferenciados({
-    id_cliente,
-    id_deudor,
-    id_usuario,
-  });
-
-  const goToGestionDeudor = useCallback(() => {
-    clearFichaDeudorSession();
-
-    if (returnPath === AUTH_ROUTES.GESTION_DEUDOR) {
-      navigate(-1);
-      return;
-    }
-
-    navigate(AUTH_ROUTES.GESTION_DEUDOR, {
-      replace: true,
+    useTelefonosReferenciados({
+      id_cliente,
+      id_deudor,
+      id_usuario,
     });
-  }, [navigate, returnPath]);
-
-  const handleCancelar = useCallback(() => {
-    goToGestionDeudor();
-  }, [goToGestionDeudor]);
 
   useEffect(() => {
     setHeaderActions(
@@ -144,42 +105,7 @@ export const useFichaDeudorPage = ({
     [onGestionRegistrada]
   );
 
-  const handleGestionGuardada = useCallback(
-    (gestionTerminada: boolean) => {
-      if (!gestionTerminada) {
-        return;
-      }
-
-      goToGestionDeudor();
-    },
-    [goToGestionDeudor]
-  );
-
-  const handleTogglePanel = useCallback(
-    (accion: FichaDeudorPanel) => {
-      setPanelesInicializados((actuales) => {
-        if (actuales.has(accion)) {
-          return actuales;
-        }
-
-        const siguientes =
-          new Set(actuales);
-
-        siguientes.add(accion);
-
-        return siguientes;
-      });
-
-      setPanelActivo((actual) =>
-        actual === accion ? null : accion
-      );
-    },
-    []
-  );
-
   return {
-    contacto,
-    setContacto,
     panelActivo,
     panelesInicializados,
     telefonoSeleccionado,

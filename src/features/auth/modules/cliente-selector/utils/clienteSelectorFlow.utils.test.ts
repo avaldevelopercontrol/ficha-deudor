@@ -70,4 +70,36 @@ export const suite = defineSuite('clienteSelectorFlow.utils', [
       false
     );
   }),
+  test('bloquea la continuación mientras alguna carga dependiente sigue pendiente', () => {
+    for (const loadingState of [
+      { isLoading: true },
+      { isAniosLoading: true },
+      { isCarterasLoading: true },
+    ]) {
+      assert.equal(
+        canContinueClienteSelector({
+          ...createBaseParams(),
+          ...loadingState,
+        }),
+        false
+      );
+    }
+  }),
+  test('bloquea la continuación ante errores o cargas dependientes incompletas', () => {
+    for (const invalidState of [
+      { aniosError: 'No se pudieron cargar los años' },
+      { carterasError: 'No se pudieron cargar las carteras' },
+      { hasLoadedAnios: false },
+      { hasLoadedCarteras: false },
+      { selectedAnio: '' as const },
+    ]) {
+      assert.equal(
+        canContinueClienteSelector({
+          ...createBaseParams(),
+          ...invalidState,
+        }),
+        false
+      );
+    }
+  }),
 ]);

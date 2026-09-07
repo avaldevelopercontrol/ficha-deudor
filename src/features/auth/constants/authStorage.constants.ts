@@ -1,5 +1,6 @@
 export const AUTH_STORAGE_KEYS = {
   STATE: 'ficha_deudor_auth_state',
+  // Legacy: se conserva únicamente para limpiar sesiones de versiones anteriores.
   TOKEN: 'auth_token',
   LOGOUT_EVENT: 'ficha_deudor_logout_event',
   MAIN_WINDOWS: 'ficha_deudor_main_windows',

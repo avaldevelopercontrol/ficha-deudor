@@ -1,0 +1,486 @@
+
+/* ── Promesas con vencimiento hoy: detalle operativo ────────── */
+.portfolio-due-today-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--ap-text);
+}
+
+.portfolio-due-today-modal__intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid rgba(180, 120, 0, 0.15);
+  border-radius: 13px;
+  background:
+    linear-gradient(
+      120deg,
+      rgba(245, 181, 37, 0.075),
+      rgba(255, 255, 255, 0.97) 62%
+    );
+}
+
+.portfolio-due-today-modal__intro-icon {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 38px;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #9a6700;
+  box-shadow: 0 4px 12px rgba(26, 37, 64, 0.07);
+}
+
+.portfolio-due-today-modal__intro-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.portfolio-due-today-modal__eyebrow {
+  display: block;
+  margin-bottom: 2px;
+  color: #9a6700;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.portfolio-due-today-modal__intro h3 {
+  margin: 0;
+  color: var(--ap-navy);
+  font-size: 16px;
+  font-weight: 780;
+  line-height: 1.25;
+}
+
+.portfolio-due-today-modal__intro p {
+  margin: 5px 0 0;
+  color: var(--ap-text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.portfolio-due-today-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.portfolio-due-today-summary article {
+  --portfolio-due-today-summary-accent: var(--ap-navy);
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid rgba(26, 37, 64, 0.08);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(26, 37, 64, 0.045);
+}
+
+.portfolio-due-today-summary article:nth-child(1) {
+  --portfolio-due-today-summary-accent: #9a6700;
+}
+
+.portfolio-due-today-summary article:nth-child(2) {
+  --portfolio-due-today-summary-accent: var(--ap-info);
+}
+
+.portfolio-due-today-summary__positive {
+  --portfolio-due-today-summary-accent: #16803a !important;
+  background:
+    linear-gradient(
+      110deg,
+      rgba(22, 128, 58, 0.045),
+      #ffffff 62%
+    ) !important;
+}
+
+.portfolio-due-today-summary__critical {
+  --portfolio-due-today-summary-accent: var(--ap-red) !important;
+  background:
+    linear-gradient(
+      110deg,
+      rgba(192, 0, 30, 0.045),
+      #ffffff 62%
+    ) !important;
+}
+
+.portfolio-due-today-summary__icon {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 34px;
+  border-radius: 10px;
+  background: color-mix(
+    in srgb,
+    var(--portfolio-due-today-summary-accent) 9%,
+    #ffffff
+  );
+  color: var(--portfolio-due-today-summary-accent);
+}
+
+.portfolio-due-today-summary__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.portfolio-due-today-summary article > div {
+  min-width: 0;
+}
+
+.portfolio-due-today-summary article > div > span {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ap-text-muted);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.portfolio-due-today-summary article > div > strong {
+  display: block;
+  overflow: hidden;
+  color: var(--portfolio-due-today-summary-accent);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-due-today-status-panel {
+  padding: 12px 13px;
+  border: 1px solid rgba(26, 37, 64, 0.08);
+  border-radius: 13px;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.portfolio-due-today-status-panel__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.portfolio-due-today-status-panel__heading > div > span {
+  display: block;
+  color: var(--ap-navy);
+  font-size: 11.5px;
+  font-weight: 780;
+}
+
+.portfolio-due-today-status-panel__heading small {
+  display: block;
+  margin-top: 2px;
+  color: var(--ap-text-muted);
+  font-size: 9.5px;
+}
+
+.portfolio-due-today-status-panel__cutoff {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(180, 120, 0, 0.08);
+  color: #8a5a00;
+  font-size: 9.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.portfolio-due-today-status-panel__bars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.portfolio-due-today-status-panel__row {
+  --portfolio-due-today-status-accent: var(--ap-navy);
+  display: grid;
+  grid-template-columns: auto minmax(60px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.78);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    transform 140ms ease;
+}
+
+.portfolio-due-today-status-panel__row--pending {
+  --portfolio-due-today-status-accent: var(--ap-red);
+}
+
+.portfolio-due-today-status-panel__row--partial {
+  --portfolio-due-today-status-accent: #d18a00;
+}
+
+.portfolio-due-today-status-panel__row--covered {
+  --portfolio-due-today-status-accent: #16803a;
+}
+
+.portfolio-due-today-status-panel__row:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-due-today-status-accent) 24%,
+    transparent
+  );
+  background: #ffffff;
+}
+
+.portfolio-due-today-status-panel__row.is-active {
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-due-today-status-accent) 36%,
+    transparent
+  );
+  background: color-mix(
+    in srgb,
+    var(--portfolio-due-today-status-accent) 6%,
+    #ffffff
+  );
+}
+
+.portfolio-due-today-status-panel__row:focus-visible {
+  outline: 2px solid var(--portfolio-due-today-status-accent);
+  outline-offset: 2px;
+}
+
+.portfolio-due-today-status-panel__label {
+  color: var(--ap-navy);
+  font-size: 9.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.portfolio-due-today-status-panel__track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(26, 37, 64, 0.08);
+}
+
+.portfolio-due-today-status-panel__fill {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+  border-radius: inherit;
+  background: var(--portfolio-due-today-status-accent);
+  box-shadow: 0 0 8px color-mix(
+    in srgb,
+    var(--portfolio-due-today-status-accent) 18%,
+    transparent
+  );
+}
+
+.portfolio-due-today-status-panel__row strong {
+  min-width: 20px;
+  color: var(--ap-navy);
+  font-size: 10.5px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.portfolio-due-today-table-section {
+  overflow: hidden;
+  border: 1px solid rgba(26, 37, 64, 0.09);
+  border-radius: 13px;
+  background: #ffffff;
+}
+
+.portfolio-due-today-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(26, 37, 64, 0.08);
+  background: #f8fafc;
+}
+
+.portfolio-due-today-table-toolbar__filter {
+  display: grid;
+  grid-template-columns: auto minmax(140px, 165px) 32px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.portfolio-due-today-table-toolbar__label,
+.portfolio-due-today-table-toolbar__filter-icon {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+}
+
+.portfolio-due-today-table-toolbar__label {
+  color: var(--ap-navy);
+  font-size: 10.5px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.portfolio-due-today-table-toolbar__select {
+  width: 100%;
+  height: 32px;
+  padding: 0 28px 0 9px;
+  border: 1px solid #cfd6e4;
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--ap-navy);
+  font-size: 10.5px;
+  font-weight: 600;
+  outline: none;
+}
+
+.portfolio-due-today-table-toolbar__select:focus {
+  border-color: var(--ap-red);
+  box-shadow: 0 0 0 2px rgba(192, 0, 30, 0.08);
+}
+
+.portfolio-due-today-table-toolbar__filter-icon {
+  width: 32px;
+  justify-content: center;
+  border: 1px solid rgba(192, 0, 30, 0.2);
+  border-radius: 7px;
+  background: rgba(192, 0, 30, 0.045);
+  color: var(--ap-red);
+}
+
+.portfolio-due-today-table-toolbar__filter-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.portfolio-due-today-table .table-wrapper {
+  border-bottom: 0;
+}
+
+.portfolio-due-today-table .data-table {
+  font-size: 10px;
+}
+
+.portfolio-due-today-table .data-table th {
+  padding: 7px 6px;
+  font-size: 10px;
+}
+
+.portfolio-due-today-table .data-table td {
+  padding: 6px;
+  font-size: 10.5px;
+}
+
+.portfolio-due-today-table .data-table__filter-row th {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background: #1e2b4a;
+}
+
+.portfolio-due-today-table .data-table__filter-row input {
+  height: 29px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  font-size: 10.5px !important;
+}
+
+.portfolio-due-today-table .data-table__filter-row input::placeholder {
+  font-size: 10.5px;
+}
+
+.portfolio-due-today-table .data-table__filter-row button {
+  height: 29px !important;
+  font-size: 10.5px !important;
+}
+
+.portfolio-due-today-status {
+  display: inline-flex;
+  min-width: 74px;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.portfolio-due-today-status--pending {
+  background: var(--ap-danger-bg);
+  color: var(--ap-danger);
+}
+
+.portfolio-due-today-status--partial {
+  background: #fff4d6;
+  color: #936100;
+}
+
+.portfolio-due-today-status--covered {
+  background: #e8f7ed;
+  color: #147332;
+}
+
+.portfolio-due-today-outstanding {
+  color: var(--ap-danger);
+  font-weight: 800;
+}
+
+.portfolio-due-today-table__pagination {
+  padding: 0 10px 8px;
+  border-top: 1px solid rgba(26, 37, 64, 0.06);
+  background: #ffffff;
+}
+
+@media (max-width: 1100px) {
+  .portfolio-due-today-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .portfolio-due-today-status-panel__bars {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-due-today-table-toolbar__filter {
+    grid-template-columns: auto minmax(120px, 155px) 32px;
+  }
+}
+
+@media (max-width: 620px) {
+  .portfolio-due-today-modal__intro {
+    padding: 11px;
+  }
+
+  .portfolio-due-today-modal__intro h3 {
+    font-size: 14px;
+  }
+
+  .portfolio-due-today-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-due-today-status-panel__heading {
+    flex-direction: column;
+  }
+
+  .portfolio-due-today-status-panel__row {
+    grid-template-columns: 86px minmax(60px, 1fr) auto;
+  }
+}

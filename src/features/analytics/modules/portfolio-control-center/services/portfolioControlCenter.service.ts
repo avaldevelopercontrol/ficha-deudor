@@ -1,209 +1,156 @@
-import { env } from '@app/config/env';
-
 import type {
   PortfolioControlCenterData,
   PortfolioControlCenterFilterOptions,
   PortfolioOperationalContext,
   PortfolioOverduePromisesData,
   PortfolioDueTodayPromisesData,
-  PortfolioPerformanceDetailData,
+  AdvisorPerformanceItem,
+  SupervisorPerformanceItem,
   PortfolioControlCenterFilters,
+  PortfolioDueTodayPromisesQuery,
+  PortfolioOverduePromisesQuery,
 } from '../../../types/portfolioControlCenter.types';
 import {
+  fetchPortfolioControlCenterBootstrap,
+  fetchPortfolioControlCenterOverview,
   fetchPortfolioAdvisorPerformance,
-  fetchPortfolioCampaignPerformance,
-  fetchPortfolioControlCenterFilterOptions,
-  fetchPortfolioControlCenterSummary,
-  fetchPortfolioEvolution,
-  fetchPortfolioPromises,
   fetchPortfolioOverduePromises,
   fetchPortfolioDueTodayPromises,
   fetchPortfolioSupervisorPerformance,
-  fetchPortfolioTargetProgress,
 } from '../api/portfolioControlCenterApi';
 import {
   mapPortfolioFilterOptionsResponse,
   mapPortfolioOverduePromisesResponse,
   mapPortfolioDueTodayPromisesResponse,
-  mapPortfolioOperationalResponses,
-  mapPortfolioPerformanceDetailResponses,
+  mapPortfolioOverviewResponse,
+  mapPortfolioAdvisorPerformanceResponse,
+  mapPortfolioSupervisorPerformanceResponse,
 } from '../mappers/portfolioControlCenterApi.mapper';
-import {
-  portfolioControlCenterMockDataSource,
-} from '../mocks/portfolioControlCenterMock.datasource';
 
-export const loadPortfolioControlCenter = async (
+export interface PortfolioControlCenterBootstrapData {
+  data: PortfolioControlCenterData | null;
+  filterOptions: PortfolioControlCenterFilterOptions;
+}
+
+export const loadPortfolioControlCenterBootstrap = async (
+  crmClientId: number,
   filters: PortfolioControlCenterFilters,
   signal: AbortSignal
-): Promise<PortfolioControlCenterData> => {
-  if (env.analyticsUseMocks) {
-    return portfolioControlCenterMockDataSource.load(
-      filters,
-      signal
-    );
-  }
-
+): Promise<PortfolioControlCenterBootstrapData> => {
   if (filters.supervisorId) {
     throw new Error(
       'Supervisor permanece restringido como filtro global porque los KPIs superiores no tienen una semántica canonical atribuible a supervisor.'
     );
   }
 
-  const summaryResponse =
-    await fetchPortfolioControlCenterSummary(
+  const response =
+    await fetchPortfolioControlCenterBootstrap(
+      crmClientId,
       filters,
       signal
     );
 
-  const campaignCode = summaryResponse.campaign.code;
-  const effectiveDateTo = summaryResponse.period.dateTo;
-
-  const [
-    targetResponse,
-    promisesResponse,
-    evolutionResponse,
-    campaignPerformanceResponse,
-    supervisorPerformanceResponse,
-    advisorPerformanceResponse,
-  ] = await Promise.all([
-      fetchPortfolioTargetProgress(
-        campaignCode,
-        effectiveDateTo,
-        filters.subPortfolioId,
-        signal
-      ),
-      fetchPortfolioPromises(
-        campaignCode,
-        filters.subPortfolioId,
-        signal
-      ),
-      fetchPortfolioEvolution(
-        campaignCode,
-        summaryResponse.period.dateFrom,
-        effectiveDateTo,
-        filters.subPortfolioId,
-        signal
-      ),
-      fetchPortfolioCampaignPerformance(
-        campaignCode,
-        summaryResponse.period.dateFrom,
-        effectiveDateTo,
-        filters.subPortfolioId,
-        signal
-      ),
-      fetchPortfolioSupervisorPerformance(
-        campaignCode,
-        summaryResponse.period.dateFrom,
-        effectiveDateTo,
-        filters.subPortfolioId,
-        filters.supervisorId,
-        signal
-      ),
-      fetchPortfolioAdvisorPerformance(
-        campaignCode,
-        summaryResponse.period.dateFrom,
-        effectiveDateTo,
-        filters.subPortfolioId,
-        filters.supervisorId,
-        signal
-      ),
-    ]);
-
-  return mapPortfolioOperationalResponses(
-    summaryResponse,
-    targetResponse,
-    promisesResponse,
-    evolutionResponse,
-    campaignPerformanceResponse,
-    supervisorPerformanceResponse,
-    advisorPerformanceResponse,
-    filters.subPortfolioId
+  const filterOptions = mapPortfolioFilterOptionsResponse(
+    response.filterOptions
   );
+
+  return {
+    data:
+      response.overview === null
+        ? null
+        : mapPortfolioOverviewResponse(
+            response.overview,
+            filters.subPortfolioId,
+            filterOptions.selectedBusinessUnit
+          ),
+    filterOptions,
+  };
 };
 
-export const loadPortfolioControlCenterFilterOptions = async (
+export const loadPortfolioControlCenter = async (
+  crmClientId: number,
+  filters: PortfolioControlCenterFilters,
   signal: AbortSignal
-): Promise<PortfolioControlCenterFilterOptions> => {
-  if (env.analyticsUseMocks) {
-    return portfolioControlCenterMockDataSource.loadFilterOptions(
-      signal
+): Promise<PortfolioControlCenterData> => {
+  if (filters.supervisorId) {
+    throw new Error(
+      'Supervisor permanece restringido como filtro global porque los KPIs superiores no tienen una semántica canonical atribuible a supervisor.'
     );
   }
 
-  const response =
-    await fetchPortfolioControlCenterFilterOptions(
+  const overviewResponse =
+    await fetchPortfolioControlCenterOverview(
+      crmClientId,
+      filters,
       signal
     );
 
-  return mapPortfolioFilterOptionsResponse(response);
+  return mapPortfolioOverviewResponse(
+    overviewResponse,
+    filters.subPortfolioId,
+    filters.businessUnit
+  );
 };
 
-export const loadPortfolioPerformanceDetail = async (
+export interface PortfolioSupervisorPerformanceData {
+  updatedAt: string | null;
+  supervisors: readonly SupervisorPerformanceItem[];
+}
+
+export interface PortfolioAdvisorPerformanceData {
+  updatedAt: string | null;
+  advisors: readonly AdvisorPerformanceItem[];
+}
+
+export const loadPortfolioSupervisorPerformance = async (
+  crmClientId: number,
   context: PortfolioOperationalContext,
-  supervisorId: string,
   signal: AbortSignal
-): Promise<PortfolioPerformanceDetailData> => {
-  if (env.analyticsUseMocks) {
-    const mockData =
-      await portfolioControlCenterMockDataSource.load(
-        {
-          dateFrom: context.dateFrom,
-          dateTo: context.dateTo,
-          subPortfolioId: context.subPortfolioId,
-          campaignId: context.campaignId,
-          supervisorId,
-        },
-        signal
-      );
-
-    return {
-      updatedAt: mockData.updatedAt,
-      supervisors: mockData.supervisors,
-      advisors: mockData.advisors,
-    };
-  }
-
-  const [
-    supervisorPerformanceResponse,
-    advisorPerformanceResponse,
-  ] = await Promise.all([
-    fetchPortfolioSupervisorPerformance(
-      context.campaignId,
-      context.dateFrom,
-      context.dateTo,
-      context.subPortfolioId,
-      supervisorId,
-      signal
-    ),
-    fetchPortfolioAdvisorPerformance(
-      context.campaignId,
-      context.dateFrom,
-      context.dateTo,
-      context.subPortfolioId,
-      supervisorId,
-      signal
-    ),
-  ]);
-
-  return mapPortfolioPerformanceDetailResponses(
-    supervisorPerformanceResponse,
-    advisorPerformanceResponse
+): Promise<PortfolioSupervisorPerformanceData> => {
+  const response = await fetchPortfolioSupervisorPerformance(
+    crmClientId,
+    context,
+    signal
   );
+
+  return {
+    updatedAt: response.updatedAt,
+    supervisors: mapPortfolioSupervisorPerformanceResponse(response),
+  };
+};
+
+export const loadPortfolioAdvisorPerformance = async (
+  crmClientId: number,
+  context: PortfolioOperationalContext,
+  supervisorId: string | null,
+  signal: AbortSignal
+): Promise<PortfolioAdvisorPerformanceData> => {
+  const response = await fetchPortfolioAdvisorPerformance(
+    crmClientId,
+    context,
+    supervisorId,
+    signal
+  );
+
+  return {
+    updatedAt: response.updatedAt,
+    advisors: mapPortfolioAdvisorPerformanceResponse(response),
+  };
 };
 
 export const loadPortfolioOverduePromises = async (
-  context: Pick<PortfolioOperationalContext, 'campaignId' | 'subPortfolioId'>,
+  crmClientId: number,
+  context: Pick<
+    PortfolioOperationalContext,
+    'businessUnit' | 'campaignId' | 'subPortfolioId'
+  >,
+  query: PortfolioOverduePromisesQuery,
   signal: AbortSignal
 ): Promise<PortfolioOverduePromisesData> => {
-  if (env.analyticsUseMocks) {
-    throw new Error(
-      'El detalle de promesas vencidas requiere Analytics API y no utiliza datos mock.'
-    );
-  }
-
   const response = await fetchPortfolioOverduePromises(
-    context.campaignId,
-    context.subPortfolioId,
+    crmClientId,
+    context,
+    query,
     signal
   );
 
@@ -211,18 +158,18 @@ export const loadPortfolioOverduePromises = async (
 };
 
 export const loadPortfolioDueTodayPromises = async (
-  context: Pick<PortfolioOperationalContext, 'campaignId' | 'subPortfolioId'>,
+  crmClientId: number,
+  context: Pick<
+    PortfolioOperationalContext,
+    'businessUnit' | 'campaignId' | 'subPortfolioId'
+  >,
+  query: PortfolioDueTodayPromisesQuery,
   signal: AbortSignal
 ): Promise<PortfolioDueTodayPromisesData> => {
-  if (env.analyticsUseMocks) {
-    throw new Error(
-      'El detalle de promesas con vencimiento hoy requiere Analytics API y no utiliza datos mock.'
-    );
-  }
-
   const response = await fetchPortfolioDueTodayPromises(
-    context.campaignId,
-    context.subPortfolioId,
+    crmClientId,
+    context,
+    query,
     signal
   );
 

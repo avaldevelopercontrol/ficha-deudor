@@ -1,0 +1,45 @@
+
+@media (max-width: 980px) {
+  .reporteria-page__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .reporteria-page__content {
+    padding: 20px 14px 28px;
+  }
+
+  .reporteria-page__hero,
+  .reporteria-page__catalog-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reporteria-page__hero {
+    padding: 22px 20px;
+  }
+
+  .reporteria-page__summary,
+  .reporteria-search {
+    width: 100%;
+    min-width: 0;
+    flex-basis: auto;
+  }
+
+  .reporteria-search__results {
+    text-align: left;
+  }
+
+  .reporteria-page__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .reporteria-card__visual {
+    min-height: 150px;
+  }
+
+  .reporteria-viewer {
+    padding: 4px;
+  }
+}

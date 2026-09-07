@@ -7,8 +7,8 @@ import {
 } from '@features/analytics/constants/reporteriaRoutes.constants';
 
 import {
-  AUTH_ROUTES,
-} from '@features/auth/constants';
+  GESTION_COBRANZAS_ROUTES,
+} from '@features/gestion-cobranzas/constants/gestionCobranzasRoutes.constants';
 
 import {
   GESTION_USUARIOS_FEATURE,
@@ -65,7 +65,9 @@ const APPLICATION_OPTION_REGISTRY:
       optionId:
         APPLICATION_OPTION_IDS
           .GESTION_DEUDOR,
-      path: AUTH_ROUTES.GESTION_DEUDOR,
+      path:
+        GESTION_COBRANZAS_ROUTES
+          .GESTION_DEUDOR,
       enabled: true,
     },
     {

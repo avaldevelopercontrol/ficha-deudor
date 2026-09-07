@@ -22,6 +22,14 @@ import {
 } from '../../../features/auth/hooks/useAuth';
 
 import {
+  APPLICATION_OPTION_IDS,
+} from '../../../features/access-control/registry/applicationOptionIds';
+
+import {
+  preloadPortfolioControlCenterNavigation,
+} from '../../../features/analytics/navigation/portfolioControlCenterNavigation.preload';
+
+import {
   SisgesIcon,
 } from '../../icons/sisges';
 
@@ -64,6 +72,19 @@ const getRoleInitials = (
 };
 
 
+const getNavigationIntent = (
+  optionId: number
+): (() => void) | undefined => {
+  if (
+    optionId ===
+    APPLICATION_OPTION_IDS.PORTFOLIO_CONTROL_CENTER
+  ) {
+    return preloadPortfolioControlCenterNavigation;
+  }
+
+  return undefined;
+};
+
 const mapSidebarNavigationItem = (
   option: AuthorizedOption
 ): SidebarNavigationItem => ({
@@ -77,6 +98,10 @@ const mapSidebarNavigationItem = (
       ? option.children.map(
           mapSidebarNavigationItem
         )
+      : undefined,
+  onNavigationIntent:
+    option.permissions.consultar
+      ? getNavigationIntent(option.id)
       : undefined,
 });
 

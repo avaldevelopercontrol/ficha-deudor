@@ -1,10 +1,17 @@
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
 import { getAnalyticsAccess } from '../api/analyticsAccess.api';
+import {
+  cancelPendingAnalyticsAccess,
+  createAnalyticsAccessRequestController,
+  getPendingAnalyticsAccess,
+  releaseAnalyticsAccessRequestController,
+} from '../services/analyticsAccess.prefetch';
 import {
   getSelectedCrmClientId,
   setSelectedCrmClientId,
@@ -14,6 +21,12 @@ import { analyticsAccessStore } from '../store/analyticsAccess.store';
 import type {
   AnalyticsAccessContext,
 } from '../types/analyticsAccess.types';
+
+const isAbortError = (reason: unknown): boolean =>
+  typeof reason === 'object' &&
+  reason !== null &&
+  'name' in reason &&
+  reason.name === 'AbortError';
 
 const resolveSelection = (
   access: AnalyticsAccessContext
@@ -50,6 +63,11 @@ export function useAnalyticsAccess(
       cachedAccess
     );
 
+  const accessRef =
+    useRef<AnalyticsAccessContext | null>(
+      cachedAccess
+    );
+
   const [selectedCrmClientId, setSelection] =
     useState<number | null>(() =>
       cachedAccess
@@ -63,12 +81,16 @@ export function useAnalyticsAccess(
   const [error, setError] =
     useState<unknown>(null);
 
+  const requestControllerRef =
+    useRef<AbortController | null>(null);
+
   const applyAccess = useCallback(
     (result: AnalyticsAccessContext) => {
       analyticsAccessStore.setAccess(
         optionId,
         result
       );
+      accessRef.current = result;
 
       const nextSelection =
         resolveSelection(result);
@@ -83,15 +105,19 @@ export function useAnalyticsAccess(
 
       setSelection(nextSelection);
       setAccess(result);
+      setError(null);
     },
     [optionId]
   );
 
   const load = useCallback(
-    async (force = false) => {
+    async (
+      force = false,
+      background = false
+    ) => {
       if (!force) {
         const cached =
-          analyticsAccessStore.getAccess(
+          analyticsAccessStore.getFreshAccess(
             optionId
           );
 
@@ -102,61 +128,170 @@ export function useAnalyticsAccess(
         }
       }
 
-      setLoading(true);
-      setError(null);
+      if (
+        background &&
+        requestControllerRef.current
+      ) {
+        return;
+      }
+
+      if (force) {
+        cancelPendingAnalyticsAccess(optionId);
+      }
+
+      const previousController =
+        requestControllerRef.current;
+      previousController?.abort();
+
+      if (previousController) {
+        releaseAnalyticsAccessRequestController(
+          previousController
+        );
+      }
+
+      const controller =
+        createAnalyticsAccessRequestController();
+      requestControllerRef.current = controller;
+
+      if (!background) {
+        setLoading(true);
+        setError(null);
+      }
 
       try {
-        const result =
-          await getAnalyticsAccess(
-            optionId
-          );
+        const pendingPrefetch =
+          !force
+            ? getPendingAnalyticsAccess(
+                optionId
+              )
+            : null;
 
-        applyAccess(result);
+        let result: AnalyticsAccessContext;
+
+        if (pendingPrefetch) {
+          try {
+            result = await pendingPrefetch;
+          } catch (reason) {
+            if (
+              !isAbortError(reason) ||
+              controller.signal.aborted
+            ) {
+              throw reason;
+            }
+
+            // Otro consumidor puede forzar una revalidación y cancelar el
+            // prefetch compartido. Si este hook sigue activo, continúa con
+            // una solicitud propia en lugar de quedar sin datos ni error.
+            result = await getAnalyticsAccess(
+              optionId,
+              controller.signal
+            );
+          }
+        } else {
+          result = await getAnalyticsAccess(
+            optionId,
+            controller.signal
+          );
+        }
+
+        if (
+          !controller.signal.aborted &&
+          requestControllerRef.current === controller
+        ) {
+          applyAccess(result);
+        }
       } catch (reason) {
-        setError(reason);
+        if (
+          !controller.signal.aborted &&
+          !background &&
+          !isAbortError(reason)
+        ) {
+          setError(reason);
+        }
       } finally {
-        setLoading(false);
+        releaseAnalyticsAccessRequestController(
+          controller
+        );
+
+        if (
+          requestControllerRef.current === controller
+        ) {
+          requestControllerRef.current = null;
+
+          if (
+            !controller.signal.aborted &&
+            !background
+          ) {
+            setLoading(false);
+          }
+        }
       }
     },
     [applyAccess, optionId]
   );
 
   useEffect(() => {
-    if (access) {
-      return;
-    }
-
     let active = true;
+    const hasCachedAccess =
+      accessRef.current !== null;
 
-    void getAnalyticsAccess(
-      optionId
-    )
-      .then((result) => {
-        if (!active) {
-          return;
-        }
-
-        applyAccess(result);
-      })
-      .catch((reason) => {
-        if (active) {
-          setError(reason);
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
-      });
+    queueMicrotask(() => {
+      if (active) {
+        void load(
+          false,
+          hasCachedAccess
+        );
+      }
+    });
 
     return () => {
       active = false;
+      const controller =
+        requestControllerRef.current;
+      controller?.abort();
+
+      if (controller) {
+        releaseAnalyticsAccessRequestController(
+          controller
+        );
+      }
+
+      requestControllerRef.current = null;
     };
-  }, [
-    access,
-    applyAccess,
-    optionId,
-  ]);
+  }, [load]);
+
+  useEffect(() => {
+    const revalidateIfStale = () => {
+      if (
+        document.visibilityState !== 'visible' ||
+        !analyticsAccessStore.isStale(optionId)
+      ) {
+        return;
+      }
+
+      void load(true, true);
+    };
+
+    window.addEventListener(
+      'focus',
+      revalidateIfStale
+    );
+    document.addEventListener(
+      'visibilitychange',
+      revalidateIfStale
+    );
+
+    return () => {
+      window.removeEventListener(
+        'focus',
+        revalidateIfStale
+      );
+      document.removeEventListener(
+        'visibilitychange',
+        revalidateIfStale
+      );
+    };
+  }, [load, optionId]);
 
   const selectCrmClientId =
     useCallback(
@@ -187,8 +322,6 @@ export function useAnalyticsAccess(
     error,
     scopes:
       access?.scopes ?? [],
-    reports:
-      access?.reports ?? [],
     selectedCrmClientId,
     selectCrmClientId,
     refresh: () => load(true),

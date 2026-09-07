@@ -1,5 +1,6 @@
 import type {
   PortfolioCampaignFilterOption,
+  PortfolioControlCenterFilters,
   PortfolioControlCenterFilterOptions,
   PortfolioFilterOption,
   PortfolioSupervisorFilterOption,
@@ -13,6 +14,36 @@ export interface PortfolioFilterDateBounds {
   min: string | null;
   max: string | null;
 }
+
+export const switchPortfolioBusinessUnit = (
+  filters: PortfolioControlCenterFilters,
+  businessUnit: string
+): PortfolioControlCenterFilters => {
+  const normalizedBusinessUnit = businessUnit.trim();
+
+  return {
+    ...filters,
+    businessUnit:
+      normalizedBusinessUnit.length > 0
+        ? normalizedBusinessUnit
+        : null,
+    dateFrom: null,
+    dateTo: null,
+    subPortfolioId: null,
+    campaignId: null,
+    supervisorId: null,
+  };
+};
+
+export const isPortfolioBusinessUnitTransitionPending = (
+  requestedBusinessUnit: string | null,
+  loadedBusinessUnit: string | null
+): boolean => {
+  const requested = requestedBusinessUnit?.trim() || null;
+  const loaded = loadedBusinessUnit?.trim() || null;
+
+  return requested !== null && requested !== loaded;
+};
 
 const PORTFOLIO_CAMPAIGN_MONTH_LABELS = [
   'Enero',
@@ -189,7 +220,6 @@ const getSubPortfolioCampaignAvailability = (
 export const getPortfolioFilterDateBounds = (
   options: PortfolioControlCenterFilterOptions,
   campaignId: string | null,
-  useLatestCampaignFallback: boolean,
   subPortfolioId: string | null = null
 ): PortfolioFilterDateBounds => {
   const selectedCampaign = campaignId
@@ -206,12 +236,10 @@ export const getPortfolioFilterDateBounds = (
 
   const effectiveCampaign =
     selectedCampaign ??
-    (useLatestCampaignFallback
-      ? getLatestPortfolioCampaign(
-          options,
-          subPortfolioId
-        )
-      : null);
+    getLatestPortfolioCampaign(
+      options,
+      subPortfolioId
+    );
 
   if (effectiveCampaign) {
     const portfolioAvailability =

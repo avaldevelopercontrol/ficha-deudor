@@ -5,60 +5,113 @@ import {
 } from '@shared/hooks/useAsyncResource';
 import type {
   PortfolioOperationalContext,
-  PortfolioPerformanceDetailData,
 } from '../../../types/portfolioControlCenter.types';
 import {
-  loadPortfolioPerformanceDetail,
+  loadPortfolioAdvisorPerformance,
+  loadPortfolioSupervisorPerformance,
+  type PortfolioAdvisorPerformanceData,
+  type PortfolioSupervisorPerformanceData,
 } from '../services/portfolioControlCenter.service';
 
-interface UsePortfolioPerformanceDetailParams {
+interface BasePerformanceParams {
+  crmClientId: number;
   context: PortfolioOperationalContext | null;
-  supervisorId: string | null;
   enabled?: boolean;
 }
 
-export const usePortfolioPerformanceDetail = ({
-  context,
-  supervisorId,
-  enabled = true,
-}: UsePortfolioPerformanceDetailParams) => {
-  const canLoad = Boolean(
-    enabled && context && supervisorId
-  );
+interface UsePortfolioAdvisorPerformanceParams
+  extends BasePerformanceParams {
+  supervisorId: string | null;
+}
 
+export const usePortfolioSupervisorPerformance = ({
+  crmClientId,
+  context,
+  enabled = true,
+}: BasePerformanceParams) => {
   const loader = useCallback(
     (signal: AbortSignal) => {
-      if (!context || !supervisorId) {
+      if (!context) {
         return Promise.reject(
           new Error(
-            'El contexto de supervisor no está disponible.'
+            'El contexto de rendimiento no está disponible.'
           )
         );
       }
 
-      return loadPortfolioPerformanceDetail(
+      return loadPortfolioSupervisorPerformance(
+        crmClientId,
+        context,
+        signal
+      );
+    }, [crmClientId, context]
+  );
+
+  return useAsyncResource<
+    PortfolioSupervisorPerformanceData | null
+  >({
+    loader,
+    resourceKey: [
+      crmClientId,
+      context?.businessUnit,
+      context?.campaignId,
+      context?.dateFrom,
+      context?.dateTo,
+      context?.subPortfolioId,
+      'supervisors',
+    ],
+    initialData: null,
+    initialLoading: false,
+    enabled: Boolean(enabled && context),
+    errorMessage:
+      'No se pudo cargar el rendimiento de supervisores.',
+  });
+};
+
+export const usePortfolioAdvisorPerformance = ({
+  crmClientId,
+  context,
+  supervisorId,
+  enabled = true,
+}: UsePortfolioAdvisorPerformanceParams) => {
+  const loader = useCallback(
+    (signal: AbortSignal) => {
+      if (!context) {
+        return Promise.reject(
+          new Error(
+            'El contexto de rendimiento no está disponible.'
+          )
+        );
+      }
+
+      return loadPortfolioAdvisorPerformance(
+        crmClientId,
         context,
         supervisorId,
         signal
       );
-    }, [context, supervisorId]
+    }, [crmClientId, context, supervisorId]
   );
 
   return useAsyncResource<
-    PortfolioPerformanceDetailData | null
+    PortfolioAdvisorPerformanceData | null
   >({
     loader,
     resourceKey: [
+      crmClientId,
+      context?.businessUnit,
       context?.campaignId,
       context?.dateFrom,
       context?.dateTo,
       context?.subPortfolioId,
       supervisorId,
+      'advisors',
     ],
     initialData: null,
     initialLoading: false,
-    enabled: canLoad,
-    errorMessage:
-      'No se pudo cargar el detalle del supervisor seleccionado.',
+    enabled: Boolean(enabled && context),
+    errorMessage: supervisorId
+      ? 'No se pudo cargar el detalle del supervisor seleccionado.'
+      : 'No se pudo cargar el rendimiento de asesores.',
   });
 };

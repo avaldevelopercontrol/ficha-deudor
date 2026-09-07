@@ -4,6 +4,7 @@ import { apiClient } from './apiClient';
 
 interface AnalyticsApiRequestOptions {
   includeSelectedCrmClientId?: boolean;
+  crmClientId?: number | null;
   signal?: AbortSignal;
 }
 
@@ -69,17 +70,21 @@ const getStoredSisgesUserId = (): number | null => {
 
 const appendSelectedCrmClient = (
   path: string,
-  includeSelectedCrmClientId: boolean
+  includeSelectedCrmClientId: boolean,
+  explicitCrmClientId?: number | null
 ): string => {
-  if (!includeSelectedCrmClientId) {
-    return path;
-  }
-
-  const selectedCrmClientId =
-    getStoredCrmClientId();
+  const selectedCrmClientId = explicitCrmClientId ??
+    (includeSelectedCrmClientId ? getStoredCrmClientId() : null);
 
   if (selectedCrmClientId === null) {
     return path;
+  }
+
+  if (
+    !Number.isSafeInteger(selectedCrmClientId) ||
+    selectedCrmClientId <= 0
+  ) {
+    throw new Error('crmClientId debe ser un entero positivo.');
   }
 
   const separator =
@@ -120,7 +125,8 @@ export const analyticsApiClient = {
         path,
         options
           .includeSelectedCrmClientId ??
-          true
+          true,
+        options.crmClientId
       ),
       {
         method: 'GET',
@@ -145,10 +151,38 @@ export const analyticsApiClient = {
         path,
         options
           .includeSelectedCrmClientId ??
-          true
+          true,
+        options.crmClientId
       ),
       {
         method: 'PUT',
+        baseUrl:
+          env.analyticsApiBaseUrl,
+        headers:
+          getAnalyticsIdentityHeaders(),
+        body,
+        signal: options.signal,
+        useMock: false,
+      }
+    );
+  },
+
+  patch<T = void>(
+    path: string,
+    body: unknown,
+    options:
+      AnalyticsApiRequestOptions = {}
+  ): Promise<T> {
+    return apiClient<T>(
+      appendSelectedCrmClient(
+        path,
+        options
+          .includeSelectedCrmClientId ??
+          true,
+        options.crmClientId
+      ),
+      {
+        method: 'PATCH',
         baseUrl:
           env.analyticsApiBaseUrl,
         headers:

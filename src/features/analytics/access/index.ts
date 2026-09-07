@@ -1,9 +1,4 @@
-export * from './api/analyticsAccess.api';
-export * from './store/analyticsAccess.store';
-export * from './types/analyticsAccess.types';
-
-export * from './hooks/useAnalyticsAccess';
-export * from './components/CrmClientSelector';
-export * from './components/AnalyticsScopesEmpty';
-
-export * from './store/analyticsCrmSelection.storage';
+export { useAnalyticsAccess } from './hooks/useAnalyticsAccess';
+export { CrmClientSelector } from './components/CrmClientSelector';
+export { AnalyticsScopesEmpty } from './components/AnalyticsScopesEmpty';
+export type { AnalyticsScope } from './types/analyticsAccess.types';

@@ -1,4 +1,4 @@
-export const PERFILES_USUARIO_BY_ID: Record<number, string> = {
+const PERFILES_USUARIO_BY_ID: Record<number, string> = {
   1: 'Gestor Campo',
   2: 'Gestor Call',
   3: 'Supervisor Call',

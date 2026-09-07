@@ -3,7 +3,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
-  useRef,
+  useState,
 } from 'react';
 
 import { createAsyncResourceController } from '@shared/utils/asyncResource.utils';
@@ -41,13 +41,13 @@ export const useClienteSelector = ({
     clienteSelectorReducer,
     initialClienteSelectorState
   );
-  const requestControllerRef = useRef(
+  const [clientesRequestController] = useState(() =>
     createAsyncResourceController<Cliente[]>()
   );
-  const aniosRequestControllerRef = useRef(
+  const [aniosRequestController] = useState(() =>
     createAsyncResourceController<number[]>()
   );
-  const carterasRequestControllerRef = useRef(
+  const [carterasRequestController] = useState(() =>
     createAsyncResourceController<CarteraParametro[]>()
   );
 
@@ -69,17 +69,20 @@ export const useClienteSelector = ({
   } = state;
 
   useEffect(() => {
-    const requestController = requestControllerRef.current;
-
     if (!isOpen) {
-      requestController.cancel();
+      clientesRequestController.cancel();
+      aniosRequestController.cancel();
+      carterasRequestController.cancel();
       dispatch({ type: 'RESET' });
       return;
     }
 
+    // Un cambio de usuario invalida inmediatamente todo el contexto derivado.
+    aniosRequestController.cancel();
+    carterasRequestController.cancel();
     dispatch({ type: 'LOAD_START' });
 
-    void requestController
+    void clientesRequestController
       .execute((signal) => fetchGruposClienteInicial(usuarioId, signal))
       .then((result) => {
         if (result.status === 'aborted') {
@@ -104,9 +107,15 @@ export const useClienteSelector = ({
       });
 
     return () => {
-      requestController.cancel();
+      clientesRequestController.cancel();
     };
-  }, [isOpen, usuarioId]);
+  }, [
+    aniosRequestController,
+    carterasRequestController,
+    clientesRequestController,
+    isOpen,
+    usuarioId,
+  ]);
 
   const selectedCliente = useMemo(
     () =>
@@ -118,16 +127,17 @@ export const useClienteSelector = ({
   );
 
   useEffect(() => {
-    const requestController = aniosRequestControllerRef.current;
-
     if (!isOpen || !selectedCliente) {
-      requestController.cancel();
+      aniosRequestController.cancel();
+      carterasRequestController.cancel();
       return;
     }
 
+    // Una nueva relación cliente-grupo invalida cualquier cartera pendiente.
+    carterasRequestController.cancel();
     dispatch({ type: 'LOAD_ANIOS_START' });
 
-    void requestController
+    void aniosRequestController
       .execute((signal) =>
         fetchAniosByCliente(selectedCliente.id_cliente, signal)
       )
@@ -154,21 +164,24 @@ export const useClienteSelector = ({
       });
 
     return () => {
-      requestController.cancel();
+      aniosRequestController.cancel();
     };
-  }, [isOpen, selectedCliente]);
+  }, [
+    aniosRequestController,
+    carterasRequestController,
+    isOpen,
+    selectedCliente,
+  ]);
 
   useEffect(() => {
-    const requestController = carterasRequestControllerRef.current;
-
     if (!isOpen || !selectedCliente || selectedAnio === '') {
-      requestController.cancel();
+      carterasRequestController.cancel();
       return;
     }
 
     dispatch({ type: 'LOAD_CARTERAS_START' });
 
-    void requestController
+    void carterasRequestController
       .execute((signal) =>
         fetchCarterasParametrosByClienteAnio(
           selectedCliente.id_cliente,
@@ -199,9 +212,14 @@ export const useClienteSelector = ({
       });
 
     return () => {
-      requestController.cancel();
+      carterasRequestController.cancel();
     };
-  }, [isOpen, selectedAnio, selectedCliente]);
+  }, [
+    carterasRequestController,
+    isOpen,
+    selectedAnio,
+    selectedCliente,
+  ]);
 
   const selectedCartera = useMemo(
     () =>

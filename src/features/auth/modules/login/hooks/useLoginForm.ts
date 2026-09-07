@@ -27,26 +27,37 @@ export const useLoginForm = ({ onSubmit }: UseLoginFormParams) => {
   const handleChange = useCallback(
     (field: keyof LoginPayload) => (value: string) => {
       setValues((prev) => ({ ...prev, [field]: value }));
+      setErrors((prev) => {
+        if (!(field in prev)) {
+          return prev;
+        }
 
-      if (errors[field]) {
-        setErrors((prev) => {
-          const next = { ...prev };
-          delete next[field];
-          return next;
-        });
-      }
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
     },
-    [errors]
+    []
   );
 
   const handleBlur = useCallback(
     (field: keyof LoginPayload) => () => {
-      setTouched((prev) => ({ ...prev, [field]: true }));
+      setTouched((prev) =>
+        prev[field]
+          ? prev
+          : { ...prev, [field]: true }
+      );
 
       const validation = validateLoginForm(values);
 
-      if (validation[field]) {
-        setErrors((prev) => ({ ...prev, [field]: validation[field] }));
+      const fieldError = validation[field];
+
+      if (fieldError) {
+        setErrors((prev) =>
+          prev[field] === fieldError
+            ? prev
+            : { ...prev, [field]: fieldError }
+        );
       }
     },
     [values]

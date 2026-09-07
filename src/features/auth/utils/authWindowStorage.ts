@@ -4,7 +4,7 @@ import {
 } from '../constants/authWindow.constants';
 import { AUTH_STORAGE_KEYS } from '../constants/authStorage.constants';
 
-export type MainWindowItem = {
+type MainWindowItem = {
   id: string;
   path: string;
   lastSeen: number;
@@ -140,18 +140,6 @@ const safeSessionStorageRemove = (key: string): void => {
   }
 };
 
-export const getNavigationType = () => {
-  try {
-    const [navigationEntry] = performance.getEntriesByType(
-      'navigation'
-    ) as PerformanceNavigationTiming[];
-
-    return navigationEntry?.type ?? 'navigate';
-  } catch {
-    return 'navigate';
-  }
-};
-
 export const getExistingWindowId = () => {
   const storedWindowId = safeSessionStorageGet(AUTH_STORAGE_KEYS.WINDOW_ID);
 
@@ -229,14 +217,25 @@ export const writeMainWindowsRegistry = (
   registry: MainWindowsRegistry
 ) => {
   const normalizedRegistry = normalizeMainWindowsRegistry(registry);
+  const currentRegistry = safeLocalStorageGet(AUTH_STORAGE_KEYS.MAIN_WINDOWS);
 
   if (Object.keys(normalizedRegistry).length === 0) {
+    if (currentRegistry === null) {
+      return true;
+    }
+
     return safeLocalStorageRemove(AUTH_STORAGE_KEYS.MAIN_WINDOWS);
+  }
+
+  const serializedRegistry = JSON.stringify(normalizedRegistry);
+
+  if (currentRegistry === serializedRegistry) {
+    return true;
   }
 
   return safeLocalStorageSet(
     AUTH_STORAGE_KEYS.MAIN_WINDOWS,
-    JSON.stringify(normalizedRegistry)
+    serializedRegistry
   );
 };
 

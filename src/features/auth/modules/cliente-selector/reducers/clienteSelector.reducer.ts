@@ -2,7 +2,7 @@ import type { CarteraParametro, Cliente } from '../../../types';
 import { buildClienteGrupoSelectionKey } from '../../../utils/clienteGrupo.utils';
 import { buildCarteraParametroSelectionKey } from '../utils/carteraParametroSelection.utils';
 
-export interface ClienteSelectorState {
+interface ClienteSelectorState {
   clientes: Cliente[];
   selectedClienteKey: string;
   anios: number[];
@@ -19,7 +19,7 @@ export interface ClienteSelectorState {
   carterasError: string | null;
 }
 
-export type ClienteSelectorAction =
+type ClienteSelectorAction =
   | { type: 'LOAD_START' }
   | { type: 'LOAD_SUCCESS'; clientes: Cliente[] }
   | { type: 'LOAD_ERROR'; error: string }

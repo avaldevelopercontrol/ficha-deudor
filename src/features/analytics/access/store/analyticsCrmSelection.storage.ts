@@ -1,3 +1,5 @@
+// La cartera seleccionada es un contexto global de Analytics, no por optionId.
+// Cada opción debe revalidarla contra sus scopes autorizados antes de reutilizarla.
 const KEY = 'analytics.selectedCrmClientId';
 
 export function getSelectedCrmClientId(): number | null {

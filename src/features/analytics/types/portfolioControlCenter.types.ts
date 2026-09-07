@@ -103,17 +103,19 @@ export interface PortfolioAttentionItem {
 }
 
 
+export type PortfolioDetailTab =
+  | 'campaigns'
+  | 'supervisors'
+  | 'advisors';
+
+export type PortfolioBusinessUnitCode = string;
+
 export interface PortfolioOperationalContext {
+  businessUnit: PortfolioBusinessUnitCode | null;
   campaignId: string;
   dateFrom: string;
   dateTo: string;
   subPortfolioId: string | null;
-}
-
-export interface PortfolioPerformanceDetailData {
-  updatedAt: string | null;
-  supervisors: readonly SupervisorPerformanceItem[];
-  advisors: readonly AdvisorPerformanceItem[];
 }
 
 export interface PortfolioControlCenterFreshness {
@@ -137,6 +139,7 @@ export interface PortfolioControlCenterData {
 }
 
 export interface PortfolioControlCenterFilters {
+  businessUnit: PortfolioBusinessUnitCode | null;
   dateFrom: string | null;
   dateTo: string | null;
   subPortfolioId: string | null;
@@ -148,6 +151,9 @@ export interface PortfolioFilterOption {
   id: string;
   label: string;
 }
+
+export type PortfolioBusinessUnitFilterOption =
+  PortfolioFilterOption;
 
 export interface PortfolioCampaignFilterOption
   extends PortfolioFilterOption {
@@ -185,6 +191,8 @@ export interface PortfolioControlCenterFilterOptions {
   availableDateFrom: string | null;
   availableDateTo: string | null;
   portfolio: PortfolioFilterScope | null;
+  businessUnits: readonly PortfolioBusinessUnitFilterOption[];
+  selectedBusinessUnit: PortfolioBusinessUnitCode | null;
   subPortfolios: readonly PortfolioFilterOption[];
   campaigns: readonly PortfolioCampaignFilterOption[];
   supervisors: readonly PortfolioSupervisorFilterOption[];
@@ -202,6 +210,11 @@ export type PortfolioOverdueAgingFilter =
   | '8-plus'
   | 'unclassified';
 
+export type PortfolioOverdueAgingKey = Exclude<
+  PortfolioOverdueAgingFilter,
+  'all'
+>;
+
 export type PortfolioOverduePromisesSortKey =
   | 'debtorId'
   | 'dueDate'
@@ -214,6 +227,14 @@ export type PortfolioOverduePromisesSortKey =
 
 export type PortfolioSortDirection = 'asc' | 'desc';
 
+export interface PortfolioOverduePromisesQuery {
+  page: number;
+  pageSize: number;
+  aging: PortfolioOverdueAgingKey | null;
+  sortBy: PortfolioOverduePromisesSortKey;
+  sortDirection: PortfolioSortDirection;
+}
+
 export interface PortfolioOverduePromiseItem {
   promiseId: string;
   debtorId: string;
@@ -222,7 +243,7 @@ export interface PortfolioOverduePromiseItem {
   promiseAmount: number;
   paidAmount: number;
   outstandingAmount: number;
-  agingKey: Exclude<PortfolioOverdueAgingFilter, 'all'>;
+  agingKey: PortfolioOverdueAgingKey;
   advisorId: string | null;
   advisorName: string | null;
   supervisorId: string | null;
@@ -230,7 +251,7 @@ export interface PortfolioOverduePromiseItem {
 }
 
 export interface PortfolioOverdueAgingBucket {
-  key: Exclude<PortfolioOverdueAgingFilter, 'all'>;
+  key: PortfolioOverdueAgingKey;
   label: string;
   count: number;
   promiseAmount: number;
@@ -242,6 +263,15 @@ export interface PortfolioOverduePromiseFilterOption {
   name: string;
 }
 
+
+export interface PortfolioPagination {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
 export interface PortfolioOverduePromisesData {
   asOfDate: string | null;
   updatedAt: string | null;
@@ -255,6 +285,7 @@ export interface PortfolioOverduePromisesData {
     advisors: readonly PortfolioOverduePromiseFilterOption[];
     supervisors: readonly PortfolioOverduePromiseFilterOption[];
   };
+  pagination: PortfolioPagination;
   items: readonly PortfolioOverduePromiseItem[];
 }
 
@@ -264,6 +295,11 @@ export type PortfolioDueTodayStatusFilter =
   | 'pending'
   | 'partial'
   | 'covered';
+
+export type PortfolioDueTodayStatusKey = Exclude<
+  PortfolioDueTodayStatusFilter,
+  'all'
+>;
 
 export type PortfolioDueTodayPromisesSortKey =
   | 'debtorId'
@@ -275,13 +311,21 @@ export type PortfolioDueTodayPromisesSortKey =
   | 'advisorName'
   | 'supervisorName';
 
+export interface PortfolioDueTodayPromisesQuery {
+  page: number;
+  pageSize: number;
+  status: PortfolioDueTodayStatusKey | null;
+  sortBy: PortfolioDueTodayPromisesSortKey;
+  sortDirection: PortfolioSortDirection;
+}
+
 export interface PortfolioDueTodayPromiseItem {
   promiseId: string;
   debtorId: string;
   promiseAmount: number;
   paidAmount: number;
   outstandingAmount: number;
-  statusKey: Exclude<PortfolioDueTodayStatusFilter, 'all'>;
+  statusKey: PortfolioDueTodayStatusKey;
   statusLabel: string;
   lastPaymentDate: string | null;
   advisorId: string | null;
@@ -291,7 +335,7 @@ export interface PortfolioDueTodayPromiseItem {
 }
 
 export interface PortfolioDueTodayStatusBucket {
-  key: Exclude<PortfolioDueTodayStatusFilter, 'all'>;
+  key: PortfolioDueTodayStatusKey;
   label: string;
   count: number;
   promiseAmount: number;
@@ -309,16 +353,6 @@ export interface PortfolioDueTodayPromisesData {
     outstandingAmount: number;
   };
   status: readonly PortfolioDueTodayStatusBucket[];
+  pagination: PortfolioPagination;
   items: readonly PortfolioDueTodayPromiseItem[];
-}
-
-
-export interface PortfolioControlCenterDataSource {
-  load: (
-    filters: PortfolioControlCenterFilters,
-    signal: AbortSignal
-  ) => Promise<PortfolioControlCenterData>;
-  loadFilterOptions: (
-    signal: AbortSignal
-  ) => Promise<PortfolioControlCenterFilterOptions>;
 }

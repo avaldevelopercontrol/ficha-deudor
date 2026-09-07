@@ -57,15 +57,28 @@ export const saveFichaDeudorSession = (
   }
 };
 
-export const loadFichaDeudorSession =
-  (): FichaDeudorParams | null => {
+export type FichaDeudorSessionReadResult =
+  | {
+      status: 'valid';
+      params: FichaDeudorParams;
+    }
+  | {
+      status: 'empty' | 'invalid';
+      params: null;
+    };
+
+export const readFichaDeudorSession =
+  (): FichaDeudorSessionReadResult => {
     try {
       const rawContext = sessionStorage.getItem(
         FICHA_DEUDOR_SESSION_KEY
       );
 
       if (!rawContext) {
-        return null;
+        return {
+          status: 'empty',
+          params: null,
+        };
       }
 
       const context = JSON.parse(
@@ -76,20 +89,31 @@ export const loadFichaDeudorSession =
         context.version !== FICHA_DEUDOR_SESSION_VERSION ||
         !isFichaDeudorParams(context.params)
       ) {
-        sessionStorage.removeItem(FICHA_DEUDOR_SESSION_KEY);
-        return null;
+        return {
+          status: 'invalid',
+          params: null,
+        };
       }
 
-      return context.params;
+      return {
+        status: 'valid',
+        params: context.params,
+      };
     } catch {
-      try {
-        sessionStorage.removeItem(FICHA_DEUDOR_SESSION_KEY);
-      } catch {
-        // No hay acceso al almacenamiento de sesión.
-      }
-
-      return null;
+      return {
+        status: 'invalid',
+        params: null,
+      };
     }
+  };
+
+export const loadFichaDeudorSession =
+  (): FichaDeudorParams | null => {
+    const result = readFichaDeudorSession();
+
+    return result.status === 'valid'
+      ? result.params
+      : null;
   };
 
 export const clearFichaDeudorSession = (): void => {

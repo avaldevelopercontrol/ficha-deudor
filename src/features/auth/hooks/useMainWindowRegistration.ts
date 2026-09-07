@@ -5,9 +5,11 @@ import { AUTH_WINDOW_TIMING } from '../constants/authWindow.constants';
 import {
   getExistingWindowId,
   getWindowId,
+  readPendingLastMainLogout,
   registerMainWindow,
   unregisterMainWindow,
 } from '../utils/authWindowStorage';
+import { createAuthWindowSyncChannel } from '../utils/authWindowSyncChannel';
 import { shouldUnregisterMainWindowOnPageHide } from '../utils/lastMainWindowLogout.utils';
 
 interface UseMainWindowRegistrationOptions {
@@ -16,10 +18,14 @@ interface UseMainWindowRegistrationOptions {
   processPendingLogout: () => boolean;
 }
 
-const isRelevantWindowStorageEvent = (event: StorageEvent) => {
+const shouldProcessWindowStorageEvent = (event: StorageEvent) => {
+  if (event.key === AUTH_STORAGE_KEYS.PENDING_LAST_MAIN_LOGOUT) {
+    return true;
+  }
+
   return (
-    event.key === AUTH_STORAGE_KEYS.PENDING_LAST_MAIN_LOGOUT ||
-    event.key === AUTH_STORAGE_KEYS.MAIN_WINDOWS
+    event.key === AUTH_STORAGE_KEYS.MAIN_WINDOWS &&
+    readPendingLastMainLogout() !== null
   );
 };
 
@@ -49,11 +55,40 @@ export const useMainWindowRegistration = ({
 
     const windowId = getWindowId();
     let pageWasReleased = false;
+    let pendingProcessTimeoutId: number | null = null;
 
-    registerMainWindow(windowId);
+    const processPendingLogoutSoon = () => {
+      if (pendingProcessTimeoutId !== null) {
+        return;
+      }
+
+      pendingProcessTimeoutId = window.setTimeout(() => {
+        pendingProcessTimeoutId = null;
+        processPendingLogout();
+      }, 0);
+    };
+
+    const windowSyncChannel = createAuthWindowSyncChannel((signal) => {
+      if (
+        signal === 'pending-logout' ||
+        readPendingLastMainLogout() !== null
+      ) {
+        processPendingLogoutSoon();
+      }
+    });
+
+    const refreshPresence = (notifyPeers = false) => {
+      registerMainWindow(windowId);
+
+      if (notifyPeers) {
+        windowSyncChannel?.publish('presence-changed');
+      }
+    };
+
+    refreshPresence(true);
 
     const heartbeatIntervalId = window.setInterval(() => {
-      registerMainWindow(windowId);
+      refreshPresence();
     }, AUTH_WINDOW_TIMING.HEARTBEAT_MS);
 
     const handlePageHide = (event: PageTransitionEvent) => {
@@ -66,6 +101,7 @@ export const useMainWindowRegistration = ({
 
       pageWasReleased = true;
       unregisterMainWindow(windowId, true);
+      windowSyncChannel?.publish('pending-logout');
     };
 
     const handlePageShow = (event: PageTransitionEvent) => {
@@ -74,29 +110,45 @@ export const useMainWindowRegistration = ({
       }
 
       pageWasReleased = false;
-      registerMainWindow(windowId);
+      refreshPresence(true);
       processPendingLogout();
     };
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !pageWasReleased) {
+        refreshPresence(true);
+      }
+    };
+
     const handleStorage = (event: StorageEvent) => {
-      if (isRelevantWindowStorageEvent(event)) {
-        processPendingLogout();
+      if (shouldProcessWindowStorageEvent(event)) {
+        processPendingLogoutSoon();
       }
     };
 
     window.addEventListener('pagehide', handlePageHide);
     window.addEventListener('pageshow', handlePageShow);
     window.addEventListener('storage', handleStorage);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.clearInterval(heartbeatIntervalId);
+
+      if (pendingProcessTimeoutId !== null) {
+        window.clearTimeout(pendingProcessTimeoutId);
+      }
+
       window.removeEventListener('pagehide', handlePageHide);
       window.removeEventListener('pageshow', handlePageShow);
       window.removeEventListener('storage', handleStorage);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
 
       if (!pageWasReleased) {
         unregisterMainWindow(windowId, false);
+        windowSyncChannel?.publish('presence-changed');
       }
+
+      windowSyncChannel?.close();
     };
   }, [isAuthenticated, isPopup, processPendingLogout]);
 };

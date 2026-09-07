@@ -1,0 +1,397 @@
+
+.portfolio-control-center__overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.78fr);
+  gap: 12px;
+}
+
+.portfolio-evolution-panel {
+  min-width: 0;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(26, 95, 168, 0.045),
+      transparent 31%
+    ),
+    #ffffff;
+}
+
+.portfolio-evolution-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.portfolio-evolution-metric-tabs {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid rgba(26, 37, 64, 0.1);
+  border-radius: 10px;
+  background: #f4f6f9;
+}
+
+.portfolio-evolution-metric-tab {
+  min-height: 30px;
+  padding: 6px 11px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ap-text-muted);
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.portfolio-evolution-metric-tab:hover {
+  color: var(--ap-text);
+}
+
+.portfolio-evolution-metric-tab:focus-visible {
+  outline: 2px solid var(--ap-red);
+  outline-offset: 2px;
+}
+
+.portfolio-evolution-metric-tab--active {
+  background: #ffffff;
+  color: var(--ap-navy);
+  box-shadow:
+    0 2px 7px rgba(26, 37, 64, 0.08),
+    inset 0 -2px 0 var(--ap-red);
+}
+
+.portfolio-evolution-chart-wrap {
+  min-width: 0;
+}
+
+.portfolio-evolution-chart__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 7px;
+  padding: 8px 10px;
+  border: 1px solid rgba(26, 37, 64, 0.07);
+  border-radius: 10px;
+  background: linear-gradient(90deg, #f7f9fc 0%, #fbfcfe 100%);
+}
+
+.portfolio-evolution-chart__current {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.portfolio-evolution-chart__summary span {
+  color: var(--ap-text-muted);
+  font-size: 10.5px;
+}
+
+.portfolio-evolution-chart__summary strong {
+  color: var(--ap-navy);
+  font-size: 20px;
+  font-weight: 760;
+  line-height: 1;
+  letter-spacing: -0.35px;
+}
+
+.portfolio-evolution-chart__delta {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--ap-info-bg);
+  color: var(--ap-info) !important;
+  font-weight: 650;
+  text-align: right;
+}
+
+.portfolio-evolution-chart__canvas {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(26, 37, 64, 0.055);
+  border-radius: 11px;
+  background:
+    linear-gradient(180deg, rgba(247, 249, 252, 0.65), rgba(255, 255, 255, 0.2));
+}
+
+.portfolio-evolution-chart__canvas svg {
+  display: block;
+  width: 100%;
+  min-height: 205px;
+  max-height: 245px;
+  overflow: visible;
+}
+
+.portfolio-evolution-chart__grid-line {
+  stroke: #dfe4ec;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.portfolio-evolution-chart__axis-label,
+.portfolio-evolution-chart__period-label {
+  fill: #75829b;
+  font-family: inherit;
+  font-size: 9.5px;
+}
+
+.portfolio-evolution-chart__area {
+  stroke: none;
+}
+
+.portfolio-evolution-chart__area--progress {
+  fill: rgba(192, 0, 30, 0.11);
+}
+
+.portfolio-evolution-chart__area--recovery {
+  fill: rgba(26, 95, 168, 0.11);
+}
+
+.portfolio-evolution-chart__line {
+  fill: none;
+  stroke-width: 2.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.portfolio-evolution-chart__line--progress {
+  stroke: var(--ap-red);
+}
+
+.portfolio-evolution-chart__line--recovery {
+  stroke: var(--ap-info);
+}
+
+.portfolio-evolution-chart__point {
+  stroke: #ffffff;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 1px 2px rgba(26, 37, 64, 0.2));
+}
+
+.portfolio-evolution-chart__point--progress {
+  fill: var(--ap-red);
+}
+
+.portfolio-evolution-chart__point--recovery {
+  fill: var(--ap-info);
+}
+
+.portfolio-control-center__section--attention {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(192, 0, 30, 0.035),
+      transparent 30%
+    ),
+    #ffffff;
+}
+
+.portfolio-attention-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.portfolio-attention-item {
+  --portfolio-attention-accent: var(--ap-danger);
+  --portfolio-attention-soft: var(--ap-danger-bg);
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(26, 37, 64, 0.08);
+  border-radius: 11px;
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgba(26, 37, 64, 0.04);
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.portfolio-attention-item--warning {
+  --portfolio-attention-accent: var(--ap-warning);
+  --portfolio-attention-soft: var(--ap-warning-bg);
+}
+
+.portfolio-attention-item--positive {
+  --portfolio-attention-accent: var(--ap-success);
+  --portfolio-attention-soft: var(--ap-success-bg);
+}
+
+.portfolio-attention-item:hover {
+  transform: translateX(2px);
+  border-color: color-mix(
+    in srgb,
+    var(--portfolio-attention-accent) 25%,
+    transparent
+  );
+  box-shadow: 0 7px 18px rgba(26, 37, 64, 0.07);
+}
+
+.portfolio-attention-item__icon {
+  display: inline-flex;
+  width: 35px;
+  height: 35px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 35px;
+  border-radius: 10px;
+  background: var(--portfolio-attention-soft);
+  color: var(--portfolio-attention-accent);
+}
+
+.portfolio-attention-item__icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.portfolio-attention-item__content {
+  min-width: 0;
+  flex: 1;
+}
+
+.portfolio-attention-item__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.portfolio-attention-item__header strong {
+  overflow: hidden;
+  color: var(--ap-navy);
+  font-size: 11.5px;
+  font-weight: 720;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-attention-item__header span {
+  flex: 0 0 auto;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: var(--portfolio-attention-soft);
+  color: var(--portfolio-attention-accent);
+  font-size: 9.5px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.portfolio-attention-item p {
+  margin: 3px 0 0;
+  color: var(--ap-text-muted);
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+
+.portfolio-attention-item__amount {
+  display: block;
+  margin-top: 4px;
+  color: var(--ap-navy);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.portfolio-attention-empty {
+  display: flex;
+  min-height: 126px;
+  align-items: center;
+  justify-content: center;
+  color: var(--ap-text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.portfolio-attention-target-unavailable {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 10px;
+  padding: 9px 10px;
+  border: 1px solid rgba(26, 37, 64, 0.1);
+  border-radius: 9px;
+  background: var(--ap-gray-50);
+  color: var(--ap-text-muted);
+}
+
+.portfolio-attention-target-unavailable > span {
+  display: inline-flex;
+  width: 27px;
+  height: 27px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 27px;
+  border-radius: 8px;
+  background: rgba(26, 37, 64, 0.08);
+  color: var(--ap-navy);
+}
+
+.portfolio-attention-target-unavailable svg {
+  width: 14px;
+  height: 14px;
+}
+
+.portfolio-attention-target-unavailable strong,
+.portfolio-attention-target-unavailable p {
+  display: block;
+}
+
+.portfolio-attention-target-unavailable strong {
+  margin-bottom: 2px;
+  color: var(--ap-navy);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.portfolio-attention-target-unavailable p {
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+
+.portfolio-attention-item--interactive {
+  width: 100%;
+  appearance: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.portfolio-attention-item--interactive:focus-visible {
+  outline: 2px solid var(--ap-red);
+  outline-offset: 2px;
+}
+
+.portfolio-attention-item__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  color: var(--ap-red);
+  font-size: 10.5px;
+  font-weight: 720;
+}
+
+.portfolio-attention-item__action > span {
+  font-size: 13px;
+  line-height: 1;
+  transition: transform 150ms ease;
+}
+
+.portfolio-attention-item--interactive:hover
+  .portfolio-attention-item__action
+  > span {
+  transform: translateX(2px);
+}

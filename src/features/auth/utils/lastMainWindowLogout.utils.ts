@@ -5,13 +5,13 @@ import type {
 } from './authWindowStorage';
 import { getCleanActiveRegistry } from './authWindowStorage';
 
-export type PendingLastMainLogoutAction =
+type PendingLastMainLogoutAction =
   | 'none'
   | 'cancel'
   | 'wait'
   | 'logout';
 
-export type ResolvePendingLastMainLogoutOptions = {
+type ResolvePendingLastMainLogoutOptions = {
   pendingLogout: PendingLastMainLogout | null;
   registry: MainWindowsRegistry;
   now?: number;
@@ -20,7 +20,7 @@ export type ResolvePendingLastMainLogoutOptions = {
   waitGraceBeforeLogout: boolean;
 };
 
-export type PendingLastMainLogoutResolution = {
+type PendingLastMainLogoutResolution = {
   action: PendingLastMainLogoutAction;
   cleanRegistry: MainWindowsRegistry;
 };
@@ -76,6 +76,24 @@ export const resolvePendingLastMainLogout = ({
     action: 'logout',
     cleanRegistry,
   };
+};
+
+
+export const getPendingLastMainLogoutRetryDelay = (
+  pendingLogout: PendingLastMainLogout | null,
+  now = Date.now()
+): number | null => {
+  if (!pendingLogout) {
+    return null;
+  }
+
+  const elapsedMs = Math.max(0, now - pendingLogout.requestedAt);
+
+  if (elapsedMs > AUTH_WINDOW_TIMING.RELOAD_GRACE_MS) {
+    return 0;
+  }
+
+  return AUTH_WINDOW_TIMING.RELOAD_GRACE_MS - elapsedMs + 1;
 };
 
 export const shouldUnregisterMainWindowOnPageHide = (

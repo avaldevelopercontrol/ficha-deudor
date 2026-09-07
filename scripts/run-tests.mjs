@@ -7,6 +7,26 @@ import { createServer } from 'vite';
 const root = process.cwd();
 const sourceRoot = path.join(root, 'src');
 
+const requestedScope = process.argv[2];
+const testRoot = requestedScope
+  ? path.resolve(root, requestedScope)
+  : sourceRoot;
+
+const isWithinSourceRoot =
+  testRoot === sourceRoot || testRoot.startsWith(`${sourceRoot}${path.sep}`);
+
+if (!isWithinSourceRoot) {
+  throw new Error(
+    `El scope de tests debe estar dentro de src: ${requestedScope}`
+  );
+}
+
+const testRootStats = await fs.stat(testRoot).catch(() => null);
+
+if (!testRootStats?.isDirectory()) {
+  throw new Error(`No existe el directorio de tests: ${requestedScope}`);
+}
+
 const collectTestFiles = async (directory) => {
   const entries = await fs.readdir(directory, { withFileTypes: true });
   const nestedFiles = await Promise.all(entries.map(async (entry) => {
@@ -40,7 +60,7 @@ let passed = 0;
 let failed = 0;
 
 try {
-  const testFiles = (await collectTestFiles(sourceRoot)).sort();
+  const testFiles = (await collectTestFiles(testRoot)).sort();
 
   if (testFiles.length === 0) {
     console.error('No se encontraron archivos *.test.ts o *.test.tsx.');

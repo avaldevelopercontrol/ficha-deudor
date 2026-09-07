@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { lockModalScroll, unlockModalScroll } from './modalScrollLock.utils';
 
 type ModalSize =
   | 'sm'
@@ -53,7 +54,6 @@ const Modal: React.FC<ModalProps> = ({
   showCloseButton = true,
 }) => {
   const modalIdRef = useRef<number>(0);
-  const scrollYRef = useRef<number>(0);
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -73,14 +73,7 @@ const Modal: React.FC<ModalProps> = ({
       containerRef.current.style.zIndex = String(newZIndex + 1);
     }
 
-    scrollYRef.current = window.scrollY;
-
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollYRef.current}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.overflow = 'hidden';
-    document.body.style.width = '100%';
+    lockModalScroll();
 
     return () => {
       const index = modalStack.indexOf(modalIdRef.current);
@@ -89,16 +82,7 @@ const Modal: React.FC<ModalProps> = ({
         modalStack.splice(index, 1);
       }
 
-      if (modalStack.length === 0) {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.left = '';
-        document.body.style.right = '';
-        document.body.style.overflow = '';
-        document.body.style.width = '';
-
-        window.scrollTo(0, scrollYRef.current);
-      }
+      unlockModalScroll();
     };
   }, [isOpen]);
 

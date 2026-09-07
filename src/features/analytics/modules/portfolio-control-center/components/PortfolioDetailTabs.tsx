@@ -8,6 +8,7 @@ import { SisgesIcon } from '@shared/icons/sisges';
 import type {
   AdvisorPerformanceItem,
   CampaignPerformanceItem,
+  PortfolioDetailTab,
   PortfolioSupervisorFilterOption,
   SupervisorPerformanceItem,
 } from '../../../types/portfolioControlCenter.types';
@@ -33,15 +34,11 @@ import {
   SupervisorPerformanceTable,
 } from './SupervisorPerformanceTable';
 
-type PortfolioDetailTab =
-  | 'campaigns'
-  | 'supervisors'
-  | 'advisors';
-
 interface PortfolioDetailTabsProps {
   campaigns: readonly CampaignPerformanceItem[];
   supervisors: readonly SupervisorPerformanceItem[];
   advisors: readonly AdvisorPerformanceItem[];
+  onActiveTabChange?: (tab: PortfolioDetailTab) => void;
   contextualSupervisorFilter?: {
     enabled: boolean;
     value: string | null;
@@ -71,6 +68,7 @@ export const PortfolioDetailTabs: React.FC<
   campaigns,
   supervisors,
   advisors,
+  onActiveTabChange,
   contextualSupervisorFilter,
 }) => {
   const [activeTab, setActiveTab] =
@@ -82,11 +80,6 @@ export const PortfolioDetailTabs: React.FC<
     contextualSupervisorFilter?.enabled &&
       activeTab !== 'campaigns'
   );
-  const isContextualRequestActive = Boolean(
-    showContextualSupervisorFilter &&
-      contextualSupervisorFilter?.value
-  );
-
   const activeSortOptions = useMemo(
     () =>
       PORTFOLIO_DETAIL_SORT_OPTIONS[activeTab].map((option) => ({
@@ -137,11 +130,13 @@ export const PortfolioDetailTabs: React.FC<
     [advisors, sortByTab.advisors]
   );
 
+  const changeActiveTab = (tab: PortfolioDetailTab) => {
+    setActiveTab(tab);
+    onActiveTabChange?.(tab);
+  };
+
   const renderSupervisorOrAdvisorPanel = () => {
-    if (
-      isContextualRequestActive &&
-      contextualSupervisorFilter
-    ) {
+    if (contextualSupervisorFilter?.enabled) {
       return (
         <PortfolioResourceState
           isLoading={contextualSupervisorFilter.isLoading}
@@ -240,7 +235,7 @@ export const PortfolioDetailTabs: React.FC<
                   : ''
               }`}
               onClick={() => {
-                setActiveTab('campaigns');
+                changeActiveTab('campaigns');
               }}
             >
               <SisgesIcon name="campaign" aria-hidden="true" />
@@ -263,7 +258,7 @@ export const PortfolioDetailTabs: React.FC<
                   contextualSupervisorFilter.onChange(null);
                 }
 
-                setActiveTab('supervisors');
+                changeActiveTab('supervisors');
               }}
             >
               <SisgesIcon name="users" aria-hidden="true" />
@@ -279,7 +274,7 @@ export const PortfolioDetailTabs: React.FC<
                   : ''
               }`}
               onClick={() => {
-                setActiveTab('advisors');
+                changeActiveTab('advisors');
               }}
             >
               <SisgesIcon name="user" aria-hidden="true" />

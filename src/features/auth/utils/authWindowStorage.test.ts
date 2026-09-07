@@ -24,13 +24,29 @@ interface FakeWindowOptions {
   search?: string;
   opener?: object | null;
   uuid?: string;
+  localStorage?: MemoryStorage;
+}
+
+class CountingMemoryStorage extends MemoryStorage {
+  setCalls = 0;
+  removeCalls = 0;
+
+  override setItem(key: string, value: string): void {
+    this.setCalls += 1;
+    super.setItem(key, value);
+  }
+
+  override removeItem(key: string): void {
+    this.removeCalls += 1;
+    super.removeItem(key);
+  }
 }
 
 const withBrowserWindow = (
   options: FakeWindowOptions,
   run: (local: MemoryStorage, session: MemoryStorage) => void
 ) => {
-  const local = new MemoryStorage();
+  const local = options.localStorage ?? new MemoryStorage();
   const session = new MemoryStorage();
   const previousLocalStorage = Object.getOwnPropertyDescriptor(
     globalThis,
@@ -130,6 +146,23 @@ export const suite = defineSuite('authWindowStorage', [
 
       writeMainWindowsRegistry({});
       assert.equal(local.getItem(AUTH_STORAGE_KEYS.MAIN_WINDOWS), null);
+    });
+  }),
+  test('evita escrituras redundantes cuando el registro no cambia', () => {
+    const local = new CountingMemoryStorage();
+
+    withBrowserWindow({ localStorage: local }, () => {
+      const registry = {
+        one: { id: 'one', path: '/menu-modulos', lastSeen: 100 },
+      };
+
+      assert.equal(writeMainWindowsRegistry(registry), true);
+      assert.equal(writeMainWindowsRegistry(registry), true);
+      assert.equal(local.setCalls, 1);
+
+      assert.equal(writeMainWindowsRegistry({}), true);
+      assert.equal(writeMainWindowsRegistry({}), true);
+      assert.equal(local.removeCalls, 1);
     });
   }),
   test('descarta registros corruptos y ventanas vencidas', () => {

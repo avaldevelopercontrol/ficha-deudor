@@ -1,6 +1,6 @@
 import type { AuthState } from '../types';
 
-export type AuthAccessStatus =
+type AuthAccessStatus =
   | 'anonymous'
   | 'pending-client'
   | 'authenticated';

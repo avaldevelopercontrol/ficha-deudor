@@ -11,6 +11,7 @@ export interface SidebarNavigationItem {
   to?: string;
   disabled?: boolean;
   children?: SidebarNavigationItem[];
+  onNavigationIntent?: () => void;
 }
 
 interface SidebarMenuSectionProps {
@@ -232,6 +233,15 @@ const NestedNavigationItem = ({
   return (
     <NavLink
       to={item.to}
+      onMouseEnter={
+        item.onNavigationIntent
+      }
+      onFocus={
+        item.onNavigationIntent
+      }
+      onPointerDown={
+        item.onNavigationIntent
+      }
       className={() =>
         [
           'app-sidebar__sub-item',

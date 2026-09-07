@@ -4,25 +4,35 @@ import {
   defineSuite,
   test,
 } from '../../../../../test/testHarness';
+import type {
+  PortfolioOverduePromisesQuery,
+} from '../../../types/portfolioControlCenter.types';
 import {
   buildPortfolioAdvisorPerformanceEndpoint,
-  buildPortfolioCampaignPerformanceEndpoint,
-  buildPortfolioEvolutionEndpoint,
-  buildPortfolioPromisesEndpoint,
-  buildPortfolioOverduePromisesEndpoint,
+  buildPortfolioBootstrapEndpoint,
   buildPortfolioDueTodayPromisesEndpoint,
-  buildPortfolioSummaryEndpoint,
+  buildPortfolioOverduePromisesEndpoint,
+  buildPortfolioOverviewEndpoint,
   buildPortfolioSupervisorPerformanceEndpoint,
-  buildPortfolioTargetProgressEndpoint,
+  fetchPortfolioControlCenterOverview,
 } from './portfolioControlCenterApi';
+
+const OPERATIONAL_CONTEXT = {
+  businessUnit: 'CLARO GOBIERNO',
+  campaignId: '2026-08',
+  dateFrom: '2026-08-05',
+  dateTo: '2026-08-13',
+  subPortfolioId: '29',
+} as const;
 
 export const suite = defineSuite(
   'portfolioControlCenterApi',
   [
     test(
-      'construye Summary con campaña fechas y subcartera pero nunca con supervisor',
+      'construye Bootstrap con el contexto canonico sin propagar supervisor',
       () => {
-        const endpoint = buildPortfolioSummaryEndpoint({
+        const endpoint = buildPortfolioBootstrapEndpoint({
+          businessUnit: 'CLARO GOBIERNO',
           dateFrom: '2026-08-01',
           dateTo: '2026-08-13',
           subPortfolioId: '99',
@@ -32,167 +42,242 @@ export const suite = defineSuite(
 
         assert.equal(
           endpoint,
-          '/api/v1/portfolio-control-center/summary?campaign=2026-08&dateFrom=2026-08-01&dateTo=2026-08-13&subPortfolioId=99'
+          '/api/v1/portfolio-control-center/bootstrap?campaign=2026-08&businessUnit=CLARO+GOBIERNO&dateFrom=2026-08-01&dateTo=2026-08-13&subPortfolioId=99'
         );
       }
     ),
     test(
-      'construye Target Progress con el contexto efectivo y la subcartera seleccionada',
+      'construye Overview con el contexto canonico y normaliza textos de query',
       () => {
+        const endpoint = buildPortfolioOverviewEndpoint({
+          businessUnit: ' CLARO GOBIERNO ',
+          dateFrom: ' 2026-08-01 ',
+          dateTo: ' 2026-08-13 ',
+          subPortfolioId: ' 99 ',
+          campaignId: ' 2026-08 ',
+          supervisorId: null,
+        });
+
         assert.equal(
-          buildPortfolioTargetProgressEndpoint(
-            '2026-08',
-            '2026-08-13',
-            '29'
-          ),
-          '/api/v1/portfolio-control-center/target-progress?campaign=2026-08&dateTo=2026-08-13&subPortfolioId=29'
+          endpoint,
+          '/api/v1/portfolio-control-center/overview?campaign=2026-08&businessUnit=CLARO+GOBIERNO&dateFrom=2026-08-01&dateTo=2026-08-13&subPortfolioId=99'
         );
       }
     ),
     test(
-      'construye Promises con campaña y subcartera sin inventar filtros de fecha',
+      'no agrega query string cuando Bootstrap y Overview usan el contexto por defecto',
       () => {
+        const filters = {
+          businessUnit: null,
+          dateFrom: null,
+          dateTo: null,
+          subPortfolioId: null,
+          campaignId: null,
+          supervisorId: null,
+        } as const;
+
         assert.equal(
-          buildPortfolioPromisesEndpoint(
-            '2026-08',
-            '29'
-          ),
-          '/api/v1/portfolio-control-center/promises?campaign=2026-08&subPortfolioId=29'
+          buildPortfolioBootstrapEndpoint(filters),
+          '/api/v1/portfolio-control-center/bootstrap'
+        );
+        assert.equal(
+          buildPortfolioOverviewEndpoint(filters),
+          '/api/v1/portfolio-control-center/overview'
         );
       }
     ),
     test(
-      'construye el detalle completo de promesas vencidas solo con el contexto global',
+      'construye el detalle de promesas vencidas con query tipada',
       () => {
         assert.equal(
           buildPortfolioOverduePromisesEndpoint(
-            '2026-08',
-            '29'
+            {
+              businessUnit: 'CLARO GOBIERNO',
+              campaignId: '2026-08',
+              subPortfolioId: '29',
+            },
+            {
+              page: 2,
+              pageSize: 25,
+              aging: '4-7',
+              sortBy: 'overdueDays',
+              sortDirection: 'desc',
+            }
           ),
-          '/api/v1/portfolio-control-center/promises/overdue?campaign=2026-08&subPortfolioId=29'
+          '/api/v1/portfolio-control-center/promises/overdue?campaign=2026-08&businessUnit=CLARO+GOBIERNO&subPortfolioId=29&page=2&pageSize=25&aging=4-7&sortBy=overdueDays&sortDirection=desc'
         );
       }
     ),
     test(
-      'construye el detalle completo de promesas que vencen hoy solo con el contexto global',
+      'omite aging cuando el detalle de vencidas solicita todas las promesas',
+      () => {
+        assert.equal(
+          buildPortfolioOverduePromisesEndpoint(
+            {
+              businessUnit: null,
+              campaignId: '2026-08',
+              subPortfolioId: null,
+            },
+            {
+              page: 1,
+              pageSize: 5,
+              aging: null,
+              sortBy: 'dueDate',
+              sortDirection: 'asc',
+            }
+          ),
+          '/api/v1/portfolio-control-center/promises/overdue?campaign=2026-08&page=1&pageSize=5&sortBy=dueDate&sortDirection=asc'
+        );
+      }
+    ),
+    test(
+      'construye el detalle de promesas de hoy con query tipada',
       () => {
         assert.equal(
           buildPortfolioDueTodayPromisesEndpoint(
-            '2026-08',
-            '29'
+            {
+              businessUnit: 'CLARO GOBIERNO',
+              campaignId: '2026-08',
+              subPortfolioId: '29',
+            },
+            {
+              page: 1,
+              pageSize: 10,
+              status: 'pending',
+              sortBy: 'outstandingAmount',
+              sortDirection: 'desc',
+            }
           ),
-          '/api/v1/portfolio-control-center/promises/due-today?campaign=2026-08&subPortfolioId=29'
+          '/api/v1/portfolio-control-center/promises/due-today?campaign=2026-08&businessUnit=CLARO+GOBIERNO&subPortfolioId=29&page=1&pageSize=10&status=pending&sortBy=outstandingAmount&sortDirection=desc'
         );
       }
     ),
     test(
-      'construye Evolution con el contexto efectivo y la subcartera seleccionada',
-      () => {
-        assert.equal(
-          buildPortfolioEvolutionEndpoint(
-            '2026-08',
-            '2026-08-01',
-            '2026-08-13',
-            '29'
-          ),
-          '/api/v1/portfolio-control-center/evolution?campaign=2026-08&dateFrom=2026-08-01&dateTo=2026-08-13&subPortfolioId=29'
-        );
-      }
-    ),
-    test(
-      'construye Campaign Performance con el mismo contexto efectivo y sin supervisor',
-      () => {
-        assert.equal(
-          buildPortfolioCampaignPerformanceEndpoint(
-            '2026-08',
-            '2026-08-01',
-            '2026-08-13'
-          ),
-          '/api/v1/portfolio-control-center/campaign-performance?campaign=2026-08&dateFrom=2026-08-01&dateTo=2026-08-13'
-        );
-      }
-    ),
-    test(
-      'construye Supervisor Performance con el mismo contexto efectivo y filtros atribuibles',
+      'construye Supervisor Performance desde un contexto operacional unico',
       () => {
         assert.equal(
           buildPortfolioSupervisorPerformanceEndpoint(
-            '2026-08',
-            '2026-08-05',
-            '2026-08-13',
-            '29',
-            '1'
+            OPERATIONAL_CONTEXT
           ),
-          '/api/v1/portfolio-control-center/supervisor-performance?campaign=2026-08&dateFrom=2026-08-05&dateTo=2026-08-13&subPortfolioId=29&supervisorId=1'
+          '/api/v1/portfolio-control-center/supervisor-performance?campaign=2026-08&businessUnit=CLARO+GOBIERNO&dateFrom=2026-08-05&dateTo=2026-08-13&subPortfolioId=29'
         );
       }
     ),
     test(
-      'construye Advisor Performance con el contexto efectivo y filtros atribuibles',
+      'construye Advisor Performance con supervisor atribuible',
       () => {
         assert.equal(
           buildPortfolioAdvisorPerformanceEndpoint(
-            '2026-08',
-            '2026-08-05',
-            '2026-08-13',
-            '29',
+            OPERATIONAL_CONTEXT,
             '1'
           ),
-          '/api/v1/portfolio-control-center/advisor-performance?campaign=2026-08&dateFrom=2026-08-05&dateTo=2026-08-13&subPortfolioId=29&supervisorId=1'
+          '/api/v1/portfolio-control-center/advisor-performance?campaign=2026-08&businessUnit=CLARO+GOBIERNO&dateFrom=2026-08-05&dateTo=2026-08-13&subPortfolioId=29&supervisorId=1'
         );
       }
     ),
     test(
-      'agrega subPortfolioId a Campaign Performance cuando exista un contexto de subcartera soportado',
+      'rechaza fechas imposibles y rangos invertidos antes de ejecutar HTTP',
       () => {
-        assert.equal(
-          buildPortfolioCampaignPerformanceEndpoint(
-            '2026-08',
-            '2026-08-01',
-            '2026-08-13',
-            '29'
-          ),
-          '/api/v1/portfolio-control-center/campaign-performance?campaign=2026-08&dateFrom=2026-08-01&dateTo=2026-08-13&subPortfolioId=29'
+        assert.throws(
+          () =>
+            buildPortfolioOverviewEndpoint({
+              businessUnit: null,
+              dateFrom: '2026-02-30',
+              dateTo: '2026-03-01',
+              subPortfolioId: null,
+              campaignId: '2026-03',
+              supervisorId: null,
+            }),
+          /dateFrom debe usar el formato YYYY-MM-DD/
+        );
+
+        assert.throws(
+          () =>
+            buildPortfolioAdvisorPerformanceEndpoint({
+              ...OPERATIONAL_CONTEXT,
+              dateFrom: '2026-08-14',
+              dateTo: '2026-08-13',
+            }),
+          /dateFrom no puede ser posterior a dateTo/
         );
       }
     ),
     test(
-      'mantiene Target Promises y Evolution sin subPortfolioId cuando el scope es campaña',
+      'rechaza paginacion y criterios fuera de contrato antes de ejecutar HTTP',
       () => {
-        assert.equal(
-          buildPortfolioTargetProgressEndpoint(
-            '2026-08',
-            '2026-08-13'
-          ),
-          '/api/v1/portfolio-control-center/target-progress?campaign=2026-08&dateTo=2026-08-13'
+        assert.throws(
+          () =>
+            buildPortfolioOverduePromisesEndpoint(
+              {
+                businessUnit: null,
+                campaignId: '2026-08',
+                subPortfolioId: null,
+              },
+              {
+                page: 0,
+                pageSize: 25,
+                aging: null,
+                sortBy: 'dueDate',
+                sortDirection: 'asc',
+              }
+            ),
+          /page debe ser un entero positivo/
         );
-        assert.equal(
-          buildPortfolioPromisesEndpoint('2026-08'),
-          '/api/v1/portfolio-control-center/promises?campaign=2026-08'
-        );
-        assert.equal(
-          buildPortfolioEvolutionEndpoint(
-            '2026-08',
-            '2026-08-01',
-            '2026-08-13'
-          ),
-          '/api/v1/portfolio-control-center/evolution?campaign=2026-08&dateFrom=2026-08-01&dateTo=2026-08-13'
+
+        const invalidQuery = {
+          page: 1,
+          pageSize: 25,
+          aging: 'otro',
+          sortBy: 'unknown',
+          sortDirection: 'asc',
+        } as unknown as PortfolioOverduePromisesQuery;
+
+        assert.throws(
+          () =>
+            buildPortfolioOverduePromisesEndpoint(
+              {
+                businessUnit: null,
+                campaignId: '2026-08',
+                subPortfolioId: null,
+              },
+              invalidQuery
+            ),
+          /aging no es un valor soportado/
         );
       }
     ),
     test(
-      'no agrega query string cuando Summary usa el contexto por defecto',
-      () => {
-        assert.equal(
-          buildPortfolioSummaryEndpoint({
-            dateFrom: null,
-            dateTo: null,
-            subPortfolioId: null,
-            campaignId: null,
-            supervisorId: null,
-          }),
-          '/api/v1/portfolio-control-center/summary'
-        );
+      'rechaza crmClientId invalido antes de iniciar la solicitud',
+      async () => {
+        const originalFetch = globalThis.fetch;
+        let requestCount = 0;
+
+        globalThis.fetch = async () => {
+          requestCount += 1;
+          throw new Error('No debe ejecutarse HTTP');
+        };
+
+        try {
+          await assert.rejects(
+            () =>
+              fetchPortfolioControlCenterOverview(
+                0,
+                {
+                  businessUnit: null,
+                  dateFrom: null,
+                  dateTo: null,
+                  subPortfolioId: null,
+                  campaignId: null,
+                  supervisorId: null,
+                },
+                new AbortController().signal
+              ),
+            /crmClientId debe ser un entero positivo/
+          );
+          assert.equal(requestCount, 0);
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
       }
     ),
   ]
