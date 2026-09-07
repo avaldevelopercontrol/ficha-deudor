@@ -6,11 +6,11 @@ import {
 } from '../../../../../test/testHarness';
 import type {
   PortfolioAdvisorPerformanceApiResponse,
-  PortfolioCampaignPerformanceApiResponse,
   PortfolioEvolutionApiResponse,
   PortfolioFilterOptionsApiResponse,
   PortfolioPromisesApiResponse,
   PortfolioOverduePromisesApiResponse,
+  PortfolioOverviewApiResponse,
   PortfolioDueTodayPromisesApiResponse,
   PortfolioSummaryApiResponse,
   PortfolioSupervisorPerformanceApiResponse,
@@ -18,13 +18,12 @@ import type {
 } from '../api/portfolioControlCenterApi.types';
 import {
   mapPortfolioAdvisorPerformanceResponse,
-  mapPortfolioCampaignPerformanceResponse,
   mapPortfolioEvolutionResponse,
   mapPortfolioFilterOptionsResponse,
   mapPortfolioOperationalResponses,
+  mapPortfolioOverviewResponse,
   mapPortfolioOverduePromisesResponse,
   mapPortfolioDueTodayPromisesResponse,
-  mapPortfolioPerformanceDetailResponses,
   mapPortfolioSupervisorPerformanceResponse,
 } from './portfolioControlCenterApi.mapper';
 
@@ -33,6 +32,11 @@ const FILTER_OPTIONS_RESPONSE: PortfolioFilterOptionsApiResponse = {
   availableDateTo: '2026-08-13',
   updatedAt: '2026-08-14T16:00:00Z',
   portfolio: { id: 95 },
+  businessUnits: [
+    { code: 'CLARO ADMINISTRATIVO', name: 'CLARO ADMINISTRATIVO' },
+    { code: 'CLARO GOBIERNO', name: 'CLARO GOBIERNO' },
+  ],
+  selectedBusinessUnit: 'CLARO GOBIERNO',
   campaigns: [
     {
       code: '2026-08',
@@ -287,32 +291,12 @@ const EVOLUTION_RESPONSE: PortfolioEvolutionApiResponse = {
   ],
 };
 
-const CAMPAIGN_PERFORMANCE_RESPONSE: PortfolioCampaignPerformanceApiResponse = {
-  updatedAt: '2026-08-14T16:07:00Z',
-  campaigns: [
-    {
-      campaignCode: '2026-08',
-      campaignName: 'Agosto 2026',
-      dateFrom: '2026-08-01',
-      dateTo: '2026-08-13',
-      snapshotDate: '2026-08-12',
-      assignedPortfolio: 42904,
-      managedPortfolio: 37938,
-      pendingPortfolio: 4966,
-      progressRate: 88.4253,
-      managementCount: 3817,
-      contactabilityRate: 70.25,
-      rpcRate: 91.1504,
-      closeRate: 7.767,
-      promiseCount: 231,
-      promiseFulfillmentRate: null,
-      paymentCount: 3510,
-      recoveredAmount: 2667904.8986,
-      targetAmount: null,
-    },
-  ],
+const OVERVIEW_RESPONSE: PortfolioOverviewApiResponse = {
+  summary: SUMMARY_RESPONSE,
+  targetProgress: TARGET_RESPONSE,
+  promises: PROMISES_RESPONSE,
+  evolution: EVOLUTION_RESPONSE,
 };
-
 
 const SUPERVISOR_PERFORMANCE_RESPONSE: PortfolioSupervisorPerformanceApiResponse = {
   dateFrom: '2026-08-05',
@@ -378,6 +362,11 @@ export const suite = defineSuite(
           FILTER_OPTIONS_RESPONSE
         );
 
+        assert.deepEqual(result.businessUnits, [
+          { id: 'CLARO ADMINISTRATIVO', label: 'CLARO ADMINISTRATIVO' },
+          { id: 'CLARO GOBIERNO', label: 'CLARO GOBIERNO' },
+        ]);
+        assert.equal(result.selectedBusinessUnit, 'CLARO GOBIERNO');
         assert.deepEqual(result.subPortfolios[0], {
           id: '29',
           label: 'Subcartera real',
@@ -402,6 +391,8 @@ export const suite = defineSuite(
       () => {
         const legacyResponse: PortfolioFilterOptionsApiResponse = {
           ...FILTER_OPTIONS_RESPONSE,
+          businessUnits: undefined,
+          selectedBusinessUnit: undefined,
           campaigns: FILTER_OPTIONS_RESPONSE.campaigns.map(
             (campaign) => ({
               code: campaign.code,
@@ -420,6 +411,8 @@ export const suite = defineSuite(
 
         assert.equal(result.campaigns[0]?.year, 2026);
         assert.equal(result.campaigns[0]?.month, 8);
+        assert.deepEqual(result.businessUnits, []);
+        assert.equal(result.selectedBusinessUnit, null);
       }
     ),
     test(
@@ -462,32 +455,6 @@ export const suite = defineSuite(
         );
 
         assert.deepEqual(result, EVOLUTION_RESPONSE.evolution);
-      }
-    ),
-    test(
-      'mapea Campaign Performance preservando tasas y meta no evaluables como null',
-      () => {
-        const result =
-          mapPortfolioCampaignPerformanceResponse(
-            CAMPAIGN_PERFORMANCE_RESPONSE
-          );
-
-        assert.deepEqual(result[0], {
-          campaignId: '2026-08',
-          campaignName: 'Agosto 2026',
-          assignedPortfolio: 42904,
-          managedPortfolio: 37938,
-          progressRate: 88.4253,
-          managementCount: 3817,
-          contactabilityRate: 70.25,
-          rpcRate: 91.1504,
-          closeRate: 7.767,
-          promiseCount: 231,
-          promiseFulfillmentRate: null,
-          paymentCount: 3510,
-          recoveredAmount: 2667904.8986,
-          targetAmount: null,
-        });
       }
     ),
     test(
@@ -560,42 +527,33 @@ export const suite = defineSuite(
       }
     ),
     test(
-      'compone el detalle contextual de supervisor sin recalcular métricas',
+      'mapea Overview usando exactamente la composicion operacional existente',
       () => {
-        const result =
-          mapPortfolioPerformanceDetailResponses(
-            SUPERVISOR_PERFORMANCE_RESPONSE,
-            ADVISOR_PERFORMANCE_RESPONSE
-          );
+        const aggregated = mapPortfolioOverviewResponse(
+          OVERVIEW_RESPONSE,
+          null
+        );
+        const legacyComposition = mapPortfolioOperationalResponses(
+          SUMMARY_RESPONSE,
+          TARGET_RESPONSE,
+          PROMISES_RESPONSE,
+          EVOLUTION_RESPONSE,
+          null
+        );
 
-        assert.equal(
-          result.updatedAt,
-          '2026-08-14T16:09:00Z'
-        );
-        assert.equal(result.supervisors.length, 1);
-        assert.equal(
-          result.supervisors[0]?.supervisorId,
-          '1'
-        );
-        assert.equal(result.advisors.length, 2);
-        assert.equal(
-          result.advisors[0]?.advisorId,
-          '3'
-        );
+        assert.deepEqual(aggregated, legacyComposition);
       }
     ),
     test(
-      'compone todos los bloques API sin mezclar datos mock',
+      'compone todos los bloques API en un unico modelo de dominio',
       () => {
         const result = mapPortfolioOperationalResponses(
           SUMMARY_RESPONSE,
           TARGET_RESPONSE,
           PROMISES_RESPONSE,
           EVOLUTION_RESPONSE,
-          CAMPAIGN_PERFORMANCE_RESPONSE,
-          SUPERVISOR_PERFORMANCE_RESPONSE,
-          ADVISOR_PERFORMANCE_RESPONSE,
-          '29'
+          '29',
+          'CLARO GOBIERNO'
         );
 
         assert.equal(
@@ -610,7 +568,7 @@ export const suite = defineSuite(
         );
         assert.equal(
           result.updatedAt,
-          '2026-08-14T16:09:00Z'
+          '2026-08-14T16:06:00Z'
         );
         assert.deepEqual(result.freshness, {
           operationAsOfAt: '2026-08-14T10:47:00-05:00',
@@ -618,6 +576,7 @@ export const suite = defineSuite(
           refreshedAt: '2026-08-14T15:55:00Z',
         });
         assert.deepEqual(result.context, {
+          businessUnit: 'CLARO GOBIERNO',
           campaignId: '2026-08',
           dateFrom: '2026-08-01',
           dateTo: '2026-08-13',
@@ -641,30 +600,49 @@ export const suite = defineSuite(
           '2026-08'
         );
         assert.equal(
+          result.campaigns[0]?.progressRate,
+          88.4253
+        );
+        assert.equal(
           result.campaigns[0]?.targetAmount,
           null
         );
-        assert.equal(
-          result.supervisors[0]?.supervisorId,
-          '1'
-        );
-        assert.equal(
-          result.supervisors[0]?.promiseFulfillmentRate,
-          null
-        );
-        assert.equal(result.advisors.length, 2);
-        assert.equal(
-          result.advisors[0]?.advisorId,
-          '3'
-        );
-        assert.equal(
-          result.advisors[1]?.currentSupervisorId,
-          null
-        );
+        assert.deepEqual(result.supervisors, []);
+        assert.deepEqual(result.advisors, []);
         assert.equal(
           result.updatedAt,
-          '2026-08-14T16:09:00Z'
+          '2026-08-14T16:06:00Z'
         );
+      }
+    ),
+    test(
+      'deriva la fila de campaña seleccionada desde summary y target sin request adicional',
+      () => {
+        const result = mapPortfolioOperationalResponses(
+          SUMMARY_RESPONSE,
+          TARGET_RESPONSE,
+          PROMISES_RESPONSE,
+          EVOLUTION_RESPONSE,
+          null
+        );
+
+        assert.equal(result.campaigns.length, 1);
+        assert.deepEqual(result.campaigns[0], {
+          campaignId: '2026-08',
+          campaignName: 'Agosto 2026',
+          assignedPortfolio: 42904,
+          managedPortfolio: 37938,
+          progressRate: 88.4253,
+          managementCount: 3817,
+          contactabilityRate: 70.25,
+          rpcRate: 91.1504,
+          closeRate: 7.767,
+          promiseCount: 231,
+          promiseFulfillmentRate: null,
+          paymentCount: 3510,
+          recoveredAmount: 2667904.8986,
+          targetAmount: 17140742,
+        });
       }
     ),
     test(
@@ -675,9 +653,6 @@ export const suite = defineSuite(
           TARGET_RESPONSE,
           PROMISES_RESPONSE,
           EVOLUTION_RESPONSE,
-          CAMPAIGN_PERFORMANCE_RESPONSE,
-          SUPERVISOR_PERFORMANCE_RESPONSE,
-          ADVISOR_PERFORMANCE_RESPONSE,
           null
         );
 
@@ -707,9 +682,6 @@ export const suite = defineSuite(
             },
           },
           EVOLUTION_RESPONSE,
-          CAMPAIGN_PERFORMANCE_RESPONSE,
-          SUPERVISOR_PERFORMANCE_RESPONSE,
-          ADVISOR_PERFORMANCE_RESPONSE,
           null
         );
 

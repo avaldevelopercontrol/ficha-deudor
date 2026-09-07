@@ -12,7 +12,13 @@
     "mock": "node mock-api.js",
     "typecheck": "tsc -b",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build",
-    "test": "node scripts/run-tests.mjs"
+    "test": "node scripts/run-tests.mjs",
+    "test:auth": "node scripts/run-tests.mjs src/features/auth",
+    "check:auth": "npm run typecheck && npm run lint && npm run test:auth && npm run build",
+    "test:gestion-deudor": "node scripts/run-tests.mjs src/features/gestion-cobranzas/modules/gestion-deudor",
+    "check:gestion-deudor": "npm run typecheck && npm run lint && npm run test:gestion-deudor && npm run build",
+    "test:portfolio-control-center": "node scripts/run-tests.mjs src/features/analytics/modules/portfolio-control-center",
+    "check:portfolio-control-center": "npm run typecheck && npm run lint && npm run test:portfolio-control-center && npm run build"
   },
   "dependencies": {
     "react": "^19.2.5",

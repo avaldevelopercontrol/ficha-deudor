@@ -8,7 +8,16 @@ import {
   parseStoredAuthSession,
 } from '../validations/authSession.guard';
 
-export type AuthLogoutReason = 'manual' | 'last-main-window-closed';
+type AuthLogoutReason = 'manual' | 'last-main-window-closed';
+
+interface AuthLogoutEvent {
+  reason: AuthLogoutReason;
+  at: number;
+}
+
+interface BroadcastAuthLogoutOptions {
+  notifyCurrentWindow?: boolean;
+}
 
 export const initialAuthState: AuthState = {
   isAuthenticated: false,
@@ -68,44 +77,40 @@ export function saveStoredAuthState(state: AuthState) {
   }
 }
 
-export function clearStoredAuthState(
-  reason: AuthLogoutReason = 'manual'
-) {
-  const logoutEvent = {
+export function clearStoredAuthState(): void {
+  try {
+    localStorage.removeItem(AUTH_STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(AUTH_STORAGE_KEYS.STATE);
+  } catch {
+    // El estado en memoria seguirá siendo la fuente segura de la sesión actual.
+  }
+}
+
+export function broadcastAuthLogout(
+  reason: AuthLogoutReason = 'manual',
+  { notifyCurrentWindow = true }: BroadcastAuthLogoutOptions = {}
+): AuthLogoutEvent {
+  const logoutEvent: AuthLogoutEvent = {
     reason,
     at: Date.now(),
   };
 
   try {
-    localStorage.removeItem(AUTH_STORAGE_KEYS.TOKEN);
-    localStorage.removeItem(AUTH_STORAGE_KEYS.STATE);
     localStorage.setItem(
       AUTH_STORAGE_KEYS.LOGOUT_EVENT,
       JSON.stringify(logoutEvent)
     );
   } catch {
-    // El evento local garantiza que el proveedor actual cierre la sesión.
+    // El evento local mantiene consistente la ventana que inició el cierre.
   }
 
-  window.dispatchEvent(
-    new CustomEvent(AUTH_LOGOUT_CUSTOM_EVENT, {
-      detail: logoutEvent,
-    })
-  );
-}
-
-export function hasStoredAuthState(): boolean {
-  try {
-    const rawState = localStorage.getItem(AUTH_STORAGE_KEYS.STATE);
-    const parsedSession = parseStoredAuthSession(rawState);
-
-    if (!parsedSession && rawState !== null) {
-      removeStoredState();
-    }
-
-    return Boolean(parsedSession);
-  } catch {
-    removeStoredState();
-    return false;
+  if (notifyCurrentWindow) {
+    window.dispatchEvent(
+      new CustomEvent(AUTH_LOGOUT_CUSTOM_EVENT, {
+        detail: logoutEvent,
+      })
+    );
   }
+
+  return logoutEvent;
 }

@@ -1,3 +1,5 @@
+import { clearAnalyticsAccessSession } from '@features/analytics/access/services/analyticsAccess.prefetch';
+import { clearSelectedCrmClientId } from '@features/analytics/access/store/analyticsCrmSelection.storage';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useAuthExternalSessionSync } from '../../hooks/useAuthExternalSessionSync';
@@ -18,6 +20,7 @@ import {
   buildLoginCancelledResponse,
   buildLoginErrorResponse,
   buildRejectedLoginState,
+  broadcastAuthLogout,
   clearAuthStateError,
   clearStoredAuthState,
   initialAuthState,
@@ -41,7 +44,13 @@ export const useAuthProviderValue = (): AuthContextValue => {
     clearError: clearLoginError,
   } = useLoginRequest();
 
-  useAuthExternalSessionSync(setState, resetLogin);
+  const resetTransientAuthState = useCallback(() => {
+    resetLogin();
+    setExpiredPasswordChallenge(null);
+    setPasswordExpiryWarning(null);
+  }, [resetLogin]);
+
+  useAuthExternalSessionSync(setState, resetTransientAuthState);
 
   const login = useCallback(
     async (payload: LoginPayload): Promise<LoginResponse> => {
@@ -59,7 +68,7 @@ export const useAuthProviderValue = (): AuthContextValue => {
           response.message
         );
 
-        clearStoredAuthState('manual');
+        clearStoredAuthState();
         setPasswordExpiryWarning(null);
 
         if (!challenge) {
@@ -82,10 +91,13 @@ export const useAuthProviderValue = (): AuthContextValue => {
 
       if (!response.success || !response.usuario) {
         setPasswordExpiryWarning(null);
-        clearStoredAuthState('manual');
+        clearStoredAuthState();
         setState(buildRejectedLoginState(response.message));
         return response;
       }
+
+      clearAnalyticsAccessSession();
+      clearSelectedCrmClientId();
 
       const nextState = buildAuthenticatedUserState(response.usuario);
 
@@ -103,12 +115,13 @@ export const useAuthProviderValue = (): AuthContextValue => {
   );
 
   const logout = useCallback(() => {
-    resetLogin();
-    clearStoredAuthState('manual');
-    setExpiredPasswordChallenge(null);
-    setPasswordExpiryWarning(null);
+    clearAnalyticsAccessSession();
+    clearSelectedCrmClientId();
+    clearStoredAuthState();
+    resetTransientAuthState();
     setState(initialAuthState);
-  }, [resetLogin]);
+    broadcastAuthLogout('manual', { notifyCurrentWindow: false });
+  }, [resetTransientAuthState]);
 
   const seleccionarCliente = useCallback((cliente: Cliente) => {
     setState((currentState) => {

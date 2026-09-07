@@ -1,9 +1,9 @@
 import type React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { SisgesIcon } from '@shared/icons/sisges';
 
-import { env } from '@app/config/env';
+import { APPLICATION_OPTION_IDS } from '@features/access-control/registry/applicationOptionIds';
 
 import {
   AnalyticsScopesEmpty,
@@ -42,25 +42,23 @@ import {
   DEFAULT_PORTFOLIO_CONTROL_CENTER_FILTERS,
 } from '../modules/portfolio-control-center/constants/portfolioControlCenter.constants';
 import {
-  usePortfolioControlCenter,
-} from '../modules/portfolio-control-center/hooks/usePortfolioControlCenter';
+  usePortfolioControlCenterBootstrap,
+} from '../modules/portfolio-control-center/hooks/usePortfolioControlCenterBootstrap';
 import {
-  usePortfolioControlCenterFilterOptions,
-} from '../modules/portfolio-control-center/hooks/usePortfolioControlCenterFilterOptions';
+  usePortfolioAutoRefresh,
+} from '../modules/portfolio-control-center/hooks/usePortfolioAutoRefresh';
 import {
-  usePortfolioPerformanceDetail,
-} from '../modules/portfolio-control-center/hooks/usePortfolioPerformanceDetail';
+  usePortfolioPerformanceController,
+} from '../modules/portfolio-control-center/hooks/usePortfolioPerformanceController';
 import {
-  getPortfolioSupervisorOptionsForContext,
-  PORTFOLIO_UNASSIGNED_SUPERVISOR_FILTER_ID,
+  isPortfolioBusinessUnitTransitionPending,
+  switchPortfolioBusinessUnit,
 } from '../modules/portfolio-control-center/utils/portfolioFilterContext.utils';
 import type {
   PortfolioControlCenterFilters,
 } from '../types/portfolioControlCenter.types';
 
 import '../styles/32-portfolio-control-center.css';
-
-const PORTFOLIO_AUTO_REFRESH_MS = 5 * 60 * 1000;
 
 interface PortfolioControlCenterContentProps {
   scopes: readonly AnalyticsScope[];
@@ -75,44 +73,45 @@ const PortfolioControlCenterContent: React.FC<
   selectedCrmClientId,
   onCrmClientChange,
 }) => {
-  const useLatestCampaignFallback =
-    !env.analyticsUseMocks;
-  const restrictSupervisorFilter =
-    !env.analyticsUseMocks;
-
   const [filters, setFilters] =
     useState<PortfolioControlCenterFilters>(
       DEFAULT_PORTFOLIO_CONTROL_CENTER_FILTERS
     );
-
-  const [detailSupervisorId, setDetailSupervisorId] =
-    useState<string | null>(null);
 
   const {
     data,
     isLoading,
     error,
     refetch,
-  } = usePortfolioControlCenter(filters);
+    filterOptions,
+    areFiltersLoading,
+    filterOptionsError,
+    refetchFilterOptions,
+  } = usePortfolioControlCenterBootstrap(
+    selectedCrmClientId,
+    filters
+  );
 
-  const {
-    data: filterOptions,
-    isLoading: areFiltersLoading,
-    error: filterOptionsError,
-    refetch: refetchFilterOptions,
-  } = usePortfolioControlCenterFilterOptions();
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        void refetch();
-      }
-    }, PORTFOLIO_AUTO_REFRESH_MS);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [refetch]);
+  const effectiveBusinessUnit =
+    filters.businessUnit ??
+    filterOptions.selectedBusinessUnit;
+  const clearBusinessUnit =
+    filterOptions.selectedBusinessUnit ??
+    filters.businessUnit;
+  const confirmedBusinessUnit =
+    data?.context.businessUnit ??
+    filterOptions.selectedBusinessUnit;
+  const isBusinessUnitTransitionPending =
+    isPortfolioBusinessUnitTransitionPending(
+      filters.businessUnit,
+      confirmedBusinessUnit
+    );
+  const visibleData = isBusinessUnitTransitionPending
+    ? null
+    : data;
+  const visibleIsLoading =
+    isLoading ||
+    (isBusinessUnitTransitionPending && !error);
 
   const portfolioOption = useMemo(() => {
     const scope = filterOptions.portfolio;
@@ -139,80 +138,19 @@ const PortfolioControlCenterContent: React.FC<
     selectedCrmClientId,
   ]);
 
-  const hasUnassignedAdvisors = Boolean(
-    data?.advisors.some(
-      (item) => item.currentSupervisorId === null
-    )
-  );
-
-  const contextualSupervisorOptions = useMemo(
-    () =>
-      getPortfolioSupervisorOptionsForContext(
-        filterOptions,
-        data?.context.campaignId ?? null,
-        data?.context.subPortfolioId ?? null,
-        hasUnassignedAdvisors
-      ),
-    [
-      data?.context.campaignId,
-      data?.context.subPortfolioId,
+  const performanceController =
+    usePortfolioPerformanceController({
+      crmClientId: selectedCrmClientId,
+      context: visibleData?.context ?? null,
       filterOptions,
-      hasUnassignedAdvisors,
-    ]
-  );
+    });
 
-  const isUnassignedSupervisorSelected = Boolean(
-    detailSupervisorId ===
-      PORTFOLIO_UNASSIGNED_SUPERVISOR_FILTER_ID &&
-      hasUnassignedAdvisors
-  );
-
-  const effectiveDetailSupervisorId =
-    detailSupervisorId &&
-    !isUnassignedSupervisorSelected &&
-    contextualSupervisorOptions.some(
-      (item) => item.id === detailSupervisorId
-    )
-      ? detailSupervisorId
-      : null;
-
-  const detailSupervisorFilterValue =
-    isUnassignedSupervisorSelected
-      ? PORTFOLIO_UNASSIGNED_SUPERVISOR_FILTER_ID
-      : effectiveDetailSupervisorId;
-
-  const {
-    data: filteredDetail,
-    isLoading: isDetailLoading,
-    error: detailError,
-    refetch: refetchDetail,
-  } = usePortfolioPerformanceDetail({
-    context: data?.context ?? null,
-    supervisorId: effectiveDetailSupervisorId,
-    enabled: !env.analyticsUseMocks,
-  });
-
-  const hasContextualSupervisor = Boolean(
-    !env.analyticsUseMocks &&
-      effectiveDetailSupervisorId
-  );
-  const detailSupervisors = isUnassignedSupervisorSelected
-    ? []
-    : hasContextualSupervisor
-      ? filteredDetail?.supervisors ?? []
-      : data?.supervisors ?? [];
-  const detailAdvisors = isUnassignedSupervisorSelected
-    ? data?.advisors.filter(
-        (item) => item.currentSupervisorId === null
-      ) ?? []
-    : hasContextualSupervisor
-      ? filteredDetail?.advisors ?? []
-      : data?.advisors ?? [];
+  usePortfolioAutoRefresh({ refetch });
 
   const handleFiltersChange = (
     nextFilters: PortfolioControlCenterFilters
   ) => {
-    setDetailSupervisorId(null);
+    performanceController.resetDetailSupervisor();
     setFilters(nextFilters);
   };
 
@@ -220,8 +158,8 @@ const PortfolioControlCenterContent: React.FC<
     <main className="portfolio-control-center">
       <div className="portfolio-control-center__content">
         <PortfolioControlCenterHeader
-          freshness={data?.freshness ?? null}
-          isLoading={isLoading}
+          freshness={visibleData?.freshness ?? null}
+          isLoading={visibleIsLoading}
         />
 
         <div className="portfolio-control-center__sections">
@@ -235,19 +173,21 @@ const PortfolioControlCenterContent: React.FC<
             filters={filters}
             options={filterOptions}
             portfolioOption={portfolioOption}
+            resolvedCampaignId={
+              visibleData?.context.campaignId ?? null
+            }
             isLoading={areFiltersLoading}
             error={filterOptionsError}
-            useLatestCampaignFallback={
-              useLatestCampaignFallback
-            }
-            restrictSupervisorFilter={
-              restrictSupervisorFilter
-            }
             onChange={handleFiltersChange}
             onClear={() => {
-              setDetailSupervisorId(null);
-              setFilters(
-                DEFAULT_PORTFOLIO_CONTROL_CENTER_FILTERS
+              performanceController.resetDetailSupervisor();
+              setFilters((currentFilters) =>
+                clearBusinessUnit
+                  ? switchPortfolioBusinessUnit(
+                      currentFilters,
+                      clearBusinessUnit
+                    )
+                  : DEFAULT_PORTFOLIO_CONTROL_CENTER_FILTERS
               );
             }}
             onRetry={() => {
@@ -272,20 +212,20 @@ const PortfolioControlCenterContent: React.FC<
             </div>
 
             <PortfolioResourceState
-              isLoading={isLoading}
+              isLoading={visibleIsLoading}
               error={error}
-              isEmpty={data === null}
+              isEmpty={visibleData === null}
               onRetry={() => {
                 void refetch();
               }}
             >
-              {data && (
+              {visibleData && (
                 <div className="portfolio-control-center__kpi-content">
                   <PortfolioKpiGrid
-                    summary={data.summary}
+                    summary={visibleData.summary}
                   />
                   <PortfolioSecondaryMetrics
-                    summary={data.summary}
+                    summary={visibleData.summary}
                   />
                 </div>
               )}
@@ -294,8 +234,8 @@ const PortfolioControlCenterContent: React.FC<
 
           <div className="portfolio-control-center__overview-grid">
             <PortfolioEvolutionChart
-              evolution={data?.evolution ?? []}
-              isLoading={isLoading}
+              evolution={visibleData?.evolution ?? []}
+              isLoading={visibleIsLoading}
               error={error}
               onRetry={() => {
                 void refetch();
@@ -303,49 +243,52 @@ const PortfolioControlCenterContent: React.FC<
             />
 
             <PortfolioAttentionPanel
-              items={data?.attention ?? []}
-              target={data?.target ?? null}
+              key={effectiveBusinessUnit ?? 'legacy'}
+              items={visibleData?.attention ?? []}
+              target={visibleData?.target ?? null}
               recoveredAmount={
-                data?.summary.recoveredAmount ?? null
+                visibleData?.summary.recoveredAmount ?? null
               }
               context={
-                data
+                visibleData
                   ? {
-                      campaignId: data.context.campaignId,
-                      subPortfolioId: data.context.subPortfolioId,
+                      crmClientId: selectedCrmClientId,
+                      businessUnit:
+                        visibleData.context.businessUnit,
+                      campaignId:
+                        visibleData.context.campaignId,
+                      subPortfolioId:
+                        visibleData.context.subPortfolioId,
                     }
                   : null
               }
+              isLoading={visibleIsLoading}
+              error={error}
+              onRetry={() => {
+                void refetch();
+              }}
             />
           </div>
 
           <PortfolioResourceState
-            isLoading={isLoading}
+            isLoading={visibleIsLoading}
             error={error}
-            isEmpty={data === null}
+            isEmpty={visibleData === null}
             onRetry={() => {
               void refetch();
             }}
           >
-            {data && (
+            {visibleData && (
               <PortfolioDetailTabs
-                campaigns={data.campaigns}
-                supervisors={detailSupervisors}
-                advisors={detailAdvisors}
+                campaigns={visibleData.campaigns}
+                supervisors={performanceController.supervisors}
+                advisors={performanceController.advisors}
+                onActiveTabChange={
+                  performanceController.onActiveTabChange
+                }
                 contextualSupervisorFilter={{
-                  enabled: !env.analyticsUseMocks,
-                  value: detailSupervisorFilterValue,
-                  options: contextualSupervisorOptions,
-                  isLoading:
-                    !isUnassignedSupervisorSelected &&
-                    isDetailLoading,
-                  error: isUnassignedSupervisorSelected
-                    ? null
-                    : detailError,
-                  onChange: setDetailSupervisorId,
-                  onRetry: () => {
-                    void refetchDetail();
-                  },
+                  enabled: true,
+                  ...performanceController.supervisorFilter,
                 }}
               />
             )}
@@ -356,7 +299,6 @@ const PortfolioControlCenterContent: React.FC<
   );
 };
 
-const PORTFOLIO_CONTROL_CENTER_OPTION_ID = 23;
 
 export const PortfolioControlCenterPage: React.FC = () => {
   const {
@@ -367,7 +309,7 @@ export const PortfolioControlCenterPage: React.FC = () => {
     selectCrmClientId,
     refresh,
   } = useAnalyticsAccess(
-    PORTFOLIO_CONTROL_CENTER_OPTION_ID
+    APPLICATION_OPTION_IDS.PORTFOLIO_CONTROL_CENTER
   );
 
   if (loading) {

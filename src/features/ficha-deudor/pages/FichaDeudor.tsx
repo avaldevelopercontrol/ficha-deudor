@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
-import { AUTH_ROUTES } from '@features/auth/constants';
+import { GESTION_COBRANZAS_ROUTES } from '@features/gestion-cobranzas/constants/gestionCobranzasRoutes.constants';
 
 import DeudorHeader from '../modules/deudor-header/components/DeudorHeader';
 import DocumentosTable from '../modules/documentos/components/DocumentosTable';
@@ -75,8 +75,6 @@ const FichaContent: React.FC<
   };
   
   const {
-    contacto,
-    setContacto,
     panelActivo,
     panelesInicializados,
     telefonoSeleccionado,
@@ -136,21 +134,17 @@ const FichaContent: React.FC<
     cabeceraData?.cartera ?? '';
 
   return (
-    <DeudorProvider value={deudorData ?? null}>
+    <DeudorProvider value={deudorData}>
       <div className="ficha-page">
         <main className="ficha-main ficha-main--two-columns">
           <aside className="ficha-sidebar">
-            {deudorData && (
-              <DeudorHeader
-                deudorData={deudorData}
-                cabeceraData={cabeceraData}
-                isLoadingCabecera={isLoadingCabecera}
-                cabeceraError={cabeceraError}
-                contacto={contacto}
-                onContactoChange={setContacto}
-                compact
-              />
-            )}
+            <DeudorHeader
+              deudorData={deudorData}
+              cabeceraData={cabeceraData}
+              isLoadingCabecera={isLoadingCabecera}
+              cabeceraError={cabeceraError}
+              compact
+            />
 
             <AccionesRapidas
               panelActivo={panelActivo}
@@ -159,15 +153,13 @@ const FichaContent: React.FC<
           </aside>
 
           <div className="ficha-content">
-            {deudorData && (
-              <DocumentosTable
-                params={documentosParams}
-                data={deudorData}
-                onFilteredDocumentosChange={
-                  setDocumentosFiltrados
-                }
-              />
-            )}
+            <DocumentosTable
+              params={documentosParams}
+              data={deudorData}
+              onFilteredDocumentosChange={
+                setDocumentosFiltrados
+              }
+            />
 
             {panelesInicializados.has(
               FICHA_DEUDOR_PANEL.DATOS_ADICIONALES
@@ -269,7 +261,7 @@ const FichaDeudor: React.FC = () => {
   if (!hasRequiredParams) {
     return (
       <Navigate
-        to={AUTH_ROUTES.GESTION_DEUDOR}
+        to={GESTION_COBRANZAS_ROUTES.GESTION_DEUDOR}
         replace
       />
     );

@@ -1,7 +1,4 @@
 export {
-  aniosCarteraMock,
-  carterasParametrosMock,
-  clientesMock,
   mockGetAniosByCliente,
   mockGetCarterasParametrosByClienteAnio,
   mockGetGruposClienteInicial,

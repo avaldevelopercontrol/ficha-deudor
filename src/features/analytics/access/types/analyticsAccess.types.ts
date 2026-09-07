@@ -1,39 +1,17 @@
-export type AnalyticsCoverageMode =
-  | 'SINGLE'
-  | 'MULTIPLE'
-  | 'ALL';
-
-export type AnalyticsScopePolicy =
-  | 'USER_SCOPED'
-  | 'UNRESTRICTED';
-
-export type AnalyticsFilterStrategy =
-  | 'NONE'
-  | 'URL_FILTER'
-  | 'EMBEDDED_RLS';
-
 export interface AnalyticsScope {
   crmClientId: number;
   name: string;
 }
 
-
-export interface AnalyticsOptionClientsResponse {
-  optionId: number;
-  clientIds: number[];
+export interface AnalyticsOptionClient {
+  clientId: number;
+  name: string;
 }
 
-export type AnalyticsGroupScopeMode =
-  | 'GROUP'
-  | 'CLIENT_LEGACY'
-  | 'NONE';
-
-export interface AnalyticsOptionGroupAccessResponse {
-  optionId: number;
-  allowed: boolean;
-  scopeMode: AnalyticsGroupScopeMode;
-  groupIds: number[];
-  requiresClientSelection: boolean;
+export interface AnalyticsOptionClientsResponse {
+  optionId?: number;
+  clientIds?: number[];
+  clients?: AnalyticsOptionClient[];
 }
 
 export interface AnalyticsReportClientOption {
@@ -46,29 +24,31 @@ export interface AnalyticsReportClientsResponse {
   clients: AnalyticsReportClientOption[];
 }
 
-export interface AnalyticsReportClientEmbedResponse {
+export interface AnalyticsPowerBiOptionAccess {
   optionId: number;
-  clientId: number;
-  name: string;
-  embedUrl: string;
+  allowed: boolean;
+  requiresClientSelection: boolean;
 }
 
-export interface AnalyticsReportScope {
-  crmClientId: number;
-  filterValue: string | null;
+export interface AnalyticsPowerBiAccessResponse {
+  options: AnalyticsPowerBiOptionAccess[];
 }
 
-export interface AnalyticsReportAccess {
+export type AnalyticsPowerBiClientSelectionStatus =
+  | 'NOT_REQUIRED'
+  | 'VALID'
+  | 'MISSING'
+  | 'INVALID';
+
+export interface AnalyticsPowerBiViewerContextResponse {
   optionId: number;
-  coverageMode: AnalyticsCoverageMode;
-  scopePolicy: AnalyticsScopePolicy;
-  filterStrategy: AnalyticsFilterStrategy;
-  filterTable: string | null;
-  filterColumn: string | null;
-  allowedScopes: AnalyticsReportScope[];
+  allowed: boolean;
+  requiresClientSelection: boolean;
+  clientSelectionStatus: AnalyticsPowerBiClientSelectionStatus;
+  selectedClient: AnalyticsReportClientOption | null;
+  embedUrl: string | null;
 }
 
 export interface AnalyticsAccessContext {
   scopes: AnalyticsScope[];
-  reports: AnalyticsReportAccess[];
 }

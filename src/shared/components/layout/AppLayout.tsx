@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import AppSidebar from './AppSidebar';
 import AppHeader from './AppHeader';
@@ -64,7 +64,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           />
 
           <main className="app-layout__main">
-            <Outlet />
+            <Suspense
+              fallback={
+                <div role="status">
+                  Cargando...
+                </div>
+              }
+            >
+              <Outlet />
+            </Suspense>
           </main>
         </div>
       </div>

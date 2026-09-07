@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useState,
   type ReactNode,
 } from 'react';
 
@@ -11,7 +10,6 @@ import {
 } from 'react-router-dom';
 
 import {
-  APPLICATION_OPTION_IDS,
   useAccessControl,
 } from '@features/access-control';
 
@@ -20,30 +18,12 @@ import {
 } from '@shared/components/layout/AppLayoutContext';
 
 import {
-  getAnalyticsOptionGroupAccess,
-  getAnalyticsReportClientEmbed,
-  getAnalyticsReportClients,
-} from '../access/api/analyticsAccess.api';
-
-import type {
-  AnalyticsReportClientOption,
-} from '../access/types/analyticsAccess.types';
-
-
-import {
   REPORTERIA_ROUTES,
 } from '../constants/reporteriaRoutes.constants';
 
 import {
-  findAuthorizedOptionById,
-  resolvePowerBiEmbedUrl,
-  resolvePowerBiPublishToWebUrl,
-} from '../modules/reporteria/utils/reporteria.utils';
-
-import {
-  findAuthorizedReportClient,
-  parseReportClientSelection,
-} from '../modules/reporteria/utils/reporteriaClientScope.utils';
+  usePowerBiViewerAccess,
+} from '../modules/reporteria/hooks/usePowerBiViewerAccess';
 
 import '../styles/33-reporteria.css';
 
@@ -64,26 +44,6 @@ const BackIcon = () => (
   </svg>
 );
 
-type ClientSelectionStatus =
-  | 'NOT_REQUIRED'
-  | 'VALID'
-  | 'MISSING'
-  | 'INVALID';
-
-type ViewerAnalyticsAccessState =
-  | {
-      key: string;
-      status: 'error';
-    }
-  | {
-      key: string;
-      status: 'ready';
-      allowed: boolean;
-      clientSelectionStatus: ClientSelectionStatus;
-      selectedClient: AnalyticsReportClientOption | null;
-      scopedEmbedUrl: string | null;
-    };
-
 export const PowerBiViewerPage = (): ReactNode => {
   const {
     optionId: optionIdParam,
@@ -102,20 +62,24 @@ export const PowerBiViewerPage = (): ReactNode => {
     setHeaderActions,
   } = useAppLayout();
 
-  const optionId = Number(
-    optionIdParam
-  );
   const routeSearch = searchParams.toString();
-  const accessRequestKey = `${optionId}:${routeSearch}`;
 
-  const reporteria =
-    findAuthorizedOptionById(
-      menuTree,
-      APPLICATION_OPTION_IDS.REPORTERIA
-    );
-
-  const reporteriaName =
-    reporteria?.name || 'Reportería';
+  const {
+    reporteriaName,
+    report,
+    isValidReport,
+    analyticsAccess,
+    isAnalyticsAccessLoading,
+    baseEmbedUrl,
+    requiresScopedEmbed,
+    rawScopedEmbedUrl,
+    embedUrl,
+  } = usePowerBiViewerAccess({
+    optionIdParam,
+    routeSearch,
+    status,
+    menuTree,
+  });
 
   useEffect(() => {
     setHeaderActions(
@@ -136,208 +100,6 @@ export const PowerBiViewerPage = (): ReactNode => {
     reporteriaName,
     setHeaderActions,
   ]);
-
-  const report =
-    Number.isSafeInteger(optionId) &&
-    optionId > 0
-      ? findAuthorizedOptionById(
-          menuTree,
-          optionId
-        )
-      : null;
-
-  const isValidReport = Boolean(
-    report &&
-    report.parentId ===
-      APPLICATION_OPTION_IDS.REPORTERIA &&
-    report.permissions.consultar
-  );
-
-  const [
-    analyticsAccess,
-    setAnalyticsAccess,
-  ] = useState<ViewerAnalyticsAccessState | null>(
-    null
-  );
-
-  useEffect(() => {
-    if (
-      status !== 'ready' ||
-      !isValidReport ||
-      !Number.isSafeInteger(optionId) ||
-      optionId <= 0
-    ) {
-      return;
-    }
-
-    let active = true;
-    const controller =
-      new AbortController();
-
-    void (async () => {
-      try {
-        const access =
-          await getAnalyticsOptionGroupAccess(
-            optionId
-          );
-
-        if (!active) {
-          return;
-        }
-
-        if (!access.allowed) {
-          setAnalyticsAccess({
-            key: accessRequestKey,
-            status: 'ready',
-            allowed: false,
-            clientSelectionStatus:
-              'NOT_REQUIRED',
-            selectedClient: null,
-            scopedEmbedUrl: null,
-          });
-          return;
-        }
-
-        const requiresClientSelection =
-          access.requiresClientSelection;
-
-        if (!requiresClientSelection) {
-          setAnalyticsAccess({
-            key: accessRequestKey,
-            status: 'ready',
-            allowed: true,
-            clientSelectionStatus:
-              'NOT_REQUIRED',
-            selectedClient: null,
-            scopedEmbedUrl: null,
-          });
-          return;
-        }
-
-        const requestedClient =
-          parseReportClientSelection(
-            new URLSearchParams(routeSearch)
-          );
-
-        if (!requestedClient) {
-          setAnalyticsAccess({
-            key: accessRequestKey,
-            status: 'ready',
-            allowed: true,
-            clientSelectionStatus: 'MISSING',
-            selectedClient: null,
-            scopedEmbedUrl: null,
-          });
-          return;
-        }
-
-        const authorizedClients =
-          await getAnalyticsReportClients(
-            optionId,
-            controller.signal
-          );
-
-        if (!active) {
-          return;
-        }
-
-        const selectedClient =
-          findAuthorizedReportClient(
-            authorizedClients,
-            requestedClient
-          );
-
-        if (!selectedClient) {
-          setAnalyticsAccess({
-            key: accessRequestKey,
-            status: 'ready',
-            allowed: true,
-            clientSelectionStatus: 'INVALID',
-            selectedClient: null,
-            scopedEmbedUrl: null,
-          });
-          return;
-        }
-
-        const scopedEmbedUrl =
-          await getAnalyticsReportClientEmbed(
-            optionId,
-            selectedClient,
-            controller.signal
-          );
-
-        if (!active) {
-          return;
-        }
-
-        setAnalyticsAccess({
-          key: accessRequestKey,
-          status: 'ready',
-          allowed: true,
-          clientSelectionStatus: 'VALID',
-          selectedClient,
-          scopedEmbedUrl,
-        });
-      } catch {
-        if (
-          !active ||
-          controller.signal.aborted
-        ) {
-          return;
-        }
-
-        setAnalyticsAccess({
-          key: accessRequestKey,
-          status: 'error',
-        });
-      }
-    })();
-
-    return () => {
-      active = false;
-      controller.abort();
-    };
-  }, [
-    accessRequestKey,
-    isValidReport,
-    optionId,
-    routeSearch,
-    status,
-  ]);
-
-  const isAnalyticsAccessLoading =
-    status === 'ready' &&
-    isValidReport &&
-    analyticsAccess?.key !==
-      accessRequestKey;
-
-  const baseEmbedUrl = isValidReport
-    ? resolvePowerBiEmbedUrl(
-        report?.urlBI ?? null
-      )
-    : null;
-
-  const selectedClient =
-    analyticsAccess?.status === 'ready'
-      ? analyticsAccess.selectedClient
-      : null;
-
-  const requiresScopedEmbed =
-    selectedClient !== null;
-
-  const rawScopedEmbedUrl =
-    analyticsAccess?.status === 'ready'
-      ? analyticsAccess.scopedEmbedUrl
-      : null;
-
-  const scopedEmbedUrl =
-    resolvePowerBiPublishToWebUrl(
-      rawScopedEmbedUrl
-    );
-
-  const embedUrl = requiresScopedEmbed
-    ? scopedEmbedUrl
-    : baseEmbedUrl;
 
   if (
     status === 'idle' ||
@@ -384,11 +146,7 @@ export const PowerBiViewerPage = (): ReactNode => {
     );
   }
 
-  if (
-    analyticsAccess?.key ===
-      accessRequestKey &&
-    analyticsAccess.status === 'error'
-  ) {
+  if (analyticsAccess?.status === 'error') {
     return (
       <main className="reporteria-viewer reporteria-viewer--state">
         <strong>
@@ -402,9 +160,7 @@ export const PowerBiViewerPage = (): ReactNode => {
   }
 
   if (
-    analyticsAccess?.key ===
-      accessRequestKey &&
-    analyticsAccess.status === 'ready' &&
+    analyticsAccess?.status === 'ready' &&
     !analyticsAccess.allowed
   ) {
     return (
@@ -420,9 +176,7 @@ export const PowerBiViewerPage = (): ReactNode => {
   }
 
   if (
-    analyticsAccess?.key ===
-      accessRequestKey &&
-    analyticsAccess.status === 'ready' &&
+    analyticsAccess?.status === 'ready' &&
     analyticsAccess.clientSelectionStatus ===
       'MISSING'
   ) {
@@ -445,9 +199,7 @@ export const PowerBiViewerPage = (): ReactNode => {
   }
 
   if (
-    analyticsAccess?.key ===
-      accessRequestKey &&
-    analyticsAccess.status === 'ready' &&
+    analyticsAccess?.status === 'ready' &&
     analyticsAccess.clientSelectionStatus ===
       'INVALID'
   ) {
@@ -528,7 +280,7 @@ export const PowerBiViewerPage = (): ReactNode => {
           title={`Power BI - ${report?.name ?? 'Reporte'}`}
           className="reporteria-viewer__frame"
           allowFullScreen
-          referrerPolicy="strict-origin-when-cross-origin"
+          referrerPolicy="no-referrer"
         />
       </div>
     </main>

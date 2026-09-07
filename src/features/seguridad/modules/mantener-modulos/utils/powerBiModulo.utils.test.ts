@@ -7,11 +7,35 @@ import {
 
 import {
   isValidPowerBiPublishToWebUrl,
+  isValidPowerBiUrl,
 } from './powerBiModulo.utils';
 
 export const suite = defineSuite(
   'powerBiModulo.utils',
   [
+    test(
+      'limita la URL general del reporte al servicio HTTPS de Power BI',
+      () => {
+        assert.equal(
+          isValidPowerBiUrl(
+            'https://app.powerbi.com/reportEmbed?reportId=abc'
+          ),
+          true
+        );
+        assert.equal(
+          isValidPowerBiUrl(
+            'https://example.com/reportEmbed?reportId=abc'
+          ),
+          false
+        );
+        assert.equal(
+          isValidPowerBiUrl(
+            'http://app.powerbi.com/view?r=abc'
+          ),
+          false
+        );
+      }
+    ),
     test(
       'acepta una URL Publish to web válida',
       () => {
@@ -57,6 +81,29 @@ export const suite = defineSuite(
         assert.equal(
           isValidPowerBiPublishToWebUrl(
             'https://app.powerbi.com/view'
+          ),
+          false
+        );
+      }
+    ),
+    test(
+      'rechaza códigos duplicados, credenciales y fragmentos',
+      () => {
+        assert.equal(
+          isValidPowerBiPublishToWebUrl(
+            'https://app.powerbi.com/view?r=abc&r=def'
+          ),
+          false
+        );
+        assert.equal(
+          isValidPowerBiPublishToWebUrl(
+            'https://user:secret@app.powerbi.com/view?r=abc'
+          ),
+          false
+        );
+        assert.equal(
+          isValidPowerBiPublishToWebUrl(
+            'https://app.powerbi.com/view?r=abc#section'
           ),
           false
         );

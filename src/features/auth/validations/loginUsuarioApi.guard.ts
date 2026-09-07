@@ -1,13 +1,13 @@
 import type { LoginUsuarioApi } from '../types';
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+import { isRecord } from './authValidation.utils';
 
 const isOptionalText = (value: unknown): boolean =>
   value === undefined || value === null || typeof value === 'string';
 
-const isOptionalNumber = (value: unknown): boolean =>
-  value === undefined || value === null || typeof value === 'number';
+const isOptionalSafeInteger = (value: unknown): boolean =>
+  value === undefined ||
+  value === null ||
+  (typeof value === 'number' && Number.isSafeInteger(value));
 
 export const isLoginUsuarioApi = (
   value: unknown
@@ -29,7 +29,7 @@ export const isLoginUsuarioApi = (
     isOptionalText(value.cUsr_Email) &&
     isOptionalText(value.cUsr_EmailPersonal) &&
     isOptionalText(value.cUsr_EmailProfile) &&
-    isOptionalNumber(value.nid_perfil) &&
-    isOptionalNumber(value.nId_PerfilGest)
+    isOptionalSafeInteger(value.nid_perfil) &&
+    isOptionalSafeInteger(value.nId_PerfilGest)
   );
 };

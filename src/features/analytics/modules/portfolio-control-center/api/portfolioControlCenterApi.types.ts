@@ -5,6 +5,11 @@ export interface PortfolioFilterOptionsApiResponse {
   portfolio: {
     id: number;
   };
+  businessUnits?: readonly {
+    code: string;
+    name: string;
+  }[];
+  selectedBusinessUnit?: string | null;
   campaigns: readonly {
     code: string;
     name: string;
@@ -124,30 +129,18 @@ export interface PortfolioEvolutionApiResponse {
     recoveredAmount: number;
   }[];
 }
-export interface PortfolioCampaignPerformanceApiResponse {
-  updatedAt: string | null;
-  campaigns: readonly {
-    campaignCode: string;
-    campaignName: string;
-    dateFrom: string;
-    dateTo: string;
-    snapshotDate: string;
-    assignedPortfolio: number;
-    managedPortfolio: number;
-    pendingPortfolio: number;
-    progressRate: number | null;
-    managementCount: number;
-    contactabilityRate: number | null;
-    rpcRate: number | null;
-    closeRate: number | null;
-    promiseCount: number;
-    promiseFulfillmentRate: number | null;
-    paymentCount: number;
-    recoveredAmount: number;
-    targetAmount: number | null;
-  }[];
+
+export interface PortfolioOverviewApiResponse {
+  summary: PortfolioSummaryApiResponse;
+  targetProgress: PortfolioTargetProgressApiResponse;
+  promises: PortfolioPromisesApiResponse;
+  evolution: PortfolioEvolutionApiResponse;
 }
 
+export interface PortfolioBootstrapApiResponse {
+  filterOptions: PortfolioFilterOptionsApiResponse;
+  overview: PortfolioOverviewApiResponse | null;
+}
 export interface PortfolioSupervisorPerformanceApiResponse {
   dateFrom: string | null;
   dateTo: string | null;
@@ -213,6 +206,14 @@ export interface PortfolioOverduePromisesApiResponse {
       name: string;
     }[];
   };
+  pagination?: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  };
   items: readonly {
     promiseId: number;
     debtorId: number;
@@ -251,6 +252,14 @@ export interface PortfolioDueTodayPromisesApiResponse {
     paidAmount: number;
     outstandingAmount: number;
   }[];
+  pagination?: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  };
   items: readonly {
     promiseId: number;
     debtorId: number;

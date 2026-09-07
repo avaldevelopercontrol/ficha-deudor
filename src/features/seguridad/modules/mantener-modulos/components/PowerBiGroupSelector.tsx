@@ -1,5 +1,6 @@
-import type {
-  ReactNode,
+import {
+  useMemo,
+  type ReactNode,
 } from 'react';
 
 import type {
@@ -42,41 +43,43 @@ export const PowerBiGroupSelector = ({
       ? value[0]
       : 0;
 
-  const sortedGroups = [
-    ...groups,
-  ].sort(
-    (a, b) =>
-      buildGroupLabel(a).localeCompare(
-        buildGroupLabel(b),
-        'es-PE',
-        {
-          sensitivity: 'base',
-        }
-      )
-  );
-
-  const knownGroupIds =
-    new Set(
-      sortedGroups.map(
-        (group) =>
-          group.idGrupo
-      )
+  const options = useMemo<
+    SelectOption<number>[]
+  >(() => {
+    const sortedGroups = [
+      ...groups,
+    ].sort(
+      (a, b) =>
+        buildGroupLabel(a).localeCompare(
+          buildGroupLabel(b),
+          'es-PE',
+          {
+            sensitivity: 'base',
+          }
+        )
     );
 
-  const unavailableSelectedIds =
-    value
-      .filter(
-        (groupId) =>
-          !knownGroupIds.has(
-            groupId
-          )
-      )
-      .sort(
-        (a, b) => a - b
+    const knownGroupIds =
+      new Set(
+        sortedGroups.map(
+          (group) =>
+            group.idGrupo
+        )
       );
 
-  const options:
-    SelectOption<number>[] = [
+    const unavailableSelectedIds =
+      value
+        .filter(
+          (groupId) =>
+            !knownGroupIds.has(
+              groupId
+            )
+        )
+        .sort(
+          (a, b) => a - b
+        );
+
+    return [
       ...sortedGroups.map(
         (group) => ({
           id: group.idGrupo,
@@ -92,6 +95,7 @@ export const PowerBiGroupSelector = ({
         })
       ),
     ];
+  }, [groups, value]);
 
   return (
     <SelectField<number>

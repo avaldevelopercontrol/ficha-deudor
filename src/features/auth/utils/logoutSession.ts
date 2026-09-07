@@ -1,16 +1,13 @@
+import { clearAnalyticsAccessSession } from '@features/analytics/access/services/analyticsAccess.prefetch';
+import { clearSelectedCrmClientId } from '@features/analytics/access/store/analyticsCrmSelection.storage';
 import { PUBLIC_AUTH_PATHS } from '../constants/authRoutes.constants';
-import { AUTH_STORAGE_KEYS } from '../constants/authStorage.constants';
-import { clearStoredAuthState } from './authStorage';
+import {
+  broadcastAuthLogout,
+  clearStoredAuthState,
+} from './authStorage';
 
 export function isPublicAuthPath(pathname: string): boolean {
   return PUBLIC_AUTH_PATHS.has(pathname);
-}
-
-export function notifyGlobalLogout(): void {
-  localStorage.setItem(
-    AUTH_STORAGE_KEYS.LOGOUT_EVENT,
-    `${Date.now()}-${Math.random()}`
-  );
 }
 
 export function closePopupOrRedirectToLogin(): void {
@@ -32,6 +29,8 @@ export function closePopupOrRedirectToLogin(): void {
 }
 
 export function logoutSession(): void {
-  clearStoredAuthState('last-main-window-closed');
-  notifyGlobalLogout();
+  clearAnalyticsAccessSession();
+  clearSelectedCrmClientId();
+  clearStoredAuthState();
+  broadcastAuthLogout('last-main-window-closed');
 }

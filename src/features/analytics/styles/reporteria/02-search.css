@@ -1,0 +1,272 @@
+
+.reporteria-search {
+  position: relative;
+  z-index: 10;
+  width: min(100%, 370px);
+  flex: 0 0 370px;
+}
+
+.reporteria-search__label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ap-navy);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reporteria-search__trigger {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 5px 16px rgba(26, 37, 64, 0.06);
+  color: var(--ap-navy);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.reporteria-search__trigger:hover,
+.reporteria-search__trigger--open {
+  border-color: rgba(192, 0, 30, 0.45);
+  box-shadow: 0 6px 20px rgba(26, 37, 64, 0.1);
+}
+
+.reporteria-search__trigger:focus-visible {
+  outline: 3px solid rgba(192, 0, 30, 0.2);
+  outline-offset: 2px;
+}
+
+.reporteria-search__trigger-icon,
+.reporteria-search__input-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  flex: 0 0 18px;
+  color: var(--ap-text-muted);
+}
+
+.reporteria-search__trigger-icon svg,
+.reporteria-search__input-icon svg,
+.reporteria-search__chevron svg,
+.reporteria-search__option-check svg {
+  width: 100%;
+  height: 100%;
+}
+
+.reporteria-search__trigger-value {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: var(--ap-text);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reporteria-search__selection-count {
+  min-width: 23px;
+  height: 23px;
+  padding: 0 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(192, 0, 30, 0.1);
+  color: var(--ap-red);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.reporteria-search__chevron {
+  width: 17px;
+  height: 17px;
+  display: inline-flex;
+  flex: 0 0 17px;
+  color: var(--ap-text-muted);
+  transition: transform 150ms ease;
+}
+
+.reporteria-search__trigger--open .reporteria-search__chevron {
+  transform: rotate(180deg);
+}
+
+.reporteria-search__dropdown {
+  position: absolute;
+  z-index: 30;
+  top: 65px;
+  right: 0;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(26, 37, 64, 0.2);
+}
+
+.reporteria-search__dropdown-search {
+  position: relative;
+  padding: 12px;
+  border-bottom: 1px solid var(--ap-gray-200);
+  background: var(--ap-gray-50);
+}
+
+.reporteria-search__input-icon {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 25px;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.reporteria-search__field {
+  width: 100%;
+  gap: 0;
+}
+
+.reporteria-search__field .form-input {
+  height: 38px;
+  padding-right: 12px;
+  padding-left: 38px;
+  border-color: var(--ap-gray-200);
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 13px;
+}
+
+.reporteria-search__field .form-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.reporteria-search__options {
+  max-height: 260px;
+  padding: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.reporteria-search__option {
+  min-height: 40px;
+  padding: 8px 9px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 8px;
+  color: var(--ap-text);
+  cursor: pointer;
+  transition:
+    background-color 130ms ease,
+    color 130ms ease;
+}
+
+.reporteria-search__option:hover {
+  background: var(--ap-gray-100);
+}
+
+.reporteria-search__option:has(input:focus-visible) {
+  outline: 2px solid rgba(192, 0, 30, 0.3);
+  outline-offset: -2px;
+}
+
+.reporteria-search__option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reporteria-search__option-check {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 18px;
+  border: 1px solid var(--ap-gray-300);
+  border-radius: 5px;
+  background: #ffffff;
+  color: #ffffff;
+}
+
+.reporteria-search__option input:checked + .reporteria-search__option-check {
+  border-color: var(--ap-red);
+  background: var(--ap-red);
+}
+
+.reporteria-search__option-label {
+  min-width: 0;
+  flex: 1;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.reporteria-search__divider {
+  height: 1px;
+  margin: 5px 8px;
+  background: var(--ap-gray-200);
+}
+
+.reporteria-search__no-options {
+  margin: 0;
+  padding: 22px 14px;
+  color: var(--ap-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.reporteria-search__dropdown-footer {
+  min-height: 42px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--ap-gray-200);
+  background: var(--ap-gray-50);
+  color: var(--ap-text-muted);
+  font-size: 11px;
+}
+
+.reporteria-search__dropdown-footer button {
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ap-red);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.reporteria-search__dropdown-footer button:hover {
+  text-decoration: underline;
+}
+
+.reporteria-search__dropdown-footer button:focus-visible {
+  outline: 2px solid rgba(192, 0, 30, 0.3);
+  outline-offset: 2px;
+}
+
+.reporteria-search__results {
+  display: block;
+  min-height: 17px;
+  margin-top: 5px;
+  color: var(--ap-text-muted);
+  font-size: 11px;
+  text-align: right;
+}

@@ -28,6 +28,10 @@ import {
 } from '../../features/analytics/constants/analyticsRoutes.constants';
 
 import {
+  loadPortfolioControlCenterPage,
+} from '../../features/analytics/navigation/portfolioControlCenterNavigation.preload';
+
+import {
   REPORTERIA_ROUTES,
 } from '../../features/analytics/constants/reporteriaRoutes.constants';
 
@@ -38,6 +42,10 @@ import {
 import {
   LoginPage,
 } from '../../features/auth/pages/LoginPage';
+
+import {
+  GESTION_COBRANZAS_ROUTES,
+} from '../../features/gestion-cobranzas/constants/gestionCobranzasRoutes.constants';
 
 import {
   FICHA_DEUDOR_ROUTES,
@@ -87,15 +95,12 @@ const MenuModulosPage = lazy(
 const GestionDeudorPage = lazy(
   () =>
     import(
-      '../../features/gestion-deudor/pages/GestionDeudorPage'
+      '../../features/gestion-cobranzas/modules/gestion-deudor/pages/GestionDeudorPage'
     )
 );
 
 const PortfolioControlCenterPage = lazy(
-  () =>
-    import(
-      '../../features/analytics/pages/PortfolioControlCenterPage'
-    )
+  loadPortfolioControlCenterPage
 );
 
 const ReporteriaPage = lazy(
@@ -311,7 +316,7 @@ export function AppRouter() {
 
               <Route
                 path={
-                  AUTH_ROUTES
+                  GESTION_COBRANZAS_ROUTES
                     .GESTION_DEUDOR
                 }
                 element={

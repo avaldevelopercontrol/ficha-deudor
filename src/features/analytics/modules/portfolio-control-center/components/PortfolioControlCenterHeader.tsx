@@ -63,7 +63,7 @@ export const PortfolioControlCenterHeader: React.FC<
 
         <div className="portfolio-control-center__header-copy">
           <h1 className="portfolio-control-center__title">
-            Portfolio Control Center
+            Análisis de Carteras
           </h1>
 
           <p className="portfolio-control-center__subtitle">

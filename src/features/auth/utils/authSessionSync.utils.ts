@@ -2,7 +2,7 @@ import { AUTH_STORAGE_KEYS } from '../constants/authStorage.constants';
 import type { AuthState } from '../types';
 import { parseStoredAuthSession } from '../validations/authSession.guard';
 
-export type AuthStorageSyncAction =
+type AuthStorageSyncAction =
   | { type: 'ignore' }
   | { type: 'reset'; removeInvalidState: boolean }
   | { type: 'restore'; state: AuthState };

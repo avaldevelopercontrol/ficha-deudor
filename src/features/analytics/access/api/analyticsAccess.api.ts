@@ -1,12 +1,13 @@
-import { fetchClientesActivos } from '@features/seguridad/api/clientesApi';
 import { analyticsApiClient } from '@shared/api/analyticsApiClient';
 import { ApiError } from '@shared/api/apiClient';
 
 import type {
   AnalyticsAccessContext,
   AnalyticsOptionClientsResponse,
-  AnalyticsOptionGroupAccessResponse,
-  AnalyticsReportClientEmbedResponse,
+  AnalyticsPowerBiAccessResponse,
+  AnalyticsPowerBiClientSelectionStatus,
+  AnalyticsPowerBiOptionAccess,
+  AnalyticsPowerBiViewerContextResponse,
   AnalyticsReportClientOption,
   AnalyticsReportClientsResponse,
   AnalyticsScope,
@@ -18,117 +19,259 @@ const isPositiveInteger = (
   Number.isSafeInteger(value) &&
   value > 0;
 
-const buildScopes = (
-  clientIds: readonly number[],
-  clientNames: ReadonlyMap<number, string>
-): AnalyticsScope[] =>
-  [...new Set(clientIds)]
-    .filter(isPositiveInteger)
-    .sort((a, b) => a - b)
-    .map((crmClientId) => ({
-      crmClientId,
-      name:
-        clientNames.get(crmClientId) ??
-        `Cartera ${crmClientId}`,
-    }));
-
-const getClientIds = async (
+const normalizeOptionClients = (
   optionId: number,
-  endpoint: string
-): Promise<number[]> => {
-  if (!isPositiveInteger(optionId)) {
+  response: AnalyticsOptionClientsResponse
+): AnalyticsScope[] => {
+  if (
+    response.optionId !== undefined &&
+    response.optionId !== optionId
+  ) {
     throw new Error(
-      'optionId debe ser un entero positivo.'
+      'La respuesta de Analytics no corresponde a la opción solicitada.'
     );
   }
 
-  let response: AnalyticsOptionClientsResponse;
+  const scopesById = new Map<number, AnalyticsScope>();
 
-  try {
-    response =
-      await analyticsApiClient.get<
-        AnalyticsOptionClientsResponse
-      >(
-        endpoint,
-        {
-          includeSelectedCrmClientId: false,
-        }
-      );
-  } catch (error) {
-    if (
-      error instanceof ApiError &&
-      error.status === 404
-    ) {
-      return [];
+  for (const client of response.clients ?? []) {
+    const crmClientId = Number(client?.clientId);
+    const name = client?.name?.trim();
+
+    if (!isPositiveInteger(crmClientId) || !name) {
+      continue;
     }
 
-    throw error;
+    scopesById.set(crmClientId, {
+      crmClientId,
+      name,
+    });
   }
 
-  return [...new Set(
-    response.clientIds ?? []
-  )]
-    .filter(isPositiveInteger)
-    .sort((a, b) => a - b);
+  // Compatibilidad de despliegue: durante un rolling deploy, una instancia
+  // anterior del backend puede responder todavía solo clientIds. La
+  // autorización sigue viniendo del mismo endpoint y nunca se consulta la API
+  // legacy de clientes desde el navegador.
+  for (const clientId of response.clientIds ?? []) {
+    const crmClientId = Number(clientId);
+
+    if (
+      isPositiveInteger(crmClientId) &&
+      !scopesById.has(crmClientId)
+    ) {
+      scopesById.set(crmClientId, {
+        crmClientId,
+        name: `Cartera ${crmClientId}`,
+      });
+    }
+  }
+
+  return [...scopesById.values()].sort(
+    (a, b) => a.crmClientId - b.crmClientId
+  );
 };
 
-export async function getAnalyticsOptionClientIds(
-  optionId: number
-): Promise<number[]> {
-  return getClientIds(
-    optionId,
-    `/api/v1/analytics-access/user/options/${optionId}/client-scopes`
+const POWER_BI_CLIENT_SELECTION_STATUSES = new Set<
+  AnalyticsPowerBiClientSelectionStatus
+>([
+  'NOT_REQUIRED',
+  'VALID',
+  'MISSING',
+  'INVALID',
+]);
+
+const normalizeReportClient = (
+  client: AnalyticsReportClientOption | null | undefined
+): AnalyticsReportClientOption | null => {
+  const name = client?.name?.trim();
+
+  if (
+    !client ||
+    !isPositiveInteger(client.clientId) ||
+    !name
+  ) {
+    return null;
+  }
+
+  return {
+    clientId: client.clientId,
+    name,
+  };
+};
+
+export async function getAnalyticsPowerBiOptionAccess(
+  optionIds: readonly number[],
+  signal?: AbortSignal
+): Promise<AnalyticsPowerBiOptionAccess[]> {
+  const normalizedOptionIds = [...new Set(optionIds)]
+    .filter(isPositiveInteger)
+    .sort((a, b) => a - b);
+
+  if (normalizedOptionIds.length === 0) {
+    return [];
+  }
+
+  const query = new URLSearchParams({
+    optionIds: normalizedOptionIds.join(','),
+  });
+
+  const response =
+    await analyticsApiClient.get<
+      AnalyticsPowerBiAccessResponse
+    >(
+      `/api/v1/analytics-access/user/power-bi-access?${query.toString()}`,
+      {
+        includeSelectedCrmClientId: false,
+        signal,
+      }
+    );
+
+  if (!Array.isArray(response.options)) {
+    throw new Error(
+      'La respuesta de Analytics para los reportes Power BI no es válida.'
+    );
+  }
+
+  const requestedOptionIds = new Set(
+    normalizedOptionIds
+  );
+  const uniqueAccess = new Map<
+    number,
+    AnalyticsPowerBiOptionAccess
+  >();
+
+  for (const option of response.options) {
+    if (
+      !isPositiveInteger(option.optionId) ||
+      !requestedOptionIds.has(option.optionId) ||
+      uniqueAccess.has(option.optionId)
+    ) {
+      throw new Error(
+        'La respuesta de Analytics no corresponde a los reportes solicitados.'
+      );
+    }
+
+    uniqueAccess.set(option.optionId, {
+      optionId: option.optionId,
+      allowed: option.allowed === true,
+      requiresClientSelection:
+        option.allowed === true &&
+        option.requiresClientSelection === true,
+    });
+  }
+
+  if (
+    normalizedOptionIds.some(
+      (optionId) => !uniqueAccess.has(optionId)
+    )
+  ) {
+    throw new Error(
+      'La respuesta de Analytics está incompleta para los reportes solicitados.'
+    );
+  }
+
+  return normalizedOptionIds.map(
+    (optionId) => uniqueAccess.get(optionId)!
   );
 }
 
-export async function getAnalyticsOptionGroupAccess(
-  optionId: number
-): Promise<AnalyticsOptionGroupAccessResponse> {
+export async function getAnalyticsPowerBiViewerContext(
+  optionId: number,
+  client: AnalyticsReportClientOption | null,
+  signal?: AbortSignal
+): Promise<AnalyticsPowerBiViewerContextResponse> {
   if (!isPositiveInteger(optionId)) {
     throw new Error(
       'optionId debe ser un entero positivo.'
     );
   }
 
-  try {
-    const response =
-      await analyticsApiClient.get<
-        AnalyticsOptionGroupAccessResponse
-      >(
-        `/api/v1/analytics-access/user/options/${optionId}/group-scopes`,
-        {
-          includeSelectedCrmClientId: false,
-        }
-      );
+  const normalizedClient = normalizeReportClient(client);
 
-    return {
-      optionId: response.optionId,
-      allowed: response.allowed === true,
-      scopeMode: response.scopeMode,
-      groupIds: [...new Set(
-        response.groupIds ?? []
-      )]
-        .filter(isPositiveInteger)
-        .sort((a, b) => a - b),
-      requiresClientSelection:
-        response.requiresClientSelection === true,
-    };
-  } catch (error) {
-    if (
-      error instanceof ApiError &&
-      error.status === 404
-    ) {
-      return {
-        optionId,
-        allowed: false,
-        scopeMode: 'NONE',
-        groupIds: [],
-        requiresClientSelection: false,
-      };
-    }
-
-    throw error;
+  if (client !== null && normalizedClient === null) {
+    throw new Error(
+      'La selección de cartera no es válida.'
+    );
   }
+
+  const query = new URLSearchParams();
+
+  if (normalizedClient) {
+    query.set(
+      'clientId',
+      String(normalizedClient.clientId)
+    );
+    query.set(
+      'reportClient',
+      normalizedClient.name
+    );
+  }
+
+  const suffix = query.size > 0
+    ? `?${query.toString()}`
+    : '';
+
+  const response =
+    await analyticsApiClient.get<
+      AnalyticsPowerBiViewerContextResponse
+    >(
+      `/api/v1/analytics-access/user/options/${optionId}/power-bi-viewer-context${suffix}`,
+      {
+        includeSelectedCrmClientId: false,
+        signal,
+      }
+    );
+
+  if (
+    response.optionId !== optionId ||
+    !POWER_BI_CLIENT_SELECTION_STATUSES.has(
+      response.clientSelectionStatus
+    )
+  ) {
+    throw new Error(
+      'La respuesta de Analytics no corresponde al reporte solicitado.'
+    );
+  }
+
+  const allowed = response.allowed === true;
+  const requiresClientSelection =
+    allowed &&
+    response.requiresClientSelection === true;
+  const selectedClient = normalizeReportClient(
+    response.selectedClient
+  );
+  const embedUrl = response.embedUrl?.trim() || null;
+
+  if (
+    (!allowed &&
+      (requiresClientSelection ||
+        response.clientSelectionStatus !==
+          'NOT_REQUIRED')) ||
+    (response.clientSelectionStatus ===
+      'NOT_REQUIRED' &&
+      requiresClientSelection) ||
+    (response.clientSelectionStatus !==
+      'NOT_REQUIRED' &&
+      !requiresClientSelection) ||
+    (response.clientSelectionStatus === 'VALID' &&
+      (!selectedClient || !embedUrl)) ||
+    (response.clientSelectionStatus !== 'VALID' &&
+      (selectedClient !== null || embedUrl !== null))
+  ) {
+    throw new Error(
+      'La respuesta de Analytics contiene un contexto Power BI inconsistente.'
+    );
+  }
+
+  return {
+    optionId,
+    allowed,
+    requiresClientSelection,
+    clientSelectionStatus:
+      response.clientSelectionStatus,
+    selectedClient,
+    embedUrl,
+  };
 }
 
 export async function getAnalyticsReportClients(
@@ -194,114 +337,47 @@ export async function getAnalyticsReportClients(
   );
 }
 
-export async function getAnalyticsReportClientEmbed(
+const getAnalyticsUserOptionClients = async (
   optionId: number,
-  client: AnalyticsReportClientOption,
   signal?: AbortSignal
-): Promise<string | null> {
-  if (
-    !isPositiveInteger(optionId) ||
-    !isPositiveInteger(client.clientId) ||
-    !client.name.trim()
-  ) {
+): Promise<AnalyticsScope[]> => {
+  if (!isPositiveInteger(optionId)) {
     throw new Error(
-      'La selección de cartera no es válida.'
+      'optionId debe ser un entero positivo.'
     );
   }
 
-  const query = new URLSearchParams({
-    clientId: String(client.clientId),
-    reportClient: client.name.trim(),
-  });
-
-  let response: AnalyticsReportClientEmbedResponse;
-
   try {
-    response =
-      await analyticsApiClient.get<
-        AnalyticsReportClientEmbedResponse
-      >(
-        `/api/v1/analytics-access/user/options/${optionId}/report-client-embed?${query.toString()}`,
+    const response =
+      await analyticsApiClient.get<AnalyticsOptionClientsResponse>(
+        `/api/v1/analytics-access/user/options/${optionId}/clients`,
         {
           includeSelectedCrmClientId: false,
           signal,
         }
       );
+
+    return normalizeOptionClients(optionId, response);
   } catch (error) {
     if (
       error instanceof ApiError &&
       error.status === 404
     ) {
-      return null;
+      return [];
     }
 
     throw error;
   }
-
-  const responseName = response.name?.trim();
-  const requestedName = client.name.trim();
-
-  if (
-    response.optionId !== optionId ||
-    response.clientId !== client.clientId ||
-    !responseName ||
-    responseName.localeCompare(
-      requestedName,
-      'es',
-      { sensitivity: 'base' }
-    ) !== 0
-  ) {
-    throw new Error(
-      'La respuesta de Analytics no corresponde a la cartera solicitada.'
-    );
-  }
-
-  const embedUrl = response.embedUrl?.trim();
-
-  return embedUrl || null;
-}
-
-const getAnalyticsUserOptionClientIds = (
-  optionId: number
-): Promise<number[]> =>
-  getClientIds(
-    optionId,
-    `/api/v1/analytics-access/user/options/${optionId}/clients`
-  );
+};
 
 export async function getAnalyticsAccess(
-  optionId: number
+  optionId: number,
+  signal?: AbortSignal
 ): Promise<AnalyticsAccessContext> {
-  const clientIds =
-    await getAnalyticsUserOptionClientIds(
-      optionId
-    );
+  const scopes = await getAnalyticsUserOptionClients(
+    optionId,
+    signal
+  );
 
-  let clientNames =
-    new Map<number, string>();
-
-  try {
-    const clientes =
-      await fetchClientesActivos();
-
-    clientNames = new Map(
-      clientes.map((cliente) => [
-        cliente.idCliente,
-        cliente.nombreCliente,
-      ])
-    );
-  } catch {
-    /*
-     * Resolver el nombre es complementario.
-     * La autorización siempre la define analytics-api.
-     */
-  }
-
-  return {
-    scopes: buildScopes(
-      clientIds,
-      clientNames
-    ),
-    reports: [],
-  };
+  return { scopes };
 }

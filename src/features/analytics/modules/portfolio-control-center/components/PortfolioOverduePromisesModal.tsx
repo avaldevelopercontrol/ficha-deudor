@@ -1,14 +1,9 @@
 import type React from 'react';
-import {
-  useMemo,
-  useState,
-} from 'react';
+import { useMemo } from 'react';
 
 import Modal from '@shared/components/modals/Modal';
 import Table from '@shared/components/table/Table';
 import TableResourceState from '@shared/components/table/TableResourceState';
-import { useClientSideTable } from '@shared/hooks/useClientSideTable';
-import Paginacion from '@shared/components/ui/Paginacion';
 import type { Column } from '@shared/types';
 import { SisgesIcon } from '@shared/icons/sisges';
 
@@ -19,25 +14,25 @@ import type {
   PortfolioOverduePromisesSortKey,
   PortfolioSortDirection,
 } from '../../../types/portfolioControlCenter.types';
-import {
-  usePortfolioOverduePromises,
-} from '../hooks/usePortfolioOverduePromises';
+import { PortfolioPromiseDetailPagination } from './PortfolioPromiseDetailPagination';
+import { usePortfolioOverduePromises } from '../hooks/usePortfolioOverduePromises';
+import { usePortfolioPromiseDetailTableState } from '../hooks/usePortfolioPromiseDetailTableState';
 import {
   formatPortfolioCurrency,
   formatPortfolioInteger,
 } from '../utils/portfolioControlCenter.formatters';
 import {
-  filterPortfolioOverduePromisesByAging,
-  sortPortfolioOverduePromises,
-} from '../utils/portfolioOverduePromises.utils';
+  formatPortfolioPromiseCurrencyFilterOption,
+  formatPortfolioPromiseDate,
+} from '../utils/portfolioPromiseDetail.utils';
 
 interface PortfolioOverduePromisesModalProps {
   isOpen: boolean;
   onClose: () => void;
   context: Pick<
     PortfolioOperationalContext,
-    'campaignId' | 'subPortfolioId'
-  >;
+    'businessUnit' | 'campaignId' | 'subPortfolioId'
+  > & { crmClientId: number };
 }
 
 const DEFAULT_PAGE_SIZE = 5;
@@ -55,27 +50,8 @@ const AGING_OPTIONS: ReadonlyArray<{
   { value: '8-plus', label: '8+ días' },
 ];
 
-const formatDate = (value: string | null): string => {
-  if (!value) {
-    return '—';
-  }
-
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-
-  if (!match) {
-    return value;
-  }
-
-  return `${match[3]}/${match[2]}/${match[1]}`;
-};
-
-const formatCurrencyFilterOption = (value: string): string => {
-  const amount = Number(value);
-
-  return Number.isFinite(amount)
-    ? formatPortfolioCurrency(amount)
-    : value;
-};
+const formatDate = (value: string | null): string =>
+  formatPortfolioPromiseDate(value, '—');
 
 const formatDaysFilterOption = (value: string): string => {
   const days = Number(value);
@@ -106,12 +82,26 @@ const getAgingTone = (
 export const PortfolioOverduePromisesModal: React.FC<
   PortfolioOverduePromisesModalProps
 > = ({ isOpen, onClose, context }) => {
-  const [aging, setAging] =
-    useState<PortfolioOverdueAgingFilter>(DEFAULT_AGING);
-  const [sortKey, setSortKey] =
-    useState<PortfolioOverduePromisesSortKey>(DEFAULT_SORT_KEY);
-  const [sortDirection, setSortDirection] =
-    useState<PortfolioSortDirection>(DEFAULT_SORT_DIRECTION);
+  const {
+    filter: aging,
+    sortKey,
+    sortDirection,
+    page,
+    pageSize,
+    setPage,
+    handleFilterChange: handleAgingChange,
+    handleSortChange,
+    handlePageSizeChange,
+    reset: resetTableState,
+  } = usePortfolioPromiseDetailTableState<
+    PortfolioOverdueAgingFilter,
+    PortfolioOverduePromisesSortKey
+  >({
+    defaultFilter: DEFAULT_AGING,
+    defaultSortKey: DEFAULT_SORT_KEY,
+    defaultSortDirection: DEFAULT_SORT_DIRECTION,
+    defaultPageSize: DEFAULT_PAGE_SIZE,
+  });
 
   const {
     data,
@@ -119,8 +109,14 @@ export const PortfolioOverduePromisesModal: React.FC<
     error,
     refetch,
   } = usePortfolioOverduePromises({
+    crmClientId: context.crmClientId,
     context,
     enabled: isOpen,
+    page,
+    pageSize,
+    aging,
+    sortKey,
+    sortDirection,
   });
 
   const normalizedItems = useMemo(
@@ -131,31 +127,6 @@ export const PortfolioOverduePromisesModal: React.FC<
         supervisorName: item.supervisorName ?? 'Sin atribución',
       })),
     [data?.items]
-  );
-
-  const agingScopedItems = useMemo(
-    () =>
-      filterPortfolioOverduePromisesByAging(
-        normalizedItems,
-        aging
-      ),
-    [aging, normalizedItems]
-  );
-
-  const sortedItems = useMemo(
-    () =>
-      sortPortfolioOverduePromises(
-        agingScopedItems,
-        sortKey,
-        sortDirection
-      ),
-    [agingScopedItems, sortDirection, sortKey]
-  );
-
-  const table = useClientSideTable(
-    sortedItems,
-    [context.campaignId, context.subPortfolioId],
-    { initialPageSize: DEFAULT_PAGE_SIZE }
   );
 
   const columns = useMemo<Column<PortfolioOverduePromiseItem>[]>(
@@ -198,7 +169,7 @@ export const PortfolioOverduePromisesModal: React.FC<
         width: '11%',
         align: 'right',
         sortable: true,
-        filterOptionLabel: formatCurrencyFilterOption,
+        filterOptionLabel: formatPortfolioPromiseCurrencyFilterOption,
         render: (item) => formatPortfolioCurrency(item.promiseAmount),
       },
       {
@@ -207,7 +178,7 @@ export const PortfolioOverduePromisesModal: React.FC<
         width: '10%',
         align: 'right',
         sortable: true,
-        filterOptionLabel: formatCurrencyFilterOption,
+        filterOptionLabel: formatPortfolioPromiseCurrencyFilterOption,
         render: (item) => formatPortfolioCurrency(item.paidAmount),
       },
       {
@@ -216,7 +187,7 @@ export const PortfolioOverduePromisesModal: React.FC<
         width: '11%',
         align: 'right',
         sortable: true,
-        filterOptionLabel: formatCurrencyFilterOption,
+        filterOptionLabel: formatPortfolioPromiseCurrencyFilterOption,
         render: (item) => (
           <strong className="portfolio-overdue-outstanding">
             {formatPortfolioCurrency(item.outstandingAmount)}
@@ -298,40 +269,10 @@ export const PortfolioOverduePromisesModal: React.FC<
     return options;
   }, [agingBuckets]);
 
-  const handleAgingChange = (
-    nextAging: PortfolioOverdueAgingFilter
-  ) => {
-    setAging(nextAging);
-    table.setPageNumber(1);
-  };
-
-  const handleSortChange = (
-    key: string,
-    direction: PortfolioSortDirection
-  ) => {
-    setSortKey(key as PortfolioOverduePromisesSortKey);
-    setSortDirection(direction);
-    table.setPageNumber(1);
-  };
-
-  const handleClearLocalFilters = () => {
-    table.resetFilters();
-    setAging(DEFAULT_AGING);
-    setSortKey(DEFAULT_SORT_KEY);
-    setSortDirection(DEFAULT_SORT_DIRECTION);
-  };
-
   const handleClose = () => {
-    handleClearLocalFilters();
+    resetTableState();
     onClose();
   };
-
-  const indiceInicio =
-    (table.pageNumber - 1) * table.pageSize;
-  const indiceFin = Math.min(
-    indiceInicio + table.pageSize,
-    table.totalRecords
-  );
 
   return (
     <Modal
@@ -501,14 +442,8 @@ export const PortfolioOverduePromisesModal: React.FC<
                 <div className="portfolio-overdue-table">
                   <Table
                     columns={columns}
-                    data={table.paginatedData}
-                    allData={sortedItems}
+                    data={[...normalizedItems]}
                     emptyMessage="No hay promesas vencidas para los filtros seleccionados."
-                    enableColumnFilters
-                    textFilters={table.textFilters}
-                    selectedFilters={table.selectedFilters}
-                    onTextFilterChange={table.onTextFilterChange}
-                    onSelectedFilterChange={table.onSelectedFilterChange}
                     sortKey={sortKey}
                     sortDirection={sortDirection}
                     onSortChange={handleSortChange}
@@ -516,28 +451,14 @@ export const PortfolioOverduePromisesModal: React.FC<
                   />
                 </div>
 
-                {table.totalRecords > 0 && (
-                  <div className="portfolio-overdue-table__pagination">
-                    <Paginacion
-                      paginaActual={table.pageNumber}
-                      totalPaginas={table.totalPages}
-                      totalRegistros={table.totalRecords}
-                      indiceInicio={indiceInicio}
-                      indiceFin={indiceFin}
-                      onPaginaAnterior={() => {
-                        table.setPageNumber(table.pageNumber - 1);
-                      }}
-                      onPaginaSiguiente={() => {
-                        table.setPageNumber(table.pageNumber + 1);
-                      }}
-                      onIrAPagina={table.setPageNumber}
-                      showPageSizeSelector
-                      pageSize={table.pageSize}
-                      pageSizeOptions={[5, 10, 25, 50]}
-                      onPageSizeChange={table.setPageSize}
-                    />
-                  </div>
-                )}
+                <PortfolioPromiseDetailPagination
+                  className="portfolio-overdue-table__pagination"
+                  pagination={data.pagination}
+                  requestedPage={page}
+                  requestedPageSize={pageSize}
+                  onPageChange={setPage}
+                  onPageSizeChange={handlePageSizeChange}
+                />
               </section>
             </>
           )}

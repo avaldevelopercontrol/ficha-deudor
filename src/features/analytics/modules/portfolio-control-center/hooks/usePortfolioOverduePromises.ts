@@ -1,51 +1,61 @@
-import { useCallback } from 'react';
-
-import { useAsyncResource } from '@shared/hooks/useAsyncResource';
+import { useMemo } from 'react';
 
 import type {
   PortfolioOperationalContext,
+  PortfolioOverdueAgingFilter,
   PortfolioOverduePromisesData,
+  PortfolioOverduePromisesQuery,
+  PortfolioOverduePromisesSortKey,
+  PortfolioSortDirection,
 } from '../../../types/portfolioControlCenter.types';
 import { loadPortfolioOverduePromises } from '../services/portfolioControlCenter.service';
+import { usePortfolioPromiseDetailResource } from './usePortfolioPromiseDetailResource';
 
 interface UsePortfolioOverduePromisesParams {
+  crmClientId: number;
   context: Pick<
     PortfolioOperationalContext,
-    'campaignId' | 'subPortfolioId'
+    'businessUnit' | 'campaignId' | 'subPortfolioId'
   > | null;
   enabled: boolean;
+  page: number;
+  pageSize: number;
+  aging: PortfolioOverdueAgingFilter;
+  sortKey: PortfolioOverduePromisesSortKey;
+  sortDirection: PortfolioSortDirection;
 }
 
 export const usePortfolioOverduePromises = ({
+  crmClientId,
   context,
   enabled,
+  page,
+  pageSize,
+  aging,
+  sortKey,
+  sortDirection,
 }: UsePortfolioOverduePromisesParams) => {
-  const loader = useCallback(
-    (signal: AbortSignal) => {
-      if (!context) {
-        return Promise.resolve<PortfolioOverduePromisesData | null>(
-          null
-        );
-      }
-
-      return loadPortfolioOverduePromises(
-        context,
-        signal
-      );
-    }, [context]
+  const query = useMemo<PortfolioOverduePromisesQuery>(
+    () => ({
+      page,
+      pageSize,
+      aging: aging === 'all' ? null : aging,
+      sortBy: sortKey,
+      sortDirection,
+    }),
+    [aging, page, pageSize, sortDirection, sortKey]
   );
 
-  return useAsyncResource<PortfolioOverduePromisesData | null>({
-    loader,
-    resourceKey: [
-      context?.campaignId ?? null,
-      context?.subPortfolioId ?? null,
-    ],
-    initialData: null,
-    initialLoading: enabled,
-    errorMessage:
-      'No se pudo cargar el detalle de promesas vencidas.',
-    enabled: enabled && context !== null,
-    resetDataWhenDisabled: true,
+  return usePortfolioPromiseDetailResource<
+    PortfolioOverduePromisesData,
+    PortfolioOverduePromisesQuery
+  >({
+    crmClientId,
+    context,
+    enabled,
+    query,
+    queryKey: [page, pageSize, aging, sortKey, sortDirection],
+    load: loadPortfolioOverduePromises,
+    errorMessage: 'No se pudo cargar el detalle de promesas vencidas.',
   });
 };

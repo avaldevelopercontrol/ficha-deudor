@@ -91,6 +91,27 @@ export const suite = defineSuite('flujo de resolución de parámetros de ficha',
     });
     assert.match(html, /data-valid="false"/);
   }),
+  test('rechaza parámetros cuando no existe un cliente seleccionado', () => {
+    const auth: AuthContextValue = {
+      ...createAuthValue(),
+      clienteSeleccionada: null,
+    };
+
+    const html = renderProbe({
+      auth,
+      state: { fichaDeudorParams: params },
+    });
+
+    assert.match(html, /data-valid="false"/);
+  }),
+  test('rechaza parámetros pertenecientes a otro cliente seleccionado', () => {
+    const html = renderProbe({
+      auth: createAuthValue('5', '99'),
+      state: { fichaDeudorParams: params },
+    });
+
+    assert.match(html, /data-valid="false"/);
+  }),
   test('recupera el contexto guardado cuando no existe state', () => {
     Object.defineProperty(globalThis, 'sessionStorage', {
       configurable: true,

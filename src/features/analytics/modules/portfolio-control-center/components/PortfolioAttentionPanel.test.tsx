@@ -70,6 +70,9 @@ export const suite = defineSuite(
             target={TARGET}
             recoveredAmount={2_667_904.9}
             context={null}
+            isLoading={false}
+            error={null}
+            onRetry={() => undefined}
           />
         );
 
@@ -88,15 +91,21 @@ export const suite = defineSuite(
             target={null}
             recoveredAmount={null}
             context={{
+              crmClientId: 95,
+              businessUnit: 'CLARO GOBIERNO',
               campaignId: '2026-08',
               subPortfolioId: '29',
             }}
+            isLoading={false}
+            error={null}
+            onRetry={() => undefined}
           />
         );
 
         assert.match(html, /46 vencidas/);
         assert.match(html, /46 compromisos requieren atención/);
         assert.match(html, /Ver detalle de promesas/);
+        assert.match(html, /Meta mensual no disponible/);
       }
     ),
     test(
@@ -108,9 +117,14 @@ export const suite = defineSuite(
             target={null}
             recoveredAmount={null}
             context={{
+              crmClientId: 95,
+              businessUnit: 'CLARO GOBIERNO',
               campaignId: '2026-08',
               subPortfolioId: '29',
             }}
+            isLoading={false}
+            error={null}
+            onRetry={() => undefined}
           />
         );
 
@@ -118,6 +132,26 @@ export const suite = defineSuite(
         assert.match(html, /Monto comprometido/);
         assert.match(html, /S\/\s*283\.68/);
         assert.match(html, /Ver detalle de promesas/);
+      }
+    ),
+    test(
+      'oculta señales antiguas mientras cambia la cartera',
+      () => {
+        const html = renderToStaticMarkup(
+          <PortfolioAttentionPanel
+            items={OVERDUE_ITEMS}
+            target={TARGET}
+            recoveredAmount={2_667_904.9}
+            context={null}
+            isLoading
+            error={null}
+            onRetry={() => undefined}
+          />
+        );
+
+        assert.match(html, /Cargando indicadores/);
+        assert.doesNotMatch(html, /46 vencidas/);
+        assert.doesNotMatch(html, /Ver detalle de promesas/);
       }
     ),
   ]

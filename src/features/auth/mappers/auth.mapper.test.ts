@@ -46,7 +46,7 @@ export const suite = defineSuite('auth.mapper', [
   test('usa el perfil alternativo cuando nid_perfil no está disponible', () => {
     const usuario = mapUsuarioApiToUsuario(
       createLoginUsuarioApi({
-        nid_perfil: undefined as unknown as number,
+        nid_perfil: undefined,
         nId_PerfilGest: 2,
       })
     );

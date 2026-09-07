@@ -115,7 +115,9 @@ const columns: Column<CampaignPerformanceItem>[] = [
     align: 'right',
     width: '145px',
     render: (row) =>
-      formatPortfolioCurrency(row.targetAmount),
+      row.targetAmount === null
+        ? 'No disponible'
+        : formatPortfolioCurrency(row.targetAmount),
   },
 ];
 

@@ -35,7 +35,7 @@ export const suite = defineSuite(
             APPLICATION_OPTION_IDS
               .PORTFOLIO_CONTROL_CENTER
           ),
-          '/analytics/portfolio-control-centerz'
+          '/analytics/portfolio-control-center'
         );
 
         assert.equal(

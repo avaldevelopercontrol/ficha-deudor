@@ -1,3 +1,5 @@
+import { clearAnalyticsAccessSession } from '@features/analytics/access/services/analyticsAccess.prefetch';
+import { clearSelectedCrmClientId } from '@features/analytics/access/store/analyticsCrmSelection.storage';
 import { useEffect, type Dispatch, type SetStateAction } from 'react';
 
 import {
@@ -12,11 +14,13 @@ import {
 
 export const useAuthExternalSessionSync = (
   setState: Dispatch<SetStateAction<AuthState>>,
-  onExternalSessionChange?: () => void
+  resetTransientAuthState?: () => void
 ) => {
   useEffect(() => {
     const resetExternalSession = () => {
-      onExternalSessionChange?.();
+      clearAnalyticsAccessSession();
+      clearSelectedCrmClientId();
+      resetTransientAuthState?.();
       setState(initialAuthState);
     };
 
@@ -34,7 +38,7 @@ export const useAuthExternalSessionSync = (
         return;
       }
 
-      onExternalSessionChange?.();
+      resetTransientAuthState?.();
 
       if (action.type === 'reset') {
         if (action.removeInvalidState) {
@@ -58,5 +62,5 @@ export const useAuthExternalSessionSync = (
       );
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [onExternalSessionChange, setState]);
+  }, [resetTransientAuthState, setState]);
 };

@@ -5,6 +5,7 @@ import {
   test,
 } from '../../../../../test/testHarness';
 import type {
+  PortfolioControlCenterFilters,
   PortfolioControlCenterFilterOptions,
 } from '../../../types/portfolioControlCenter.types';
 import {
@@ -13,14 +14,21 @@ import {
   getPortfolioCampaignYearOptions,
   getPortfolioFilterDateBounds,
   getPortfolioSupervisorOptionsForContext,
+  isPortfolioBusinessUnitTransitionPending,
   keepDateWithinBounds,
   PORTFOLIO_UNASSIGNED_SUPERVISOR_FILTER_ID,
+  switchPortfolioBusinessUnit,
 } from './portfolioFilterContext.utils';
 
 const OPTIONS: PortfolioControlCenterFilterOptions = {
   availableDateFrom: '2026-07-01',
   availableDateTo: '2026-08-13',
   portfolio: { id: '95' },
+  businessUnits: [
+    { id: 'CLARO ADMINISTRATIVO', label: 'CLARO ADMINISTRATIVO' },
+    { id: 'CLARO GOBIERNO', label: 'CLARO GOBIERNO' },
+  ],
+  selectedBusinessUnit: 'CLARO GOBIERNO',
   subPortfolios: [
     { id: '10', label: 'Subcartera histórica' },
     { id: '20', label: 'Subcartera vigente' },
@@ -113,7 +121,26 @@ const MULTI_YEAR_OPTIONS: PortfolioControlCenterFilterOptions = {
       availableDateFrom: '2025-12-01',
       availableDateTo: '2025-12-31',
     },
+    {
+      id: '2027-01',
+      label: 'Enero 2027',
+      year: 2027,
+      month: 1,
+      startDate: '2027-01-01',
+      endDate: '2027-01-31',
+      availableDateFrom: '2027-01-01',
+      availableDateTo: '2027-01-02',
+    },
   ],
+};
+
+const SCOPED_FILTERS: PortfolioControlCenterFilters = {
+  businessUnit: 'CLARO ADMINISTRATIVO',
+  dateFrom: '2026-08-05',
+  dateTo: '2026-08-13',
+  subPortfolioId: '20',
+  campaignId: '2026-08',
+  supervisorId: '2',
 };
 
 export const suite = defineSuite(
@@ -136,9 +163,28 @@ export const suite = defineSuite(
             MULTI_YEAR_OPTIONS
           ),
           [
+            { id: '2027', label: '2027' },
             { id: '2026', label: '2026' },
             { id: '2025', label: '2025' },
           ]
+        );
+      }
+    ),
+    test(
+      'resuelve enero del nuevo año como período más reciente sin lógica especial de rollover',
+      () => {
+        assert.equal(
+          getLatestPortfolioCampaign(
+            MULTI_YEAR_OPTIONS
+          )?.id,
+          '2027-01'
+        );
+        assert.deepEqual(
+          getPortfolioCampaignMonthOptions(
+            MULTI_YEAR_OPTIONS,
+            2027
+          ),
+          [{ id: '2027-01', label: 'Enero' }]
         );
       }
     ),
@@ -198,7 +244,7 @@ export const suite = defineSuite(
           getPortfolioFilterDateBounds(
             OPTIONS,
             '2026-07',
-            true
+            null
           ),
           {
             min: '2026-07-01',
@@ -214,7 +260,6 @@ export const suite = defineSuite(
           getPortfolioFilterDateBounds(
             OPTIONS,
             '2026-08',
-            true,
             '20'
           ),
           {
@@ -231,7 +276,6 @@ export const suite = defineSuite(
           getPortfolioFilterDateBounds(
             OPTIONS,
             null,
-            true,
             '10'
           ),
           {
@@ -247,8 +291,7 @@ export const suite = defineSuite(
         assert.deepEqual(
           getPortfolioFilterDateBounds(
             OPTIONS,
-            null,
-            true
+            null
           ),
           {
             min: '2026-08-01',
@@ -257,23 +300,6 @@ export const suite = defineSuite(
         );
       }
     ),
-    test(
-      'conserva el rango global en modo mock cuando campaign vacío significa todas',
-      () => {
-        assert.deepEqual(
-          getPortfolioFilterDateBounds(
-            OPTIONS,
-            null,
-            false
-          ),
-          {
-            min: '2026-07-01',
-            max: '2026-08-13',
-          }
-        );
-      }
-    ),
-
     test(
       'limita supervisores al contexto efectivo de campaña y subcartera',
       () => {
@@ -339,6 +365,69 @@ export const suite = defineSuite(
         assert.equal(
           keepDateWithinBounds('2026-08-13', bounds),
           null
+        );
+      }
+    ),
+    test(
+      'cambiar cartera limpia todos los filtros dependientes',
+      () => {
+        assert.deepEqual(
+          switchPortfolioBusinessUnit(
+            SCOPED_FILTERS,
+            'CLARO GOBIERNO'
+          ),
+          {
+            businessUnit: 'CLARO GOBIERNO',
+            dateFrom: null,
+            dateTo: null,
+            subPortfolioId: null,
+            campaignId: null,
+            supervisorId: null,
+          }
+        );
+
+        assert.deepEqual(
+          switchPortfolioBusinessUnit(
+            {
+              ...SCOPED_FILTERS,
+              businessUnit: 'CLARO GOBIERNO',
+            },
+            'CLARO ADMINISTRATIVO'
+          ),
+          {
+            businessUnit: 'CLARO ADMINISTRATIVO',
+            dateFrom: null,
+            dateTo: null,
+            subPortfolioId: null,
+            campaignId: null,
+            supervisorId: null,
+          }
+        );
+      }
+    ),
+    test(
+      'detecta la transición de cartera antes de que llegue el nuevo overview',
+      () => {
+        assert.equal(
+          isPortfolioBusinessUnitTransitionPending(
+            'CLARO GOBIERNO',
+            'CLARO ADMINISTRATIVO'
+          ),
+          true
+        );
+        assert.equal(
+          isPortfolioBusinessUnitTransitionPending(
+            'CLARO GOBIERNO',
+            'CLARO GOBIERNO'
+          ),
+          false
+        );
+        assert.equal(
+          isPortfolioBusinessUnitTransitionPending(
+            null,
+            'CLARO ADMINISTRATIVO'
+          ),
+          false
         );
       }
     ),

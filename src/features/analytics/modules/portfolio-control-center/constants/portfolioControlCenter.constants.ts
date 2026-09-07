@@ -3,6 +3,7 @@ import type {
 } from '../../../types/portfolioControlCenter.types';
 
 export const DEFAULT_PORTFOLIO_CONTROL_CENTER_FILTERS: PortfolioControlCenterFilters = {
+  businessUnit: null,
   dateFrom: null,
   dateTo: null,
   subPortfolioId: null,

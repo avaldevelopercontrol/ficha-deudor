@@ -1,5 +1,7 @@
-import type {
-  ReactNode,
+import {
+  memo,
+  useMemo,
+  type ReactNode,
 } from 'react';
 
 import type {
@@ -25,6 +27,13 @@ interface PowerBiReportClientPublicationsProps {
     name: string,
     groupIds: readonly number[]
   ) => void;
+}
+
+interface PowerBiReportClientPublicationRowProps {
+  client: AnalyticsOptionReportClientPublication;
+  disabled: boolean;
+  onEmbedUrlChange: PowerBiReportClientPublicationsProps['onEmbedUrlChange'];
+  onGroupIdsChange: PowerBiReportClientPublicationsProps['onGroupIdsChange'];
 }
 
 const isDraftReady = (
@@ -88,20 +97,249 @@ const getStatus = (
   };
 };
 
+const PowerBiReportClientPublicationRow = memo(
+  ({
+    client,
+    disabled,
+    onEmbedUrlChange,
+    onGroupIdsChange,
+  }: PowerBiReportClientPublicationRowProps): ReactNode => {
+    const value = client.embedUrl ?? '';
+    const hasValue = Boolean(value.trim());
+    const isInvalid =
+      hasValue &&
+      !isValidPowerBiPublishToWebUrl(
+        value
+      );
+    const status = getStatus(client);
+    const inputId =
+      `report-client-embed-${client.clientId}-${client.name}`
+        .replace(/[^A-Za-z0-9_-]+/g, '-');
+
+    const selectedGroupIds = useMemo(
+      () => new Set(client.groupIds),
+      [client.groupIds]
+    );
+
+    const selectedGroups = useMemo(
+      () =>
+        client.candidateGroups.filter(
+          (group) =>
+            selectedGroupIds.has(
+              group.groupId
+            )
+        ),
+      [
+        client.candidateGroups,
+        selectedGroupIds,
+      ]
+    );
+
+    const rowDisabled =
+      disabled || !client.isAvailable;
+
+    return (
+      <div
+        className={[
+          'power-bi-report-client-publications__row',
+          !client.isAvailable
+            ? 'power-bi-report-client-publications__row--unavailable'
+            : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <div className="power-bi-report-client-publications__identity">
+          <label
+            htmlFor={inputId}
+            className="power-bi-report-client-publications__name"
+          >
+            {client.name}
+          </label>
+          <span className="power-bi-report-client-publications__client-id">
+            Cliente {client.clientId}
+          </span>
+          {!client.isAvailable && (
+            <span className="power-bi-report-client-publications__source-note">
+              Ya no está vigente en la fuente del BI. Se conserva su configuración por si reaparece.
+            </span>
+          )}
+        </div>
+
+        <div className="power-bi-report-client-publications__access">
+          {client.isAvailable &&
+            client.candidateGroups.length === 0 && (
+              <span className="power-bi-report-client-publications__access-warning">
+                No hay grupos SISGES activos vinculados a este cliente.
+              </span>
+            )}
+
+          {client.candidateGroups.length > 0 && (
+            <>
+              <div className="power-bi-report-client-publications__selected-groups">
+                {selectedGroups.length > 0
+                  ? selectedGroups.map(
+                      (group) => (
+                        <span
+                          key={group.groupId}
+                          className="power-bi-report-client-publications__group-chip"
+                        >
+                          {group.name} [{group.groupId}]
+                        </span>
+                      )
+                    )
+                  : (
+                    <span className="power-bi-report-client-publications__access-warning">
+                      Acceso pendiente
+                    </span>
+                  )}
+              </div>
+
+              {client.isAvailable &&
+                client.candidateGroups.length === 1 &&
+                client.groupResolution === 'AUTO_DETECTED' && (
+                  <span className="power-bi-report-client-publications__auto-note">
+                    Detectado automáticamente por cliente SISGES.
+                  </span>
+                )}
+
+              {client.isAvailable &&
+                (
+                  client.candidateGroups.length > 1 ||
+                  client.groupIds.length === 0 ||
+                  client.groupResolution === 'INVALID_CONFIGURED'
+                ) && (
+                  <details className="power-bi-report-client-publications__group-picker">
+                    <summary>
+                      Configurar acceso ({client.groupIds.length} seleccionado{client.groupIds.length === 1 ? '' : 's'})
+                    </summary>
+
+                    <div className="power-bi-report-client-publications__group-options">
+                      {client.candidateGroups.map(
+                        (group) => (
+                          <label
+                            key={group.groupId}
+                            className="power-bi-report-client-publications__group-option"
+                          >
+                            <input
+                              type="checkbox"
+                              disabled={rowDisabled}
+                              checked={selectedGroupIds.has(
+                                group.groupId
+                              )}
+                              onChange={(event) => {
+                                const nextGroupIds =
+                                  new Set(
+                                    client.groupIds
+                                  );
+
+                                if (event.target.checked) {
+                                  nextGroupIds.add(
+                                    group.groupId
+                                  );
+                                } else {
+                                  nextGroupIds.delete(
+                                    group.groupId
+                                  );
+                                }
+
+                                onGroupIdsChange(
+                                  client.clientId,
+                                  client.name,
+                                  [...nextGroupIds].sort(
+                                    (left, right) =>
+                                      left - right
+                                  )
+                                );
+                              }}
+                            />
+                            <span>
+                              {group.name} [{group.groupId}]
+                            </span>
+                          </label>
+                        )
+                      )}
+                    </div>
+                  </details>
+                )}
+            </>
+          )}
+        </div>
+
+        <div className="power-bi-report-client-publications__field">
+          <input
+            id={inputId}
+            type="url"
+            value={value}
+            disabled={rowDisabled}
+            autoComplete="off"
+            inputMode="url"
+            placeholder="https://app.powerbi.com/view?r=..."
+            aria-invalid={
+              isInvalid || undefined
+            }
+            onChange={(event) => {
+              onEmbedUrlChange(
+                client.clientId,
+                client.name,
+                event.target.value
+              );
+            }}
+          />
+
+          {isInvalid && (
+            <span
+              className="power-bi-report-client-publications__error"
+              role="alert"
+            >
+              Use una URL https://app.powerbi.com/view?r=...
+            </span>
+          )}
+        </div>
+
+        <span
+          className={`power-bi-report-client-publications__status power-bi-report-client-publications__status--${status.modifier}`}
+        >
+          {status.label}
+        </span>
+      </div>
+    );
+  }
+);
+
 export const PowerBiReportClientPublications = ({
   clients,
   disabled = false,
   onEmbedUrlChange,
   onGroupIdsChange,
 }: PowerBiReportClientPublicationsProps): ReactNode => {
-  const availableClients = clients.filter(
-    (client) => client.isAvailable
-  );
-  const readyCount = availableClients.filter(
-    isDraftReady
-  ).length;
-  const unavailableCount =
-    clients.length - availableClients.length;
+  const {
+    availableCount,
+    readyCount,
+    unavailableCount,
+  } = useMemo(() => {
+    let nextAvailableCount = 0;
+    let nextReadyCount = 0;
+
+    for (const client of clients) {
+      if (!client.isAvailable) {
+        continue;
+      }
+
+      nextAvailableCount++;
+
+      if (isDraftReady(client)) {
+        nextReadyCount++;
+      }
+    }
+
+    return {
+      availableCount: nextAvailableCount,
+      readyCount: nextReadyCount,
+      unavailableCount:
+        clients.length - nextAvailableCount,
+    };
+  }, [clients]);
 
   return (
     <section className="power-bi-report-client-publications">
@@ -111,7 +349,7 @@ export const PowerBiReportClientPublications = ({
             Publicaciones por cartera
           </span>
           <span className="power-bi-report-client-publications__counter">
-            {readyCount}/{availableClients.length} listas
+            {readyCount}/{availableCount} listas
             {unavailableCount > 0
               ? ` · ${unavailableCount} no disponibles`
               : ''}
@@ -124,202 +362,15 @@ export const PowerBiReportClientPublications = ({
           </p>
 
           <div className="power-bi-report-client-publications__list">
-            {clients.map((client) => {
-              const value =
-                client.embedUrl ?? '';
-              const hasValue =
-                Boolean(value.trim());
-              const isInvalid =
-                hasValue &&
-                !isValidPowerBiPublishToWebUrl(
-                  value
-                );
-              const status =
-                getStatus(client);
-              const inputId =
-                `report-client-embed-${client.clientId}-${client.name}`
-                  .replace(/[^A-Za-z0-9_-]+/g, '-');
-              const selectedGroupIds =
-                new Set(client.groupIds);
-              const selectedGroups =
-                client.candidateGroups.filter(
-                  (group) =>
-                    selectedGroupIds.has(
-                      group.groupId
-                    )
-                );
-              const rowDisabled =
-                disabled ||
-                !client.isAvailable;
-
-              return (
-                <div
-                  key={`${client.clientId}:${client.name}`}
-                  className={[
-                    'power-bi-report-client-publications__row',
-                    !client.isAvailable
-                      ? 'power-bi-report-client-publications__row--unavailable'
-                      : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  <div className="power-bi-report-client-publications__identity">
-                    <label
-                      htmlFor={inputId}
-                      className="power-bi-report-client-publications__name"
-                    >
-                      {client.name}
-                    </label>
-                    <span className="power-bi-report-client-publications__client-id">
-                      Cliente {client.clientId}
-                    </span>
-                    {!client.isAvailable && (
-                      <span className="power-bi-report-client-publications__source-note">
-                        Ya no está vigente en la fuente del BI. Se conserva su configuración por si reaparece.
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="power-bi-report-client-publications__access">
-                    {client.isAvailable &&
-                      client.candidateGroups.length === 0 && (
-                        <span className="power-bi-report-client-publications__access-warning">
-                          No hay grupos SISGES activos vinculados a este cliente.
-                        </span>
-                      )}
-
-                    {client.candidateGroups.length > 0 && (
-                      <>
-                        <div className="power-bi-report-client-publications__selected-groups">
-                          {selectedGroups.length > 0
-                            ? selectedGroups.map(
-                                (group) => (
-                                  <span
-                                    key={group.groupId}
-                                    className="power-bi-report-client-publications__group-chip"
-                                  >
-                                    {group.name} [{group.groupId}]
-                                  </span>
-                                )
-                              )
-                            : (
-                              <span className="power-bi-report-client-publications__access-warning">
-                                Acceso pendiente
-                              </span>
-                            )}
-                        </div>
-
-                        {client.isAvailable &&
-                          client.candidateGroups.length === 1 &&
-                          client.groupResolution === 'AUTO_DETECTED' && (
-                            <span className="power-bi-report-client-publications__auto-note">
-                              Detectado automáticamente por cliente SISGES.
-                            </span>
-                          )}
-
-                        {client.isAvailable &&
-                          (
-                            client.candidateGroups.length > 1 ||
-                            client.groupIds.length === 0 ||
-                            client.groupResolution === 'INVALID_CONFIGURED'
-                          ) && (
-                            <details className="power-bi-report-client-publications__group-picker">
-                              <summary>
-                                Configurar acceso ({client.groupIds.length} seleccionado{client.groupIds.length === 1 ? '' : 's'})
-                              </summary>
-
-                              <div className="power-bi-report-client-publications__group-options">
-                                {client.candidateGroups.map(
-                                  (group) => (
-                                    <label
-                                      key={group.groupId}
-                                      className="power-bi-report-client-publications__group-option"
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        disabled={rowDisabled}
-                                        checked={selectedGroupIds.has(
-                                          group.groupId
-                                        )}
-                                        onChange={(event) => {
-                                          const nextGroupIds =
-                                            new Set(
-                                              client.groupIds
-                                            );
-
-                                          if (event.target.checked) {
-                                            nextGroupIds.add(
-                                              group.groupId
-                                            );
-                                          } else {
-                                            nextGroupIds.delete(
-                                              group.groupId
-                                            );
-                                          }
-
-                                          onGroupIdsChange(
-                                            client.clientId,
-                                            client.name,
-                                            [...nextGroupIds].sort(
-                                              (left, right) =>
-                                                left - right
-                                            )
-                                          );
-                                        }}
-                                      />
-                                      <span>
-                                        {group.name} [{group.groupId}]
-                                      </span>
-                                    </label>
-                                  )
-                                )}
-                              </div>
-                            </details>
-                          )}
-                      </>
-                    )}
-                  </div>
-
-                  <div className="power-bi-report-client-publications__field">
-                    <input
-                      id={inputId}
-                      type="url"
-                      value={value}
-                      disabled={rowDisabled}
-                      autoComplete="off"
-                      inputMode="url"
-                      placeholder="https://app.powerbi.com/view?r=..."
-                      aria-invalid={
-                        isInvalid || undefined
-                      }
-                      onChange={(event) => {
-                        onEmbedUrlChange(
-                          client.clientId,
-                          client.name,
-                          event.target.value
-                        );
-                      }}
-                    />
-
-                    {isInvalid && (
-                      <span
-                        className="power-bi-report-client-publications__error"
-                        role="alert"
-                      >
-                        Use una URL https://app.powerbi.com/view?r=...
-                      </span>
-                    )}
-                  </div>
-
-                  <span
-                    className={`power-bi-report-client-publications__status power-bi-report-client-publications__status--${status.modifier}`}
-                  >
-                    {status.label}
-                  </span>
-                </div>
-              );
-            })}
+            {clients.map((client) => (
+              <PowerBiReportClientPublicationRow
+                key={`${client.clientId}:${client.name}`}
+                client={client}
+                disabled={disabled}
+                onEmbedUrlChange={onEmbedUrlChange}
+                onGroupIdsChange={onGroupIdsChange}
+              />
+            ))}
           </div>
         </div>
       </details>

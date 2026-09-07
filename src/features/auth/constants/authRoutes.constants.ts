@@ -3,7 +3,6 @@ export const AUTH_ROUTES = {
   LOGIN: '/login',
   CAMBIAR_CLAVE_EXPIRADA: '/cambiar-clave-expirada',
   MENU_MODULOS: '/menu-modulos',
-  GESTION_DEUDOR: '/gestion-cobranzas/gestion-deudor',
 } as const;
 
 export const PUBLIC_AUTH_PATHS = new Set<string>([

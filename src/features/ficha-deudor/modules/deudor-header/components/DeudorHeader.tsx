@@ -14,8 +14,6 @@ interface Props {
   cabeceraData: CabeceraInfo | null;
   isLoadingCabecera: boolean;
   cabeceraError: string | null;
-  contacto: string;
-  onContactoChange: (value: string) => void;
   compact?: boolean;
   mejorResultado?: string;
 }
@@ -25,8 +23,6 @@ const DeudorHeader: React.FC<Props> = ({
   cabeceraData,
   isLoadingCabecera,
   cabeceraError,
-  contacto,
-  onContactoChange,
   compact = false,
 }) => {
 
@@ -94,8 +90,7 @@ const DeudorHeader: React.FC<Props> = ({
                 <input
                   type="text"
                   placeholder="Ingresar..."
-                  value={contacto}
-                  onChange={(e) => onContactoChange(e.target.value)}
+                  readOnly
                   className="compact-input"
                 />
               </div>

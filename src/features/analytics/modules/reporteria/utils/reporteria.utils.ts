@@ -3,6 +3,11 @@ import {
   type AuthorizedOption,
 } from '@features/access-control';
 
+import {
+  normalizePowerBiPublishToWebUrl,
+  normalizePowerBiServiceUrl,
+} from '@shared/utils/powerBiUrl.utils';
+
 export const findAuthorizedOptionById = (
   options: readonly AuthorizedOption[],
   optionId: number
@@ -43,7 +48,46 @@ export const getAuthorizedPowerBiReports = (
       option.parentId ===
         APPLICATION_OPTION_IDS.REPORTERIA &&
       option.permissions.consultar &&
-      Boolean(option.urlBI?.trim())
+      Boolean(
+        normalizePowerBiServiceUrl(option.urlBI)
+      )
+  );
+};
+
+
+export const buildPowerBiReportAccessKey = (
+  reports: readonly AuthorizedOption[]
+): string =>
+  reports
+    .map((report) => report.id)
+    .sort((left, right) => left - right)
+    .join(',');
+
+export const retainAvailablePowerBiReportIds = (
+  reports: readonly AuthorizedOption[],
+  selectedReportIds: readonly number[]
+): number[] => {
+  const availableIds = new Set(
+    reports.map((report) => report.id)
+  );
+
+  return selectedReportIds.filter((reportId) =>
+    availableIds.has(reportId)
+  );
+};
+
+export const filterPowerBiReportsBySelection = (
+  reports: readonly AuthorizedOption[],
+  selectedReportIds: readonly number[]
+): AuthorizedOption[] => {
+  if (selectedReportIds.length === 0) {
+    return [...reports];
+  }
+
+  const selectedIds = new Set(selectedReportIds);
+
+  return reports.filter((report) =>
+    selectedIds.has(report.id)
   );
 };
 
@@ -74,62 +118,15 @@ export const filterPowerBiReports = (
   });
 };
 
-const POWER_BI_HOST = 'app.powerbi.com';
-const POWER_BI_PUBLISH_PATH = '/view';
-
 export const resolvePowerBiPublishToWebUrl = (
   value: string | null
-): string | null => {
-  const normalized = value?.trim() ?? '';
-
-  if (!normalized) {
-    return null;
-  }
-
-  try {
-    const url = new URL(normalized);
-
-    if (
-      url.protocol !== 'https:' ||
-      url.hostname.toLocaleLowerCase('en-US') !==
-        POWER_BI_HOST ||
-      url.pathname.toLocaleLowerCase('en-US') !==
-        POWER_BI_PUBLISH_PATH ||
-      !url.searchParams.get('r')
-    ) {
-      return null;
-    }
-
-    return url.toString();
-  } catch {
-    return null;
-  }
-};
+): string | null =>
+  normalizePowerBiPublishToWebUrl(value);
 
 export const resolvePowerBiEmbedUrl = (
   value: string | null
-): string | null => {
-  const normalized = value?.trim() ?? '';
-
-  if (!normalized) {
-    return null;
-  }
-
-  try {
-    const url = new URL(normalized);
-
-    if (
-      url.protocol !== 'https:' &&
-      url.protocol !== 'http:'
-    ) {
-      return null;
-    }
-
-    return url.toString();
-  } catch {
-    return null;
-  }
-};
+): string | null =>
+  normalizePowerBiServiceUrl(value);
 
 export const resolveReportImageSource = (
   value: string | null

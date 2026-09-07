@@ -2,7 +2,7 @@ import { isAbortError } from '@shared/utils/asyncResource.utils';
 
 import type { LoginPayload, LoginResponse } from '../types';
 
-export type LoginRequestExecutor = (
+type LoginRequestExecutor = (
   payload: LoginPayload,
   signal: AbortSignal
 ) => Promise<LoginResponse>;
@@ -16,7 +16,7 @@ export type LoginRequestOutcome =
       status: 'cancelled';
     };
 
-export interface LoginRequestController {
+interface LoginRequestController {
   execute: (payload: LoginPayload) => Promise<LoginRequestOutcome>;
   cancel: () => void;
   isPending: () => boolean;

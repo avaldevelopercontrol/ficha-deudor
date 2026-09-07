@@ -8,7 +8,6 @@ export const AUTH_LOGIN_CODES = {
 } as const;
 
 export const AUTH_API_ENDPOINTS = {
-  USUARIO_BASE: '/v1/Usuario',
   LOGIN_USUARIO: '/v1/Usuario/GetLoginUsuario',
   GRUPOS_CLIENTE_INICIAL: '/v1/Grupo/GetGruposClienteInicial',
   ANIOS_BY_CLIENTE: '/v1/Cartera/GetAnioByIdCliente',

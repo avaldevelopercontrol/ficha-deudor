@@ -5,26 +5,12 @@ import {
   AUTH_STORAGE_VERSION,
 } from '../constants/authStorage.constants';
 import type { AuthState, Cliente, Usuario } from '../types';
-
-const isRecord = (
-  value: unknown
-): value is Record<string, unknown> =>
-  typeof value === 'object' &&
-  value !== null &&
-  !Array.isArray(value);
-
-const hasOwn = (
-  value: Record<string, unknown>,
-  property: string
-): boolean => Object.prototype.hasOwnProperty.call(value, property);
-
-const normalizeRequiredText = (value: unknown): string | null => {
-  if (typeof value !== 'string' || !value.trim()) {
-    return null;
-  }
-
-  return value.trim();
-};
+import {
+  hasOwn,
+  isNonNegativeSafeInteger,
+  isRecord,
+  normalizeNonEmptyText,
+} from './authValidation.utils';
 
 const normalizeOptionalText = (value: unknown): string | null => {
   if (typeof value !== 'string') {
@@ -41,11 +27,7 @@ const normalizeOptionalProfileId = (
     return null;
   }
 
-  if (
-    typeof value !== 'number' ||
-    !Number.isSafeInteger(value) ||
-    value < 0
-  ) {
+  if (!isNonNegativeSafeInteger(value)) {
     return undefined;
   }
 
@@ -62,9 +44,9 @@ export const normalizeStoredUsuario = (
   try {
     const nombre = normalizeOptionalText(value.nombre);
     const apellido = normalizeOptionalText(value.apellido);
-    const username = normalizeRequiredText(value.username);
+    const username = normalizeNonEmptyText(value.username);
     const email = normalizeOptionalText(value.email);
-    const perfil = normalizeRequiredText(value.perfil);
+    const perfil = normalizeNonEmptyText(value.perfil);
     const perfilId = normalizeOptionalProfileId(value.perfilId);
 
     if (
@@ -116,7 +98,7 @@ export const normalizeStoredCliente = (
   }
 };
 
-export interface ParsedStoredAuthSession {
+interface ParsedStoredAuthSession {
   state: AuthState;
   format: 'versioned' | 'legacy';
 }

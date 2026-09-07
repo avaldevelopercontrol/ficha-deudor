@@ -27,6 +27,9 @@ import {
 import {
   PortfolioRecoveryPaceModal,
 } from './PortfolioRecoveryPaceModal';
+import {
+  PortfolioResourceState,
+} from './PortfolioResourceState';
 
 interface PortfolioAttentionPanelProps {
   items: readonly PortfolioAttentionItem[];
@@ -34,8 +37,11 @@ interface PortfolioAttentionPanelProps {
   recoveredAmount: number | null;
   context: Pick<
     PortfolioOperationalContext,
-    'campaignId' | 'subPortfolioId'
-  > | null;
+    'businessUnit' | 'campaignId' | 'subPortfolioId'
+  > & { crmClientId: number } | null;
+  isLoading: boolean;
+  error: string | null;
+  onRetry: () => void;
 }
 
 const getMetricLabel = (
@@ -117,7 +123,15 @@ const getAttentionDetail = (
 
 export const PortfolioAttentionPanel: React.FC<
   PortfolioAttentionPanelProps
-> = ({ items, target, recoveredAmount, context }) => {
+> = ({
+  items,
+  target,
+  recoveredAmount,
+  context,
+  isLoading,
+  error,
+  onRetry,
+}) => {
   const [isRecoveryPaceOpen, setIsRecoveryPaceOpen] =
     useState(false);
   const [isOverduePromisesOpen, setIsOverduePromisesOpen] =
@@ -147,6 +161,12 @@ export const PortfolioAttentionPanel: React.FC<
         </p>
       </div>
 
+      <PortfolioResourceState
+        isLoading={isLoading}
+        error={error}
+        isEmpty={false}
+        onRetry={onRetry}
+      >
       {items.length === 0 ? (
         <div className="portfolio-attention-empty">
           No hay señales para los filtros seleccionados.
@@ -249,6 +269,22 @@ export const PortfolioAttentionPanel: React.FC<
           })}
         </div>
       )}
+
+      {target === null && context !== null && (
+        <div className="portfolio-attention-target-unavailable">
+          <span aria-hidden="true">
+            <SisgesIcon name="target" />
+          </span>
+          <div>
+            <strong>Meta mensual no disponible</strong>
+            <p>
+              Esta cartera no tiene una meta específica
+              disponible para el alcance seleccionado.
+            </p>
+          </div>
+        </div>
+      )}
+      </PortfolioResourceState>
 
       {target && recoveredAmount !== null && (
         <PortfolioRecoveryPaceModal

@@ -27,7 +27,7 @@ const initialLoginRequestState: LoginRequestState = {
 };
 
 export const useLoginRequest = () => {
-  const controllerRef = useRef(
+  const [controller] = useState(() =>
     createLoginRequestController(loginApi)
   );
   const isMountedRef = useRef(true);
@@ -37,17 +37,15 @@ export const useLoginRequest = () => {
 
   useEffect(() => {
     isMountedRef.current = true;
-    const controller = controllerRef.current;
 
     return () => {
       isMountedRef.current = false;
       controller.cancel();
     };
-  }, []);
+  }, [controller]);
 
   const execute = useCallback(
     async (payload: LoginPayload): Promise<LoginRequestOutcome> => {
-      const controller = controllerRef.current;
       const wasPending = controller.isPending();
 
       if (!wasPending && isMountedRef.current) {
@@ -100,33 +98,45 @@ export const useLoginRequest = () => {
         };
       }
     },
-    []
+    [controller]
   );
 
   const cancel = useCallback(() => {
-    controllerRef.current.cancel();
+    controller.cancel();
 
     if (isMountedRef.current) {
-      setState((current) => ({
-        ...current,
-        isLoading: false,
-      }));
+      setState((current) =>
+        current.isLoading
+          ? {
+              ...current,
+              isLoading: false,
+            }
+          : current
+      );
     }
-  }, []);
+  }, [controller]);
 
   const reset = useCallback(() => {
-    controllerRef.current.cancel();
+    controller.cancel();
 
     if (isMountedRef.current) {
-      setState(initialLoginRequestState);
+      setState((current) =>
+        current.isLoading || current.error !== null || current.data !== null
+          ? initialLoginRequestState
+          : current
+      );
     }
-  }, []);
+  }, [controller]);
 
   const clearError = useCallback(() => {
-    setState((current) => ({
-      ...current,
-      error: null,
-    }));
+    setState((current) =>
+      current.error === null
+        ? current
+        : {
+            ...current,
+            error: null,
+          }
+    );
   }, []);
 
   return {

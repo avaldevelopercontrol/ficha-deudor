@@ -2,6 +2,11 @@ import {
   APPLICATION_OPTION_IDS,
 } from '@features/access-control/registry/applicationOptionIds';
 
+import {
+  normalizePowerBiPublishToWebUrl,
+  normalizePowerBiServiceUrl,
+} from '@shared/utils/powerBiUrl.utils';
+
 import type {
   Modulo,
 } from '../../../types/opcion.types';
@@ -23,24 +28,8 @@ export const hasModuloChildren = (
 
 export const isValidPowerBiUrl = (
   value: string
-): boolean => {
-  const normalized = value.trim();
-
-  if (!normalized) {
-    return false;
-  }
-
-  try {
-    const url = new URL(normalized);
-
-    return (
-      url.protocol === 'https:' ||
-      url.protocol === 'http:'
-    );
-  } catch {
-    return false;
-  }
-};
+): boolean =>
+  normalizePowerBiServiceUrl(value) !== null;
 
 export const isValidOptionImageSource = (
   value: string
@@ -69,25 +58,5 @@ export const isValidOptionImageSource = (
 
 export const isValidPowerBiPublishToWebUrl = (
   value: string
-): boolean => {
-  const normalized = value.trim();
-
-  if (!normalized) {
-    return false;
-  }
-
-  try {
-    const url = new URL(normalized);
-
-    return (
-      url.protocol === 'https:' &&
-      url.hostname.toLocaleLowerCase('en-US') ===
-        'app.powerbi.com' &&
-      url.pathname.toLocaleLowerCase('en-US') ===
-        '/view' &&
-      Boolean(url.searchParams.get('r'))
-    );
-  } catch {
-    return false;
-  }
-};
+): boolean =>
+  normalizePowerBiPublishToWebUrl(value) !== null;

@@ -8,8 +8,8 @@ import {
 } from '@features/auth/hooks/useAuth';
 
 import {
-  replaceAnalyticsOptionReportClientEmbeds,
   syncAnalyticsOption,
+  syncAnalyticsPowerBiConfiguration,
   type AnalyticsReportClientPublicationInput,
 } from '@features/analytics/access/api/analyticsAccessAdmin.api';
 
@@ -263,7 +263,7 @@ export const useMantenerModulosTable = () => {
 
         if (form.esPowerBI) {
           try {
-            await syncAnalyticsOption({
+            await syncAnalyticsPowerBiConfiguration({
               optionId:
                 moduloDetalle
                   .nId_Opcion,
@@ -274,6 +274,8 @@ export const useMantenerModulosTable = () => {
               isActive:
                 form.estado,
               groupIds,
+              publications:
+                reportClientPublications ?? [],
             });
           } catch (error) {
             refetch();
@@ -286,34 +288,10 @@ export const useMantenerModulosTable = () => {
                 : '';
 
             throw new Error(
-              'El módulo fue actualizado correctamente en SISGES, pero no se pudo completar su configuración de grupos en Analytics.' +
+              'El módulo fue actualizado correctamente en SISGES, pero no se pudo completar su configuración Power BI en Analytics.' +
                 detail +
-                ' Vuelva a editar el módulo y reintente el guardado del grupo.'
+                ' Vuelva a editar el módulo y reintente el guardado.'
             );
-          }
-
-          if (reportClientPublications !== null) {
-            try {
-              await replaceAnalyticsOptionReportClientEmbeds(
-                moduloDetalle.nId_Opcion,
-                reportClientPublications
-              );
-            } catch (error) {
-              refetch();
-              await refreshAccessControl();
-
-              const detail =
-                error instanceof Error &&
-                error.message.trim()
-                  ? ` ${error.message}`
-                  : '';
-
-              throw new Error(
-                'El módulo y su grupo fueron actualizados correctamente, pero no se pudieron guardar las publicaciones por cartera en Analytics.' +
-                  detail +
-                  ' Vuelva a editar el módulo y reintente el guardado de la configuración por cartera.'
-              );
-            }
           }
         }
 

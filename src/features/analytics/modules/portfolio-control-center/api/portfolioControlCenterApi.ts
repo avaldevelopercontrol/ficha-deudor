@@ -4,37 +4,46 @@ import {
 
 import type {
   PortfolioControlCenterFilters,
+  PortfolioDueTodayPromisesQuery,
+  PortfolioOperationalContext,
+  PortfolioOverduePromisesQuery,
 } from '../../../types/portfolioControlCenter.types';
 import type {
   PortfolioAdvisorPerformanceApiResponse,
-  PortfolioCampaignPerformanceApiResponse,
-  PortfolioEvolutionApiResponse,
-  PortfolioFilterOptionsApiResponse,
-  PortfolioPromisesApiResponse,
-  PortfolioOverduePromisesApiResponse,
+  PortfolioBootstrapApiResponse,
   PortfolioDueTodayPromisesApiResponse,
-  PortfolioSummaryApiResponse,
+  PortfolioOverviewApiResponse,
+  PortfolioOverduePromisesApiResponse,
   PortfolioSupervisorPerformanceApiResponse,
-  PortfolioTargetProgressApiResponse,
 } from './portfolioControlCenterApi.types';
+import {
+  assertDateRange,
+  assertPositiveIntegerParam,
+  normalizeOptionalIsoDateParam,
+  normalizeOptionalQueryText,
+  normalizePerformanceContext,
+  normalizeRequiredQueryText,
+  validateDueTodayPromisesQuery,
+  validateOverduePromisesQuery,
+} from './portfolioControlCenterApi.params';
+import {
+  parsePortfolioAdvisorPerformanceApiResponse,
+  parsePortfolioBootstrapApiResponse,
+  parsePortfolioDueTodayPromisesApiResponse,
+  parsePortfolioOverviewApiResponse,
+  parsePortfolioOverduePromisesApiResponse,
+  parsePortfolioSupervisorPerformanceApiResponse,
+} from './portfolioControlCenterApi.validators';
 
 const ANALYTICS_ENDPOINTS = {
-  filterOptions:
-    '/api/v1/portfolio-control-center/filter-options',
-  summary:
-    '/api/v1/portfolio-control-center/summary',
-  targetProgress:
-    '/api/v1/portfolio-control-center/target-progress',
-  promises:
-    '/api/v1/portfolio-control-center/promises',
+  bootstrap:
+    '/api/v1/portfolio-control-center/bootstrap',
+  overview:
+    '/api/v1/portfolio-control-center/overview',
   overduePromises:
     '/api/v1/portfolio-control-center/promises/overdue',
   dueTodayPromises:
     '/api/v1/portfolio-control-center/promises/due-today',
-  evolution:
-    '/api/v1/portfolio-control-center/evolution',
-  campaignPerformance:
-    '/api/v1/portfolio-control-center/campaign-performance',
   supervisorPerformance:
     '/api/v1/portfolio-control-center/supervisor-performance',
   advisorPerformance:
@@ -46,7 +55,7 @@ const appendQueryParam = (
   key: string,
   value: string | null
 ) => {
-  if (value) {
+  if (value !== null) {
     params.set(key, value);
   }
 };
@@ -60,330 +69,283 @@ const withQuery = (
   return query ? `${endpoint}?${query}` : endpoint;
 };
 
-export const buildPortfolioSummaryEndpoint = (
+const buildPortfolioOperationalEndpoint = (
+  endpoint: string,
   filters: PortfolioControlCenterFilters
 ): string => {
   const params = new URLSearchParams();
-
-  appendQueryParam(
-    params,
+  const campaignId = normalizeOptionalQueryText(
     'campaign',
     filters.campaignId
   );
-  appendQueryParam(
-    params,
+  const businessUnit = normalizeOptionalQueryText(
+    'businessUnit',
+    filters.businessUnit
+  );
+  const dateFrom = normalizeOptionalIsoDateParam(
     'dateFrom',
     filters.dateFrom
   );
-  appendQueryParam(
-    params,
+  const dateTo = normalizeOptionalIsoDateParam(
     'dateTo',
     filters.dateTo
   );
-  appendQueryParam(
-    params,
+  const subPortfolioId = normalizeOptionalQueryText(
     'subPortfolioId',
     filters.subPortfolioId
   );
 
-  return withQuery(ANALYTICS_ENDPOINTS.summary, params);
-};
+  if (dateFrom !== null && dateTo !== null) {
+    assertDateRange(dateFrom, dateTo);
+  }
 
-export const buildPortfolioTargetProgressEndpoint = (
-  campaignCode: string,
-  dateTo: string,
-  subPortfolioId: string | null = null
-): string => {
-  const params = new URLSearchParams();
-  params.set('campaign', campaignCode);
-  params.set('dateTo', dateTo);
+  appendQueryParam(params, 'campaign', campaignId);
+  appendQueryParam(params, 'businessUnit', businessUnit);
+  appendQueryParam(params, 'dateFrom', dateFrom);
+  appendQueryParam(params, 'dateTo', dateTo);
   appendQueryParam(params, 'subPortfolioId', subPortfolioId);
 
-  return withQuery(
-    ANALYTICS_ENDPOINTS.targetProgress,
-    params
+  return withQuery(endpoint, params);
+};
+
+export const buildPortfolioBootstrapEndpoint = (
+  filters: PortfolioControlCenterFilters
+): string =>
+  buildPortfolioOperationalEndpoint(
+    ANALYTICS_ENDPOINTS.bootstrap,
+    filters
   );
-};
 
-export const buildPortfolioPromisesEndpoint = (
-  campaignCode: string,
-  subPortfolioId: string | null = null
-): string => {
-  const params = new URLSearchParams();
-  params.set('campaign', campaignCode);
-  appendQueryParam(params, 'subPortfolioId', subPortfolioId);
-
-  return withQuery(ANALYTICS_ENDPOINTS.promises, params);
-};
-
+export const buildPortfolioOverviewEndpoint = (
+  filters: PortfolioControlCenterFilters
+): string =>
+  buildPortfolioOperationalEndpoint(
+    ANALYTICS_ENDPOINTS.overview,
+    filters
+  );
 
 export const buildPortfolioOverduePromisesEndpoint = (
-  campaignCode: string,
-  subPortfolioId: string | null
+  context: Pick<
+    PortfolioOperationalContext,
+    'businessUnit' | 'campaignId' | 'subPortfolioId'
+  >,
+  query: PortfolioOverduePromisesQuery
 ): string => {
+  validateOverduePromisesQuery(query);
+
   const params = new URLSearchParams();
-  params.set('campaign', campaignCode);
-  appendQueryParam(params, 'subPortfolioId', subPortfolioId);
+  params.set(
+    'campaign',
+    normalizeRequiredQueryText('campaign', context.campaignId)
+  );
+  appendQueryParam(
+    params,
+    'businessUnit',
+    normalizeOptionalQueryText('businessUnit', context.businessUnit)
+  );
+  appendQueryParam(
+    params,
+    'subPortfolioId',
+    normalizeOptionalQueryText('subPortfolioId', context.subPortfolioId)
+  );
+  params.set('page', String(query.page));
+  params.set('pageSize', String(query.pageSize));
+  appendQueryParam(params, 'aging', query.aging);
+  params.set('sortBy', query.sortBy);
+  params.set('sortDirection', query.sortDirection);
 
   return withQuery(ANALYTICS_ENDPOINTS.overduePromises, params);
 };
 
 export const buildPortfolioDueTodayPromisesEndpoint = (
-  campaignCode: string,
-  subPortfolioId: string | null
+  context: Pick<
+    PortfolioOperationalContext,
+    'businessUnit' | 'campaignId' | 'subPortfolioId'
+  >,
+  query: PortfolioDueTodayPromisesQuery
 ): string => {
+  validateDueTodayPromisesQuery(query);
+
   const params = new URLSearchParams();
-  params.set('campaign', campaignCode);
-  appendQueryParam(params, 'subPortfolioId', subPortfolioId);
+  params.set(
+    'campaign',
+    normalizeRequiredQueryText('campaign', context.campaignId)
+  );
+  appendQueryParam(
+    params,
+    'businessUnit',
+    normalizeOptionalQueryText('businessUnit', context.businessUnit)
+  );
+  appendQueryParam(
+    params,
+    'subPortfolioId',
+    normalizeOptionalQueryText('subPortfolioId', context.subPortfolioId)
+  );
+  params.set('page', String(query.page));
+  params.set('pageSize', String(query.pageSize));
+  appendQueryParam(params, 'status', query.status);
+  params.set('sortBy', query.sortBy);
+  params.set('sortDirection', query.sortDirection);
 
   return withQuery(ANALYTICS_ENDPOINTS.dueTodayPromises, params);
 };
 
-export const buildPortfolioEvolutionEndpoint = (
-  campaignCode: string,
-  dateFrom: string,
-  dateTo: string,
-  subPortfolioId: string | null = null
+const buildPortfolioPerformanceEndpoint = (
+  endpoint: string,
+  context: PortfolioOperationalContext,
+  supervisorId: string | null
 ): string => {
+  const normalizedContext = normalizePerformanceContext(context);
   const params = new URLSearchParams();
-  params.set('campaign', campaignCode);
-  params.set('dateFrom', dateFrom);
-  params.set('dateTo', dateTo);
-  appendQueryParam(params, 'subPortfolioId', subPortfolioId);
 
-  return withQuery(ANALYTICS_ENDPOINTS.evolution, params);
-};
-
-export const buildPortfolioCampaignPerformanceEndpoint = (
-  campaignCode: string,
-  dateFrom: string,
-  dateTo: string,
-  subPortfolioId: string | null = null
-): string => {
-  const params = new URLSearchParams();
-  params.set('campaign', campaignCode);
-  params.set('dateFrom', dateFrom);
-  params.set('dateTo', dateTo);
-  appendQueryParam(params, 'subPortfolioId', subPortfolioId);
-
-  return withQuery(
-    ANALYTICS_ENDPOINTS.campaignPerformance,
-    params
+  params.set('campaign', normalizedContext.campaignId);
+  appendQueryParam(
+    params,
+    'businessUnit',
+    normalizedContext.businessUnit
   );
-};
+  params.set('dateFrom', normalizedContext.dateFrom);
+  params.set('dateTo', normalizedContext.dateTo);
+  appendQueryParam(
+    params,
+    'subPortfolioId',
+    normalizedContext.subPortfolioId
+  );
+  appendQueryParam(
+    params,
+    'supervisorId',
+    normalizeOptionalQueryText('supervisorId', supervisorId)
+  );
 
+  return withQuery(endpoint, params);
+};
 
 export const buildPortfolioSupervisorPerformanceEndpoint = (
-  campaignCode: string,
-  dateFrom: string,
-  dateTo: string,
-  subPortfolioId: string | null = null,
+  context: PortfolioOperationalContext,
   supervisorId: string | null = null
-): string => {
-  const params = new URLSearchParams();
-  params.set('campaign', campaignCode);
-  params.set('dateFrom', dateFrom);
-  params.set('dateTo', dateTo);
-  appendQueryParam(params, 'subPortfolioId', subPortfolioId);
-  appendQueryParam(params, 'supervisorId', supervisorId);
-
-  return withQuery(
+): string =>
+  buildPortfolioPerformanceEndpoint(
     ANALYTICS_ENDPOINTS.supervisorPerformance,
-    params
+    context,
+    supervisorId
   );
-};
 
 export const buildPortfolioAdvisorPerformanceEndpoint = (
-  campaignCode: string,
-  dateFrom: string,
-  dateTo: string,
-  subPortfolioId: string | null = null,
+  context: PortfolioOperationalContext,
   supervisorId: string | null = null
-): string => {
-  const params = new URLSearchParams();
-  params.set('campaign', campaignCode);
-  params.set('dateFrom', dateFrom);
-  params.set('dateTo', dateTo);
-  appendQueryParam(params, 'subPortfolioId', subPortfolioId);
-  appendQueryParam(params, 'supervisorId', supervisorId);
-
-  return withQuery(
+): string =>
+  buildPortfolioPerformanceEndpoint(
     ANALYTICS_ENDPOINTS.advisorPerformance,
-    params
+    context,
+    supervisorId
   );
-};
 
-export const fetchPortfolioControlCenterFilterOptions = (
-  signal: AbortSignal
-): Promise<PortfolioFilterOptionsApiResponse> => {
-  return analyticsApiClient.get<PortfolioFilterOptionsApiResponse>(
-    ANALYTICS_ENDPOINTS.filterOptions,
+const fetchValidatedPortfolioResponse = async <T>(
+  crmClientId: number,
+  endpoint: string,
+  signal: AbortSignal,
+  parse: (value: unknown) => T
+): Promise<T> => {
+  assertPositiveIntegerParam('crmClientId', crmClientId);
+
+  const response = await analyticsApiClient.get<unknown>(
+    endpoint,
     {
+      crmClientId,
+      includeSelectedCrmClientId: false,
       signal,
     }
   );
+
+  return parse(response);
 };
 
-export const fetchPortfolioControlCenterSummary = (
+export const fetchPortfolioControlCenterBootstrap = (
+  crmClientId: number,
   filters: PortfolioControlCenterFilters,
   signal: AbortSignal
-): Promise<PortfolioSummaryApiResponse> => {
-  return analyticsApiClient.get<PortfolioSummaryApiResponse>(
-    buildPortfolioSummaryEndpoint(filters),
-    {
-      signal,
-    }
+): Promise<PortfolioBootstrapApiResponse> =>
+  fetchValidatedPortfolioResponse(
+    crmClientId,
+    buildPortfolioBootstrapEndpoint(filters),
+    signal,
+    parsePortfolioBootstrapApiResponse
   );
-};
 
-export const fetchPortfolioTargetProgress = (
-  campaignCode: string,
-  dateTo: string,
-  subPortfolioId: string | null,
+export const fetchPortfolioControlCenterOverview = (
+  crmClientId: number,
+  filters: PortfolioControlCenterFilters,
   signal: AbortSignal
-): Promise<PortfolioTargetProgressApiResponse> => {
-  return analyticsApiClient.get<PortfolioTargetProgressApiResponse>(
-    buildPortfolioTargetProgressEndpoint(
-      campaignCode,
-      dateTo,
-      subPortfolioId
-    ),
-    {
-      signal,
-    }
+): Promise<PortfolioOverviewApiResponse> =>
+  fetchValidatedPortfolioResponse(
+    crmClientId,
+    buildPortfolioOverviewEndpoint(filters),
+    signal,
+    parsePortfolioOverviewApiResponse
   );
-};
-
-export const fetchPortfolioPromises = (
-  campaignCode: string,
-  subPortfolioId: string | null,
-  signal: AbortSignal
-): Promise<PortfolioPromisesApiResponse> => {
-  return analyticsApiClient.get<PortfolioPromisesApiResponse>(
-    buildPortfolioPromisesEndpoint(
-      campaignCode,
-      subPortfolioId
-    ),
-    {
-      signal,
-    }
-  );
-};
-
 
 export const fetchPortfolioOverduePromises = (
-  campaignCode: string,
-  subPortfolioId: string | null,
+  crmClientId: number,
+  context: Pick<
+    PortfolioOperationalContext,
+    'businessUnit' | 'campaignId' | 'subPortfolioId'
+  >,
+  query: PortfolioOverduePromisesQuery,
   signal: AbortSignal
-): Promise<PortfolioOverduePromisesApiResponse> => {
-  return analyticsApiClient.get<PortfolioOverduePromisesApiResponse>(
+): Promise<PortfolioOverduePromisesApiResponse> =>
+  fetchValidatedPortfolioResponse(
+    crmClientId,
     buildPortfolioOverduePromisesEndpoint(
-      campaignCode,
-      subPortfolioId
+      context,
+      query
     ),
-    {
-      signal,
-    }
+    signal,
+    parsePortfolioOverduePromisesApiResponse
   );
-};
 
 export const fetchPortfolioDueTodayPromises = (
-  campaignCode: string,
-  subPortfolioId: string | null,
+  crmClientId: number,
+  context: Pick<
+    PortfolioOperationalContext,
+    'businessUnit' | 'campaignId' | 'subPortfolioId'
+  >,
+  query: PortfolioDueTodayPromisesQuery,
   signal: AbortSignal
-): Promise<PortfolioDueTodayPromisesApiResponse> => {
-  return analyticsApiClient.get<PortfolioDueTodayPromisesApiResponse>(
+): Promise<PortfolioDueTodayPromisesApiResponse> =>
+  fetchValidatedPortfolioResponse(
+    crmClientId,
     buildPortfolioDueTodayPromisesEndpoint(
-      campaignCode,
-      subPortfolioId
+      context,
+      query
     ),
-    {
-      signal,
-    }
+    signal,
+    parsePortfolioDueTodayPromisesApiResponse
   );
-};
-
-export const fetchPortfolioEvolution = (
-  campaignCode: string,
-  dateFrom: string,
-  dateTo: string,
-  subPortfolioId: string | null,
-  signal: AbortSignal
-): Promise<PortfolioEvolutionApiResponse> => {
-  return analyticsApiClient.get<PortfolioEvolutionApiResponse>(
-    buildPortfolioEvolutionEndpoint(
-      campaignCode,
-      dateFrom,
-      dateTo,
-      subPortfolioId
-    ),
-    {
-      signal,
-    }
-  );
-};
-
-export const fetchPortfolioCampaignPerformance = (
-  campaignCode: string,
-  dateFrom: string,
-  dateTo: string,
-  subPortfolioId: string | null,
-  signal: AbortSignal
-): Promise<PortfolioCampaignPerformanceApiResponse> => {
-  return analyticsApiClient.get<PortfolioCampaignPerformanceApiResponse>(
-    buildPortfolioCampaignPerformanceEndpoint(
-      campaignCode,
-      dateFrom,
-      dateTo,
-      subPortfolioId
-    ),
-    {
-      signal,
-    }
-  );
-};
-
 
 export const fetchPortfolioSupervisorPerformance = (
-  campaignCode: string,
-  dateFrom: string,
-  dateTo: string,
-  subPortfolioId: string | null,
-  supervisorId: string | null,
+  crmClientId: number,
+  context: PortfolioOperationalContext,
   signal: AbortSignal
-): Promise<PortfolioSupervisorPerformanceApiResponse> => {
-  return analyticsApiClient.get<PortfolioSupervisorPerformanceApiResponse>(
-    buildPortfolioSupervisorPerformanceEndpoint(
-      campaignCode,
-      dateFrom,
-      dateTo,
-      subPortfolioId,
-      supervisorId
-    ),
-    {
-      signal,
-    }
+): Promise<PortfolioSupervisorPerformanceApiResponse> =>
+  fetchValidatedPortfolioResponse(
+    crmClientId,
+    buildPortfolioSupervisorPerformanceEndpoint(context),
+    signal,
+    parsePortfolioSupervisorPerformanceApiResponse
   );
-};
 
 export const fetchPortfolioAdvisorPerformance = (
-  campaignCode: string,
-  dateFrom: string,
-  dateTo: string,
-  subPortfolioId: string | null,
+  crmClientId: number,
+  context: PortfolioOperationalContext,
   supervisorId: string | null,
   signal: AbortSignal
-): Promise<PortfolioAdvisorPerformanceApiResponse> => {
-  return analyticsApiClient.get<PortfolioAdvisorPerformanceApiResponse>(
+): Promise<PortfolioAdvisorPerformanceApiResponse> =>
+  fetchValidatedPortfolioResponse(
+    crmClientId,
     buildPortfolioAdvisorPerformanceEndpoint(
-      campaignCode,
-      dateFrom,
-      dateTo,
-      subPortfolioId,
+      context,
       supervisorId
     ),
-    {
-      signal,
-    }
+    signal,
+    parsePortfolioAdvisorPerformanceApiResponse
   );
-};
