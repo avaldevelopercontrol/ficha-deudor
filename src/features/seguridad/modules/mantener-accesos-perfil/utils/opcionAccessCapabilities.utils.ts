@@ -41,6 +41,15 @@ const MAINTENANCE_PERMISSIONS:
     exportar: false,
   };
 
+const READ_ONLY_PERMISSIONS:
+  PerfilOpcionPermissionAvailability = {
+    consultar: true,
+    insertar: false,
+    editar: false,
+    eliminar: false,
+    exportar: false,
+  };
+
 const CHANGE_PASSWORD_PERMISSIONS:
   PerfilOpcionPermissionAvailability = {
     consultar: true,
@@ -68,6 +77,16 @@ const OPTION_PERMISSION_AVAILABILITY_BY_ID:
     ],
     [
       APPLICATION_OPTION_IDS
+        .PORTFOLIO_CONTROL_CENTER,
+      READ_ONLY_PERMISSIONS,
+    ],
+    [
+      APPLICATION_OPTION_IDS
+        .REPORTERIA,
+      READ_ONLY_PERMISSIONS,
+    ],
+    [
+      APPLICATION_OPTION_IDS
         .MANTENER_PERFIL,
       MAINTENANCE_PERMISSIONS,
     ],
@@ -79,6 +98,11 @@ const OPTION_PERMISSION_AVAILABILITY_BY_ID:
     [
       APPLICATION_OPTION_IDS
         .MANTENER_GRUPO,
+      MAINTENANCE_PERMISSIONS,
+    ],
+    [
+      APPLICATION_OPTION_IDS
+        .MANTENER_USUARIO,
       MAINTENANCE_PERMISSIONS,
     ],
     [
@@ -102,10 +126,25 @@ export const getPerfilOpcionPermissionAvailability = (
     };
   }
 
-  return {
-    ...(OPTION_PERMISSION_AVAILABILITY_BY_ID.get(
+  const configuredAvailability =
+    OPTION_PERMISSION_AVAILABILITY_BY_ID.get(
       option.idModulo
-    ) ?? ALL_PERMISSIONS_AVAILABLE),
+    );
+
+  if (configuredAvailability) {
+    return {
+      ...configuredAvailability,
+    };
+  }
+
+  if (option.urlBI?.trim()) {
+    return {
+      ...READ_ONLY_PERMISSIONS,
+    };
+  }
+
+  return {
+    ...ALL_PERMISSIONS_AVAILABLE,
   };
 };
 

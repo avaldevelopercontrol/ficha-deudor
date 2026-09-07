@@ -4,6 +4,10 @@ import {
 } from '@shared/api/apiClient';
 
 import {
+  assertApiBusinessSuccess,
+} from '@shared/api/apiResponse.utils';
+
+import {
   SEGURIDAD_API_ENDPOINTS,
 } from '../constants/seguridadRoutes.constants';
 
@@ -141,19 +145,6 @@ const buildOpcionByIdEndpoint = (
   }/${opcionId}`;
 };
 
-const isSuccessfulResponse = (
-  result: {
-    code: string;
-    statusCode: number;
-  }
-): boolean =>
-  (
-    result.statusCode >= 200 &&
-    result.statusCode < 300
-  ) ||
-  result.code === '00' ||
-  result.code === '200';
-
 export const fetchOpciones = async (
   signal?: AbortSignal
 ): Promise<Modulo[]> => {
@@ -170,17 +161,10 @@ export const fetchOpciones = async (
         }
       );
 
-    if (
-      !isSuccessfulResponse(
-        result
-      )
-    ) {
-      throw new Error(
-        result.messageUser?.trim() ||
-          result.message?.trim() ||
-          OPCIONES_ERROR_MESSAGES.list
-      );
-    }
+    assertApiBusinessSuccess(
+      result,
+      OPCIONES_ERROR_MESSAGES.list
+    );
 
     return mapOpcionesResponse(
       result.response
@@ -213,12 +197,12 @@ export const fetchOpcionById = async (
         }
       );
 
-    if (
-      !isSuccessfulResponse(
-        result
-      ) ||
-      !result.response
-    ) {
+    assertApiBusinessSuccess(
+      result,
+      OPCIONES_ERROR_MESSAGES.detail
+    );
+
+    if (!result.response) {
       throw new Error(
         result.messageUser?.trim() ||
           result.message?.trim() ||
@@ -269,17 +253,10 @@ export const createOpcion = async (
         }
       );
 
-    if (
-      !isSuccessfulResponse(
-        result
-      )
-    ) {
-      throw new Error(
-        result.messageUser?.trim() ||
-          result.message?.trim() ||
-          OPCIONES_ERROR_MESSAGES.create
-      );
-    }
+    assertApiBusinessSuccess(
+      result,
+      OPCIONES_ERROR_MESSAGES.create
+    );
 
     return result.response;
   } catch (error) {
@@ -327,17 +304,10 @@ export const updateOpcion = async (
           }
         );
 
-      if (
-        !isSuccessfulResponse(
-          result
-        )
-      ) {
-        throw new Error(
-          result.messageUser?.trim() ||
-            result.message?.trim() ||
-            OPCIONES_ERROR_MESSAGES.update
-        );
-      }
+      assertApiBusinessSuccess(
+        result,
+        OPCIONES_ERROR_MESSAGES.update
+      );
 
       if (
         body.nId_Opcion ===

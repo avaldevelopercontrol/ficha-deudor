@@ -4,7 +4,7 @@ import {
 } from '@shared/api/apiClient';
 
 import {
-  assertApiSuccess,
+  assertApiBusinessSuccess,
   getApiErrorMessage,
   normalizeApiCollectionResponse,
   unwrapApiObjectResponse,
@@ -168,7 +168,7 @@ export const fetchPerfilOptionsCount = async (
         }
       );
 
-    assertApiSuccess(
+    assertApiBusinessSuccess(
       result,
       PERFIL_OPTIONS_COUNT_ERROR
     );
@@ -204,7 +204,7 @@ export const fetchPerfilesAcceso = async (
         }
       );
 
-    assertApiSuccess(
+    assertApiBusinessSuccess(
       result,
       PERFILES_ACCESO_ERROR
     );
@@ -253,7 +253,7 @@ export const fetchPerfilOpcionesByPerfil = async (
         }
       );
 
-    assertApiSuccess(
+    assertApiBusinessSuccess(
       result,
       PERFIL_OPCIONES_DETAIL_ERROR
     );
@@ -290,6 +290,11 @@ const createPerfilOpcion = async (
       }
     );
 
+  assertApiBusinessSuccess(
+    result,
+    CREATE_PERFIL_OPCION_ERROR
+  );
+
   const response =
     unwrapApiObjectResponse<CreatePerfilOpcionResponseApi>(
       result,
@@ -316,6 +321,11 @@ const updatePerfilOpcion = async (
         signal,
       }
     );
+
+  assertApiBusinessSuccess(
+    result,
+    UPDATE_PERFIL_OPCION_ERROR
+  );
 
   const response =
     unwrapApiObjectResponse<UpdatePerfilOpcionResponseApi>(

@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import {
+  assertApiBusinessSuccess,
+  isSuccessfulApiBusinessResponse,
   normalizeApiCollectionResponse,
   unwrapApiCollectionResponse,
 } from './apiResponse.utils';
@@ -26,6 +28,66 @@ const createEnvelope = (
 export const suite = defineSuite(
   'apiCollectionResponse.utils',
   [
+    test(
+      'valida en conjunto statusCode y code para operaciones de negocio',
+      () => {
+        assert.equal(
+          isSuccessfulApiBusinessResponse({
+            code: '00',
+            statusCode: 200,
+          }),
+          true
+        );
+        assert.equal(
+          isSuccessfulApiBusinessResponse({
+            code: '200',
+            statusCode: 201,
+          }),
+          true
+        );
+        assert.equal(
+          isSuccessfulApiBusinessResponse({
+            code: '00',
+            statusCode: 0,
+          }),
+          true
+        );
+        assert.equal(
+          isSuccessfulApiBusinessResponse({
+            code: '052',
+            statusCode: 200,
+          }),
+          false
+        );
+        assert.equal(
+          isSuccessfulApiBusinessResponse({
+            code: '00',
+            statusCode: 500,
+          }),
+          false
+        );
+      }
+    ),
+    test(
+      'rechaza HTTP exitoso cuando el código de negocio informa error',
+      () => {
+        assert.throws(
+          () =>
+            assertApiBusinessSuccess(
+              {
+                code: '052',
+                statusCode: 200,
+                message:
+                  'Detalle técnico',
+                messageUser:
+                  'No se pudo completar la operación.',
+              },
+              'Error de fallback'
+            ),
+          /No se pudo completar la operación\./
+        );
+      }
+    ),
     test('normaliza arreglos objetos únicos y respuestas vacías', () => {
       const record = { id: 7 };
 

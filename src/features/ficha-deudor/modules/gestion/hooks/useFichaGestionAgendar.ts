@@ -97,7 +97,7 @@ export const useFichaGestionAgendar = ({
         showAgendaFeedback({
           variant: 'error',
           title:
-            'No se pudo preparar la agenda',
+            'No se pudo preparar la gestión para agendar',
           message:
             getErrorMessage(
               error,
@@ -128,7 +128,7 @@ export const useFichaGestionAgendar = ({
         showAgendaFeedback({
           variant: 'error',
           title:
-            'No se pudo registrar la agenda',
+            'No se pudo agendar la gestión',
           message:
             getErrorMessage(
               result.error,
@@ -157,11 +157,10 @@ export const useFichaGestionAgendar = ({
 
       showAgendaSuccess({
         entity: {
-          label: 'Agenda',
+          label: 'Gestión',
           gender: 'feminine',
         },
-        action: 'create',
-        context: 'record',
+        action: 'schedule',
         message:
           'La nueva gestión fue agendada correctamente.',
       });

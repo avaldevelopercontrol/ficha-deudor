@@ -86,19 +86,93 @@ export const suite = defineSuite(
               label: 'Gestión',
               gender: 'feminine',
             },
-            action: 'create',
-            context: 'record',
+            action: 'save',
             message:
               'La nueva gestión fue guardada y la tabla de Gestión Realizada se actualizó.',
           }),
           {
             variant: 'success',
-            title: 'Gestión registrada correctamente',
+            title: 'Gestión guardada correctamente',
             message:
               'La nueva gestión fue guardada y la tabla de Gestión Realizada se actualizó.',
           }
         );
       }
     ),
+
+    test(
+      'construye el mensaje estándar para agendar una gestión',
+      () => {
+        assert.deepEqual(
+          buildOperationSuccessFeedback({
+            entity: {
+              label: 'Gestión',
+              gender: 'feminine',
+            },
+            action: 'schedule',
+          }),
+          {
+            variant: 'success',
+            title: 'Gestión agendada correctamente',
+            message:
+              'La gestión se agendó correctamente.',
+          }
+        );
+      }
+    ),
+
+    test(
+      'mantiene los mensajes CRUD esperados para teléfono, dirección y email',
+      () => {
+        assert.deepEqual(
+          buildOperationSuccessFeedback({
+            entity: {
+              label: 'Teléfono',
+              gender: 'masculine',
+            },
+            action: 'update',
+          }),
+          {
+            variant: 'success',
+            title: 'Teléfono actualizado correctamente',
+            message:
+              'Los cambios del teléfono se guardaron correctamente.',
+          }
+        );
+
+        assert.deepEqual(
+          buildOperationSuccessFeedback({
+            entity: {
+              label: 'Dirección',
+              gender: 'feminine',
+            },
+            action: 'create',
+          }),
+          {
+            variant: 'success',
+            title: 'Dirección registrada correctamente',
+            message:
+              'La nueva dirección ya se encuentra disponible en el listado.',
+          }
+        );
+
+        assert.deepEqual(
+          buildOperationSuccessFeedback({
+            entity: {
+              label: 'Email',
+              gender: 'masculine',
+            },
+            action: 'create',
+          }),
+          {
+            variant: 'success',
+            title: 'Email registrado correctamente',
+            message:
+              'El nuevo email ya se encuentra disponible en el listado.',
+          }
+        );
+      }
+    ),
+
   ]
 );

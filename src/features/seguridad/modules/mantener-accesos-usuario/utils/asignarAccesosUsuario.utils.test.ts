@@ -65,6 +65,31 @@ const treeItems: OpcionTreeItem[] = [
     isAssignmentTarget: true,
     isPermissionTarget: true,
   },
+  {
+    idModulo: 999,
+    nombre: 'Power BI futuro',
+    descripcion: '',
+    codigo: 'mPowerBiFuturo',
+    ruta: 'root/mSeguridad/mPowerBiFuturo/',
+    urlBI: 'https://app.powerbi.com/view?r=demo',
+    imagenOpcion: null,
+    icono: '',
+    tipo: 3,
+    idPadre: 2,
+    codigoPadre: 'mSeguridad',
+    padre: 'Seguridad',
+    orden: 2,
+    visibleActivo: true,
+    visible: 'Sí',
+    estadoActivo: true,
+    estado: 'Activo',
+    depth: 1,
+    treeCode: '1.2',
+    displayLabel: '1.2. Power BI futuro',
+    hasChildren: false,
+    isAssignmentTarget: true,
+    isPermissionTarget: true,
+  },
 ];
 
 export const suite = defineSuite(
@@ -102,6 +127,82 @@ export const suite = defineSuite(
             consultar: true,
             insertar: true,
             editar: true,
+            eliminar: false,
+            exportar: false,
+          }
+        );
+      }
+    ),
+    test(
+      'limpia permisos de escritura de un Power BI al cargar accesos existentes',
+      () => {
+        const form =
+          createAsignarAccesosUsuarioFormFromAssignments(
+            10,
+            20,
+            [
+              {
+                idUsuarioGrupoOpcion: 2,
+                idUsuario: 10,
+                idGrupo: 20,
+                idOpcion: 999,
+                consultar: true,
+                insertar: true,
+                editar: true,
+                eliminar: true,
+                exportar: true,
+                estadoActivo: true,
+                crea: 1,
+                fechaCrea: '2026-08-12T10:00:00',
+              },
+            ],
+            treeItems
+          );
+
+        assert.deepEqual(
+          form.permissionsByOptionId['999'],
+          {
+            consultar: true,
+            insertar: false,
+            editar: false,
+            eliminar: false,
+            exportar: false,
+          }
+        );
+      }
+    ),
+    test(
+      'normaliza un Power BI con solo consultar antes de guardar',
+      () => {
+        const normalized =
+          normalizeAsignarAccesosUsuarioForm(
+            {
+              usuarioId: 10,
+              grupoId: 20,
+              selectedOptionIds: [2, 999],
+              activeOptionId: 999,
+              permissionsByOptionId: {
+                '999': {
+                  consultar: true,
+                  insertar: true,
+                  editar: true,
+                  eliminar: true,
+                  exportar: true,
+                },
+              },
+            },
+            treeItems
+          );
+
+        assert.deepEqual(
+          normalized.assignments.find(
+            (assignment) =>
+              assignment.opcionId === 999
+          )?.permissions,
+          {
+            consultar: true,
+            insertar: false,
+            editar: false,
             eliminar: false,
             exportar: false,
           }

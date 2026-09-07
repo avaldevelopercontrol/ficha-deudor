@@ -4,10 +4,18 @@ interface ApiResponseStatus {
   messageUser?: unknown;
 }
 
+interface ApiBusinessResponseStatus
+  extends ApiResponseStatus {
+  code: unknown;
+}
+
 interface ApiResponseEnvelope<T = unknown>
   extends ApiResponseStatus {
   response: T;
 }
+
+const SUCCESS_BUSINESS_CODES =
+  new Set(['00', '200']);
 
 const INVALID_RESPONSE_SUFFIX =
   'La respuesta del servidor no contiene datos válidos.';
@@ -58,6 +66,46 @@ export const getApiErrorMessage = (
     getNonEmptyMessage(result.messageUser) ??
     getNonEmptyMessage(result.message) ??
     fallbackMessage
+  );
+};
+
+const isSuccessfulBusinessStatusCode = (
+  statusCode: unknown
+): statusCode is number => {
+  return (
+    statusCode === 0 ||
+    isSuccessfulStatusCode(statusCode)
+  );
+};
+
+export const isSuccessfulApiBusinessResponse = (
+  result: ApiBusinessResponseStatus
+): boolean => {
+  const normalizedCode =
+    typeof result.code === 'string'
+      ? result.code.trim()
+      : '';
+
+  return (
+    isSuccessfulBusinessStatusCode(
+      result.statusCode
+    ) &&
+    SUCCESS_BUSINESS_CODES.has(
+      normalizedCode
+    )
+  );
+};
+
+export const assertApiBusinessSuccess = (
+  result: ApiBusinessResponseStatus,
+  fallbackMessage: string
+): void => {
+  if (isSuccessfulApiBusinessResponse(result)) {
+    return;
+  }
+
+  throw new Error(
+    getApiErrorMessage(result, fallbackMessage)
   );
 };
 
