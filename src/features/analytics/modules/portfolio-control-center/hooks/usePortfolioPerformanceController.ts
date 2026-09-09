@@ -10,9 +10,6 @@ import type {
   PortfolioOperationalContext,
 } from '../../../types/portfolioControlCenter.types';
 import {
-  PORTFOLIO_UNASSIGNED_SUPERVISOR_FILTER_ID,
-} from '../utils/portfolioFilterContext.utils';
-import {
   resolvePortfolioPerformanceSelection,
 } from '../utils/portfolioPerformanceController.utils';
 import {
@@ -48,16 +45,8 @@ export const usePortfolioPerformanceController = ({
     supervisorId: null,
     enabled:
       activeDetailTab === 'advisors' &&
-      (detailSupervisorId === null ||
-        detailSupervisorId ===
-          PORTFOLIO_UNASSIGNED_SUPERVISOR_FILTER_ID),
+      detailSupervisorId === null,
   });
-
-  const hasUnassignedAdvisors = Boolean(
-    baseAdvisorDetail.data?.advisors.some(
-      (item) => item.currentSupervisorId === null
-    )
-  );
 
   const selection = useMemo(
     () =>
@@ -65,13 +54,12 @@ export const usePortfolioPerformanceController = ({
         filterOptions,
         context,
         detailSupervisorId,
-        hasUnassignedAdvisors,
+        hasUnassignedAdvisors: false,
       }),
     [
       context,
       detailSupervisorId,
       filterOptions,
-      hasUnassignedAdvisors,
     ]
   );
 
@@ -94,11 +82,8 @@ export const usePortfolioPerformanceController = ({
       ? supervisorDetail
       : activeAdvisorDetail;
 
-  const detailAdvisors = selection.isUnassignedSupervisorSelected
-    ? baseAdvisorDetail.data?.advisors.filter(
-        (item) => item.currentSupervisorId === null
-      ) ?? []
-    : activeAdvisorDetail.data?.advisors ?? [];
+  const detailAdvisors =
+    activeAdvisorDetail.data?.advisors ?? [];
 
   const resetDetailSupervisor = useCallback(() => {
     setDetailSupervisorId(null);

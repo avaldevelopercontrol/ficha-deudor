@@ -70,6 +70,8 @@ export interface SupervisorPerformanceItem {
 export interface AdvisorPerformanceItem {
   advisorId: string;
   advisorName: string;
+  periodSupervisorId: string | null;
+  periodSupervisorName: string | null;
   currentSupervisorId: string | null;
   currentSupervisorName: string | null;
   managementCount: number;

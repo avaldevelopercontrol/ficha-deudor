@@ -273,6 +273,8 @@ export const suite = defineSuite(
             {
               advisorId: 3,
               advisorName: 'Asesor',
+              periodSupervisorId: 1,
+              periodSupervisorName: 'Supervisor del período',
               currentSupervisorId: null,
               currentSupervisorName: null,
               managementCount: 10,

@@ -166,6 +166,8 @@ export interface PortfolioAdvisorPerformanceApiResponse {
   advisors: readonly {
     advisorId: number;
     advisorName: string;
+    periodSupervisorId: number | null;
+    periodSupervisorName: string | null;
     currentSupervisorId: number | null;
     currentSupervisorName: string | null;
     managementCount: number;

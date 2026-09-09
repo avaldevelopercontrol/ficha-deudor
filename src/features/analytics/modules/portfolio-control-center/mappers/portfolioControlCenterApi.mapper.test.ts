@@ -327,6 +327,9 @@ const ADVISOR_PERFORMANCE_RESPONSE: PortfolioAdvisorPerformanceApiResponse = {
     {
       advisorId: 3,
       advisorName: 'AMAR SONIA IVET',
+      periodSupervisorId: 1,
+      periodSupervisorName:
+        'POMACARHUA ALCANTARA YANINA',
       currentSupervisorId: 1,
       currentSupervisorName:
         'POMACARHUA ALCANTARA YANINA',
@@ -340,6 +343,8 @@ const ADVISOR_PERFORMANCE_RESPONSE: PortfolioAdvisorPerformanceApiResponse = {
     {
       advisorId: 4,
       advisorName: 'ASESOR SIN SUPERVISOR ACTUAL',
+      periodSupervisorId: 7,
+      periodSupervisorName: 'SUPERVISORA DEL PERIODO',
       currentSupervisorId: null,
       currentSupervisorName: null,
       managementCount: 17,
@@ -498,6 +503,9 @@ export const suite = defineSuite(
         assert.deepEqual(result[0], {
           advisorId: '3',
           advisorName: 'AMAR SONIA IVET',
+          periodSupervisorId: '1',
+          periodSupervisorName:
+            'POMACARHUA ALCANTARA YANINA',
           currentSupervisorId: '1',
           currentSupervisorName:
             'POMACARHUA ALCANTARA YANINA',
@@ -508,6 +516,14 @@ export const suite = defineSuite(
           paymentCount: 3,
           attributableRecoveredAmount: 103211.41,
         });
+        assert.equal(
+          result[1]?.periodSupervisorId,
+          '7'
+        );
+        assert.equal(
+          result[1]?.periodSupervisorName,
+          'SUPERVISORA DEL PERIODO'
+        );
         assert.equal(
           result[1]?.currentSupervisorId,
           null
