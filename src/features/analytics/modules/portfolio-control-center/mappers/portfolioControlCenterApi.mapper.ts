@@ -376,6 +376,11 @@ export const mapPortfolioAdvisorPerformanceResponse = (
   return response.advisors.map((item) => ({
     advisorId: String(item.advisorId),
     advisorName: item.advisorName,
+    periodSupervisorId:
+      item.periodSupervisorId === null
+        ? null
+        : String(item.periodSupervisorId),
+    periodSupervisorName: item.periodSupervisorName,
     currentSupervisorId:
       item.currentSupervisorId === null
         ? null

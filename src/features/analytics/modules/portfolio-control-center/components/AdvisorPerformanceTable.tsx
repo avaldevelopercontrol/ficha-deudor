@@ -22,10 +22,14 @@ const columns: Column<AdvisorPerformanceItem>[] = [
     width: '245px',
   },
   {
-    key: 'currentSupervisorName',
-    label: 'Supervisor actual',
+    key: 'periodSupervisorName',
+    label: 'Supervisor del período',
     width: '280px',
-    render: (row) => row.currentSupervisorName ?? '—',
+    render: (row) =>
+      row.periodSupervisorName ??
+      (row.periodSupervisorId
+        ? `Sin nombre (ID ${row.periodSupervisorId})`
+        : '—'),
   },
   {
     key: 'managementCount',

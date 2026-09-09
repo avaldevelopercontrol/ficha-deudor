@@ -20,6 +20,8 @@ const advisors: AdvisorPerformanceItem[] = [
   {
     advisorId: '1',
     advisorName: 'A',
+    periodSupervisorId: null,
+    periodSupervisorName: null,
     currentSupervisorId: null,
     currentSupervisorName: null,
     managementCount: 10,
@@ -32,6 +34,8 @@ const advisors: AdvisorPerformanceItem[] = [
   {
     advisorId: '2',
     advisorName: 'B',
+    periodSupervisorId: null,
+    periodSupervisorName: null,
     currentSupervisorId: null,
     currentSupervisorName: null,
     managementCount: 20,

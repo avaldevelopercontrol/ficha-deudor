@@ -101,6 +101,16 @@ export const parsePortfolioAdvisorPerformanceApiResponse: ContractParser<Portfol
     expectPositiveInteger(item.advisorId, contract, `${path}.advisorId`);
     expectNonEmptyString(item.advisorName, contract, `${path}.advisorName`);
     expectNullablePositiveInteger(
+      item.periodSupervisorId,
+      contract,
+      `${path}.periodSupervisorId`
+    );
+    expectNullableString(
+      item.periodSupervisorName,
+      contract,
+      `${path}.periodSupervisorName`
+    );
+    expectNullablePositiveInteger(
       item.currentSupervisorId,
       contract,
       `${path}.currentSupervisorId`
