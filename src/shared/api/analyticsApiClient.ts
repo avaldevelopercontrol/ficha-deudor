@@ -125,10 +125,6 @@ const appendSelectedCrmClient = (
 
 const getAnalyticsIdentityHeaders =
   (): Record<string, string> => {
-    if (!import.meta.env.DEV) {
-      return {};
-    }
-
     const { userId, groupId } =
       getStoredSisgesAnalyticsContext();
 
