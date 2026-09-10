@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import {
   fetchCabeceraDatosAdicionales,
   fetchAllDatosAdicionales,
+  type CabeceraDatosAdicionalesResult,
 } from '../api/datosAdicionalesApi';
 import { useClientSideResourceTable } from '@shared/hooks/useClientSideResourceTable';
 import { useApiResource } from '@shared/hooks/useApiResource';
@@ -25,6 +26,7 @@ export type { TextFilters, SelectedFilters };
 
 interface UseDatosAdicionalesReturn {
   columns: ColumnApi[];
+  isConfigured: boolean;
   allData: DatoAdicionalApi[];
   filteredData: DatoAdicionalApi[];
   paginatedData: DatoAdicionalApi[];
@@ -66,21 +68,23 @@ export function useDatosAdicionales(
   );
 
   const {
-    data: columnsData,
+    data: cabeceraData,
     isLoading: metaLoading,
     error: metaError,
-  } = useApiResource<ColumnApi[]>(
+    refetch: refetchCabecera,
+  } = useApiResource<CabeceraDatosAdicionalesResult>(
     fetchCabeceraData,
     [id_cliente, pantalla],
     {
       enabled: canLoadCabeceraDatosAdicionales,
-      initialLoading: false,
+      initialLoading: canLoadCabeceraDatosAdicionales,
       errorMessage: DATOS_ADICIONALES_ERROR_MESSAGES.META,
     }
   );
 
   const columns =
-    columnsData ?? EMPTY_DATOS_ADICIONALES_COLUMNS;
+    cabeceraData?.columns ?? EMPTY_DATOS_ADICIONALES_COLUMNS;
+  const isConfigured = cabeceraData?.isConfigured ?? false;
 
   const fetchDatosAdicionalesData = useCallback(
     (signal: AbortSignal) => {
@@ -108,7 +112,7 @@ export function useDatosAdicionales(
     totalPages,
     setPageNumber,
     setPageSize,
-    refetch,
+    refetch: refetchData,
     textFilters,
     selectedFilters,
     onTextFilterChange,
@@ -121,11 +125,28 @@ export function useDatosAdicionales(
     errorMessage: DATOS_ADICIONALES_ERROR_MESSAGES.DATA,
   });
 
-  const isLoading = metaLoading || dataLoading;
-  const error = metaError || dataError;
+  const isLoading =
+    metaLoading || (isConfigured && dataLoading);
+  const error =
+    metaError || (isConfigured ? dataError : null);
+
+  const refetch = useCallback(async () => {
+    const requests: Promise<void>[] = [refetchCabecera()];
+
+    if (canLoadDatosAdicionales) {
+      requests.push(refetchData());
+    }
+
+    await Promise.all(requests);
+  }, [
+    canLoadDatosAdicionales,
+    refetchCabecera,
+    refetchData,
+  ]);
 
   return {
     columns,
+    isConfigured,
     allData,
     filteredData,
     paginatedData,

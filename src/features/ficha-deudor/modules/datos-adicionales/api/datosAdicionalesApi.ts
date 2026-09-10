@@ -13,7 +13,7 @@ import {
 import { mapCabeceraDatosAdicionalesToColumns } from '../mappers/datosAdicionales.mapper';
 import {
   unwrapApiArrayResponse,
-  unwrapApiObjectResponse,
+  unwrapApiNullableObjectResponse,
 } from '../../../shared/utils/apiResponse.utils';
 import {
   isCabeceraDatosAdicionalesApi,
@@ -29,6 +29,11 @@ export interface FetchDatosAdicionalesParams {
   idCliente: string;
   idCartera: string;
   idDeudor: string;
+}
+
+export interface CabeceraDatosAdicionalesResult {
+  isConfigured: boolean;
+  columns: ColumnApi[];
 }
 
 const buildCabeceraDatosAdicionalesParams = ({
@@ -58,7 +63,7 @@ const buildDatosAdicionalesParams = ({
 export async function fetchCabeceraDatosAdicionales(
   params: FetchCabeceraDatosAdicionalesParams,
   signal?: AbortSignal
-): Promise<ColumnApi[]> {
+): Promise<CabeceraDatosAdicionalesResult> {
   const searchParams = buildCabeceraDatosAdicionalesParams(params);
 
   const result = await apiClient<unknown>(
@@ -66,13 +71,25 @@ export async function fetchCabeceraDatosAdicionales(
     { signal }
   );
 
-  const cabecera = unwrapApiObjectResponse<CabeceraDatosAdicionalesApi>(
+  const cabecera = unwrapApiNullableObjectResponse<CabeceraDatosAdicionalesApi>(
     result,
     DATOS_ADICIONALES_ERROR_MESSAGES.META,
     isCabeceraDatosAdicionalesApi
   );
 
-  return mapCabeceraDatosAdicionalesToColumns(cabecera);
+  if (cabecera === null) {
+    return {
+      isConfigured: false,
+      columns: [],
+    };
+  }
+
+  const columns = mapCabeceraDatosAdicionalesToColumns(cabecera);
+
+  return {
+    isConfigured: columns.length > 0,
+    columns,
+  };
 }
 
 export async function fetchAllDatosAdicionales(

@@ -4,6 +4,7 @@ import {
   getApiErrorMessage,
   isSuccessfulStatusCode,
   unwrapApiArrayResponse,
+  unwrapApiNullableObjectResponse,
   unwrapApiObjectResponse,
   unwrapApiPaginatedArrayResponse,
   unwrapApiResponse,
@@ -278,6 +279,45 @@ export const suite = defineSuite('apiResponse.utils', [
         unwrapApiArrayResponse(
           createEnvelope([1, 2]),
           'Error consultando lista',
+          isTestItem
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+  }),
+  test('acepta response null solo para contratos de objeto nullable', () => {
+    assert.equal(
+      unwrapApiNullableObjectResponse(
+        createEnvelope(null),
+        'Error consultando detalle opcional',
+        isTestItem
+      ),
+      null
+    );
+
+    assert.deepEqual(
+      unwrapApiNullableObjectResponse(
+        createEnvelope({ id: 7 }),
+        'Error consultando detalle opcional',
+        isTestItem
+      ),
+      { id: 7 }
+    );
+
+    assert.throws(
+      () =>
+        unwrapApiNullableObjectResponse(
+          createEnvelope(undefined),
+          'Error consultando detalle opcional',
+          isTestItem
+        ),
+      /respuesta del servidor no contiene datos válidos/i
+    );
+
+    assert.throws(
+      () =>
+        unwrapApiNullableObjectResponse(
+          createEnvelope([]),
+          'Error consultando detalle opcional',
           isTestItem
         ),
       /respuesta del servidor no contiene datos válidos/i

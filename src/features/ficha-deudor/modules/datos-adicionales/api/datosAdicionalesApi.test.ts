@@ -62,10 +62,36 @@ export const suite = defineSuite('datosAdicionalesApi', [
       assert.equal(capturedUrl.searchParams.get('nId_Cliente'), '95');
       assert.equal(capturedUrl.searchParams.get('pantalla'), '2');
       assert.equal(capturedSignal, controller.signal);
-      assert.deepEqual(result, [
-        { key: 'documento', label: 'Documento', type: 'text' },
-        { key: 'montoPendiente', label: 'Monto Pendiente', type: 'money' },
-      ]);
+      assert.deepEqual(result, {
+        isConfigured: true,
+        columns: [
+          { key: 'documento', label: 'Documento', type: 'text' },
+          { key: 'montoPendiente', label: 'Monto Pendiente', type: 'money' },
+        ],
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  }),
+  test('trata response null de cabecera como cliente sin configuración', async () => {
+    const originalFetch = globalThis.fetch;
+
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify(createEnvelope(null)),
+        { status: 200, headers: { 'content-type': 'application/json' } }
+      );
+
+    try {
+      const result = await fetchCabeceraDatosAdicionales({
+        idCliente: '59',
+        pantalla: 3,
+      });
+
+      assert.deepEqual(result, {
+        isConfigured: false,
+        columns: [],
+      });
     } finally {
       globalThis.fetch = originalFetch;
     }
