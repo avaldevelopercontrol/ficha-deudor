@@ -10,6 +10,10 @@ export interface PowerBiImageDefinition {
  * La opción persiste únicamente `src` en sImagenOpcion. El catálogo sirve
  * para que administración pueda reutilizar los logos existentes sin conocer
  * rutas de archivos ni modificar código al registrar los BI actuales.
+ *
+ * Algunas rutas históricas se conservan porque ya pueden estar persistidas en
+ * `sImagenOpcion`; su archivo WebP se reemplaza con el arte vigente para no
+ * invalidar módulos existentes.
  */
 export const POWER_BI_IMAGE_CATALOG:
   readonly PowerBiImageDefinition[] = [
@@ -94,19 +98,54 @@ export const POWER_BI_IMAGE_CATALOG:
       src: '/imgs_webp/gestion-integral.webp',
     },
     {
+      id: 'asesor-gestion-campo',
+      label: 'ASESOR DE GESTIÓN DE CAMPO',
+      src: '/imgs_webp/campo.webp',
+    },
+    {
       id: 'call-produccion',
       label: 'CALL PRODUCCION',
       src: '/imgs_webp/call-production.webp',
     },
     {
-      id: 'gestion-analisis-kpi',
-      label: 'GESTION Y ANALISIS DE KPI',
+      id: 'indicadores-operativos',
+      label: 'INDICADORES OPERATIVOS DE CARTERAS',
       src: '/imgs_webp/analisis.webp',
     },
     {
-      id: 'control-eficiencia-operativa',
-      label: 'CONTROL DE EFICIENCIA OPERATIVA',
+      id: 'eficiencia-operativa',
+      label: 'EFICIENCIA OPERATIVA',
       src: '/imgs_webp/kpi-eficiencia-operativa.webp',
+    },
+    {
+      id: 'alfin',
+      label: 'ALFIN',
+      src: '/imgs_webp/logo-alfin.webp',
+    },
+    {
+      id: 'certus',
+      label: 'CERTUS',
+      src: '/imgs_webp/logo-certus.webp',
+    },
+    {
+      id: 'directv',
+      label: 'DIRECTV',
+      src: '/imgs_webp/logo-directv.webp',
+    },
+    {
+      id: 'maf',
+      label: 'MAF',
+      src: '/imgs_webp/logo-maf.webp',
+    },
+    {
+      id: 'niubiz',
+      label: 'NIUBIZ',
+      src: '/imgs_webp/logo-niubiz.webp',
+    },
+    {
+      id: 'oriflame',
+      label: 'ORIFLAME',
+      src: '/imgs_webp/logo-oriflame.webp',
     },
   ];
 
