@@ -283,6 +283,35 @@ export const unwrapApiObjectResponse = <T>(
   );
 };
 
+export const unwrapApiNullableObjectResponse = <T>(
+  result: unknown,
+  fallbackMessage: string,
+  isObject: RuntimeTypeGuard<T>
+): T | null => {
+  const envelope = getValidResponseEnvelope(
+    result,
+    fallbackMessage
+  );
+
+  if (!Object.hasOwn(envelope, 'response')) {
+    return throwInvalidResponse(fallbackMessage);
+  }
+
+  if (envelope.response === null) {
+    return null;
+  }
+
+  if (envelope.response === undefined) {
+    return throwInvalidResponse(fallbackMessage);
+  }
+
+  return ensureObjectResponse(
+    envelope.response,
+    fallbackMessage,
+    isObject
+  );
+};
+
 export const unwrapApiPaginatedArrayResponse = <T>(
   result: unknown,
   fallbackMessage: string,

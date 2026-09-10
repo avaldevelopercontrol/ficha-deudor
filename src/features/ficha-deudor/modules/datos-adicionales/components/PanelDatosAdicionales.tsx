@@ -19,6 +19,7 @@ interface Props {
 const PanelDatosAdicionales: React.FC<Props> = ({ isActive, params }) => {
   const {
     allData,
+    isConfigured,
     paginatedData,
     isLoading,
     error,
@@ -48,6 +49,25 @@ const PanelDatosAdicionales: React.FC<Props> = ({ isActive, params }) => {
         errorTitle={PANEL_DATOS_ADICIONALES_MESSAGES.ERROR_TITLE}
         onRetry={refetch}
       />
+    );
+  }
+
+  if (!isConfigured) {
+    return (
+      <PanelLayout
+        title={PANEL_DATOS_ADICIONALES_TITLE}
+        isActive={isActive}
+      >
+        <div
+          style={{
+            padding: '2rem',
+            textAlign: 'center',
+            color: '#64748b',
+          }}
+        >
+          {PANEL_DATOS_ADICIONALES_MESSAGES.NOT_CONFIGURED}
+        </div>
+      </PanelLayout>
     );
   }
 
