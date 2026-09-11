@@ -1,6 +1,6 @@
 import type {
   PortfolioControlCenterFilters,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioFilters.types';
 
 export const DEFAULT_PORTFOLIO_CONTROL_CENTER_FILTERS: PortfolioControlCenterFilters = {
   businessUnit: null,

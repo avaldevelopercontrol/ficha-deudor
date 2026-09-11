@@ -4,7 +4,7 @@ import Paginacion from '@shared/components/ui/Paginacion';
 
 import type {
   PortfolioPagination,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioPromises.types';
 import {
   resolvePortfolioPromisePagination,
 } from '../utils/portfolioPromiseDetail.utils';

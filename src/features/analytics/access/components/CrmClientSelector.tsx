@@ -1,4 +1,4 @@
-import type { AnalyticsScope } from '../types/analyticsAccess.types';
+import type { AnalyticsScope } from '../domain/analyticsAccess.types';
 
 interface Props {
   scopes: readonly AnalyticsScope[];

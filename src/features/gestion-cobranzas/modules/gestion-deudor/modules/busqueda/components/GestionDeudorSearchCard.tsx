@@ -75,7 +75,7 @@ export const GestionDeudorSearchCard: React.FC<GestionDeudorSearchCardProps> = (
                 value={valorBusqueda}
                 onChange={(event) => onValorBusquedaChange(event.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                placeholder="Ingrese RUC, DNI o teléfono"
+                placeholder="Ingrese RUC, DNI, teléfono, documento o código"
                 disabled={isLoading}
               />
             </div>

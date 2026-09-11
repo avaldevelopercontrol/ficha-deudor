@@ -49,11 +49,3 @@ export interface ColumnApi {
   label: string;
   type: 'text' | 'money' | 'date' | 'atraso' | 'estado';
 }
-
-// ─── Boton ───
-export interface BotonApi {
-  id: string;
-  label: string;
-  action?: string;
-  popupUrl?: string;
-}

@@ -1,5 +1,4 @@
 import {
-  ApiError,
   apiClient,
 } from '@shared/api/apiClient';
 
@@ -25,11 +24,11 @@ import {
 
 import type {
   EditarModuloFormData,
-} from '../modules/mantener-modulos/types/editarModulo.types';
+} from '../domain/modulos/moduloForm.types';
 
 import type {
   RegistrarModuloFormData,
-} from '../modules/mantener-modulos/types/registrarModulo.types';
+} from '../domain/modulos/moduloForm.types';
 
 import type {
   UpdateOpcionApiResponse,
@@ -48,6 +47,10 @@ import type {
   OpcionApi,
 } from '../types/opcion.types';
 
+import {
+  resolveSeguridadApiError,
+} from './seguridadApiError';
+
 const OPCIONES_ERROR_MESSAGES = {
   list:
     'No se pudo obtener la lista de módulos.',
@@ -61,71 +64,6 @@ const OPCIONES_ERROR_MESSAGES = {
   update:
     'No se pudo actualizar el módulo.',
 } as const;
-
-const isRecord = (
-  value: unknown
-): value is Record<
-  string,
-  unknown
-> =>
-  typeof value === 'object' &&
-  value !== null;
-
-const getStringProperty = (
-  value:
-    Record<string, unknown>,
-
-  property:
-    string
-): string | null => {
-  const propertyValue =
-    value[property];
-
-  if (
-    typeof propertyValue !==
-      'string' ||
-    !propertyValue.trim()
-  ) {
-    return null;
-  }
-
-  return propertyValue.trim();
-};
-
-const resolveOpcionesApiError = (
-  error: unknown,
-  fallbackMessage: string
-): string => {
-  if (
-    error instanceof ApiError &&
-    isRecord(error.data)
-  ) {
-    const apiMessage =
-      getStringProperty(
-        error.data,
-        'messageUser'
-      ) ??
-      getStringProperty(
-        error.data,
-        'message'
-      );
-
-    return (
-      apiMessage ||
-      error.message.trim() ||
-      fallbackMessage
-    );
-  }
-
-  if (
-    error instanceof Error &&
-    error.message.trim()
-  ) {
-    return error.message.trim();
-  }
-
-  return fallbackMessage;
-};
 
 const buildOpcionByIdEndpoint = (
   opcionId: number
@@ -170,11 +108,9 @@ export const fetchOpciones = async (
       result.response
     );
   } catch (error) {
-    throw new Error(
-      resolveOpcionesApiError(
+    throw resolveSeguridadApiError(
         error,
         OPCIONES_ERROR_MESSAGES.list
-      )
     );
   }
 };
@@ -212,11 +148,9 @@ export const fetchOpcionById = async (
 
     return result.response;
   } catch (error) {
-    throw new Error(
-      resolveOpcionesApiError(
+    throw resolveSeguridadApiError(
         error,
         OPCIONES_ERROR_MESSAGES.detail
-      )
     );
   }
 };
@@ -260,11 +194,9 @@ export const createOpcion = async (
 
     return result.response;
   } catch (error) {
-    throw new Error(
-      resolveOpcionesApiError(
+    throw resolveSeguridadApiError(
         error,
         OPCIONES_ERROR_MESSAGES.create
-      )
     );
   }
 };
@@ -317,11 +249,9 @@ export const updateOpcion = async (
           result.response;
       }
     } catch (error) {
-      throw new Error(
-        resolveOpcionesApiError(
+      throw resolveSeguridadApiError(
           error,
           OPCIONES_ERROR_MESSAGES.update
-        )
       );
     }
   }

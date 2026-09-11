@@ -1,6 +1,6 @@
 import type {
-  RegistrarPerfilFormData,
-} from '../modules/mantener-perfil/types/registrarPerfil.types';
+  PerfilFormData,
+} from '../domain/perfiles/perfilForm.types';
 
 import type {
   UpdatePerfilRequestApi,
@@ -16,7 +16,7 @@ import type {
  */
 export const mapPerfilApiToForm = (
   perfil: PerfilApi
-): RegistrarPerfilFormData => ({
+): PerfilFormData => ({
   nombrePerfil:
     perfil.per_Nombre?.trim() ?? '',
 
@@ -40,7 +40,7 @@ export const mapPerfilApiToForm = (
  */
 export const buildUpdatePerfilRequest = (
   perfil: PerfilApi,
-  form: RegistrarPerfilFormData
+  form: PerfilFormData
 ): UpdatePerfilRequestApi => {
   const fechaRegistro =
     perfil.per_Fecha?.trim();

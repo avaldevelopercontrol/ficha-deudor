@@ -8,7 +8,7 @@ import {
 import type {
   PortfolioControlCenterFilterOptions,
   PortfolioControlCenterFilters,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioFilters.types';
 import {
   PortfolioFilters,
 } from './PortfolioFilters';

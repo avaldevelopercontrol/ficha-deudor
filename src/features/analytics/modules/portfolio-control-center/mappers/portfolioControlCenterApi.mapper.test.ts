@@ -17,15 +17,21 @@ import type {
   PortfolioTargetProgressApiResponse,
 } from '../api/portfolioControlCenterApi.types';
 import {
+  mapPortfolioFilterOptionsResponse,
+} from './portfolioFilters.mapper';
+import {
   mapPortfolioAdvisorPerformanceResponse,
   mapPortfolioEvolutionResponse,
-  mapPortfolioFilterOptionsResponse,
+  mapPortfolioSupervisorPerformanceResponse,
+} from './portfolioPerformance.mapper';
+import {
   mapPortfolioOperationalResponses,
   mapPortfolioOverviewResponse,
-  mapPortfolioOverduePromisesResponse,
+} from './portfolioOverview.mapper';
+import {
   mapPortfolioDueTodayPromisesResponse,
-  mapPortfolioSupervisorPerformanceResponse,
-} from './portfolioControlCenterApi.mapper';
+  mapPortfolioOverduePromisesResponse,
+} from './portfolioPromises.mapper';
 
 const FILTER_OPTIONS_RESPONSE: PortfolioFilterOptionsApiResponse = {
   availableDateFrom: '2026-08-01',
@@ -358,7 +364,7 @@ const ADVISOR_PERFORMANCE_RESPONSE: PortfolioAdvisorPerformanceApiResponse = {
 };
 
 export const suite = defineSuite(
-  'portfolioControlCenterApi.mapper',
+  'portfolio mappers',
   [
     test(
       'normaliza ids y relaciones many-to-many de Filter Options',

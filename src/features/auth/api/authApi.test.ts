@@ -77,6 +77,7 @@ export const suite = defineSuite('authApi', [
         const url = new URL(String(request.input), 'http://localhost');
         assert.equal(result.success, true);
         assert.equal(result.usuario?.id_usuario, '16068');
+        assert.equal(result.usuario?.perfil, 'Administrador Base Datos');
         assert.equal(url.searchParams.get('cUsr_Login'), 'cramirez');
         assert.equal(url.searchParams.get('cUsr_Pass'), 'a&b=c?#');
         assert.equal(request.init?.method, 'GET');

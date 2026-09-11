@@ -7,7 +7,7 @@ import {
 
 import type {
   AnalyticsAccessContext,
-} from '../types/analyticsAccess.types';
+} from '../domain/analyticsAccess.types';
 import {
   ANALYTICS_ACCESS_CACHE_TTL_MS,
   analyticsAccessStore,

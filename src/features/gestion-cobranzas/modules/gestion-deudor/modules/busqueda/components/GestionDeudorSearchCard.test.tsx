@@ -29,6 +29,18 @@ export const suite = defineSuite('estados críticos de búsqueda de deudor', [
       /<button[^>]*btn-primary[^>]*disabled=""/
     );
   }),
+  test('muestra los nuevos tipos de búsqueda por documento y código del cliente', () => {
+    const html = renderCard();
+
+    assert.match(html, /NÚMERO DE DOCUMENTO/);
+    assert.match(html, /CÓDIGO DEL CLIENTE/);
+    assert.match(html, /N.º documento/);
+    assert.match(html, /Código cliente/);
+    assert.match(
+      html,
+      /Ingrese RUC, DNI, teléfono, documento o código/
+    );
+  }),
   test('muestra el mensaje de validación o consulta', () => {
     const html = renderCard({ error: 'No se encontró el deudor.' });
 

@@ -13,34 +13,23 @@ import {
   createAsyncMutationController,
 } from '@shared/utils/asyncMutation.utils';
 
-import {
-  fetchOpciones,
-} from '../../../api/opcionesApi';
-import {
-  fetchUsuarioGrupoOpcionById,
-  fetchUsuarioGrupoOpcionesByUsuarioGrupo,
-} from '../../../api/usuarioGrupoOpcionesApi';
-
 import type {
   UsuarioGrupoOpcionDetalle,
   UsuarioGrupoOpcionListado,
 } from '../../../types/usuarioGrupoOpcion.types';
 
-import type {
-  PerfilOpcionPermissionKey,
-} from '../../mantener-accesos-perfil/types/asignarAccesosPerfil.types';
+import {
+  useAccessAssignmentEditor,
+} from '../../../hooks/useAccessAssignmentEditor';
 
 import {
-  buildAccesosPerfilTree,
-} from '../../mantener-accesos-perfil/utils/accesosPerfilTree.utils';
+  resolveOperationErrorMessage,
+} from '../../../utils/operationError.utils';
 
 import {
-  getPerfilOpcionBranchAllPermissionsState,
-  getPerfilOpcionBranchPermissionStates,
-  setAllPerfilOpcionBranchPermissions,
-  setPerfilOpcionBranchPermission,
-  setPerfilOpcionBranchSelected,
-} from '../../mantener-accesos-perfil/utils/asignarAccesosPerfil.utils';
+  loadEditarAccesosUsuarioCatalog,
+  type EditarAccesosUsuarioCatalog,
+} from '../../../application/accesos/accessCatalog.application';
 
 import {
   MODAL_EDITAR_ACCESOS_USUARIO_TEXTS,
@@ -59,13 +48,6 @@ import {
   validateEditarAccesosUsuarioForm,
 } from '../utils/asignarAccesosUsuario.utils';
 
-interface EditarAccesosUsuarioCatalog {
-  opciones: Awaited<
-    ReturnType<typeof fetchOpciones>
-  >;
-  asignaciones: UsuarioGrupoOpcionDetalle[];
-}
-
 interface UseEditarAccesosUsuarioModalParams {
   isOpen: boolean;
   acceso: UsuarioGrupoOpcionListado;
@@ -76,19 +58,6 @@ interface UseEditarAccesosUsuarioModalParams {
     data: RegistrarUsuarioGrupoOpcionesData
   ) => Promise<void> | void;
 }
-
-const resolveSubmitError = (
-  error: unknown
-): string => {
-  if (
-    error instanceof Error &&
-    error.message.trim()
-  ) {
-    return error.message.trim();
-  }
-
-  return 'No se pudieron actualizar los accesos del usuario.';
-};
 
 export const useEditarAccesosUsuarioModal = ({
   isOpen,
@@ -123,42 +92,16 @@ export const useEditarAccesosUsuarioModal = ({
     useState(false);
 
   const loadCatalog = useCallback(
-    async (
-      signal: AbortSignal
-    ): Promise<EditarAccesosUsuarioCatalog> => {
-      const [
-        opciones,
-        detalleSeleccionado,
-        asignaciones,
-      ] = await Promise.all([
-        fetchOpciones(signal),
-        fetchUsuarioGrupoOpcionById(
-          acceso.idUsuarioGrupoOpcion,
-          signal
-        ),
-        fetchUsuarioGrupoOpcionesByUsuarioGrupo(
-          acceso.idUsuario,
-          acceso.idGrupo,
-          signal
-        ),
-      ]);
-
-      if (
-        detalleSeleccionado.idUsuario !==
-          acceso.idUsuario ||
-        detalleSeleccionado.idGrupo !==
-          acceso.idGrupo
-      ) {
-        throw new Error(
-          'El acceso seleccionado ya no pertenece al usuario y grupo mostrados en la tabla.'
-        );
-      }
-
-      return {
-        opciones,
-        asignaciones,
-      };
-    },
+    (signal: AbortSignal) =>
+      loadEditarAccesosUsuarioCatalog(
+        {
+          idUsuarioGrupoOpcion:
+            acceso.idUsuarioGrupoOpcion,
+          idUsuario: acceso.idUsuario,
+          idGrupo: acceso.idGrupo,
+        },
+        signal
+      ),
     [
       acceso.idGrupo,
       acceso.idUsuario,
@@ -187,37 +130,29 @@ export const useEditarAccesosUsuarioModal = ({
     }
   );
 
-  const treeState = useMemo(() => {
-    if (!catalog) {
-      return {
-        items: [],
-        error: null,
-      };
-    }
-
-    try {
-      return {
-        items: buildAccesosPerfilTree(
-          catalog.opciones
-        ),
-        error: null,
-      };
-    } catch (error) {
-      return {
-        items: [],
-        error:
-          error instanceof Error
-            ? error.message
-            : 'La jerarquía de opciones no es válida.',
-      };
-    }
-  }, [catalog]);
+  const {
+    treeItems,
+    treeError,
+    activeOption,
+    activePermissionStates,
+    activeSelectAllState,
+    handleActivateOption,
+    handleToggleOption,
+    handlePermissionChange,
+    handleSelectAllPermissions,
+  } = useAccessAssignmentEditor({
+    form,
+    setForm,
+    opciones: catalog?.opciones,
+    setErrors,
+    setSubmitError,
+  });
 
   useEffect(() => {
     if (
       !isOpen ||
       !catalog ||
-      treeState.error ||
+      treeError ||
       initializedCatalogRef.current ===
         catalog
     ) {
@@ -231,7 +166,7 @@ export const useEditarAccesosUsuarioModal = ({
         acceso.idUsuario,
         acceso.idGrupo,
         catalog.asignaciones,
-        treeState.items
+        treeItems
       );
 
     setForm(nextForm);
@@ -243,8 +178,8 @@ export const useEditarAccesosUsuarioModal = ({
     acceso.idUsuario,
     catalog,
     isOpen,
-    treeState.error,
-    treeState.items,
+    treeError,
+    treeItems,
   ]);
 
   const userOptions = useMemo(
@@ -276,185 +211,20 @@ export const useEditarAccesosUsuarioModal = ({
     [acceso.grupo, acceso.idGrupo]
   );
 
-  const activeOption = useMemo(
-    () =>
-      treeState.items.find(
-        (item) =>
-          item.idModulo ===
-          form.activeOptionId
-      ) ?? null,
-    [
-      form.activeOptionId,
-      treeState.items,
-    ]
-  );
-
-  const activePermissionStates = useMemo(
-    () =>
-      form.activeOptionId === null
-        ? {
-            consultar:
-              'unchecked' as const,
-            insertar:
-              'unchecked' as const,
-            editar:
-              'unchecked' as const,
-            eliminar:
-              'unchecked' as const,
-            exportar:
-              'unchecked' as const,
-          }
-        : getPerfilOpcionBranchPermissionStates(
-            form,
-            treeState.items,
-            form.activeOptionId
-          ),
-    [form, treeState.items]
-  );
-
-  const activeSelectAllState = useMemo(
-    () =>
-      activeOption?.isPermissionTarget
-        ? getPerfilOpcionBranchAllPermissionsState(
-            activePermissionStates,
-            activeOption
-          )
-        : 'unchecked',
-    [
-      activeOption,
-      activePermissionStates,
-    ]
-  );
-
   const isDirty = useMemo(
     () =>
       initialForm !== null &&
       !areAccesosUsuarioFormsEqual(
         form,
         initialForm,
-        treeState.items
+        treeItems
       ),
     [
       form,
       initialForm,
-      treeState.items,
+      treeItems,
     ]
   );
-
-  const clearFormErrors = useCallback(
-    (...fieldNames: string[]) => {
-      setErrors((previousErrors) => {
-        const nextErrors = {
-          ...previousErrors,
-        };
-
-        fieldNames.forEach(
-          (fieldName) => {
-            delete nextErrors[
-              fieldName
-            ];
-          }
-        );
-
-        return nextErrors;
-      });
-      setSubmitError(null);
-    },
-    []
-  );
-
-  const handleActivateOption = useCallback(
-    (optionId: number) => {
-      setForm((previousForm) => ({
-        ...previousForm,
-        activeOptionId: optionId,
-      }));
-    },
-    []
-  );
-
-  const handleToggleOption = useCallback(
-    (
-      optionId: number,
-      selected: boolean
-    ) => {
-      setForm((previousForm) =>
-        setPerfilOpcionBranchSelected(
-          previousForm,
-          treeState.items,
-          optionId,
-          selected
-        )
-      );
-      clearFormErrors(
-        'selectedOptionIds',
-        'permissionsByOptionId'
-      );
-    },
-    [
-      clearFormErrors,
-      treeState.items,
-    ]
-  );
-
-  const handlePermissionChange = useCallback(
-    (
-      permission: PerfilOpcionPermissionKey,
-      checked: boolean
-    ) => {
-      if (form.activeOptionId === null) {
-        return;
-      }
-
-      setForm((previousForm) =>
-        setPerfilOpcionBranchPermission(
-          previousForm,
-          treeState.items,
-          form.activeOptionId as number,
-          permission,
-          checked
-        )
-      );
-      clearFormErrors(
-        'selectedOptionIds',
-        'permissionsByOptionId'
-      );
-    },
-    [
-      clearFormErrors,
-      form.activeOptionId,
-      treeState.items,
-    ]
-  );
-
-  const handleSelectAllPermissions =
-    useCallback(
-      (checked: boolean) => {
-        if (
-          form.activeOptionId === null
-        ) {
-          return;
-        }
-
-        setForm((previousForm) =>
-          setAllPerfilOpcionBranchPermissions(
-            previousForm,
-            treeState.items,
-            form.activeOptionId as number,
-            checked
-          )
-        );
-        clearFormErrors(
-          'selectedOptionIds',
-          'permissionsByOptionId'
-        );
-      },
-      [
-        clearFormErrors,
-        form.activeOptionId,
-        treeState.items,
-      ]
-    );
 
   const resetAndClose = useCallback(() => {
     if (
@@ -492,7 +262,7 @@ export const useEditarAccesosUsuarioModal = ({
     const validationErrors =
       validateEditarAccesosUsuarioForm(
         form,
-        treeState.items
+        treeItems
       );
 
     if (
@@ -514,7 +284,7 @@ export const useEditarAccesosUsuarioModal = ({
             catalog.asignaciones,
             normalizeAsignarAccesosUsuarioForm(
               form,
-              treeState.items
+              treeItems
             )
           );
         }
@@ -530,8 +300,9 @@ export const useEditarAccesosUsuarioModal = ({
 
     if (result.status === 'error') {
       setSubmitError(
-        resolveSubmitError(
-          result.error
+        resolveOperationErrorMessage(
+          result.error,
+          'No se pudieron actualizar los accesos del usuario.'
         )
       );
     }
@@ -542,22 +313,22 @@ export const useEditarAccesosUsuarioModal = ({
     isDirty,
     onClose,
     onGuardar,
-    treeState.items,
+    treeItems,
   ]);
 
   const emptyCatalogMessage =
     !isLoading &&
     !resourceError &&
-    !treeState.error &&
+    !treeError &&
     catalog &&
-    treeState.items.length === 0
+    treeItems.length === 0
       ? MODAL_EDITAR_ACCESOS_USUARIO_TEXTS
           .emptyOptions
       : null;
 
   const catalogError =
     resourceError ??
-    treeState.error ??
+    treeError ??
     emptyCatalogMessage;
 
   const isReady = Boolean(
@@ -579,7 +350,7 @@ export const useEditarAccesosUsuarioModal = ({
     refetch,
     userOptions,
     groupOptions,
-    treeItems: treeState.items,
+    treeItems,
     activeOption,
     activePermissionStates,
     activeSelectAllState,

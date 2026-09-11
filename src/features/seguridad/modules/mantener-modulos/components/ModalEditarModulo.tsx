@@ -1,35 +1,16 @@
-import {
-  useCallback,
-  useMemo,
-  type ReactNode,
+import type {
+  ReactNode,
 } from 'react';
-
-import {
-  hasRegisteredOptionRoute,
-} from '@features/access-control/registry/optionRoute.registry';
 
 import type {
   AnalyticsReportClientPublicationInput,
 } from '@features/analytics/access/api/analyticsAccessAdmin.api';
 
 import Modal from '@shared/components/modals/Modal';
-
 import {
   ActionButton,
   FeedbackMessage,
 } from '@shared/components/ui';
-
-import {
-  useApiResource,
-} from '@shared/hooks/useApiResource';
-
-import {
-  useModalForm,
-} from '@shared/hooks/ui/useModalForm';
-
-import {
-  fetchOpcionById,
-} from '../../../api/opcionesApi';
 
 import type {
   Modulo,
@@ -39,46 +20,20 @@ import type {
 import {
   MODAL_EDITAR_MODULO_TEXTS,
 } from '../constants/modalEditarModulo.constants';
-
+import {
+  useEditarModuloModal,
+} from '../hooks/useEditarModuloModal';
 import type {
   EditarModuloFormData,
 } from '../types/editarModulo.types';
-
-import {
-  buildEditableParentOptions,
-  buildOrderOptions,
-  buildOrderPreview,
-  mapOpcionApiToEditarModuloForm,
-  resolveModuloCodeAfterNameChange,
-  resolveOrderAfterParentChange,
-} from '../utils/editarModulo.utils';
-
-
-import {
-  useModuloAvailabilityControls,
-} from '../hooks/useModuloAvailabilityControls';
-
-import {
-  usePowerBiModuleConfiguration,
-} from '../hooks/usePowerBiModuleConfiguration';
-
-import {
-  normalizeModuloForm,
-  validateEditarModuloForm,
-} from '../validations/registrarModulo.validation';
-
-import ModuloFormErrorSummary from './ModuloFormErrorSummary';
-
-import ModuloFormFields from './ModuloFormFields';
-
-import ModuloOrderControl from './ModuloOrderControl';
-
-import PowerBiConfigurationSection from './PowerBiConfigurationSection';
-
 import {
   getMantenerModulosPermissionMessage,
 } from '../utils/mantenerModulosPermissions';
 
+import ModuloModalFormBody from './ModuloModalFormBody';
+import ModuloModalSubmitFooter from './ModuloModalSubmitFooter';
+import ModuloOrderControl from './ModuloOrderControl';
+import PowerBiConfigurationSection from './PowerBiConfigurationSection';
 
 interface ModalEditarModuloProps {
   isOpen: boolean;
@@ -95,22 +50,6 @@ interface ModalEditarModuloProps {
   ) => Promise<void> | void;
 }
 
-const EMPTY_EDIT_FORM:
-  EditarModuloFormData = {
-    nombre: '',
-    descripcion: '',
-    codigo: '',
-    icono: '',
-    esPowerBI: false,
-    urlBI: '',
-    imagenOpcion: '',
-    emailOpcion: '',
-    padreId: 0,
-    orden: 0,
-    visible: true,
-    estado: true,
-  };
-
 export const ModalEditarModulo = ({
   isOpen,
   canEdit,
@@ -119,297 +58,42 @@ export const ModalEditarModulo = ({
   onClose,
   onGuardar,
 }: ModalEditarModuloProps): ReactNode => {
-  const isImplementedModule =
-    hasRegisteredOptionRoute(
-      moduloId
-    );
-
-  const fetcher =
-    useCallback(
-      (
-        signal: AbortSignal
-      ) =>
-        fetchOpcionById(
-          moduloId,
-          signal
-        ),
-      [moduloId]
-    );
-
   const {
-    data: moduloDetalle,
+    moduloDetalle,
     isLoading,
     error,
     refetch,
-  } =
-    useApiResource<OpcionApi>(
-      fetcher,
-      [moduloId]
-    );
-
-  const isPowerBiModule =
-    Boolean(
-      moduloDetalle?.sUrlBI?.trim()
-    );
-
-  const powerBi =
-    usePowerBiModuleConfiguration({
-      isOpen,
-      moduloId,
-      enabled: isPowerBiModule,
-    });
-
-  const mapEntityToForm =
-    useCallback(
-      (
-        modulo: OpcionApi
-      ) =>
-        mapOpcionApiToEditarModuloForm(
-          modulo,
-          modulosExistentes
-        ),
-      [modulosExistentes]
-    );
-
-  const validate =
-    useCallback(
-      (
-        form: EditarModuloFormData
-      ) =>
-        validateEditarModuloForm(
-          form,
-          {
-            modulosExistentes,
-            moduloIdActual: moduloId,
-            isImplemented:
-              isImplementedModule,
-          }
-        ),
-      [
-        isImplementedModule,
-        moduloId,
-        modulosExistentes,
-      ]
-    );
-
-  const {
     form,
     errors,
     isDirty,
     isSubmitting,
     submitError,
     handleChange,
-    setErrors,
     handleSubmit,
     handleCancel,
-  } =
-    useModalForm<
-      EditarModuloFormData,
-      OpcionApi
-    >({
-      initialForm:
-        EMPTY_EDIT_FORM,
-
-      entity:
-        moduloDetalle,
-
-      mapEntityToForm,
-
-      onClose,
-
-      validate,
-
-      resetOnClose: true,
-
-      onSubmit: async (
-        data
-      ) => {
-        if (!moduloDetalle) {
-          throw new Error(
-            'No se encontró la información del módulo a actualizar.'
-          );
-        }
-
-        if (data.esPowerBI) {
-          const message =
-            powerBi.validateGroupSelection();
-
-          if (message) {
-            throw new Error(message);
-          }
-        }
-
-        await onGuardar(
-          moduloDetalle,
-          normalizeModuloForm(
-            data
-          ),
-          data.esPowerBI
-            ? powerBi.selectedGroupIds
-            : [],
-          data.esPowerBI
-            ? powerBi.getPublicationsForSave()
-            : null
-        );
-      },
-    });
-
-  const groupsDirty =
-    form.esPowerBI &&
-    powerBi.groupsDirty;
-
-  const reportClientPublicationsDirty =
-    form.esPowerBI &&
-    powerBi.reportClientPublicationsDirty;
-
-  const analyticsReportClientEmbedsBusy =
-    form.esPowerBI &&
-    powerBi.isLoading;
-
-  const analyticsReportClientEmbedsUnavailable =
-    form.esPowerBI &&
-    Boolean(powerBi.error);
-
-  const analyticsGroupsBusy =
-    form.esPowerBI &&
-    powerBi.isLoading;
-
-  const analyticsGroupsUnavailable =
-    form.esPowerBI &&
-    Boolean(powerBi.error);
-
-  const parentOptions =
-    useMemo(
-      () =>
-        moduloDetalle
-          ? buildEditableParentOptions(
-              moduloDetalle,
-              modulosExistentes
-            )
-          : [],
-      [
-        moduloDetalle,
-        modulosExistentes,
-      ]
-    );
-
-  const orderOptions =
-    useMemo(
-      () =>
-        buildOrderOptions(
-          form.padreId,
-          moduloId,
-          modulosExistentes
-        ),
-      [
-        form.padreId,
-        moduloId,
-        modulosExistentes,
-      ]
-    );
-
-  const orderPreview =
-    useMemo(
-      () =>
-        buildOrderPreview(
-          form,
-          moduloId,
-          modulosExistentes
-        ),
-      [
-        form,
-        moduloId,
-        modulosExistentes,
-      ]
-    );
-
-  const isRootModule =
-    moduloDetalle
-      ? (
-          Number(
-            moduloDetalle
-              .nId_OpcionPadre
-          ) || 0
-        ) === 0
-      : false;
-
-  const handleNombreChange =
-    useCallback(
-      (
-        value: string
-      ) => {
-        handleChange(
-          'nombre',
-          value
-        );
-
-        if (!moduloDetalle) {
-          return;
-        }
-
-        const nextCode =
-          resolveModuloCodeAfterNameChange(
-            moduloDetalle,
-            value
-          );
-
-        if (
-          nextCode !==
-          form.codigo
-        ) {
-          handleChange(
-            'codigo',
-            nextCode
-          );
-        }
-      },
-      [
-        form.codigo,
-        handleChange,
-        moduloDetalle,
-      ]
-    );
-
-  const handleParentChange =
-    useCallback(
-      (
-        parentId: number
-      ) => {
-        handleChange(
-          'padreId',
-          parentId
-        );
-
-        handleChange(
-          'orden',
-          resolveOrderAfterParentChange(
-            parentId,
-            moduloId,
-            modulosExistentes
-          )
-        );
-      },
-      [
-        handleChange,
-        moduloId,
-        modulosExistentes,
-      ]
-    );
-
-  const {
+    powerBi,
+    groupsDirty,
+    reportClientPublicationsDirty,
+    analyticsReportClientEmbedsBusy,
+    analyticsReportClientEmbedsUnavailable,
+    analyticsGroupsBusy,
+    analyticsGroupsUnavailable,
+    parentOptions,
+    orderOptions,
+    orderPreview,
+    isRootModule,
     visibleDisabled,
+    handleNombreChange,
+    handleParentChange,
     onVisibleChange,
     onEstadoChange,
-  } =
-    useModuloAvailabilityControls({
-      form,
-      moduloId,
-      modulos:
-        modulosExistentes,
-      onChange:
-        handleChange,
-      setErrors,
-    });
+  } = useEditarModuloModal({
+    isOpen,
+    moduloId,
+    modulosExistentes,
+    onClose,
+    onGuardar,
+  });
 
   if (!isOpen) {
     return null;
@@ -418,10 +102,7 @@ export const ModalEditarModulo = ({
   return (
     <Modal
       isOpen={isOpen}
-      title={
-        MODAL_EDITAR_MODULO_TEXTS
-          .title
-      }
+      title={MODAL_EDITAR_MODULO_TEXTS.title}
       onClose={handleCancel}
       size="md"
       closeOnEsc={!isSubmitting}
@@ -430,7 +111,6 @@ export const ModalEditarModulo = ({
       <div
         className={[
           'registrar-modulo-modal',
-
           isSubmitting
             ? 'registrar-modulo-modal--submitting'
             : '',
@@ -454,118 +134,81 @@ export const ModalEditarModulo = ({
               className="editar-modulo-modal__spinner"
               aria-hidden="true"
             />
-
             <span>
-              {
-                MODAL_EDITAR_MODULO_TEXTS
-                  .loadingDetail
-              }
+              {MODAL_EDITAR_MODULO_TEXTS.loadingDetail}
             </span>
           </div>
         )}
 
-        {!isLoading &&
-          error && (
-            <div className="editar-modulo-modal__resource-error">
-              <FeedbackMessage
-                variant="error"
-                title={
-                  MODAL_EDITAR_MODULO_TEXTS
-                    .detailErrorTitle
-                }
-                message={error}
-              />
+        {!isLoading && error && (
+          <div className="editar-modulo-modal__resource-error">
+            <FeedbackMessage
+              variant="error"
+              title={
+                MODAL_EDITAR_MODULO_TEXTS
+                  .detailErrorTitle
+              }
+              message={error}
+            />
 
-              <div className="editar-modulo-modal__resource-actions">
-                <ActionButton
-                  label="Reintentar"
-                  variant="secondary"
-                  size="sm"
-                  onClick={refetch}
-                />
-              </div>
+            <div className="editar-modulo-modal__resource-actions">
+              <ActionButton
+                label="Reintentar"
+                variant="secondary"
+                size="sm"
+                onClick={refetch}
+              />
             </div>
-          )}
+          </div>
+        )}
 
         {!isLoading &&
           !error &&
           moduloDetalle && (
             <>
-              <div className="registrar-modulo-modal__body">
-                <ModuloFormFields
-                  form={form}
-                  errors={errors}
-                  parentOptions={
-                    parentOptions
-                  }
-                  codeDisabled
-                  parentDisabled={
-                    isRootModule ||
-                    form.esPowerBI
-                  }
-                  showPowerBiTypeSelector={
-                    false
-                  }
-                  onNombreChange={
-                    handleNombreChange
-                  }
-                  onDescripcionChange={(value) => {
-                    handleChange(
-                      'descripcion',
-                      value
-                    );
-                  }}
-                  onCodigoChange={(value) => {
-                    handleChange(
-                      'codigo',
-                      value
-                    );
-                  }}
-                  onIconoChange={(value) => {
-                    handleChange(
-                      'icono',
-                      value
-                    );
-                  }}
-                  onUrlBIChange={(value) => {
-                    handleChange(
-                      'urlBI',
-                      value
-                    );
-                  }}
-                  onImagenOpcionChange={(value) => {
+              <ModuloModalFormBody
+                formFieldsProps={{
+                  form,
+                  errors,
+                  parentOptions,
+                  codeDisabled: true,
+                  parentDisabled:
+                    isRootModule || form.esPowerBI,
+                  showPowerBiTypeSelector: false,
+                  onNombreChange: handleNombreChange,
+                  onDescripcionChange: (value) => {
+                    handleChange('descripcion', value);
+                  },
+                  onCodigoChange: (value) => {
+                    handleChange('codigo', value);
+                  },
+                  onIconoChange: (value) => {
+                    handleChange('icono', value);
+                  },
+                  onUrlBIChange: (value) => {
+                    handleChange('urlBI', value);
+                  },
+                  onImagenOpcionChange: (value) => {
                     handleChange(
                       'imagenOpcion',
                       value
                     );
-                  }}
-                  onEmailOpcionChange={(value) => {
+                  },
+                  onEmailOpcionChange: (value) => {
                     handleChange(
                       'emailOpcion',
                       value
                     );
-                  }}
-                  onPadreChange={
-                    handleParentChange
-                  }
-                  visibleDisabled={
-                    visibleDisabled
-                  }
-                  onVisibleChange={
-                    onVisibleChange
-                  }
-                  onEstadoChange={
-                    onEstadoChange
-                  }
-                  orderControl={
+                  },
+                  onPadreChange: handleParentChange,
+                  visibleDisabled,
+                  onVisibleChange,
+                  onEstadoChange,
+                  orderControl: (
                     <ModuloOrderControl
                       value={form.orden}
-                      options={
-                        orderOptions
-                      }
-                      previewItems={
-                        orderPreview
-                      }
+                      options={orderOptions}
+                      previewItems={orderPreview}
                       error={errors.orden}
                       helpText={
                         MODAL_EDITAR_MODULO_TEXTS
@@ -575,19 +218,19 @@ export const ModalEditarModulo = ({
                         MODAL_EDITAR_MODULO_TEXTS
                           .orderPreview
                       }
-                      disabled={
-                        isRootModule
-                      }
+                      disabled={isRootModule}
                       onChange={(value) => {
-                        handleChange(
-                          'orden',
-                          value
-                        );
+                        handleChange('orden', value);
                       }}
                     />
-                  }
-                />
-
+                  ),
+                }}
+                validationTitle={
+                  MODAL_EDITAR_MODULO_TEXTS
+                    .validationSummary
+                }
+                submitError={submitError}
+              >
                 {form.esPowerBI && (
                   <PowerBiConfigurationSection
                     groups={powerBi.groups}
@@ -618,70 +261,41 @@ export const ModalEditarModulo = ({
                     }
                   />
                 )}
+              </ModuloModalFormBody>
 
-                <ModuloFormErrorSummary
-                  errors={errors}
-                  title={
-                    MODAL_EDITAR_MODULO_TEXTS
-                      .validationSummary
-                  }
-                />
-
-                {submitError && (
-                  <div
-                    className="error-summary"
-                    role="alert"
-                  >
-                    <strong>
-                      {submitError}
-                    </strong>
-                  </div>
-                )}
-              </div>
-
-              <footer className="registrar-modulo-modal__footer">
-                <ActionButton
-                  label={
-                    MODAL_EDITAR_MODULO_TEXTS
-                      .submitLabel
-                  }
-                  loadingLabel={
-                    MODAL_EDITAR_MODULO_TEXTS
-                      .loadingLabel
-                  }
-                  loading={isSubmitting}
-                  variant="primary"
-                  size="md"
-                  icon="✓"
-                  onClick={handleSubmit}
-                  disabled={
-                    isSubmitting ||
-                    (
-                      !isDirty &&
-                      !groupsDirty &&
-                      !reportClientPublicationsDirty
-                    ) ||
-                    !canEdit ||
-                    analyticsGroupsBusy ||
-                    analyticsGroupsUnavailable ||
-                    analyticsReportClientEmbedsBusy ||
-                    analyticsReportClientEmbedsUnavailable ||
-                    powerBi.hasInvalidReportClientPublication ||
-                    (
-                      form.esPowerBI &&
-                      !powerBi.hasValidGroupSelection
-                    )
-                  }
-                  title={
-                    !canEdit
-                      ? getMantenerModulosPermissionMessage(
-                          'editar'
-                        )
-                      : undefined
-                  }
-                  className="registrar-modulo-modal__submit-button"
-                />
-              </footer>
+              <ModuloModalSubmitFooter
+                label={
+                  MODAL_EDITAR_MODULO_TEXTS
+                    .submitLabel
+                }
+                loadingLabel={
+                  MODAL_EDITAR_MODULO_TEXTS
+                    .loadingLabel
+                }
+                loading={isSubmitting}
+                onSubmit={handleSubmit}
+                disabled={
+                  isSubmitting ||
+                  (!isDirty &&
+                    !groupsDirty &&
+                    !reportClientPublicationsDirty) ||
+                  !canEdit ||
+                  analyticsGroupsBusy ||
+                  analyticsGroupsUnavailable ||
+                  analyticsReportClientEmbedsBusy ||
+                  analyticsReportClientEmbedsUnavailable ||
+                  powerBi.hasInvalidReportClientPublication ||
+                  (form.esPowerBI &&
+                    !powerBi.hasValidGroupSelection)
+                }
+                title={
+                  !canEdit
+                    ? getMantenerModulosPermissionMessage(
+                        'editar'
+                      )
+                    : undefined
+                }
+              />
             </>
           )}
       </div>

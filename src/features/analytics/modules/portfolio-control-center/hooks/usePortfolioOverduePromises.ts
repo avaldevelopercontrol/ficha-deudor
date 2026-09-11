@@ -2,13 +2,18 @@ import { useMemo } from 'react';
 
 import type {
   PortfolioOperationalContext,
+} from '../domain/portfolioOverview.types';
+import type {
   PortfolioOverdueAgingFilter,
   PortfolioOverduePromisesData,
   PortfolioOverduePromisesQuery,
   PortfolioOverduePromisesSortKey,
   PortfolioSortDirection,
-} from '../../../types/portfolioControlCenter.types';
-import { loadPortfolioOverduePromises } from '../services/portfolioControlCenter.service';
+} from '../domain/portfolioPromises.types';
+import {
+  buildPortfolioOverduePromisesQuery,
+  loadPortfolioOverduePromises,
+} from '../application/portfolioPromises.application';
 import { usePortfolioPromiseDetailResource } from './usePortfolioPromiseDetailResource';
 
 interface UsePortfolioOverduePromisesParams {
@@ -36,13 +41,14 @@ export const usePortfolioOverduePromises = ({
   sortDirection,
 }: UsePortfolioOverduePromisesParams) => {
   const query = useMemo<PortfolioOverduePromisesQuery>(
-    () => ({
-      page,
-      pageSize,
-      aging: aging === 'all' ? null : aging,
-      sortBy: sortKey,
-      sortDirection,
-    }),
+    () =>
+      buildPortfolioOverduePromisesQuery(
+        page,
+        pageSize,
+        aging,
+        sortKey,
+        sortDirection
+      ),
     [aging, page, pageSize, sortDirection, sortKey]
   );
 

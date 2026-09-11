@@ -10,7 +10,7 @@ import type {
   PortfolioAttentionTone,
   PortfolioOperationalContext,
   PortfolioTargetProgress,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   formatPortfolioCompactCurrency,
   formatPortfolioCurrency,

@@ -2,7 +2,7 @@ import type React from 'react';
 
 import type {
   PortfolioSummaryMetrics,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   calculatePortfolioRate,
   formatPortfolioCurrency,

@@ -1,4 +1,4 @@
-export type TipoBusquedaGestionDeudor = 'R' | 'D' | 'F';
+export type TipoBusquedaGestionDeudor = 'R' | 'D' | 'F' | 'T' | 'C';
 
 export interface DeudorGestionDeudor {
   idDeudor: number;

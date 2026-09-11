@@ -31,7 +31,7 @@ import {
   validateRegistrarPerfilForm,
 } from '../validations/registrarPerfil.validation';
 
-import PerfilFormErrorSummary from './PerfilFormErrorSummary';
+import FormErrorSummary from '../../../components/FormErrorSummary';
 
 import RegistrarPerfilFormFields from './RegistrarPerfilFormFields';
 
@@ -156,7 +156,7 @@ export const ModalRegistrarPerfil = ({
             }
           />
 
-          <PerfilFormErrorSummary
+          <FormErrorSummary
             errors={errors}
             title={
               MODAL_REGISTRAR_PERFIL_TEXTS

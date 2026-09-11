@@ -30,17 +30,12 @@ export const suite = defineSuite(
           return Response.json({
             optionId: 27,
             isConfigured: true,
-            groupIds: [156, 156, -1],
+            groupIds: [156, 156],
             availableGroups: [
               {
                 groupId: 156,
                 clientId: 95,
                 name: ' CLIENTE GENERAL ',
-              },
-              {
-                groupId: 0,
-                clientId: 95,
-                name: 'inválido',
               },
             ],
             clients: [
@@ -67,26 +62,18 @@ export const suite = defineSuite(
 
         try {
           const result =
-            await getAnalyticsPowerBiConfiguration(
-              27
-            );
+            await getAnalyticsPowerBiConfiguration(27);
 
           assert.equal(requestCount, 1);
           assert.equal(capturedMethod, 'GET');
-          assert.deepEqual(
-            result.groupIds,
-            [156]
-          );
-          assert.deepEqual(
-            result.availableGroups,
-            [
-              {
-                groupId: 156,
-                clientId: 95,
-                name: 'CLIENTE GENERAL',
-              },
-            ]
-          );
+          assert.deepEqual(result.groupIds, [156]);
+          assert.deepEqual(result.availableGroups, [
+            {
+              groupId: 156,
+              clientId: 95,
+              name: 'CLIENTE GENERAL',
+            },
+          ]);
           assert.equal(
             result.clients[0]?.groupResolution,
             'AUTO_DETECTED'
@@ -95,12 +82,143 @@ export const suite = defineSuite(
             result.clients[0]?.groupIds,
             [219]
           );
+          assert.equal(
+            result.clients[0]?.embedUrl,
+            'https://app.powerbi.com/view?r=test'
+          );
         } finally {
           globalThis.fetch = originalFetch;
         }
       }
     ),
+    test(
+      'rechaza grupos malformados en vez de omitirlos silenciosamente',
+      async () => {
+        const originalFetch = globalThis.fetch;
 
+        globalThis.fetch = async () =>
+          Response.json({
+            optionId: 27,
+            isConfigured: true,
+            groupIds: [156],
+            availableGroups: [
+              {
+                groupId: 0,
+                clientId: 95,
+                name: 'Inválido',
+              },
+            ],
+            clients: [],
+          });
+
+        try {
+          await assert.rejects(
+            () => getAnalyticsPowerBiConfiguration(27),
+            /response\.availableGroups\[0\]\.groupId debe ser un entero positivo/
+          );
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'rechaza publicaciones con resolución de grupo fuera del contrato',
+      async () => {
+        const originalFetch = globalThis.fetch;
+
+        globalThis.fetch = async () =>
+          Response.json({
+            optionId: 27,
+            isConfigured: true,
+            groupIds: [156],
+            availableGroups: [],
+            clients: [
+              {
+                clientId: 178,
+                name: 'ADEX',
+                isAvailable: true,
+                groupResolution: 'UNKNOWN',
+                hasExplicitGroupConfiguration: false,
+                groupIds: [],
+                candidateGroups: [],
+                embedUrl: null,
+                isReady: false,
+              },
+            ],
+          });
+
+        try {
+          await assert.rejects(
+            () => getAnalyticsPowerBiConfiguration(27),
+            /response\.clients\[0\]\.groupResolution debe ser uno de/
+          );
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'rechaza una publicación cuyo groupId no pertenece a candidateGroups',
+      async () => {
+        const originalFetch = globalThis.fetch;
+
+        globalThis.fetch = async () =>
+          Response.json({
+            optionId: 27,
+            isConfigured: true,
+            groupIds: [156],
+            availableGroups: [],
+            clients: [
+              {
+                clientId: 178,
+                name: 'ADEX',
+                isAvailable: true,
+                groupResolution: 'CONFIGURED',
+                hasExplicitGroupConfiguration: true,
+                groupIds: [219],
+                candidateGroups: [
+                  { groupId: 220, name: 'Otro grupo' },
+                ],
+                embedUrl: null,
+                isReady: false,
+              },
+            ],
+          });
+
+        try {
+          await assert.rejects(
+            () => getAnalyticsPowerBiConfiguration(27),
+            /groupIds contiene un grupo no disponible/
+          );
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'rechaza flags de configuración mal tipados',
+      async () => {
+        const originalFetch = globalThis.fetch;
+
+        globalThis.fetch = async () =>
+          Response.json({
+            optionId: 27,
+            isConfigured: 'true',
+            groupIds: [],
+            availableGroups: [],
+            clients: [],
+          });
+
+        try {
+          await assert.rejects(
+            () => getAnalyticsPowerBiConfiguration(27),
+            /response\.isConfigured debe ser un booleano/
+          );
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
     test(
       'guarda opción grupo y publicaciones en una sola solicitud PATCH',
       async () => {
@@ -115,9 +233,7 @@ export const suite = defineSuite(
         ) => {
           requestCount++;
           capturedMethod = init?.method ?? '';
-          capturedBody = JSON.parse(
-            String(init?.body)
-          );
+          capturedBody = JSON.parse(String(init?.body));
 
           return new Response(null, {
             status: 204,
@@ -146,26 +262,23 @@ export const suite = defineSuite(
 
           assert.equal(requestCount, 1);
           assert.equal(capturedMethod, 'PATCH');
-          assert.deepEqual(
-            capturedBody,
-            {
-              optionCode:
-                'GESTION_INTEGRAL_COBRANZA',
-              optionName:
-                'Gestión Integral de Cobranza',
-              isActive: true,
-              groupIds: [156],
-              publications: [
-                {
-                  clientId: 178,
-                  name: 'ADEX INSTITUTO',
-                  groupIds: null,
-                  embedUrl:
-                    'https://app.powerbi.com/view?r=test',
-                },
-              ],
-            }
-          );
+          assert.deepEqual(capturedBody, {
+            optionCode:
+              'GESTION_INTEGRAL_COBRANZA',
+            optionName:
+              'Gestión Integral de Cobranza',
+            isActive: true,
+            groupIds: [156],
+            publications: [
+              {
+                clientId: 178,
+                name: 'ADEX INSTITUTO',
+                groupIds: null,
+                embedUrl:
+                  'https://app.powerbi.com/view?r=test',
+              },
+            ],
+          });
         } finally {
           globalThis.fetch = originalFetch;
         }
@@ -201,6 +314,128 @@ export const suite = defineSuite(
           );
 
           assert.equal(requestCount, 0);
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'rechaza publicaciones inválidas antes de ejecutar el PATCH',
+      async () => {
+        const originalFetch = globalThis.fetch;
+        let requestCount = 0;
+
+        globalThis.fetch = async () => {
+          requestCount += 1;
+          throw new Error('No debe ejecutarse HTTP');
+        };
+
+        const baseInput = {
+          optionId: 27,
+          optionCode: 'REPORTE',
+          optionName: 'Reporte',
+          isActive: true,
+          groupIds: [156],
+        } as const;
+
+        try {
+          await assert.rejects(
+            () =>
+              syncAnalyticsPowerBiConfiguration({
+                ...baseInput,
+                publications: [
+                  {
+                    clientId: 0,
+                    name: 'ADEX',
+                    groupIds: null,
+                    embedUrl:
+                      'https://app.powerbi.com/view?r=test',
+                  },
+                ],
+              }),
+            /publications\[0\]\.clientId debe ser un entero positivo/
+          );
+
+          await assert.rejects(
+            () =>
+              syncAnalyticsPowerBiConfiguration({
+                ...baseInput,
+                publications: [
+                  {
+                    clientId: 178,
+                    name: '   ',
+                    groupIds: null,
+                    embedUrl:
+                      'https://app.powerbi.com/view?r=test',
+                  },
+                ],
+              }),
+            /publications\[0\]\.name no puede estar vacío/
+          );
+
+          await assert.rejects(
+            () =>
+              syncAnalyticsPowerBiConfiguration({
+                ...baseInput,
+                publications: [
+                  {
+                    clientId: 178,
+                    name: 'ADEX',
+                    groupIds: null,
+                    embedUrl: 'javascript:alert(1)',
+                  },
+                ],
+              }),
+            /embedUrl debe ser una URL pública válida de Power BI/
+          );
+
+          await assert.rejects(
+            () =>
+              syncAnalyticsPowerBiConfiguration({
+                ...baseInput,
+                publications: [
+                  {
+                    clientId: 178,
+                    name: 'ADEX',
+                    groupIds: [0],
+                    embedUrl:
+                      'https://app.powerbi.com/view?r=test',
+                  },
+                ],
+              }),
+            /publications\[0\]\.groupIds debe ser un entero positivo/
+          );
+
+          assert.equal(requestCount, 0);
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'propaga AbortSignal al cargar la configuración administrativa',
+      async () => {
+        const originalFetch = globalThis.fetch;
+        const controller = new AbortController();
+        let receivedSignal: AbortSignal | null = null;
+
+        globalThis.fetch = async (_input, init) => {
+          receivedSignal = init?.signal ?? null;
+          return Response.json({
+            optionId: 27,
+            isConfigured: false,
+            groupIds: [],
+            availableGroups: [],
+            clients: [],
+          });
+        };
+
+        try {
+          await getAnalyticsPowerBiConfiguration(
+            27,
+            controller.signal
+          );
+          assert.equal(receivedSignal, controller.signal);
         } finally {
           globalThis.fetch = originalFetch;
         }

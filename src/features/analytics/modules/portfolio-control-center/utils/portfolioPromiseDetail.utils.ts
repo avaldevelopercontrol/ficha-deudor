@@ -1,6 +1,10 @@
+import {
+  getCurrentPeruDateTime,
+} from '@shared/utils/peruDateTime.utils';
+
 import type {
   PortfolioPagination,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioPromises.types';
 import { formatPortfolioCurrency } from './portfolioControlCenter.formatters';
 
 export interface PortfolioPromisePaginationView {
@@ -50,6 +54,22 @@ export const formatPortfolioPromiseDate = (
   }
 
   return `${match[3]}/${match[2]}/${match[1]}`;
+};
+
+export const formatPortfolioPromiseCutoffLabel = (
+  asOfDate: string | null,
+  currentDate = new Date()
+): string | null => {
+  if (!asOfDate) {
+    return null;
+  }
+
+  const currentPeruDate = getCurrentPeruDateTime(currentDate).slice(0, 10);
+  const formattedDate = formatPortfolioPromiseDate(asOfDate, asOfDate);
+
+  return asOfDate === currentPeruDate
+    ? `Hoy ${formattedDate}`
+    : `Datos al ${formattedDate}`;
 };
 
 export const formatPortfolioPromiseCurrencyFilterOption = (

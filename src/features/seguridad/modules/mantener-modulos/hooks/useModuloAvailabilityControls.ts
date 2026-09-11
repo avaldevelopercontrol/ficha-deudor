@@ -14,7 +14,7 @@ import type {
 
 import {
   validateModuloAvailabilityTransition,
-} from '../utils/moduloAvailability.utils';
+} from '../../../domain/modulos/moduloAvailability.utils';
 
 interface UseModuloAvailabilityControlsParams {
   form: ModuloFormData;

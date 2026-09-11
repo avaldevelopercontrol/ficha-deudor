@@ -1,19 +1,10 @@
-export interface ModuloFormData {
-  nombre: string;
-  descripcion: string;
-  codigo: string;
-  icono: string;
-  esPowerBI: boolean;
-  urlBI: string;
-  imagenOpcion: string;
-  emailOpcion?: string;
-  padreId: number;
-  visible: boolean;
-  estado: boolean;
-}
+import type {
+  ModuloFormData as DomainModuloFormData,
+  RegistrarModuloFormData as DomainRegistrarModuloFormData,
+} from '../../../domain/modulos/moduloForm.types';
 
-export type RegistrarModuloFormData =
-  ModuloFormData;
+export type ModuloFormData = DomainModuloFormData;
+export type RegistrarModuloFormData = DomainRegistrarModuloFormData;
 
 export type ModuloFormFieldChange = <
   K extends keyof ModuloFormData,
@@ -22,5 +13,4 @@ export type ModuloFormFieldChange = <
   value: ModuloFormData[K]
 ) => void;
 
-export type RegistrarModuloFieldChange =
-  ModuloFormFieldChange;
+export type RegistrarModuloFieldChange = ModuloFormFieldChange;

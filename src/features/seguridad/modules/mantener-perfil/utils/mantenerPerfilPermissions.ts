@@ -1,37 +1,21 @@
+import {
+  createWritePermissionGuard,
+} from '../../../utils/writePermission.utils';
+
 export type MantenerPerfilWritePermission =
   | 'insertar'
   | 'editar';
 
-const PERMISSION_MESSAGES: Readonly<
-  Record<
-    MantenerPerfilWritePermission,
-    string
-  >
-> = Object.freeze({
-  insertar:
-    'No tiene permiso para agregar perfiles.',
-  editar:
-    'No tiene permiso para editar perfiles.',
-});
+const permissionGuard =
+  createWritePermissionGuard<MantenerPerfilWritePermission>({
+    insertar:
+      'No tiene permiso para agregar perfiles.',
+    editar:
+      'No tiene permiso para editar perfiles.',
+  });
 
-export const getMantenerPerfilPermissionMessage = (
-  permission: MantenerPerfilWritePermission
-): string =>
-  PERMISSION_MESSAGES[
-    permission
-  ];
+export const getMantenerPerfilPermissionMessage =
+  permissionGuard.getMessage;
 
-export const assertMantenerPerfilPermission = (
-  permission: MantenerPerfilWritePermission,
-  isAllowed: boolean
-): void => {
-  if (isAllowed) {
-    return;
-  }
-
-  throw new Error(
-    getMantenerPerfilPermissionMessage(
-      permission
-    )
-  );
-};
+export const assertMantenerPerfilPermission =
+  permissionGuard.assert;

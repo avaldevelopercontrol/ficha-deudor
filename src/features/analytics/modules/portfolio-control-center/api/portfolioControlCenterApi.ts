@@ -3,11 +3,15 @@ import {
 } from '@shared/api/analyticsApiClient';
 
 import type {
-  PortfolioControlCenterFilters,
-  PortfolioDueTodayPromisesQuery,
   PortfolioOperationalContext,
+} from '../domain/portfolioOverview.types';
+import type {
+  PortfolioControlCenterFilters,
+} from '../domain/portfolioFilters.types';
+import type {
+  PortfolioDueTodayPromisesQuery,
   PortfolioOverduePromisesQuery,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioPromises.types';
 import type {
   PortfolioAdvisorPerformanceApiResponse,
   PortfolioBootstrapApiResponse,

@@ -1,12 +1,14 @@
 import type {
+  PortfolioOperationalContext,
+} from '../domain/portfolioOverview.types';
+import type {
   PortfolioDueTodayPromisesQuery,
   PortfolioDueTodayPromisesSortKey,
   PortfolioDueTodayStatusKey,
-  PortfolioOperationalContext,
   PortfolioOverdueAgingKey,
   PortfolioOverduePromisesQuery,
   PortfolioOverduePromisesSortKey,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioPromises.types';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 

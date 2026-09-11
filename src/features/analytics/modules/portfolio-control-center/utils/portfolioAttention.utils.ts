@@ -2,7 +2,7 @@ import type {
   PortfolioAttentionItem,
   PortfolioPromiseStatus,
   PortfolioTargetProgress,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 
 export const buildPortfolioOperationalAttention = (
   target: PortfolioTargetProgress | null,

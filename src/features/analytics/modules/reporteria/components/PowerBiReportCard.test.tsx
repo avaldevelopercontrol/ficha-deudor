@@ -4,40 +4,28 @@ import {
   renderToStaticMarkup,
 } from 'react-dom/server';
 
-import type {
-  AuthorizedOption,
-} from '@features/access-control';
-
 import {
   defineSuite,
   test,
 } from '../../../../../test/testHarness';
 
+import type {
+  PowerBiReport,
+} from '../domain/reporteria.types';
+
 import {
   PowerBiReportCard,
 } from './PowerBiReportCard';
 
-const report: AuthorizedOption = {
+const report: PowerBiReport = {
   id: 26,
   code: 'mAmericatel',
   name: 'AMERICATEL',
   description: 'Reporte de prueba.',
-  urlBI: 'https://app.powerbi.com/view?r=demo',
+  serviceUrl: 'https://app.powerbi.com/view?r=demo',
   image: '/imgs_webp/logo-entel.webp',
   email: 'mparipanca@avalperu.com',
   icon: 'analytics',
-  type: 4,
-  parentId: 25,
-  order: 1,
-  route: null,
-  permissions: {
-    consultar: true,
-    insertar: false,
-    editar: false,
-    eliminar: false,
-    exportar: false,
-  },
-  children: [],
 };
 
 export const suite = defineSuite(

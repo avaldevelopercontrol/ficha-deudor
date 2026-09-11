@@ -1,6 +1,6 @@
 import type {
   AnalyticsAccessContext,
-} from '../types/analyticsAccess.types';
+} from '../domain/analyticsAccess.types';
 
 // UX-only freshness window. The backend reauthorizes every protected request;
 // this cache must never be treated as a security decision.

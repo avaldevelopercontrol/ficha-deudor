@@ -1,12 +1,10 @@
-export type RegistrarGrupoEstado =
-  boolean;
+import type {
+  GrupoEstado,
+  GrupoFormData,
+} from '../../../domain/grupos/grupoForm.types';
 
-export interface RegistrarGrupoFormData {
-  nombre: string;
-  sigla: string;
-  clienteId: number | '';
-  estado: RegistrarGrupoEstado;
-}
+export type RegistrarGrupoEstado = GrupoEstado;
+export type RegistrarGrupoFormData = GrupoFormData;
 
 export type RegistrarGrupoFieldChange = <
   K extends keyof RegistrarGrupoFormData,

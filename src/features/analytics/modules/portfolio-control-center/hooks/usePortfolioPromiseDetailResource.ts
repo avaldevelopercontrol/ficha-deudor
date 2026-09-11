@@ -3,13 +3,8 @@ import { useCallback } from 'react';
 import { useAsyncResource } from '@shared/hooks/useAsyncResource';
 
 import type {
-  PortfolioOperationalContext,
-} from '../../../types/portfolioControlCenter.types';
-
-export type PortfolioPromiseDetailContext = Pick<
-  PortfolioOperationalContext,
-  'businessUnit' | 'campaignId' | 'subPortfolioId'
->;
+  PortfolioPromiseDetailContext,
+} from '../application/portfolioPromises.application';
 
 type PortfolioPromiseDetailLoader<TData, TQuery> = (
   crmClientId: number,

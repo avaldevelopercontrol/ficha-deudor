@@ -8,7 +8,7 @@ import type {
   AdvisorPerformanceItem,
   CampaignPerformanceItem,
   SupervisorPerformanceItem,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   PORTFOLIO_DETAIL_SORT_OPTIONS,
   sortAdvisorPerformanceByHighest,

@@ -4,47 +4,39 @@ import {
 
 import type {
   EditarModuloFormData,
-} from '../modules/mantener-modulos/types/editarModulo.types';
-
+} from '../domain/modulos/moduloForm.types';
 import {
   buildModuloRoute,
-} from '../modules/mantener-modulos/utils/registrarModulo.utils';
-
+} from '../domain/modulos/moduloForm.utils';
+import {
+  cascadeModuloHierarchyValues,
+  renumberModuloParentChildren,
+  resolveModuloRouteSegment,
+} from '../domain/modulos/moduloHierarchy.utils';
+import type {
+  ModuloMutationState,
+} from '../domain/modulos/moduloMutation.types';
+import {
+  hasModuloMutationChanged,
+} from '../domain/modulos/moduloMutation.utils';
+import {
+  buildSafeModuloReorderSequence,
+} from '../domain/modulos/moduloReorder.utils';
 import {
   POWER_BI_DEFAULT_ICON,
   POWER_BI_PARENT_OPTION_ID,
-} from '../modules/mantener-modulos/utils/powerBiModulo.utils';
-
+} from '../domain/modulos/powerBiModulo.utils';
 import {
   assertModuloAvailabilityTransition,
   normalizeModuloAvailability,
-} from '../modules/mantener-modulos/utils/moduloAvailability.utils';
-
+} from '../domain/modulos/moduloAvailability.utils';
 import type {
   UpdateOpcionRequestApi,
 } from '../types/actualizarOpcion.types';
-
 import type {
   Modulo,
   OpcionApi,
 } from '../types/opcion.types';
-
-interface MutableModulo {
-  idModulo: number;
-  codigo: string;
-  nombre: string;
-  descripcion: string;
-  ruta: string;
-  urlBI: string | null;
-  imagenOpcion: string | null;
-  emailOpcion: string | null;
-  icono: string;
-  tipo: number;
-  idPadre: number;
-  orden: number;
-  visible: boolean;
-  estado: boolean;
-}
 
 const parseAuthenticatedUserId = (
   value: string
@@ -63,9 +55,9 @@ const parseAuthenticatedUserId = (
   return parsedValue;
 };
 
-const mapModuloToMutable = (
+const mapModuloToMutationState = (
   modulo: Modulo
-): MutableModulo => ({
+): ModuloMutationState => ({
   idModulo: modulo.idModulo,
   codigo: modulo.codigo,
   nombre: modulo.nombre,
@@ -84,26 +76,21 @@ const mapModuloToMutable = (
   estado: modulo.estadoActivo,
 });
 
-const mapOpcionApiToMutable = (
+const mapOpcionApiToMutationState = (
   modulo: OpcionApi
-): MutableModulo => ({
+): ModuloMutationState => ({
   idModulo: Number(modulo.nId_Opcion),
-  codigo:
-    modulo.sCodigoOpcion?.trim() ?? '',
-  nombre:
-    modulo.sNombreOpcion?.trim() ?? '',
+  codigo: modulo.sCodigoOpcion?.trim() ?? '',
+  nombre: modulo.sNombreOpcion?.trim() ?? '',
   descripcion:
     modulo.sDescripcionOpcion?.trim() ?? '',
-  ruta:
-    modulo.sUrlOpcion?.trim() ?? '',
-  urlBI:
-    modulo.sUrlBI?.trim() || null,
+  ruta: modulo.sUrlOpcion?.trim() ?? '',
+  urlBI: modulo.sUrlBI?.trim() || null,
   imagenOpcion:
     modulo.sImagenOpcion?.trim() || null,
   emailOpcion:
     modulo.sEmailOpcion?.trim() || null,
-  icono:
-    modulo.sIcono?.trim() ?? '',
+  icono: modulo.sIcono?.trim() ?? '',
   tipo: Number(modulo.nTipo) || 0,
   idPadre:
     Number(modulo.nId_OpcionPadre) || 0,
@@ -112,426 +99,8 @@ const mapOpcionApiToMutable = (
   estado: Boolean(modulo.bEstado),
 });
 
-const hasChanged = (
-  original: MutableModulo,
-  updated: MutableModulo
-): boolean =>
-  original.codigo !== updated.codigo ||
-  original.nombre !== updated.nombre ||
-  original.descripcion !== updated.descripcion ||
-  original.ruta !== updated.ruta ||
-  original.urlBI !== updated.urlBI ||
-  original.imagenOpcion !== updated.imagenOpcion ||
-  original.emailOpcion !== updated.emailOpcion ||
-  original.icono !== updated.icono ||
-  original.tipo !== updated.tipo ||
-  original.idPadre !== updated.idPadre ||
-  original.orden !== updated.orden ||
-  original.visible !== updated.visible ||
-  original.estado !== updated.estado;
-
-
-const hasPositionChanged = (
-  original: MutableModulo,
-  updated: MutableModulo
-): boolean =>
-  original.idPadre !== updated.idPadre ||
-  original.orden !== updated.orden;
-
-const getPositionKey = (
-  parentId: number,
-  order: number
-): string =>
-  `${parentId}:${order}`;
-
-const buildSafeReorderSequence = (
-  originalById: ReadonlyMap<
-    number,
-    MutableModulo
-  >,
-  changedModules: readonly MutableModulo[],
-  updatedCurrent: MutableModulo
-): MutableModulo[] => {
-  const currentOriginal =
-    originalById.get(
-      updatedCurrent.idModulo
-    );
-
-  if (
-    !currentOriginal ||
-    !hasPositionChanged(
-      currentOriginal,
-      updatedCurrent
-    ) ||
-    updatedCurrent.idPadre === 0
-  ) {
-    return [...changedModules];
-  }
-
-  const maximumTargetOrder = Math.max(
-    updatedCurrent.orden,
-    ...[...originalById.values()]
-      .filter(
-        (module) =>
-          module.idPadre ===
-            updatedCurrent.idPadre &&
-          module.idModulo !==
-            updatedCurrent.idModulo
-      )
-      .map((module) => module.orden),
-    ...changedModules
-      .filter(
-        (module) =>
-          module.idPadre ===
-            updatedCurrent.idPadre &&
-          module.idModulo !==
-            updatedCurrent.idModulo
-      )
-      .map((module) => module.orden)
-  );
-
-  // Se usa una posición temporal libre para sacar al módulo actual
-  // del rango ocupado antes de mover a sus hermanos. Esto evita
-  // colisiones cuando la base de datos exige que el orden sea único
-  // dentro de un mismo padre.
-  const temporaryCurrent: MutableModulo = {
-    ...updatedCurrent,
-    orden: maximumTargetOrder + 2,
-  };
-
-  const occupancy = new Map<
-    string,
-    number
-  >();
-
-  const currentPositions = new Map<
-    number,
-    {
-      parentId: number;
-      order: number;
-    }
-  >();
-
-  originalById.forEach((module) => {
-    if (
-      module.idModulo ===
-      updatedCurrent.idModulo
-    ) {
-      return;
-    }
-
-    occupancy.set(
-      getPositionKey(
-        module.idPadre,
-        module.orden
-      ),
-      module.idModulo
-    );
-
-    currentPositions.set(
-      module.idModulo,
-      {
-        parentId: module.idPadre,
-        order: module.orden,
-      }
-    );
-  });
-
-  occupancy.set(
-    getPositionKey(
-      temporaryCurrent.idPadre,
-      temporaryCurrent.orden
-    ),
-    temporaryCurrent.idModulo
-  );
-
-  currentPositions.set(
-    temporaryCurrent.idModulo,
-    {
-      parentId:
-        temporaryCurrent.idPadre,
-      order: temporaryCurrent.orden,
-    }
-  );
-
-  const pendingPositionUpdates =
-    changedModules
-      .filter((module) => {
-        if (
-          module.idModulo ===
-          updatedCurrent.idModulo
-        ) {
-          return false;
-        }
-
-        const original =
-          originalById.get(
-            module.idModulo
-          );
-
-        return Boolean(
-          original &&
-          hasPositionChanged(
-            original,
-            module
-          )
-        );
-      })
-      .map((module) => ({
-        ...module,
-      }));
-
-  const orderedPositionUpdates:
-    MutableModulo[] = [];
-
-  while (
-    pendingPositionUpdates.length > 0
-  ) {
-    const availableIndex =
-      pendingPositionUpdates.findIndex(
-        (module) => {
-          const occupant =
-            occupancy.get(
-              getPositionKey(
-                module.idPadre,
-                module.orden
-              )
-            );
-
-          return (
-            occupant === undefined ||
-            occupant === module.idModulo
-          );
-        }
-      );
-
-    if (availableIndex < 0) {
-      throw new Error(
-        'No se pudo construir una secuencia segura para reordenar los módulos.'
-      );
-    }
-
-    const [module] =
-      pendingPositionUpdates.splice(
-        availableIndex,
-        1
-      );
-
-    const previousPosition =
-      currentPositions.get(
-        module.idModulo
-      );
-
-    if (previousPosition) {
-      occupancy.delete(
-        getPositionKey(
-          previousPosition.parentId,
-          previousPosition.order
-        )
-      );
-    }
-
-    occupancy.set(
-      getPositionKey(
-        module.idPadre,
-        module.orden
-      ),
-      module.idModulo
-    );
-
-    currentPositions.set(
-      module.idModulo,
-      {
-        parentId: module.idPadre,
-        order: module.orden,
-      }
-    );
-
-    orderedPositionUpdates.push(
-      module
-    );
-  }
-
-  const remainingUpdates =
-    changedModules.filter((module) => {
-      if (
-        module.idModulo ===
-        updatedCurrent.idModulo
-      ) {
-        return false;
-      }
-
-      const original =
-        originalById.get(
-          module.idModulo
-        );
-
-      return !(
-        original &&
-        hasPositionChanged(
-          original,
-          module
-        )
-      );
-    });
-
-  return [
-    temporaryCurrent,
-    ...orderedPositionUpdates,
-    updatedCurrent,
-    ...remainingUpdates,
-  ];
-};
-
-const sortByOrder = (
-  left: MutableModulo,
-  right: MutableModulo
-): number => {
-  if (left.orden !== right.orden) {
-    return left.orden - right.orden;
-  }
-
-  return left.idModulo - right.idModulo;
-};
-
-const resolveRouteSegment = (
-  route: string,
-  fallbackCode: string
-): string => {
-  const normalizedRoute = route
-    .trim()
-    .replace(/\\/g, '/')
-    .replace(/\/{2,}/g, '/')
-    .replace(/^\/+|\/+$/g, '');
-
-  if (!normalizedRoute) {
-    return fallbackCode.trim();
-  }
-
-  const segments =
-    normalizedRoute
-      .split('/')
-      .filter(Boolean);
-
-  return (
-    segments.at(-1) ??
-    fallbackCode.trim()
-  );
-};
-
-const renumberParentChildren = (
-  modulesById: Map<number, MutableModulo>,
-  parentId: number,
-  currentModuloId: number,
-  desiredCurrentOrder?: number
-): void => {
-  if (parentId === 0) {
-    return;
-  }
-
-  const children = [
-    ...modulesById.values(),
-  ]
-    .filter(
-      (module) =>
-        module.idPadre === parentId &&
-        module.idModulo !== currentModuloId
-    )
-    .sort(sortByOrder);
-
-  const currentModule =
-    modulesById.get(currentModuloId);
-
-  if (
-    currentModule?.idPadre === parentId &&
-    desiredCurrentOrder !== undefined
-  ) {
-    const safePosition = Math.max(
-      1,
-      Math.min(
-        desiredCurrentOrder,
-        children.length + 1
-      )
-    );
-
-    children.splice(
-      safePosition - 1,
-      0,
-      currentModule
-    );
-  }
-
-  children.forEach(
-    (module, index) => {
-      modulesById.set(
-        module.idModulo,
-        {
-          ...module,
-          orden: index + 1,
-        }
-      );
-    }
-  );
-};
-
-const cascadeHierarchyValues = (
-  modulesById: Map<number, MutableModulo>,
-  rootModuloId: number
-): void => {
-  const pendingParentIds = [
-    rootModuloId,
-  ];
-
-  while (pendingParentIds.length > 0) {
-    const parentId =
-      pendingParentIds.shift();
-
-    if (parentId === undefined) {
-      continue;
-    }
-
-    const parent =
-      modulesById.get(parentId);
-
-    if (!parent) {
-      continue;
-    }
-
-    const children = [
-      ...modulesById.values(),
-    ].filter(
-      (module) =>
-        module.idPadre === parentId
-    );
-
-    children.forEach((child) => {
-      const routeSegment =
-        resolveRouteSegment(
-          child.ruta,
-          child.codigo
-        );
-
-      modulesById.set(
-        child.idModulo,
-        {
-          ...child,
-          ruta: buildModuloRoute(
-            parent.ruta,
-            routeSegment
-          ),
-          tipo: parent.tipo + 1,
-        }
-      );
-
-      pendingParentIds.push(
-        child.idModulo
-      );
-    });
-  }
-};
-
 const toUpdateRequest = (
-  modulo: MutableModulo,
+  modulo: ModuloMutationState,
   authenticatedUserId: number,
   modifiedAt: string
 ): UpdateOpcionRequestApi => ({
@@ -553,6 +122,64 @@ const toUpdateRequest = (
   dFechaModifica: modifiedAt,
 });
 
+const buildUpdatedCurrentModulo = (
+  originalCurrent: ModuloMutationState,
+  form: EditarModuloFormData,
+  parentOption: ModuloMutationState | null,
+  targetParentId: number
+): ModuloMutationState => {
+  const codigo = form.codigo.trim();
+  const currentRouteSegment =
+    originalCurrent.codigo !== codigo
+      ? codigo
+      : resolveModuloRouteSegment(
+          originalCurrent.ruta,
+          codigo
+        );
+  const hierarchyChanged =
+    originalCurrent.idPadre !== targetParentId ||
+    originalCurrent.codigo !== codigo;
+  const updatedRoute =
+    !hierarchyChanged && originalCurrent.ruta
+      ? originalCurrent.ruta
+      : parentOption
+        ? buildModuloRoute(
+            parentOption.ruta,
+            currentRouteSegment
+          )
+        : buildModuloRoute('', currentRouteSegment);
+
+  return {
+    ...originalCurrent,
+    codigo,
+    nombre: form.nombre.trim(),
+    descripcion: form.descripcion.trim(),
+    ruta: updatedRoute,
+    urlBI: form.esPowerBI
+      ? form.urlBI.trim()
+      : null,
+    imagenOpcion: form.esPowerBI
+      ? form.imagenOpcion.trim() || null
+      : null,
+    emailOpcion: form.esPowerBI
+      ? (form.emailOpcion ?? '').trim()
+      : null,
+    icono: form.esPowerBI
+      ? POWER_BI_DEFAULT_ICON
+      : form.icono.trim(),
+    tipo: parentOption
+      ? parentOption.tipo + 1
+      : originalCurrent.tipo,
+    idPadre: targetParentId,
+    orden:
+      targetParentId === 0
+        ? 0
+        : form.orden,
+    visible: form.visible,
+    estado: form.estado,
+  };
+};
+
 export const buildUpdateOpcionRequests = (
   moduloDetalle: OpcionApi,
   form: EditarModuloFormData,
@@ -562,11 +189,8 @@ export const buildUpdateOpcionRequests = (
 ): UpdateOpcionRequestApi[] => {
   const currentModuloId =
     Number(moduloDetalle.nId_Opcion);
-
   const normalizedForm =
-    normalizeModuloAvailability(
-      form
-    );
+    normalizeModuloAvailability(form);
 
   assertModuloAvailabilityTransition(
     normalizedForm,
@@ -575,17 +199,16 @@ export const buildUpdateOpcionRequests = (
   );
 
   const originalCurrent =
-    mapOpcionApiToMutable(
+    mapOpcionApiToMutationState(
       moduloDetalle
     );
-
   const originalById = new Map<
     number,
-    MutableModulo
+    ModuloMutationState
   >(
     modulos.map((modulo) => [
       modulo.idModulo,
-      mapModuloToMutable(modulo),
+      mapModuloToMutationState(modulo),
     ])
   );
 
@@ -598,16 +221,12 @@ export const buildUpdateOpcionRequests = (
     [...originalById.entries()].map(
       ([id, modulo]) => [
         id,
-        {
-          ...modulo,
-        },
+        { ...modulo },
       ]
     )
   );
-
   const originalParentId =
     originalCurrent.idPadre;
-
   const targetParentId =
     normalizedForm.esPowerBI
       ? POWER_BI_PARENT_OPTION_ID
@@ -625,9 +244,7 @@ export const buildUpdateOpcionRequests = (
   const parentOption =
     targetParentId === 0
       ? null
-      : modulesById.get(
-          targetParentId
-        );
+      : modulesById.get(targetParentId) ?? null;
 
   if (
     targetParentId !== 0 &&
@@ -638,73 +255,13 @@ export const buildUpdateOpcionRequests = (
     );
   }
 
-  const codigo = normalizedForm.codigo.trim();
-
-  const currentRouteSegment =
-    originalCurrent.codigo !== codigo
-      ? codigo
-      : resolveRouteSegment(
-          originalCurrent.ruta,
-          codigo
-        );
-
-  const hierarchyChanged =
-    originalCurrent.idPadre !==
-      targetParentId ||
-    originalCurrent.codigo !== codigo;
-
-  const updatedRoute =
-    !hierarchyChanged &&
-    originalCurrent.ruta
-      ? originalCurrent.ruta
-      : parentOption
-        ? buildModuloRoute(
-            parentOption.ruta,
-            currentRouteSegment
-          )
-        : buildModuloRoute(
-            '',
-            currentRouteSegment
-          );
-
-  const updatedCurrent:
-    MutableModulo = {
-      ...originalCurrent,
-      codigo,
-      nombre: normalizedForm.nombre.trim(),
-      descripcion:
-        normalizedForm.descripcion.trim(),
-      ruta: updatedRoute,
-      urlBI:
-        normalizedForm.esPowerBI
-          ? normalizedForm.urlBI.trim()
-          : null,
-      imagenOpcion:
-        normalizedForm.esPowerBI
-          ? (
-              normalizedForm.imagenOpcion.trim() ||
-              null
-            )
-          : null,
-      emailOpcion:
-        normalizedForm.esPowerBI
-          ? (normalizedForm.emailOpcion ?? '').trim()
-          : null,
-      icono:
-        normalizedForm.esPowerBI
-          ? POWER_BI_DEFAULT_ICON
-          : normalizedForm.icono.trim(),
-      tipo: parentOption
-        ? parentOption.tipo + 1
-        : originalCurrent.tipo,
-      idPadre: targetParentId,
-      orden:
-        targetParentId === 0
-          ? 0
-          : normalizedForm.orden,
-      visible: normalizedForm.visible,
-      estado: normalizedForm.estado,
-    };
+  const updatedCurrent =
+    buildUpdatedCurrentModulo(
+      originalCurrent,
+      normalizedForm,
+      parentOption,
+      targetParentId
+    );
 
   modulesById.set(
     currentModuloId,
@@ -712,24 +269,22 @@ export const buildUpdateOpcionRequests = (
   );
 
   if (
-    originalParentId !==
-    updatedCurrent.idPadre
+    originalParentId !== updatedCurrent.idPadre
   ) {
-    renumberParentChildren(
+    renumberModuloParentChildren(
       modulesById,
       originalParentId,
       currentModuloId
     );
   }
 
-  renumberParentChildren(
+  renumberModuloParentChildren(
     modulesById,
     updatedCurrent.idPadre,
     currentModuloId,
     updatedCurrent.orden
   );
-
-  cascadeHierarchyValues(
+  cascadeModuloHierarchyValues(
     modulesById,
     currentModuloId
   );
@@ -738,23 +293,17 @@ export const buildUpdateOpcionRequests = (
     parseAuthenticatedUserId(
       authenticatedUserId
     );
-
   const modifiedAt =
-    getCurrentPeruDateTime(
-      currentDate
-    );
-
+    getCurrentPeruDateTime(currentDate);
   const changedModules = [
     ...modulesById.values(),
   ].filter((updated) => {
     const original =
-      originalById.get(
-        updated.idModulo
-      );
+      originalById.get(updated.idModulo);
 
     return Boolean(
       original &&
-      hasChanged(
+      hasModuloMutationChanged(
         original,
         updated
       )
@@ -769,19 +318,15 @@ export const buildUpdateOpcionRequests = (
     return left.orden - right.orden;
   });
 
-  const safeUpdateSequence =
-    buildSafeReorderSequence(
-      originalById,
-      changedModules,
-      updatedCurrent
-    );
-
-  return safeUpdateSequence.map(
-    (modulo) =>
-      toUpdateRequest(
-        modulo,
-        modifierId,
-        modifiedAt
-      )
+  return buildSafeModuloReorderSequence(
+    originalById,
+    changedModules,
+    updatedCurrent
+  ).map((modulo) =>
+    toUpdateRequest(
+      modulo,
+      modifierId,
+      modifiedAt
+    )
   );
 };

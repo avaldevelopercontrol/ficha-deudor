@@ -1,4 +1,3 @@
-import { getPerfilUsuarioNombreById } from '../constants/perfilesUsuario.constants';
 import type { LoginUsuarioApi, Usuario } from '../types';
 
 const cleanText = (value?: string | null): string => value?.trim() || '';
@@ -23,7 +22,7 @@ export const mapUsuarioApiToUsuario = (
     apellido,
     username: cleanText(usuarioApi.cUsr_Login),
     email,
-    perfil: getPerfilUsuarioNombreById(perfilId),
+    perfil: cleanText(usuarioApi.per_Nombre) || 'Perfil no definido',
     perfilId,
   };
 };

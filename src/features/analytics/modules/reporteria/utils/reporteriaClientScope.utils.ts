@@ -1,6 +1,6 @@
 import type {
   AnalyticsReportClientOption,
-} from '../../../access/types/analyticsAccess.types';
+} from '../../../access/domain/analyticsAccess.types';
 
 import {
   REPORTERIA_QUERY_PARAMS,

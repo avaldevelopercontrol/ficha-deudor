@@ -44,11 +44,3 @@ export const MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS = {
   validationTitle:
     'Revise la información antes de registrar:',
 } as const;
-
-export const PERFIL_OPCION_PERMISSION_LABELS = {
-  consultar: 'CONSULTAR',
-  insertar: 'INSERTAR',
-  editar: 'EDITAR',
-  eliminar: 'ELIMINAR',
-  exportar: 'EXPORTAR',
-} as const;

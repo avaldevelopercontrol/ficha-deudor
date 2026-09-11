@@ -1,5 +1,4 @@
 import {
-  ApiError,
   apiClient,
 } from '@shared/api/apiClient';
 
@@ -25,8 +24,8 @@ import {
 } from '../mappers/grupo.mapper';
 
 import type {
-  RegistrarGrupoFormData,
-} from '../modules/mantener-grupo/types/registrarGrupo.types';
+  GrupoFormData,
+} from '../domain/grupos/grupoForm.types';
 
 import type {
   CreateGrupoApiResponse,
@@ -45,6 +44,10 @@ import type {
   GrupoDetalleApi,
 } from '../types/grupo.types';
 
+import {
+  resolveSeguridadApiError,
+} from './seguridadApiError';
+
 const GRUPO_ERROR_MESSAGES = {
   list:
     'No se pudo obtener la lista de grupos.',
@@ -58,68 +61,6 @@ const GRUPO_ERROR_MESSAGES = {
   update:
     'No se pudo actualizar el grupo.',
 } as const;
-
-const isRecord = (
-  value: unknown
-): value is Record<
-  string,
-  unknown
-> =>
-  typeof value === 'object' &&
-  value !== null;
-
-const getStringProperty = (
-  value: Record<string, unknown>,
-  property: string
-): string | null => {
-  const propertyValue =
-    value[property];
-
-  if (
-    typeof propertyValue !==
-      'string' ||
-    !propertyValue.trim()
-  ) {
-    return null;
-  }
-
-  return propertyValue.trim();
-};
-
-const resolveGrupoApiError = (
-  error: unknown,
-  fallbackMessage: string
-): string => {
-  if (
-    error instanceof ApiError &&
-    isRecord(error.data)
-  ) {
-    const apiMessage =
-      getStringProperty(
-        error.data,
-        'messageUser'
-      ) ??
-      getStringProperty(
-        error.data,
-        'message'
-      );
-
-    return (
-      apiMessage ||
-      error.message.trim() ||
-      fallbackMessage
-    );
-  }
-
-  if (
-    error instanceof Error &&
-    error.message.trim()
-  ) {
-    return error.message.trim();
-  }
-
-  return fallbackMessage;
-};
 
 const buildGrupoByIdEndpoint = (
   grupoId: number
@@ -164,17 +105,15 @@ export const fetchGruposListado = async (
       result.response
     );
   } catch (error) {
-    throw new Error(
-      resolveGrupoApiError(
+    throw resolveSeguridadApiError(
         error,
         GRUPO_ERROR_MESSAGES.list
-      )
     );
   }
 };
 
 export const createGrupo = async (
-  form: RegistrarGrupoFormData
+  form: GrupoFormData
 ): Promise<CreateGrupoResponseApi> => {
   const body =
     buildCreateGrupoRequest(
@@ -201,11 +140,9 @@ export const createGrupo = async (
 
     return result.response;
   } catch (error) {
-    throw new Error(
-      resolveGrupoApiError(
+    throw resolveSeguridadApiError(
         error,
         GRUPO_ERROR_MESSAGES.create
-      )
     );
   }
 };
@@ -248,11 +185,9 @@ export const fetchGrupoById = async (
 
     return result.response;
   } catch (error) {
-    throw new Error(
-      resolveGrupoApiError(
+    throw resolveSeguridadApiError(
         error,
         GRUPO_ERROR_MESSAGES.detail
-      )
     );
   }
 };
@@ -260,7 +195,7 @@ export const fetchGrupoById = async (
 export const updateGrupo = async (
   selectedGrupoId: number,
   grupo: GrupoDetalleApi,
-  form: RegistrarGrupoFormData
+  form: GrupoFormData
 ): Promise<UpdateGrupoResponseApi> => {
   const body =
     buildUpdateGrupoRequest(
@@ -289,11 +224,9 @@ export const updateGrupo = async (
 
     return result.response;
   } catch (error) {
-    throw new Error(
-      resolveGrupoApiError(
+    throw resolveSeguridadApiError(
         error,
         GRUPO_ERROR_MESSAGES.update
-      )
     );
   }
 };

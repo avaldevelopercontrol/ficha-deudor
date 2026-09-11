@@ -13,7 +13,10 @@ import type {
 
 import {
   suggestModuloCode,
-} from './registrarModulo.utils';
+} from '../../../domain/modulos/moduloForm.utils';
+import {
+  getModuloDescendantIds,
+} from '../../../domain/modulos/moduloTree.utils';
 
 export const resolveModuloCodeAfterNameChange = (
   modulo: OpcionApi,
@@ -54,30 +57,11 @@ const sortModulesByOrder = (
 export const getDescendantIds = (
   moduloId: number,
   modulos: readonly Modulo[]
-): Set<number> => {
-  const descendantIds = new Set<number>();
-  const pendingParentIds = [moduloId];
-
-  while (pendingParentIds.length > 0) {
-    const parentId = pendingParentIds.shift();
-
-    if (parentId === undefined) {
-      continue;
-    }
-
-    modulos.forEach((modulo) => {
-      if (
-        modulo.idPadre === parentId &&
-        !descendantIds.has(modulo.idModulo)
-      ) {
-        descendantIds.add(modulo.idModulo);
-        pendingParentIds.push(modulo.idModulo);
-      }
-    });
-  }
-
-  return descendantIds;
-};
+): Set<number> =>
+  getModuloDescendantIds(
+    moduloId,
+    modulos
+  );
 
 export const buildEditableParentOptions = (
   modulo: OpcionApi,

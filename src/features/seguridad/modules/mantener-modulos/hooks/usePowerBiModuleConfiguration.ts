@@ -5,10 +5,10 @@ import {
 } from 'react';
 
 import {
-  getAnalyticsPowerBiConfiguration,
-  type AnalyticsOptionReportClientPublication,
-  type AnalyticsReportClientPublicationInput,
-} from '@features/analytics/access/api/analyticsAccessAdmin.api';
+  loadPowerBiModuleConfiguration,
+  type ModuloReportClientPublication,
+  type ModuloReportClientPublicationInput,
+} from '../../../application/modulos/moduloMaintenance.application';
 
 import type {
   Grupo,
@@ -20,7 +20,7 @@ import {
 
 import {
   isValidPowerBiPublishToWebUrl,
-} from '../utils/powerBiModulo.utils';
+} from '../../../domain/modulos/powerBiModulo.utils';
 
 import {
   buildReportClientPublicationIndex,
@@ -39,7 +39,7 @@ interface UsePowerBiModuleConfigurationOptions {
 interface UsePowerBiModuleConfigurationResult {
   groups: readonly Grupo[];
   selectedGroupIds: readonly number[];
-  reportClientPublications: readonly AnalyticsOptionReportClientPublication[];
+  reportClientPublications: readonly ModuloReportClientPublication[];
   hasReportClientConfiguration: boolean;
   hasInvalidReportClientPublication: boolean;
   hasValidGroupSelection: boolean;
@@ -50,7 +50,7 @@ interface UsePowerBiModuleConfigurationResult {
   groupSelectionError: string | null;
   refetch: () => Promise<void>;
   validateGroupSelection: () => string | null;
-  getPublicationsForSave: () => AnalyticsReportClientPublicationInput[] | null;
+  getPublicationsForSave: () => ModuloReportClientPublicationInput[] | null;
   onGroupSelectionChange: (groupIds: number[]) => void;
   onEmbedUrlChange: (
     clientId: number,
@@ -83,7 +83,7 @@ export const usePowerBiModuleConfiguration = ({
   ] = useState<
     ReadonlyMap<
       string,
-      AnalyticsOptionReportClientPublication
+      ModuloReportClientPublication
     >
   >(() => new Map());
 
@@ -94,7 +94,7 @@ export const usePowerBiModuleConfiguration = ({
 
   const fetcher = useCallback(
     (signal: AbortSignal) =>
-      getAnalyticsPowerBiConfiguration(
+      loadPowerBiModuleConfiguration(
         moduloId,
         signal
       ),
@@ -242,8 +242,8 @@ export const usePowerBiModuleConfiguration = ({
         clientId: number,
         name: string,
         update: (
-          publication: AnalyticsOptionReportClientPublication
-        ) => AnalyticsOptionReportClientPublication
+          publication: ModuloReportClientPublication
+        ) => ModuloReportClientPublication
       ) => {
         const key =
           buildReportClientPublicationKey(
@@ -328,7 +328,7 @@ export const usePowerBiModuleConfiguration = ({
 
   const getPublicationsForSave =
     useCallback(
-      (): AnalyticsReportClientPublicationInput[] | null => {
+      (): ModuloReportClientPublicationInput[] | null => {
         if (!hasReportClientConfiguration) {
           return null;
         }

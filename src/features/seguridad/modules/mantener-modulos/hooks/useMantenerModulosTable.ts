@@ -8,12 +8,6 @@ import {
 } from '@features/auth/hooks/useAuth';
 
 import {
-  syncAnalyticsOption,
-  syncAnalyticsPowerBiConfiguration,
-  type AnalyticsReportClientPublicationInput,
-} from '@features/analytics/access/api/analyticsAccessAdmin.api';
-
-import {
   APPLICATION_OPTION_IDS,
   useAccessControl,
   useOptionPermissions,
@@ -32,10 +26,12 @@ import {
 } from '@shared/hooks/useOperationFeedback';
 
 import {
-  createOpcion,
-  fetchOpciones,
-  updateOpcion,
-} from '../../../api/opcionesApi';
+  ModuloAnalyticsSyncError,
+  actualizarModulo as ejecutarActualizacionModulo,
+  loadModulos,
+  registrarModulo as ejecutarRegistroModulo,
+  type ModuloReportClientPublicationInput,
+} from '../../../application/modulos/moduloMaintenance.application';
 
 import type {
   Modulo,
@@ -55,7 +51,7 @@ import {
 } from '../utils/mantenerModulosPermissions';
 
 import {
-  resolveModuloImplementacion,
+  attachModuloImplementacion,
 } from '../utils/moduloImplementation.utils';
 
 export const useMantenerModulosTable = () => {
@@ -93,27 +89,16 @@ export const useMantenerModulosTable = () => {
     useApiResource<
       Modulo[]
     >(
-      fetchOpciones,
+      loadModulos,
       []
     );
 
   const allData =
     useMemo(
-      () => {
-        const modulos =
-          data ?? [];
-
-        return modulos.map(
-          (modulo) => ({
-            ...modulo,
-            implementacion:
-              resolveModuloImplementacion(
-                modulo,
-                modulos
-              ),
-          })
-        );
-      },
+      () =>
+        attachModuloImplementacion(
+          data ?? []
+        ),
       [data]
     );
 
@@ -157,45 +142,21 @@ export const useMantenerModulosTable = () => {
           );
         }
 
-        const created =
-          await createOpcion(
+        try {
+          await ejecutarRegistroModulo({
             form,
-            allData,
-            authenticatedUserId
-          );
-
-        if (form.esPowerBI) {
-          try {
-            await syncAnalyticsOption({
-              optionId:
-                created.nId_Opcion,
-              optionCode:
-                form.codigo,
-              optionName:
-                form.nombre,
-              isActive:
-                form.estado,
-              groupIds,
-            });
-          } catch (error) {
-            setPageNumber(
-              1
-            );
+            modulos: allData,
+            authenticatedUserId,
+            groupIds,
+          });
+        } catch (error) {
+          if (error instanceof ModuloAnalyticsSyncError) {
+            setPageNumber(1);
             refetch();
             await refreshAccessControl();
-
-            const detail =
-              error instanceof Error &&
-              error.message.trim()
-                ? ` ${error.message}`
-                : '';
-
-            throw new Error(
-              'El módulo fue creado correctamente en SISGES, pero no se pudo completar su configuración de grupos en Analytics.' +
-                detail +
-                ' No vuelva a registrarlo; complete la configuración de grupos Analytics para la opción creada.'
-            );
           }
+
+          throw error;
         }
 
         setPageNumber(
@@ -236,7 +197,7 @@ export const useMantenerModulosTable = () => {
         groupIds:
           readonly number[] = [],
         reportClientPublications:
-          readonly AnalyticsReportClientPublicationInput[] | null = null
+          readonly ModuloReportClientPublicationInput[] | null = null
       ): Promise<void> => {
         clearFeedback();
 
@@ -254,45 +215,22 @@ export const useMantenerModulosTable = () => {
           );
         }
 
-        await updateOpcion(
-          moduloDetalle,
-          form,
-          allData,
-          authenticatedUserId
-        );
-
-        if (form.esPowerBI) {
-          try {
-            await syncAnalyticsPowerBiConfiguration({
-              optionId:
-                moduloDetalle
-                  .nId_Opcion,
-              optionCode:
-                form.codigo,
-              optionName:
-                form.nombre,
-              isActive:
-                form.estado,
-              groupIds,
-              publications:
-                reportClientPublications ?? [],
-            });
-          } catch (error) {
+        try {
+          await ejecutarActualizacionModulo({
+            moduloDetalle,
+            form,
+            modulos: allData,
+            authenticatedUserId,
+            groupIds,
+            reportClientPublications,
+          });
+        } catch (error) {
+          if (error instanceof ModuloAnalyticsSyncError) {
             refetch();
             await refreshAccessControl();
-
-            const detail =
-              error instanceof Error &&
-              error.message.trim()
-                ? ` ${error.message}`
-                : '';
-
-            throw new Error(
-              'El módulo fue actualizado correctamente en SISGES, pero no se pudo completar su configuración Power BI en Analytics.' +
-                detail +
-                ' Vuelva a editar el módulo y reintente el guardado.'
-            );
           }
+
+          throw error;
         }
 
         refetch();

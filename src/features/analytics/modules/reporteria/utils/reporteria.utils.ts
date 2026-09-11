@@ -1,62 +1,27 @@
 import {
-  APPLICATION_OPTION_IDS,
-  type AuthorizedOption,
-} from '@features/access-control';
-
-import {
   normalizePowerBiPublishToWebUrl,
   normalizePowerBiServiceUrl,
 } from '@shared/utils/powerBiUrl.utils';
 
-export const findAuthorizedOptionById = (
-  options: readonly AuthorizedOption[],
-  optionId: number
-): AuthorizedOption | null => {
-  for (const option of options) {
-    if (option.id === optionId) {
-      return option;
-    }
+import type {
+  PowerBiReport,
+} from '../domain/reporteria.types';
 
-    const child = findAuthorizedOptionById(
-      option.children,
-      optionId
-    );
-
-    if (child) {
-      return child;
-    }
-  }
-
-  return null;
-};
-
-export const getAuthorizedPowerBiReports = (
-  menuTree: readonly AuthorizedOption[]
-): AuthorizedOption[] => {
-  const reporteria =
-    findAuthorizedOptionById(
-      menuTree,
-      APPLICATION_OPTION_IDS.REPORTERIA
-    );
-
-  if (!reporteria) {
-    return [];
-  }
-
-  return reporteria.children.filter(
-    (option) =>
-      option.parentId ===
-        APPLICATION_OPTION_IDS.REPORTERIA &&
-      option.permissions.consultar &&
-      Boolean(
-        normalizePowerBiServiceUrl(option.urlBI)
-      )
+export const getAvailablePowerBiReports = (
+  reports: readonly PowerBiReport[]
+): PowerBiReport[] =>
+  reports.filter((report) =>
+    Boolean(normalizePowerBiServiceUrl(report.serviceUrl))
   );
-};
 
+export const findPowerBiReportById = (
+  reports: readonly PowerBiReport[],
+  reportId: number
+): PowerBiReport | null =>
+  reports.find((report) => report.id === reportId) ?? null;
 
 export const buildPowerBiReportAccessKey = (
-  reports: readonly AuthorizedOption[]
+  reports: readonly PowerBiReport[]
 ): string =>
   reports
     .map((report) => report.id)
@@ -64,7 +29,7 @@ export const buildPowerBiReportAccessKey = (
     .join(',');
 
 export const retainAvailablePowerBiReportIds = (
-  reports: readonly AuthorizedOption[],
+  reports: readonly PowerBiReport[],
   selectedReportIds: readonly number[]
 ): number[] => {
   const availableIds = new Set(
@@ -77,9 +42,9 @@ export const retainAvailablePowerBiReportIds = (
 };
 
 export const filterPowerBiReportsBySelection = (
-  reports: readonly AuthorizedOption[],
+  reports: readonly PowerBiReport[],
   selectedReportIds: readonly number[]
-): AuthorizedOption[] => {
+): PowerBiReport[] => {
   if (selectedReportIds.length === 0) {
     return [...reports];
   }
@@ -92,9 +57,9 @@ export const filterPowerBiReportsBySelection = (
 };
 
 export const filterPowerBiReports = (
-  reports: readonly AuthorizedOption[],
+  reports: readonly PowerBiReport[],
   search: string
-): AuthorizedOption[] => {
+): PowerBiReport[] => {
   const normalizedSearch = search
     .trim()
     .toLocaleLowerCase('es-PE');

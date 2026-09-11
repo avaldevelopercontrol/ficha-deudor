@@ -1,10 +1,10 @@
 import React from 'react';
 
-import Modal from '@shared/components/modals/Modal';
 import Table from '@shared/components/table/Table';
-import type { DocumentoApi } from '../../../../shared/types';
+import type { DeudorInfo, DocumentoApi } from '../../../../shared/types';
+import type { FichaDeudorDocumentosParams } from '../../../../shared/types/fichaDeudor.types';
 import type { useDocumentosTableViewModel } from '../../hooks/useDocumentosTableViewModel';
-import DocumentosActionsCarousel from './DocumentosActionsCarousel';
+import GestionBotones from '../GestionBotones';
 import DocumentosHeader from './DocumentosHeader';
 import DocumentosPagination from './DocumentosPagination';
 
@@ -12,17 +12,20 @@ type DocumentosTableViewModel = ReturnType<typeof useDocumentosTableViewModel>;
 
 interface Props {
   viewModel: DocumentosTableViewModel;
+  params: FichaDeudorDocumentosParams;
+  data: DeudorInfo;
   onDocumentoClick?: (doc: DocumentoApi) => void;
 }
 
 const DocumentosTableContent: React.FC<Props> = ({
   viewModel,
+  params,
+  data,
   onDocumentoClick,
 }) => {
   const {
     allData,
     paginatedData,
-    botones,
     pageNumber,
     pageSize,
     totalRecords,
@@ -33,14 +36,6 @@ const DocumentosTableContent: React.FC<Props> = ({
     selectedFilters,
     onTextFilterChange,
     onSelectedFilterChange,
-    scrollRef,
-    puedeScrollIzq,
-    puedeScrollDer,
-    scroll,
-    modalOpen,
-    modalTitle,
-    closeModal,
-    handleBotonClick,
     tableStyles,
     tableColumns,
   } = viewModel;
@@ -76,16 +71,11 @@ const DocumentosTableContent: React.FC<Props> = ({
         onPageSizeChange={setPageSize}
       />
 
-      <DocumentosActionsCarousel
-        botones={botones}
-        puedeScrollIzq={puedeScrollIzq}
-        puedeScrollDer={puedeScrollDer}
-        scrollRef={scrollRef}
-        onScroll={scroll}
-        onBotonClick={handleBotonClick}
+      <GestionBotones
+        key={`${params.id_cliente}:${params.id_contrato}`}
+        params={params}
+        data={data}
       />
-
-      <Modal isOpen={modalOpen} title={modalTitle} onClose={closeModal} />
     </div>
   );
 };

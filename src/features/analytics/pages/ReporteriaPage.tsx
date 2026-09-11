@@ -1,10 +1,15 @@
 import {
+  useMemo,
   type ReactNode,
 } from 'react';
 
 import {
   useAccessControl,
 } from '@features/access-control';
+
+import {
+  adaptAccessControlToReporteriaCatalog,
+} from '../modules/reporteria/adapters/accessControlReporteria.adapter';
 
 import PowerBiReportCard from '../modules/reporteria/components/PowerBiReportCard';
 import PowerBiReportClientModal from '../modules/reporteria/components/PowerBiReportClientModal';
@@ -26,9 +31,14 @@ export const ReporteriaPage = (): ReactNode => {
     menuTree,
   } = useAccessControl();
 
+  const catalog = useMemo(
+    () => adaptAccessControlToReporteriaCatalog(menuTree),
+    [menuTree]
+  );
+
   const {
     reporteriaOption,
-    parentOption,
+    parentName,
     reporteriaName,
     reports,
     analyticsReports,
@@ -41,7 +51,7 @@ export const ReporteriaPage = (): ReactNode => {
     setSelectedReportIds,
   } = usePowerBiReportCatalog({
     status,
-    menuTree,
+    catalog,
   });
 
   const {
@@ -59,7 +69,7 @@ export const ReporteriaPage = (): ReactNode => {
         <section className="reporteria-page__hero">
           <div>
             <span className="reporteria-page__eyebrow">
-              {parentOption?.name ?? 'Gestión Analítica'}
+              {parentName ?? 'Gestión Analítica'}
             </span>
             <h1>{reporteriaName}</h1>
             <p>

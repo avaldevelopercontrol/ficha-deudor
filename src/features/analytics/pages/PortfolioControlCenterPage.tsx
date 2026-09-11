@@ -51,12 +51,14 @@ import {
   usePortfolioPerformanceController,
 } from '../modules/portfolio-control-center/hooks/usePortfolioPerformanceController';
 import {
-  isPortfolioBusinessUnitTransitionPending,
   switchPortfolioBusinessUnit,
-} from '../modules/portfolio-control-center/utils/portfolioFilterContext.utils';
+} from '../modules/portfolio-control-center/domain/portfolioFilterContext';
+import {
+  resolvePortfolioControlCenterViewState,
+} from '../modules/portfolio-control-center/application/portfolioView.application';
 import type {
   PortfolioControlCenterFilters,
-} from '../types/portfolioControlCenter.types';
+} from '../modules/portfolio-control-center/domain/portfolioFilters.types';
 
 import '../styles/32-portfolio-control-center.css';
 
@@ -92,26 +94,18 @@ const PortfolioControlCenterContent: React.FC<
     filters
   );
 
-  const effectiveBusinessUnit =
-    filters.businessUnit ??
-    filterOptions.selectedBusinessUnit;
-  const clearBusinessUnit =
-    filterOptions.selectedBusinessUnit ??
-    filters.businessUnit;
-  const confirmedBusinessUnit =
-    data?.context.businessUnit ??
-    filterOptions.selectedBusinessUnit;
-  const isBusinessUnitTransitionPending =
-    isPortfolioBusinessUnitTransitionPending(
-      filters.businessUnit,
-      confirmedBusinessUnit
-    );
-  const visibleData = isBusinessUnitTransitionPending
-    ? null
-    : data;
-  const visibleIsLoading =
-    isLoading ||
-    (isBusinessUnitTransitionPending && !error);
+  const {
+    effectiveBusinessUnit,
+    clearBusinessUnit,
+    visibleData,
+    visibleIsLoading,
+  } = resolvePortfolioControlCenterViewState({
+    filters,
+    filterOptions,
+    data,
+    isLoading,
+    error,
+  });
 
   const portfolioOption = useMemo(() => {
     const scope = filterOptions.portfolio;

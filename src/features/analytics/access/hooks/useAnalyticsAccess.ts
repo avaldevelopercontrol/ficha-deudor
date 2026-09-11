@@ -5,104 +5,59 @@ import {
   useState,
 } from 'react';
 
-import { getAnalyticsAccess } from '../api/analyticsAccess.api';
 import {
-  cancelPendingAnalyticsAccess,
-  createAnalyticsAccessRequestController,
-  getPendingAnalyticsAccess,
-  releaseAnalyticsAccessRequestController,
-} from '../services/analyticsAccess.prefetch';
-import {
-  getSelectedCrmClientId,
-  setSelectedCrmClientId,
-  clearSelectedCrmClientId,
-} from '../store/analyticsCrmSelection.storage';
-import { analyticsAccessStore } from '../store/analyticsAccess.store';
+  cancelAnalyticsAccessRequest,
+  commitAnalyticsAccess,
+  getAnalyticsAccessSnapshot,
+  isAnalyticsAbortError,
+  isAnalyticsAccessStale,
+  prepareAnalyticsAccessLoad,
+  selectAnalyticsCrmClient,
+  type AnalyticsAccessRequest,
+} from '../application/analyticsAccess.application';
 import type {
   AnalyticsAccessContext,
-} from '../types/analyticsAccess.types';
-
-const isAbortError = (reason: unknown): boolean =>
-  typeof reason === 'object' &&
-  reason !== null &&
-  'name' in reason &&
-  reason.name === 'AbortError';
-
-const resolveSelection = (
-  access: AnalyticsAccessContext
-): number | null => {
-  const stored =
-    getSelectedCrmClientId();
-
-  if (
-    stored !== null &&
-    access.scopes.some(
-      (scope) =>
-        scope.crmClientId === stored
-    )
-  ) {
-    return stored;
-  }
-
-  return (
-    access.scopes[0]?.crmClientId ??
-    null
-  );
-};
+} from '../domain/analyticsAccess.types';
 
 export function useAnalyticsAccess(
   optionId: number
 ) {
-  const cachedAccess =
-    analyticsAccessStore.getAccess(
-      optionId
-    );
+  const initialSnapshot =
+    getAnalyticsAccessSnapshot(optionId);
 
   const [access, setAccess] =
     useState<AnalyticsAccessContext | null>(
-      cachedAccess
+      initialSnapshot.access
     );
 
   const accessRef =
     useRef<AnalyticsAccessContext | null>(
-      cachedAccess
+      initialSnapshot.access
     );
 
   const [selectedCrmClientId, setSelection] =
-    useState<number | null>(() =>
-      cachedAccess
-        ? resolveSelection(cachedAccess)
-        : null
+    useState<number | null>(
+      initialSnapshot.selectedCrmClientId
     );
 
   const [loading, setLoading] =
-    useState(!cachedAccess);
+    useState(initialSnapshot.access === null);
 
   const [error, setError] =
     useState<unknown>(null);
 
-  const requestControllerRef =
-    useRef<AbortController | null>(null);
+  const requestRef =
+    useRef<AnalyticsAccessRequest | null>(null);
 
   const applyAccess = useCallback(
     (result: AnalyticsAccessContext) => {
-      analyticsAccessStore.setAccess(
-        optionId,
-        result
-      );
-      accessRef.current = result;
-
       const nextSelection =
-        resolveSelection(result);
-
-      if (nextSelection === null) {
-        clearSelectedCrmClientId();
-      } else {
-        setSelectedCrmClientId(
-          nextSelection
+        commitAnalyticsAccess(
+          optionId,
+          result
         );
-      }
 
+      accessRef.current = result;
       setSelection(nextSelection);
       setAccess(result);
       setError(null);
@@ -110,48 +65,45 @@ export function useAnalyticsAccess(
     [optionId]
   );
 
+  const cancelCurrentRequest = useCallback(() => {
+    const request = requestRef.current;
+
+    if (!request) {
+      return;
+    }
+
+    cancelAnalyticsAccessRequest(request);
+    requestRef.current = null;
+  }, []);
+
   const load = useCallback(
     async (
       force = false,
       background = false
     ) => {
-      if (!force) {
-        const cached =
-          analyticsAccessStore.getFreshAccess(
-            optionId
-          );
-
-        if (cached) {
-          applyAccess(cached);
-          setLoading(false);
-          return;
-        }
-      }
-
       if (
         background &&
-        requestControllerRef.current
+        requestRef.current
       ) {
         return;
       }
 
-      if (force) {
-        cancelPendingAnalyticsAccess(optionId);
-      }
-
-      const previousController =
-        requestControllerRef.current;
-      previousController?.abort();
-
-      if (previousController) {
-        releaseAnalyticsAccessRequestController(
-          previousController
+      const operation =
+        prepareAnalyticsAccessLoad(
+          optionId,
+          force
         );
+
+      if (operation.kind === 'cache') {
+        applyAccess(operation.access);
+        setLoading(false);
+        return;
       }
 
-      const controller =
-        createAnalyticsAccessRequestController();
-      requestControllerRef.current = controller;
+      cancelCurrentRequest();
+
+      const { request } = operation;
+      requestRef.current = request;
 
       if (!background) {
         setLoading(true);
@@ -159,67 +111,28 @@ export function useAnalyticsAccess(
       }
 
       try {
-        const pendingPrefetch =
-          !force
-            ? getPendingAnalyticsAccess(
-                optionId
-              )
-            : null;
-
-        let result: AnalyticsAccessContext;
-
-        if (pendingPrefetch) {
-          try {
-            result = await pendingPrefetch;
-          } catch (reason) {
-            if (
-              !isAbortError(reason) ||
-              controller.signal.aborted
-            ) {
-              throw reason;
-            }
-
-            // Otro consumidor puede forzar una revalidación y cancelar el
-            // prefetch compartido. Si este hook sigue activo, continúa con
-            // una solicitud propia en lugar de quedar sin datos ni error.
-            result = await getAnalyticsAccess(
-              optionId,
-              controller.signal
-            );
-          }
-        } else {
-          result = await getAnalyticsAccess(
-            optionId,
-            controller.signal
-          );
-        }
+        const result = await request.promise;
 
         if (
-          !controller.signal.aborted &&
-          requestControllerRef.current === controller
+          !request.controller.signal.aborted &&
+          requestRef.current === request
         ) {
           applyAccess(result);
         }
       } catch (reason) {
         if (
-          !controller.signal.aborted &&
+          !request.controller.signal.aborted &&
           !background &&
-          !isAbortError(reason)
+          !isAnalyticsAbortError(reason)
         ) {
           setError(reason);
         }
       } finally {
-        releaseAnalyticsAccessRequestController(
-          controller
-        );
-
-        if (
-          requestControllerRef.current === controller
-        ) {
-          requestControllerRef.current = null;
+        if (requestRef.current === request) {
+          requestRef.current = null;
 
           if (
-            !controller.signal.aborted &&
+            !request.controller.signal.aborted &&
             !background
           ) {
             setLoading(false);
@@ -227,7 +140,11 @@ export function useAnalyticsAccess(
         }
       }
     },
-    [applyAccess, optionId]
+    [
+      applyAccess,
+      cancelCurrentRequest,
+      optionId,
+    ]
   );
 
   useEffect(() => {
@@ -246,25 +163,15 @@ export function useAnalyticsAccess(
 
     return () => {
       active = false;
-      const controller =
-        requestControllerRef.current;
-      controller?.abort();
-
-      if (controller) {
-        releaseAnalyticsAccessRequestController(
-          controller
-        );
-      }
-
-      requestControllerRef.current = null;
+      cancelCurrentRequest();
     };
-  }, [load]);
+  }, [cancelCurrentRequest, load]);
 
   useEffect(() => {
     const revalidateIfStale = () => {
       if (
         document.visibilityState !== 'visible' ||
-        !analyticsAccessStore.isStale(optionId)
+        !isAnalyticsAccessStale(optionId)
       ) {
         return;
       }
@@ -293,35 +200,24 @@ export function useAnalyticsAccess(
     };
   }, [load, optionId]);
 
-  const selectCrmClientId =
-    useCallback(
-      (crmClientId: number) => {
-        if (
-          !access?.scopes.some(
-            (scope) =>
-              scope.crmClientId ===
-              crmClientId
-          )
-        ) {
-          throw new Error(
-            'La cartera seleccionada no está autorizada.'
-          );
-        }
-
-        setSelectedCrmClientId(
+  const selectCrmClientId = useCallback(
+    (crmClientId: number) => {
+      const nextSelection =
+        selectAnalyticsCrmClient(
+          access,
           crmClientId
         );
-        setSelection(crmClientId);
-      },
-      [access]
-    );
+
+      setSelection(nextSelection);
+    },
+    [access]
+  );
 
   return {
     access,
     loading,
     error,
-    scopes:
-      access?.scopes ?? [],
+    scopes: access?.scopes ?? [],
     selectedCrmClientId,
     selectCrmClientId,
     refresh: () => load(true),

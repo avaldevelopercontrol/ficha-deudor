@@ -1,14 +1,19 @@
 import { useMemo } from 'react';
 
 import type {
+  PortfolioOperationalContext,
+} from '../domain/portfolioOverview.types';
+import type {
   PortfolioDueTodayPromisesData,
   PortfolioDueTodayPromisesQuery,
   PortfolioDueTodayPromisesSortKey,
   PortfolioDueTodayStatusFilter,
-  PortfolioOperationalContext,
   PortfolioSortDirection,
-} from '../../../types/portfolioControlCenter.types';
-import { loadPortfolioDueTodayPromises } from '../services/portfolioControlCenter.service';
+} from '../domain/portfolioPromises.types';
+import {
+  buildPortfolioDueTodayPromisesQuery,
+  loadPortfolioDueTodayPromises,
+} from '../application/portfolioPromises.application';
 import { usePortfolioPromiseDetailResource } from './usePortfolioPromiseDetailResource';
 
 interface UsePortfolioDueTodayPromisesParams {
@@ -36,13 +41,14 @@ export const usePortfolioDueTodayPromises = ({
   sortDirection,
 }: UsePortfolioDueTodayPromisesParams) => {
   const query = useMemo<PortfolioDueTodayPromisesQuery>(
-    () => ({
-      page,
-      pageSize,
-      status: status === 'all' ? null : status,
-      sortBy: sortKey,
-      sortDirection,
-    }),
+    () =>
+      buildPortfolioDueTodayPromisesQuery(
+        page,
+        pageSize,
+        status,
+        sortKey,
+        sortDirection
+      ),
     [status, page, pageSize, sortDirection, sortKey]
   );
 

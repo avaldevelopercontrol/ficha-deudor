@@ -8,7 +8,7 @@ import {
 import type {
   RegistrarUsuarioGrupoOpcionesData,
   UsuarioGrupoOpcionAssignment,
-} from '../modules/mantener-accesos-usuario/types/asignarAccesosUsuario.types';
+} from '../domain/accesos/usuarioAccess.types';
 import type {
   UsuarioGrupoOpcionDetalle,
 } from '../types/usuarioGrupoOpcion.types';

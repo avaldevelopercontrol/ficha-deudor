@@ -4,14 +4,14 @@ import {
   renderToStaticMarkup,
 } from 'react-dom/server';
 
-import type {
-  AuthorizedOption,
-} from '@features/access-control';
-
 import {
   defineSuite,
   test,
 } from '../../../../../test/testHarness';
+
+import type {
+  PowerBiReport,
+} from '../domain/reporteria.types';
 
 import {
   PowerBiReportFilter,
@@ -20,27 +20,15 @@ import {
 const buildReport = (
   id: number,
   name: string
-): AuthorizedOption => ({
+): PowerBiReport => ({
   id,
   code: `m${name}`,
   name,
   description: '',
-  urlBI: 'https://app.powerbi.com/view?r=demo',
+  serviceUrl: 'https://app.powerbi.com/view?r=demo',
   image: null,
   email: 'reportes@avalperu.com',
   icon: 'analytics',
-  type: 4,
-  parentId: 25,
-  order: id,
-  route: null,
-  permissions: {
-    consultar: true,
-    insertar: false,
-    editar: false,
-    eliminar: false,
-    exportar: false,
-  },
-  children: [],
 });
 
 const reports = [

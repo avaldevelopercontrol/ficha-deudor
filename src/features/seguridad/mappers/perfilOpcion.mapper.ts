@@ -12,7 +12,7 @@ import type {
 
 import type {
   PerfilAccesoOption,
-} from '../modules/mantener-accesos-perfil/types/asignarAccesosPerfil.types';
+} from '../domain/accesos/perfilAccess.types';
 
 const toRequiredText = (
   value: unknown,

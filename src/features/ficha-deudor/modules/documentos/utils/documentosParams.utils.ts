@@ -22,9 +22,16 @@ export const buildGestionDocumentosParams = ({
   });
 };
 
-export const buildDocumentosBotonesParams = (idCliente: string) => {
+export const buildDocumentosBotonesParams = ({
+  idCliente,
+  idContrato,
+}: {
+  idCliente: string;
+  idContrato: string;
+}) => {
   return new URLSearchParams({
-    id_cliente: idCliente,
+    nId_Cliente: idCliente,
+    nId_Contrato: idContrato,
   });
 };
 

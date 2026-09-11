@@ -7,7 +7,7 @@ import {
 import type {
   PortfolioPromiseStatus,
   PortfolioTargetProgress,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   buildPortfolioOperationalAttention,
 } from './portfolioAttention.utils';

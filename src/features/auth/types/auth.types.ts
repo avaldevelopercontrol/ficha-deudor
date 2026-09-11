@@ -45,6 +45,7 @@ export interface LoginUsuarioApi {
   cUsr_Email?: string | null;
   cUsr_EmailPersonal?: string | null;
   cUsr_EmailProfile?: string | null;
+  per_Nombre?: string | null;
   nid_perfil?: number | null;
   nId_PerfilGest?: number | null;
 }

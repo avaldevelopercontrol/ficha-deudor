@@ -5,7 +5,7 @@ import { SisgesIcon } from '@shared/icons/sisges';
 
 import type {
   PortfolioEvolutionPoint,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   formatPortfolioCompactCurrency,
   formatPortfolioCurrency,

@@ -10,7 +10,7 @@ import type {
 
 import {
   isValidPowerBiPublishToWebUrl,
-} from '../utils/powerBiModulo.utils';
+} from '../../../domain/modulos/powerBiModulo.utils';
 
 import './PowerBiReportClientPublications.css';
 

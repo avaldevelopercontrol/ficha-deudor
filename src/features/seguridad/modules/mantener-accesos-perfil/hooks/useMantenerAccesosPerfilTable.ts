@@ -26,11 +26,10 @@ import {
 } from '@shared/hooks/useOperationFeedback';
 
 import {
-  createPerfilOpciones,
-  fetchPerfilOptionsCount,
-  fetchPerfilesAcceso,
-  updatePerfilOpciones,
-} from '../../../api/perfilOpcionesApi';
+  actualizarAccesosPerfil as ejecutarActualizacionAccesosPerfil,
+  loadPerfilesConEstado,
+  registrarAccesosPerfil as ejecutarRegistroAccesosPerfil,
+} from '../../../application/accesos/accessMaintenance.application';
 
 import type {
   PerfilOpcionCount,
@@ -39,35 +38,11 @@ import type {
 
 import type {
   RegistrarPerfilOpcionesData,
-} from '../types/asignarAccesosPerfil.types';
+} from '../../../domain/accesos/perfilAccess.types';
 
 import {
   assertMantenerAccesosPerfilPermission,
 } from '../utils/mantenerAccesosPerfilPermissions';
-
-const loadPerfilesConEstado = async (
-  signal: AbortSignal
-): Promise<PerfilOpcionCount[]> => {
-  const [perfiles, perfilesCatalogo] =
-    await Promise.all([
-      fetchPerfilOptionsCount(signal),
-      fetchPerfilesAcceso(signal),
-    ]);
-
-  const estadoByPerfilId = new Map(
-    perfilesCatalogo.map((perfil) => [
-      perfil.idPerfil,
-      perfil.estadoActivo,
-    ])
-  );
-
-  return perfiles.map((perfil) => ({
-    ...perfil,
-    estadoActivo: estadoByPerfilId.get(
-      perfil.idPerfil
-    ),
-  }));
-};
 
 export const useMantenerAccesosPerfilTable = () => {
   const {
@@ -157,7 +132,7 @@ export const useMantenerAccesosPerfilTable = () => {
           };
 
         try {
-          await createPerfilOpciones(
+          await ejecutarRegistroAccesosPerfil(
             form,
             authenticatedUserId
           );
@@ -232,7 +207,7 @@ export const useMantenerAccesosPerfilTable = () => {
           };
 
         try {
-          await updatePerfilOpciones(
+          await ejecutarActualizacionAccesosPerfil(
             asignacionesActuales,
             form,
             authenticatedUserId

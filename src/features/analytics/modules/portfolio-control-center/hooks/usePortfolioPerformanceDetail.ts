@@ -5,13 +5,13 @@ import {
 } from '@shared/hooks/useAsyncResource';
 import type {
   PortfolioOperationalContext,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   loadPortfolioAdvisorPerformance,
   loadPortfolioSupervisorPerformance,
   type PortfolioAdvisorPerformanceData,
   type PortfolioSupervisorPerformanceData,
-} from '../services/portfolioControlCenter.service';
+} from '../application/portfolioPerformance.application';
 
 interface BasePerformanceParams {
   crmClientId: number;

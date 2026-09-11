@@ -7,23 +7,23 @@ import type {
 } from '../../../types/usuarioGrupoOpcion.types';
 
 import type {
-  OpcionTreeItem,
-  PerfilOpcionPermissions,
-} from '../../mantener-accesos-perfil/types/asignarAccesosPerfil.types';
+  AccessTreeItem,
+} from '../../../domain/accesos/access.types';
 
 import {
-  getAutomaticAncestorOptionIds,
-} from '../../mantener-accesos-perfil/utils/accesosPerfilTree.utils';
+  AUTOMATIC_PARENT_ACCESS_PERMISSIONS,
+} from '../../../domain/accesos/access.constants';
 
 import {
-  createEmptyPerfilOpcionPermissions,
+  getAccessPermissions,
   getSelectedLeafIds,
-  hasAnyPerfilOpcionPermission,
-} from '../../mantener-accesos-perfil/utils/asignarAccesosPerfil.utils';
+  hasAnyAccessPermission,
+  resolveSelectedAccessAssignmentIds,
+} from '../../../domain/accesos/accessFormState.utils';
 
 import {
-  sanitizePerfilOpcionPermissions,
-} from '../../mantener-accesos-perfil/utils/opcionAccessCapabilities.utils';
+  sanitizeAccessPermissions,
+} from '../../../domain/accesos/accessCapabilities.utils';
 
 import type {
   AsignarAccesosUsuarioFormData,
@@ -39,50 +39,12 @@ export const ASIGNAR_ACCESOS_USUARIO_INITIAL_FORM:
     permissionsByOptionId: {},
   };
 
-const AUTOMATIC_PARENT_PERMISSIONS:
-  PerfilOpcionPermissions = {
-    consultar: true,
-    insertar: false,
-    editar: false,
-    eliminar: false,
-    exportar: false,
-  };
-
-const resolveSelectedAssignmentIds = (
-  selectedLeafIds: readonly number[],
-  treeItems: readonly OpcionTreeItem[]
-): number[] => {
-  const selectedIds = new Set([
-    ...selectedLeafIds,
-    ...getAutomaticAncestorOptionIds(
-      treeItems,
-      selectedLeafIds
-    ),
-  ]);
-
-  return treeItems
-    .filter(
-      (item) =>
-        item.isAssignmentTarget &&
-        selectedIds.has(item.idModulo)
-    )
-    .map((item) => item.idModulo);
-};
-
-const getPermissions = (
-  form: AsignarAccesosUsuarioFormData,
-  optionId: number
-): PerfilOpcionPermissions =>
-  form.permissionsByOptionId[
-    String(optionId)
-  ] ?? createEmptyPerfilOpcionPermissions();
-
 export const createAsignarAccesosUsuarioFormFromAssignments = (
   usuarioId: number,
   grupoId: number,
   assignments:
     readonly UsuarioGrupoOpcionDetalle[],
-  treeItems: readonly OpcionTreeItem[]
+  treeItems: readonly AccessTreeItem[]
 ): AsignarAccesosUsuarioFormData => {
   const normalizedUsuarioId =
     toRequiredId(
@@ -112,6 +74,12 @@ export const createAsignarAccesosUsuarioFormFromAssignments = (
         ])
     );
 
+  const treeItemsById = new Map(
+    treeItems.map((item) => [
+      item.idModulo,
+      item,
+    ])
+  );
   const selectedLeafIds = treeItems
     .filter(
       (item) =>
@@ -132,11 +100,8 @@ export const createAsignarAccesosUsuarioFormFromAssignments = (
 
         return [
           String(optionId),
-          sanitizePerfilOpcionPermissions(
-            treeItems.find(
-              (item) =>
-                item.idModulo === optionId
-            ),
+          sanitizeAccessPermissions(
+            treeItemsById.get(optionId),
             {
               consultar:
                 assignment?.consultar ?? false,
@@ -158,7 +123,7 @@ export const createAsignarAccesosUsuarioFormFromAssignments = (
     usuarioId: normalizedUsuarioId,
     grupoId: normalizedGrupoId,
     selectedOptionIds:
-      resolveSelectedAssignmentIds(
+      resolveSelectedAccessAssignmentIds(
         selectedLeafIds,
         treeItems
       ),
@@ -175,7 +140,7 @@ export const createAsignarAccesosUsuarioFormFromAssignments = (
 
 const validateAccessSelection = (
   form: AsignarAccesosUsuarioFormData,
-  treeItems: readonly OpcionTreeItem[],
+  treeItems: readonly AccessTreeItem[],
   requireSelection: boolean
 ): Record<string, string> => {
   const errors: Record<string, string> = {};
@@ -250,9 +215,9 @@ const validateAccessSelection = (
             String(optionId)
           ];
 
-        return !hasAnyPerfilOpcionPermission(
+        return !hasAnyAccessPermission(
           permissions
-            ? sanitizePerfilOpcionPermissions(
+            ? sanitizeAccessPermissions(
                 option,
                 permissions
               )
@@ -290,7 +255,7 @@ const validateAccessSelection = (
 
 export const validateAsignarAccesosUsuarioForm = (
   form: AsignarAccesosUsuarioFormData,
-  treeItems: readonly OpcionTreeItem[]
+  treeItems: readonly AccessTreeItem[]
 ): Record<string, string> =>
   validateAccessSelection(
     form,
@@ -300,7 +265,7 @@ export const validateAsignarAccesosUsuarioForm = (
 
 export const validateEditarAccesosUsuarioForm = (
   form: AsignarAccesosUsuarioFormData,
-  treeItems: readonly OpcionTreeItem[]
+  treeItems: readonly AccessTreeItem[]
 ): Record<string, string> =>
   validateAccessSelection(
     form,
@@ -310,7 +275,7 @@ export const validateEditarAccesosUsuarioForm = (
 
 export const normalizeAsignarAccesosUsuarioForm = (
   form: AsignarAccesosUsuarioFormData,
-  treeItems: readonly OpcionTreeItem[]
+  treeItems: readonly AccessTreeItem[]
 ): RegistrarUsuarioGrupoOpcionesData => {
   const selectedLeafIds =
     getSelectedLeafIds(
@@ -319,7 +284,7 @@ export const normalizeAsignarAccesosUsuarioForm = (
     );
   const selectedAssignmentIds =
     new Set(
-      resolveSelectedAssignmentIds(
+      resolveSelectedAccessAssignmentIds(
         selectedLeafIds,
         treeItems
       )
@@ -349,15 +314,15 @@ export const normalizeAsignarAccesosUsuarioForm = (
         ),
         permissions:
           item.isPermissionTarget
-            ? sanitizePerfilOpcionPermissions(
+            ? sanitizeAccessPermissions(
                 item,
-                getPermissions(
+                getAccessPermissions(
                   form,
                   item.idModulo
                 )
               )
             : {
-                ...AUTOMATIC_PARENT_PERMISSIONS,
+                ...AUTOMATIC_PARENT_ACCESS_PERMISSIONS,
               },
       })),
   };
@@ -366,7 +331,7 @@ export const normalizeAsignarAccesosUsuarioForm = (
 export const areAccesosUsuarioFormsEqual = (
   left: AsignarAccesosUsuarioFormData,
   right: AsignarAccesosUsuarioFormData,
-  treeItems: readonly OpcionTreeItem[]
+  treeItems: readonly AccessTreeItem[]
 ): boolean =>
   JSON.stringify(
     normalizeAsignarAccesosUsuarioForm(

@@ -4,17 +4,17 @@ import {
 
 import type {
   RegistrarModuloFormData,
-} from '../modules/mantener-modulos/types/registrarModulo.types';
+} from '../domain/modulos/moduloForm.types';
 
 import {
   buildModuloRoute,
   calculateNextOrder,
-} from '../modules/mantener-modulos/utils/registrarModulo.utils';
+} from '../domain/modulos/moduloForm.utils';
 
 import {
   POWER_BI_DEFAULT_ICON,
   POWER_BI_PARENT_OPTION_ID,
-} from '../modules/mantener-modulos/utils/powerBiModulo.utils';
+} from '../domain/modulos/powerBiModulo.utils';
 
 import type {
   CreateOpcionRequestApi,

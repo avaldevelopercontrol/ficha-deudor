@@ -2,7 +2,7 @@ import type {
   AdvisorPerformanceItem,
   CampaignPerformanceItem,
   SupervisorPerformanceItem,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 
 export const PORTFOLIO_DETAIL_SORT_OPTIONS = {
   advisors: [

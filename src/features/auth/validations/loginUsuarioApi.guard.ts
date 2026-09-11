@@ -29,6 +29,7 @@ export const isLoginUsuarioApi = (
     isOptionalText(value.cUsr_Email) &&
     isOptionalText(value.cUsr_EmailPersonal) &&
     isOptionalText(value.cUsr_EmailProfile) &&
+    isOptionalText(value.per_Nombre) &&
     isOptionalSafeInteger(value.nid_perfil) &&
     isOptionalSafeInteger(value.nId_PerfilGest)
   );

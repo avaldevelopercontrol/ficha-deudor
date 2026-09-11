@@ -5,13 +5,15 @@ import {
 } from 'react';
 
 import type {
-  PortfolioControlCenterFilterOptions,
   PortfolioDetailTab,
   PortfolioOperationalContext,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
+import type {
+  PortfolioControlCenterFilterOptions,
+} from '../domain/portfolioFilters.types';
 import {
   resolvePortfolioPerformanceSelection,
-} from '../utils/portfolioPerformanceController.utils';
+} from '../application/portfolioPerformanceSelection.application';
 import {
   usePortfolioAdvisorPerformance,
   usePortfolioSupervisorPerformance,

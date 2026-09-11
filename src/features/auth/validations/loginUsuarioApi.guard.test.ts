@@ -71,6 +71,13 @@ export const suite = defineSuite('loginUsuarioApi.guard', [
       }),
       false
     );
+    assert.equal(
+      isLoginUsuarioApi({
+        ...createLoginUsuarioApi(),
+        per_Nombre: 9,
+      }),
+      false
+    );
   }),
   test('rechaza valores nulos arreglos y objetos incompletos', () => {
     assert.equal(isLoginUsuarioApi(null), false);
