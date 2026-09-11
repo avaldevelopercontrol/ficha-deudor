@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 
 import type {
   PortfolioSortDirection,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioPromises.types';
 
 interface UsePortfolioPromiseDetailTableStateParams<
   TFilter extends string,
@@ -10,9 +10,15 @@ interface UsePortfolioPromiseDetailTableStateParams<
 > {
   defaultFilter: TFilter;
   defaultSortKey: TSortKey;
+  sortKeys: readonly TSortKey[];
   defaultSortDirection?: PortfolioSortDirection;
   defaultPageSize?: number;
 }
+
+export const isPortfolioPromiseSortKey = <TSortKey extends string>(
+  key: string,
+  sortKeys: readonly TSortKey[]
+): key is TSortKey => sortKeys.some((sortKey) => sortKey === key);
 
 export function usePortfolioPromiseDetailTableState<
   TFilter extends string,
@@ -20,6 +26,7 @@ export function usePortfolioPromiseDetailTableState<
 >({
   defaultFilter,
   defaultSortKey,
+  sortKeys,
   defaultSortDirection = 'desc',
   defaultPageSize = 5,
 }: UsePortfolioPromiseDetailTableStateParams<TFilter, TSortKey>) {
@@ -39,10 +46,14 @@ export function usePortfolioPromiseDetailTableState<
     key: string,
     direction: PortfolioSortDirection
   ) => {
-    setSortKey(key as TSortKey);
+    if (!isPortfolioPromiseSortKey(key, sortKeys)) {
+      return;
+    }
+
+    setSortKey(key);
     setSortDirection(direction);
     setPage(1);
-  }, []);
+  }, [sortKeys]);
 
   const handlePageSizeChange = useCallback((nextPageSize: number) => {
     setPageSize(nextPageSize);

@@ -5,38 +5,34 @@ import {
 } from 'react';
 
 import {
-  APPLICATION_OPTION_IDS,
-  type AccessControlStatus,
-  type AuthorizedOption,
-} from '@features/access-control';
-
-import {
-  getAnalyticsPowerBiOptionAccess,
-} from '../../../access/api/analyticsAccess.api';
-
+  loadReporteriaReportAccess,
+  type ReporteriaReportAccess,
+} from '../application/reporteriaCatalog.application';
+import type {
+  ReporteriaAccessStatus,
+  ReporteriaCatalog,
+} from '../domain/reporteria.types';
 import {
   buildPowerBiReportAccessKey,
   filterPowerBiReportsBySelection,
-  findAuthorizedOptionById,
-  getAuthorizedPowerBiReports,
+  getAvailablePowerBiReports,
   retainAvailablePowerBiReportIds,
 } from '../utils/reporteria.utils';
 
 interface AnalyticsReportAccessState {
   key: string;
-  allowedReportIds: readonly number[];
-  clientScopedReportIds: readonly number[];
+  access: ReporteriaReportAccess;
   hasErrors: boolean;
 }
 
 interface UsePowerBiReportCatalogParams {
-  status: AccessControlStatus;
-  menuTree: readonly AuthorizedOption[];
+  status: ReporteriaAccessStatus;
+  catalog: ReporteriaCatalog;
 }
 
 export const usePowerBiReportCatalog = ({
   status,
-  menuTree,
+  catalog,
 }: UsePowerBiReportCatalogParams) => {
   const [selectedReportIds, setSelectedReportIds] =
     useState<number[]>([]);
@@ -44,29 +40,9 @@ export const usePowerBiReportCatalog = ({
   const [analyticsAccess, setAnalyticsAccess] =
     useState<AnalyticsReportAccessState | null>(null);
 
-  const reporteriaOption = useMemo(
-    () =>
-      findAuthorizedOptionById(
-        menuTree,
-        APPLICATION_OPTION_IDS.REPORTERIA
-      ),
-    [menuTree]
-  );
-
-  const parentOption = useMemo(
-    () =>
-      reporteriaOption
-        ? findAuthorizedOptionById(
-            menuTree,
-            reporteriaOption.parentId
-          )
-        : null,
-    [menuTree, reporteriaOption]
-  );
-
   const reports = useMemo(
-    () => getAuthorizedPowerBiReports(menuTree),
-    [menuTree]
+    () => getAvailablePowerBiReports(catalog.reports),
+    [catalog.reports]
   );
 
   const reportAccessKey = useMemo(
@@ -85,8 +61,8 @@ export const usePowerBiReportCatalog = ({
     let active = true;
     const controller = new AbortController();
 
-    void getAnalyticsPowerBiOptionAccess(
-      reports.map((report) => report.id),
+    void loadReporteriaReportAccess(
+      reports,
       controller.signal
     )
       .then((access) => {
@@ -96,19 +72,7 @@ export const usePowerBiReportCatalog = ({
 
         setAnalyticsAccess({
           key: reportAccessKey,
-          allowedReportIds: access.flatMap(
-            (option) =>
-              option.allowed
-                ? [option.optionId]
-                : []
-          ),
-          clientScopedReportIds: access.flatMap(
-            (option) =>
-              option.allowed &&
-              option.requiresClientSelection
-                ? [option.optionId]
-                : []
-          ),
+          access,
           hasErrors: false,
         });
       })
@@ -122,8 +86,10 @@ export const usePowerBiReportCatalog = ({
 
         setAnalyticsAccess({
           key: reportAccessKey,
-          allowedReportIds: [],
-          clientScopedReportIds: [],
+          access: {
+            allowedReportIds: [],
+            clientScopedReportIds: [],
+          },
           hasErrors: true,
         });
       });
@@ -150,7 +116,7 @@ export const usePowerBiReportCatalog = ({
     }
 
     const allowedIds = new Set(
-      currentAnalyticsAccess.allowedReportIds
+      currentAnalyticsAccess.access.allowedReportIds
     );
 
     return reports.filter((report) =>
@@ -161,8 +127,8 @@ export const usePowerBiReportCatalog = ({
   const clientScopedReportIds = useMemo(
     () =>
       new Set(
-        currentAnalyticsAccess
-          ?.clientScopedReportIds ?? []
+        currentAnalyticsAccess?.access
+          .clientScopedReportIds ?? []
       ),
     [currentAnalyticsAccess]
   );
@@ -186,10 +152,10 @@ export const usePowerBiReportCatalog = ({
   );
 
   return {
-    reporteriaOption,
-    parentOption,
+    reporteriaOption: catalog.section,
+    parentName: catalog.parentName,
     reporteriaName:
-      reporteriaOption?.name || 'Reportería',
+      catalog.section?.name || 'Reportería',
     reports,
     analyticsReports,
     clientScopedReportIds,

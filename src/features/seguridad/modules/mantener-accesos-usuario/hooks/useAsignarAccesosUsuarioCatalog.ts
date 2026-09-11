@@ -1,29 +1,11 @@
 import {
-  fetchGrupos,
-} from '@features/gestion-usuarios/api/usuarioCatalogosApi';
-import {
-  fetchUsuariosList,
-} from '@features/gestion-usuarios/api/usuariosApi';
-
-import {
   useApiResource,
 } from '@shared/hooks/useApiResource';
 
 import {
-  fetchOpciones,
-} from '../../../api/opcionesApi';
-
-export interface AsignarAccesosUsuarioCatalog {
-  usuarios: Awaited<
-    ReturnType<typeof fetchUsuariosList>
-  >;
-  grupos: Awaited<
-    ReturnType<typeof fetchGrupos>
-  >;
-  opciones: Awaited<
-    ReturnType<typeof fetchOpciones>
-  >;
-}
+  loadAsignarAccesosUsuarioCatalog,
+  type AsignarAccesosUsuarioCatalog,
+} from '../../../application/accesos/accessCatalog.application';
 
 export interface AsignarAccesosUsuarioCatalogResource {
   catalog: AsignarAccesosUsuarioCatalog | null;
@@ -31,23 +13,6 @@ export interface AsignarAccesosUsuarioCatalogResource {
   error: string | null;
   refetch: () => void;
 }
-
-const loadAsignarAccesosUsuarioCatalog = async (
-  signal: AbortSignal
-): Promise<AsignarAccesosUsuarioCatalog> => {
-  const [usuarios, grupos, opciones] =
-    await Promise.all([
-      fetchUsuariosList(signal),
-      fetchGrupos(signal),
-      fetchOpciones(signal),
-    ]);
-
-  return {
-    usuarios,
-    grupos,
-    opciones,
-  };
-};
 
 /**
  * Precarga los catálogos apenas se monta el listado del módulo.

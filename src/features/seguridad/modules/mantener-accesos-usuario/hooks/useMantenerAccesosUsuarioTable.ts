@@ -26,11 +26,10 @@ import {
 } from '@shared/hooks/useOperationFeedback';
 
 import {
-  addUsuarioGrupoOpciones,
-  fetchUsuarioGrupoOpcionesByUsuarioGrupo,
-  fetchUsuarioGrupoOpcionesListado,
-  syncUsuarioGrupoOpciones,
-} from '../../../api/usuarioGrupoOpcionesApi';
+  actualizarAccesosUsuario as ejecutarActualizacionAccesosUsuario,
+  loadAccesosUsuarioListado,
+  registrarAccesosUsuario as ejecutarRegistroAccesosUsuario,
+} from '../../../application/accesos/accessMaintenance.application';
 
 import type {
   UsuarioGrupoOpcionDetalle,
@@ -40,10 +39,6 @@ import type {
 import type {
   RegistrarUsuarioGrupoOpcionesData,
 } from '../types/asignarAccesosUsuario.types';
-
-import {
-  MANTENER_ACCESOS_USUARIO_RULE_MESSAGES,
-} from '../constants/mantenerAccesosUsuario.constants';
 
 import {
   assertMantenerAccesosUsuarioPermission,
@@ -78,7 +73,7 @@ export const useMantenerAccesosUsuarioTable = () => {
     error,
     refetch,
   } = useApiResource<UsuarioGrupoOpcionListado[]>(
-    fetchUsuarioGrupoOpcionesListado,
+    loadAccesosUsuarioListado,
     []
   );
 
@@ -157,21 +152,7 @@ export const useMantenerAccesosUsuarioTable = () => {
         }
 
         try {
-          const existingAssignments =
-            await fetchUsuarioGrupoOpcionesByUsuarioGrupo(
-              form.usuarioId,
-              form.grupoId
-            );
-
-          if (existingAssignments.length > 0) {
-            throw new Error(
-              MANTENER_ACCESOS_USUARIO_RULE_MESSAGES
-                .alreadyAssignedUserGroup
-            );
-          }
-
-          await addUsuarioGrupoOpciones(
-            existingAssignments,
+          await ejecutarRegistroAccesosUsuario(
             form,
             authenticatedUserId
           );
@@ -232,7 +213,7 @@ export const useMantenerAccesosUsuarioTable = () => {
         }
 
         try {
-          await syncUsuarioGrupoOpciones(
+          await ejecutarActualizacionAccesosUsuario(
             asignacionesActuales,
             form,
             authenticatedUserId

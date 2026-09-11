@@ -2,11 +2,9 @@ import {
   createObjectGuard,
   isBoolean,
   isInteger,
-  isOptionalString,
   isString,
 } from '../../../shared/utils/runtimeTypeGuards.utils';
 import type {
-  BotonApi,
   CabeceraPantallaApi,
   DocumentoApi,
 } from '../../../shared/types';
@@ -17,13 +15,6 @@ export const isCabeceraPantallaApi =
     tipoDato: isString,
     orden: isInteger,
   });
-
-export const isBotonApi = createObjectGuard<BotonApi>({
-  id: isString,
-  label: isString,
-  action: isOptionalString,
-  popupUrl: isOptionalString,
-});
 
 export const isDocumentoApi = createObjectGuard<DocumentoApi>({
   nId_DocxCobrar: isInteger,

@@ -4,7 +4,7 @@ import Table from '@shared/components/table/Table';
 import type { Column } from '@shared/types';
 import type {
   CampaignPerformanceItem,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   formatPortfolioCurrency,
   formatPortfolioInteger,

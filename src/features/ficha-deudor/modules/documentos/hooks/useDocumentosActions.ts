@@ -1,15 +1,9 @@
 import { useCallback, useState } from 'react';
 
-import type {
-  BotonApi,
-  DeudorInfo,
-} from '../../../shared/types';
-import type {
-  FichaDeudorDocumentosParams,
-} from '../../../shared/types/fichaDeudor.types';
-import {
-  openFichaDeudorPopup,
-} from '@app/popups';
+import type { DeudorInfo } from '../../../shared/types';
+import type { FichaDeudorDocumentosParams } from '../../../shared/types/fichaDeudor.types';
+import { executeGestionBoton } from '../registry/gestionBotones.registry';
+import type { GestionBoton } from '../types/gestionBoton.types';
 
 interface UseDocumentosActionsParams {
   data: DeudorInfo;
@@ -33,79 +27,17 @@ export const useDocumentosActions = ({
   }, []);
 
   const handleBotonClick = useCallback(
-    (boton: BotonApi) => {
-      const {
-        id_cliente: idCliente,
-        id_cartera: idCartera,
-        id_deudor: idDeudor,
-        id_usuario: idUsuario,
-      } = params;
+    (boton: GestionBoton) => {
+      const isImplemented = executeGestionBoton(
+        boton.nombre,
+        { data, params }
+      );
 
-      const nombre = data.nombreRazonSocial;
-      const documento = data.dniRuc;
-
-      switch (boton.action) {
-        case 'popup_estado_cuenta':
-        openFichaDeudorPopup('estado-cuenta', {
-          idCliente,
-          idCartera,
-          idDeudor,
-          nombre,
-          documento,
-        });
-        return;
-        case 'popup_pago':
-          openFichaDeudorPopup('pago-deudor', {
-            idCliente,
-            idCartera,
-            idDeudor,
-            nombre,
-            documento,
-          });
-          return;
-
-        case 'popup_email':
-          openFichaDeudorPopup('email-deudor', {
-            idCliente,
-            idDeudor,
-            idUsuario,
-            nombre,
-            documento,
-          });
-          return;
-
-        case 'popup_agenda':
-          openFichaDeudorPopup('agenda-deudor', {
-            idCliente,
-            idCartera,
-            idDeudor,
-            idUsuario,
-            nombre,
-            documento,
-          });
-          return;
-
-        case 'popup_inf_deudor':
-          openFichaDeudorPopup('inf-deudor', {
-            idCliente,
-            idCartera,
-            idDeudor,
-            idUsuario,
-            nombre,
-            documento,
-          });
-          return;
-
-        default:
-          openModal(boton.label);
+      if (!isImplemented) {
+        openModal(boton.label);
       }
     },
-    [
-      data.dniRuc,
-      data.nombreRazonSocial,
-      openModal,
-      params,
-    ]
+    [data, openModal, params]
   );
 
   return {

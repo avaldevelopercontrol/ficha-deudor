@@ -43,7 +43,7 @@ import {
   validateRegistrarGrupoForm,
 } from '../validations/registrarGrupo.validation';
 
-import GrupoFormErrorSummary from './GrupoFormErrorSummary';
+import FormErrorSummary from '../../../components/FormErrorSummary';
 
 import RegistrarGrupoFormFields from './RegistrarGrupoFormFields';
 
@@ -284,7 +284,7 @@ export const ModalRegistrarGrupo = ({
                 }
               />
 
-              <GrupoFormErrorSummary
+              <FormErrorSummary
                 errors={errors}
                 title={
                   MODAL_REGISTRAR_GRUPO_TEXTS

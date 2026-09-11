@@ -34,9 +34,23 @@ export const OptionAccessRoute: React.FC<
     refresh,
   } = useAccessControl();
 
+  const canConsult =
+    hasPermission(
+      optionId,
+      'consultar'
+    );
+
+  if (status === 'idle') {
+    return (
+      <AccessControlFeedback
+        message="Cargando accesos..."
+      />
+    );
+  }
+
   if (
-    status === 'idle' ||
-    status === 'loading'
+    status === 'loading' &&
+    !canConsult
   ) {
     return (
       <AccessControlFeedback
@@ -60,12 +74,7 @@ export const OptionAccessRoute: React.FC<
     );
   }
 
-  if (
-    !hasPermission(
-      optionId,
-      'consultar'
-    )
-  ) {
+  if (!canConsult) {
     return (
       <Navigate
         to={

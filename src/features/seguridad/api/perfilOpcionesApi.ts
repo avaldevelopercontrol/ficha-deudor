@@ -1,11 +1,9 @@
 import {
-  ApiError,
   apiClient,
 } from '@shared/api/apiClient';
 
 import {
   assertApiBusinessSuccess,
-  getApiErrorMessage,
   normalizeApiCollectionResponse,
   unwrapApiObjectResponse,
 } from '@shared/api/apiResponse.utils';
@@ -31,7 +29,7 @@ import {
 import type {
   PerfilAccesoOption,
   RegistrarPerfilOpcionesData,
-} from '../modules/mantener-accesos-perfil/types/asignarAccesosPerfil.types';
+} from '../domain/accesos/perfilAccess.types';
 
 import type {
   CreatePerfilOpcionApiResponse,
@@ -50,6 +48,10 @@ import type {
   UpdatePerfilOpcionResponseApi,
 } from '../types/perfilOpcion.types';
 
+import {
+  resolveSeguridadApiError,
+} from './seguridadApiError';
+
 const PERFIL_OPTIONS_COUNT_ERROR =
   'No se pudo obtener la lista de accesos por perfil.';
 
@@ -64,46 +66,6 @@ const CREATE_PERFIL_OPCION_ERROR =
 
 const UPDATE_PERFIL_OPCION_ERROR =
   'No se pudieron actualizar los accesos del perfil.';
-
-const isRecord = (
-  value: unknown
-): value is Record<string, unknown> =>
-  typeof value === 'object' &&
-  value !== null &&
-  !Array.isArray(value);
-
-const resolvePerfilOpcionError = (
-  error: unknown,
-  fallbackMessage: string
-): Error => {
-  if (
-    error instanceof Error &&
-    error.name === 'AbortError'
-  ) {
-    return error;
-  }
-
-  if (
-    error instanceof ApiError &&
-    isRecord(error.data)
-  ) {
-    return new Error(
-      getApiErrorMessage(
-        error.data,
-        fallbackMessage
-      )
-    );
-  }
-
-  if (
-    error instanceof Error &&
-    error.message.trim()
-  ) {
-    return error;
-  }
-
-  return new Error(fallbackMessage);
-};
 
 const assertCreatedAssignment = (
   response: CreatePerfilOpcionResponseApi,
@@ -183,7 +145,7 @@ export const fetchPerfilOptionsCount = async (
       response
     );
   } catch (error) {
-    throw resolvePerfilOpcionError(
+    throw resolveSeguridadApiError(
       error,
       PERFIL_OPTIONS_COUNT_ERROR
     );
@@ -219,7 +181,7 @@ export const fetchPerfilesAcceso = async (
       response
     );
   } catch (error) {
-    throw resolvePerfilOpcionError(
+    throw resolveSeguridadApiError(
       error,
       PERFILES_ACCESO_ERROR
     );
@@ -268,7 +230,7 @@ export const fetchPerfilOpcionesByPerfil = async (
       response
     );
   } catch (error) {
-    throw resolvePerfilOpcionError(
+    throw resolveSeguridadApiError(
       error,
       PERFIL_OPCIONES_DETAIL_ERROR
     );
@@ -362,7 +324,7 @@ export const createPerfilOpciones = async (
       completed += 1;
     } catch (error) {
       const resolvedError =
-        resolvePerfilOpcionError(
+        resolveSeguridadApiError(
           error,
           CREATE_PERFIL_OPCION_ERROR
         );
@@ -444,7 +406,7 @@ export const updatePerfilOpciones = async (
       completed += 1;
     } catch (error) {
       const resolvedError =
-        resolvePerfilOpcionError(
+        resolveSeguridadApiError(
           error,
           UPDATE_PERFIL_OPCION_ERROR
         );

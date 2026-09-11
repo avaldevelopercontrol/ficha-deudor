@@ -4,7 +4,7 @@ import { SisgesIcon } from '@shared/icons/sisges';
 
 import type {
   PortfolioControlCenterFreshness,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   formatPortfolioUpdatedAt,
 } from '../utils/portfolioControlCenter.formatters';

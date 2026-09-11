@@ -8,7 +8,7 @@ import {
 import type {
   PerfilOpcionAssignment,
   RegistrarPerfilOpcionesData,
-} from '../modules/mantener-accesos-perfil/types/asignarAccesosPerfil.types';
+} from '../domain/accesos/perfilAccess.types';
 
 import type {
   PerfilOpcionDetalle,

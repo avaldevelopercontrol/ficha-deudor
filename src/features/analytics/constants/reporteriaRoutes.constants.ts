@@ -1,6 +1,6 @@
 import type {
   AnalyticsReportClientOption,
-} from '../access/types/analyticsAccess.types';
+} from '../access/domain/analyticsAccess.types';
 
 export const REPORTERIA_ROUTES = {
   ROOT: '/analytics/reporteria',

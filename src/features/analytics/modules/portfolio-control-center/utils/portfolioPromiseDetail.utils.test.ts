@@ -4,9 +4,10 @@ import { defineSuite, test } from '../../../../../test/testHarness';
 
 import type {
   PortfolioPagination,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioPromises.types';
 import {
   formatPortfolioPromiseCurrencyFilterOption,
+  formatPortfolioPromiseCutoffLabel,
   formatPortfolioPromiseDate,
   resolvePortfolioPromisePagination,
 } from './portfolioPromiseDetail.utils';
@@ -64,6 +65,33 @@ export const suite = defineSuite(
       assert.equal(
         formatPortfolioPromiseDate(null, 'Sin pago'),
         'Sin pago'
+      );
+    }),
+    test('identifica como Hoy un corte que coincide con la fecha actual de Perú', () => {
+      assert.equal(
+        formatPortfolioPromiseCutoffLabel(
+          '2026-09-11',
+          new Date('2026-09-12T04:30:00.000Z')
+        ),
+        'Hoy 11/09/2026'
+      );
+    }),
+    test('identifica como dato histórico un corte anterior a la fecha actual de Perú', () => {
+      assert.equal(
+        formatPortfolioPromiseCutoffLabel(
+          '2026-09-10',
+          new Date('2026-09-11T21:13:00.000Z')
+        ),
+        'Datos al 10/09/2026'
+      );
+    }),
+    test('omite el corte cuando Analytics no entrega asOfDate', () => {
+      assert.equal(
+        formatPortfolioPromiseCutoffLabel(
+          null,
+          new Date('2026-09-11T21:13:00.000Z')
+        ),
+        null
       );
     }),
     test('formatea opciones monetarias numéricas usando el formatter común', () => {

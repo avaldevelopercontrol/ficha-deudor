@@ -39,6 +39,8 @@ const DocumentosTable: React.FC<Props> = ({
   return (
     <DocumentosTableContent
       viewModel={viewModel}
+      params={params}
+      data={data}
       onDocumentoClick={onDocumentoClick}
     />
   );

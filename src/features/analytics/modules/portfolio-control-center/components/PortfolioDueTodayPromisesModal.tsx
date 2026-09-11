@@ -1,20 +1,17 @@
 import type React from 'react';
 import { useMemo } from 'react';
 
-import Modal from '@shared/components/modals/Modal';
-import Table from '@shared/components/table/Table';
-import TableResourceState from '@shared/components/table/TableResourceState';
 import type { Column } from '@shared/types';
-import { SisgesIcon } from '@shared/icons/sisges';
 
+import type {
+  PortfolioOperationalContext,
+} from '../domain/portfolioOverview.types';
 import type {
   PortfolioDueTodayPromiseItem,
   PortfolioDueTodayPromisesSortKey,
   PortfolioDueTodayStatusFilter,
-  PortfolioOperationalContext,
   PortfolioSortDirection,
-} from '../../../types/portfolioControlCenter.types';
-import { PortfolioPromiseDetailPagination } from './PortfolioPromiseDetailPagination';
+} from '../domain/portfolioPromises.types';
 import { usePortfolioDueTodayPromises } from '../hooks/usePortfolioDueTodayPromises';
 import { usePortfolioPromiseDetailTableState } from '../hooks/usePortfolioPromiseDetailTableState';
 import {
@@ -23,8 +20,13 @@ import {
 } from '../utils/portfolioControlCenter.formatters';
 import {
   formatPortfolioPromiseCurrencyFilterOption,
+  formatPortfolioPromiseCutoffLabel,
   formatPortfolioPromiseDate,
 } from '../utils/portfolioPromiseDetail.utils';
+import { PortfolioPromiseDetailModalFrame } from './PortfolioPromiseDetailModalFrame';
+import { PortfolioPromiseDistribution } from './PortfolioPromiseDistribution';
+import { PortfolioPromiseSummary } from './PortfolioPromiseSummary';
+import { PortfolioPromiseTableSection } from './PortfolioPromiseTableSection';
 
 interface PortfolioDueTodayPromisesModalProps {
   isOpen: boolean;
@@ -40,6 +42,16 @@ const DEFAULT_STATUS: PortfolioDueTodayStatusFilter = 'all';
 const DEFAULT_SORT_KEY: PortfolioDueTodayPromisesSortKey =
   'outstandingAmount';
 const DEFAULT_SORT_DIRECTION: PortfolioSortDirection = 'desc';
+const DUE_TODAY_SORT_KEYS: readonly PortfolioDueTodayPromisesSortKey[] = [
+  'debtorId',
+  'promiseAmount',
+  'paidAmount',
+  'outstandingAmount',
+  'statusLabel',
+  'lastPaymentDate',
+  'advisorName',
+  'supervisorName',
+];
 
 const STATUS_OPTIONS: ReadonlyArray<{
   value: PortfolioDueTodayStatusFilter;
@@ -78,6 +90,7 @@ export const PortfolioDueTodayPromisesModal: React.FC<
   >({
     defaultFilter: DEFAULT_STATUS,
     defaultSortKey: DEFAULT_SORT_KEY,
+    sortKeys: DUE_TODAY_SORT_KEYS,
     defaultSortDirection: DEFAULT_SORT_DIRECTION,
     defaultPageSize: DEFAULT_PAGE_SIZE,
   });
@@ -224,213 +237,96 @@ export const PortfolioDueTodayPromisesModal: React.FC<
   };
 
   return (
-    <Modal
+    <PortfolioPromiseDetailModalFrame
       isOpen={isOpen}
       title="Promesas con vencimiento hoy"
       onClose={handleClose}
-      size="3xl"
+      rootClassName="portfolio-due-today-modal"
+      introIcon="calendar"
+      eyebrow="Seguimiento del día"
+      heading="Compromisos que deben asegurarse durante el corte actual"
+      description="Revisa cuánto ya fue cubierto, qué saldo sigue pendiente y qué compromisos requieren contacto antes de cerrar el día."
+      isInitialLoading={isLoading && data === null}
+      error={error}
+      onRetry={() => {
+        void refetch();
+      }}
+      loadingMessage="Cargando promesas con vencimiento hoy..."
     >
-      <div className="portfolio-due-today-modal">
-        <section className="portfolio-due-today-modal__intro">
-          <span
-            className="portfolio-due-today-modal__intro-icon"
-            aria-hidden="true"
-          >
-            <SisgesIcon name="calendar" />
-          </span>
-          <div>
-            <span className="portfolio-due-today-modal__eyebrow">
-              Seguimiento del día
-            </span>
-            <h3>Compromisos que deben asegurarse durante el corte actual</h3>
-            <p>
-              Revisa cuánto ya fue cubierto, qué saldo sigue pendiente y qué
-              compromisos requieren contacto antes de cerrar el día.
-            </p>
-          </div>
-        </section>
+      {data && (
+        <>
+          <PortfolioPromiseSummary
+            className="portfolio-due-today-summary"
+            items={[
+              {
+                key: 'due-today-count',
+                icon: 'calendar',
+                label: 'Promesas hoy',
+                value: formatPortfolioInteger(data.summary.dueTodayCount),
+              },
+              {
+                key: 'due-today-amount',
+                icon: 'money',
+                label: 'Monto comprometido',
+                value: formatPortfolioCurrency(data.summary.dueTodayAmount),
+              },
+              {
+                key: 'paid-amount',
+                icon: 'payments',
+                label: 'Monto pagado',
+                value: formatPortfolioCurrency(data.summary.paidAmount),
+                className: 'portfolio-due-today-summary__positive',
+              },
+              {
+                key: 'outstanding-amount',
+                icon: 'target',
+                label: 'Saldo pendiente',
+                value: formatPortfolioCurrency(data.summary.outstandingAmount),
+                className: 'portfolio-due-today-summary__critical',
+              },
+            ]}
+          />
 
-        <TableResourceState
-          isLoading={isLoading && data === null}
-          error={error}
-          onRetry={() => {
-            void refetch();
-          }}
-          loadingMessage="Cargando promesas con vencimiento hoy..."
-        >
-          {data && (
-            <>
-              <div className="portfolio-due-today-summary">
-                <article>
-                  <span
-                    className="portfolio-due-today-summary__icon"
-                    aria-hidden="true"
-                  >
-                    <SisgesIcon name="calendar" />
-                  </span>
-                  <div>
-                    <span>Promesas hoy</span>
-                    <strong>
-                      {formatPortfolioInteger(data.summary.dueTodayCount)}
-                    </strong>
-                  </div>
-                </article>
-                <article>
-                  <span
-                    className="portfolio-due-today-summary__icon"
-                    aria-hidden="true"
-                  >
-                    <SisgesIcon name="money" />
-                  </span>
-                  <div>
-                    <span>Monto comprometido</span>
-                    <strong>
-                      {formatPortfolioCurrency(data.summary.dueTodayAmount)}
-                    </strong>
-                  </div>
-                </article>
-                <article className="portfolio-due-today-summary__positive">
-                  <span
-                    className="portfolio-due-today-summary__icon"
-                    aria-hidden="true"
-                  >
-                    <SisgesIcon name="payments" />
-                  </span>
-                  <div>
-                    <span>Monto pagado</span>
-                    <strong>
-                      {formatPortfolioCurrency(data.summary.paidAmount)}
-                    </strong>
-                  </div>
-                </article>
-                <article className="portfolio-due-today-summary__critical">
-                  <span
-                    className="portfolio-due-today-summary__icon"
-                    aria-hidden="true"
-                  >
-                    <SisgesIcon name="target" />
-                  </span>
-                  <div>
-                    <span>Saldo pendiente</span>
-                    <strong>
-                      {formatPortfolioCurrency(
-                        data.summary.outstandingAmount
-                      )}
-                    </strong>
-                  </div>
-                </article>
-              </div>
+          <PortfolioPromiseDistribution
+            className="portfolio-due-today-status-panel"
+            title="Estado de cumplimiento"
+            description="Distribución de los compromisos que vencen en el corte actual."
+            cutoff={formatPortfolioPromiseCutoffLabel(data.asOfDate)}
+            buckets={statusBuckets}
+            activeKey={status}
+            maxCount={maxStatusCount}
+            onToggle={(bucketKey) => {
+              handleStatusChange(status === bucketKey ? 'all' : bucketKey);
+            }}
+            getRowModifierClassName={(bucketKey) =>
+              `portfolio-due-today-status-panel__row--${bucketKey}`
+            }
+          />
 
-              <section className="portfolio-due-today-status-panel">
-                <div className="portfolio-due-today-status-panel__heading">
-                  <div>
-                    <span>Estado de cumplimiento</span>
-                    <small>
-                      Distribución de los compromisos que vencen en el corte
-                      actual.
-                    </small>
-                  </div>
-                  {data.asOfDate && (
-                    <span className="portfolio-due-today-status-panel__cutoff">
-                      Hoy {formatDate(data.asOfDate)}
-                    </span>
-                  )}
-                </div>
-
-                <div className="portfolio-due-today-status-panel__bars">
-                  {statusBuckets.map((bucket) => (
-                    <button
-                      key={bucket.key}
-                      type="button"
-                      className={`portfolio-due-today-status-panel__row portfolio-due-today-status-panel__row--${bucket.key}${
-                        status === bucket.key ? ' is-active' : ''
-                      }`}
-                      onClick={() => {
-                        handleStatusChange(
-                          status === bucket.key ? 'all' : bucket.key
-                        );
-                      }}
-                      aria-pressed={status === bucket.key}
-                    >
-                      <span className="portfolio-due-today-status-panel__label">
-                        {bucket.label}
-                      </span>
-                      <span className="portfolio-due-today-status-panel__track">
-                        <span
-                          className="portfolio-due-today-status-panel__fill"
-                          style={{
-                            width: `${(bucket.count / maxStatusCount) * 100}%`,
-                          }}
-                        />
-                      </span>
-                      <strong>
-                        {formatPortfolioInteger(bucket.count)}
-                      </strong>
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              <section className="portfolio-due-today-table-section">
-                <div className="portfolio-due-today-table-toolbar">
-                  <div className="portfolio-due-today-table-toolbar__filter">
-                    <label
-                      className="portfolio-due-today-table-toolbar__label"
-                      htmlFor="portfolio-due-today-status-filter"
-                    >
-                      Estado
-                    </label>
-                    <select
-                      id="portfolio-due-today-status-filter"
-                      className="portfolio-due-today-table-toolbar__select"
-                      value={status}
-                      onChange={(event) => {
-                        handleStatusChange(
-                          event.target.value as PortfolioDueTodayStatusFilter
-                        );
-                      }}
-                    >
-                      {STATUS_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <span
-                      className="portfolio-due-today-table-toolbar__filter-icon"
-                      aria-hidden="true"
-                    >
-                      <SisgesIcon name="filter" />
-                    </span>
-                  </div>
-                </div>
-
-                <div className="portfolio-due-today-table">
-                  <Table
-                    columns={columns}
-                    data={[...normalizedItems]}
-                    emptyMessage="No hay promesas con vencimiento hoy para los filtros seleccionados."
-                    sortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSortChange={handleSortChange}
-                    fitToPanel
-                  />
-                </div>
-
-                <PortfolioPromiseDetailPagination
-                  className="portfolio-due-today-table__pagination"
-                  pagination={data.pagination}
-                  requestedPage={page}
-                  requestedPageSize={pageSize}
-                  onPageChange={setPage}
-                  onPageSizeChange={handlePageSizeChange}
-                />
-              </section>
-            </>
-          )}
-        </TableResourceState>
-      </div>
-    </Modal>
+          <PortfolioPromiseTableSection
+            sectionClassName="portfolio-due-today-table-section"
+            toolbarClassName="portfolio-due-today-table-toolbar"
+            tableClassName="portfolio-due-today-table"
+            filterId="portfolio-due-today-status-filter"
+            filterLabel="Estado"
+            filterValue={status}
+            filterOptions={STATUS_OPTIONS}
+            onFilterChange={handleStatusChange}
+            columns={columns}
+            data={[...normalizedItems]}
+            emptyMessage="No hay promesas con vencimiento hoy para los filtros seleccionados."
+            sortKey={sortKey}
+            sortDirection={sortDirection}
+            onSortChange={handleSortChange}
+            pagination={data.pagination}
+            requestedPage={page}
+            requestedPageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        </>
+      )}
+    </PortfolioPromiseDetailModalFrame>
   );
 };
 

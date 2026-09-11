@@ -4,7 +4,7 @@ import Table from '@shared/components/table/Table';
 import type { Column } from '@shared/types';
 import type {
   SupervisorPerformanceItem,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   formatPortfolioCurrency,
   formatPortfolioInteger,

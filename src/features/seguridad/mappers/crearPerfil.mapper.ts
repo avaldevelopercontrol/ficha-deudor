@@ -3,15 +3,15 @@ import {
 } from '@shared/utils/peruDateTime.utils';
 
 import type {
-  RegistrarPerfilFormData,
-} from '../modules/mantener-perfil/types/registrarPerfil.types';
+  PerfilFormData,
+} from '../domain/perfiles/perfilForm.types';
 
 import type {
   CreatePerfilRequestApi,
 } from '../types/crearPerfil.types';
 
 export const buildCreatePerfilRequest = (
-  form: RegistrarPerfilFormData,
+  form: PerfilFormData,
   currentDate = new Date()
 ): CreatePerfilRequestApi => ({
   nid_perfil: 0,

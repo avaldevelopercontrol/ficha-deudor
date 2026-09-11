@@ -1,13 +1,13 @@
 import type {
-  RegistrarGrupoFormData,
-} from '../modules/mantener-grupo/types/registrarGrupo.types';
+  GrupoFormData,
+} from '../domain/grupos/grupoForm.types';
 
 import type {
   CreateGrupoRequestApi,
 } from '../types/crearGrupo.types';
 
 export const buildCreateGrupoRequest = (
-  form: RegistrarGrupoFormData
+  form: GrupoFormData
 ): CreateGrupoRequestApi => ({
   nId_Grupo: 0,
   cNombre_Grupo:

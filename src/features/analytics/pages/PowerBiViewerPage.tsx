@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   type ReactNode,
 } from 'react';
 
@@ -20,6 +21,10 @@ import {
 import {
   REPORTERIA_ROUTES,
 } from '../constants/reporteriaRoutes.constants';
+
+import {
+  adaptAccessControlToReporteriaCatalog,
+} from '../modules/reporteria/adapters/accessControlReporteria.adapter';
 
 import {
   usePowerBiViewerAccess,
@@ -64,6 +69,11 @@ export const PowerBiViewerPage = (): ReactNode => {
 
   const routeSearch = searchParams.toString();
 
+  const catalog = useMemo(
+    () => adaptAccessControlToReporteriaCatalog(menuTree),
+    [menuTree]
+  );
+
   const {
     reporteriaName,
     report,
@@ -78,7 +88,7 @@ export const PowerBiViewerPage = (): ReactNode => {
     optionIdParam,
     routeSearch,
     status,
-    menuTree,
+    catalog,
   });
 
   useEffect(() => {

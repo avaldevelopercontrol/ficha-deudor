@@ -1,6 +1,6 @@
 import type {
   PortfolioEvolutionPoint,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   calculatePortfolioRate,
 } from './portfolioControlCenter.formatters';

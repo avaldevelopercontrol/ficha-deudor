@@ -6,7 +6,7 @@ import {
 } from '@shared/icons/sisges';
 import type {
   PortfolioSummaryMetrics,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   formatPortfolioInteger,
   formatPortfolioPercentage,

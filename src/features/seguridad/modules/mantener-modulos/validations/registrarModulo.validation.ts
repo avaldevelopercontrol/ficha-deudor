@@ -30,12 +30,12 @@ import {
   isValidPowerBiUrl,
   POWER_BI_DEFAULT_ICON,
   POWER_BI_PARENT_OPTION_ID,
-} from '../utils/powerBiModulo.utils';
+} from '../../../domain/modulos/powerBiModulo.utils';
 
 import {
   normalizeModuloAvailability,
   validateModuloAvailabilityTransition,
-} from '../utils/moduloAvailability.utils';
+} from '../../../domain/modulos/moduloAvailability.utils';
 
 interface ModuloFormValidationOptions {
   modulosExistentes?:

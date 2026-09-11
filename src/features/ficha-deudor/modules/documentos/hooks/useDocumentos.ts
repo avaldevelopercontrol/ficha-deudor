@@ -2,7 +2,6 @@ import { useCallback } from 'react';
 import type {
   ColumnApi,
   DocumentoApi,
-  BotonApi,
 } from '../../../shared/types';
 import type { FichaDeudorDocumentosParams } from '../../../shared/types/fichaDeudor.types';
 import { useDocumentosData } from './useDocumentosData';
@@ -20,7 +19,6 @@ interface UseDocumentosReturn {
   allData: DocumentoApi[];
   filteredData: DocumentoApi[];
   paginatedData: DocumentoApi[];
-  botones: BotonApi[];
   isLoading: boolean;
   error: string | null;
   pageNumber: number;
@@ -48,7 +46,6 @@ export function useDocumentos(
 
   const {
     columns,
-    botones,
     isLoading: metaLoading,
     error: metaError,
     refetch: refetchMetadata,
@@ -89,7 +86,6 @@ export function useDocumentos(
 
   return {
     columns,
-    botones,
     isLoading,
     error,
     refetch,

@@ -29,8 +29,16 @@ export const suite = defineSuite('documentosParams.utils', [
   }),
   test('mantiene los nombres contractuales de botones y cabecera', () => {
     assert.deepEqual(
-      toObject(buildDocumentosBotonesParams('95')),
-      { id_cliente: '95' }
+      toObject(
+        buildDocumentosBotonesParams({
+          idCliente: '95',
+          idContrato: '801',
+        })
+      ),
+      {
+        nId_Cliente: '95',
+        nId_Contrato: '801',
+      }
     );
 
     assert.deepEqual(

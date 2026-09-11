@@ -14,20 +14,12 @@ import {
 } from '@shared/utils/asyncMutation.utils';
 
 import {
-  buildAccesosPerfilTree,
-} from '../../mantener-accesos-perfil/utils/accesosPerfilTree.utils';
+  useAccessAssignmentEditor,
+} from '../../../hooks/useAccessAssignmentEditor';
 
 import {
-  getPerfilOpcionBranchAllPermissionsState,
-  getPerfilOpcionBranchPermissionStates,
-  setAllPerfilOpcionBranchPermissions,
-  setPerfilOpcionBranchPermission,
-  setPerfilOpcionBranchSelected,
-} from '../../mantener-accesos-perfil/utils/asignarAccesosPerfil.utils';
-
-import type {
-  PerfilOpcionPermissionKey,
-} from '../../mantener-accesos-perfil/types/asignarAccesosPerfil.types';
+  resolveOperationErrorMessage,
+} from '../../../utils/operationError.utils';
 
 import {
   MODAL_ASIGNAR_ACCESOS_USUARIO_TEXTS,
@@ -67,19 +59,6 @@ interface UseAsignarAccesosUsuarioModalParams {
   ) => Promise<void> | void;
 }
 
-const resolveSubmitError = (
-  error: unknown
-): string => {
-  if (
-    error instanceof Error &&
-    error.message.trim()
-  ) {
-    return error.message.trim();
-  }
-
-  return 'No se pudieron registrar los accesos del usuario.';
-};
-
 export const useAsignarAccesosUsuarioModal = ({
   catalogResource,
   existingAccesses,
@@ -109,31 +88,24 @@ export const useAsignarAccesosUsuarioModal = ({
     refetch,
   } = catalogResource;
 
-  const treeState = useMemo(() => {
-    if (!catalog) {
-      return {
-        items: [],
-        error: null,
-      };
-    }
-
-    try {
-      return {
-        items: buildAccesosPerfilTree(
-          catalog.opciones
-        ),
-        error: null,
-      };
-    } catch (error) {
-      return {
-        items: [],
-        error:
-          error instanceof Error
-            ? error.message
-            : 'La jerarquía de opciones no es válida.',
-      };
-    }
-  }, [catalog]);
+  const {
+    treeItems,
+    treeError,
+    activeOption,
+    activePermissionStates,
+    activeSelectAllState,
+    clearFormErrors,
+    handleActivateOption,
+    handleToggleOption,
+    handlePermissionChange,
+    handleSelectAllPermissions,
+  } = useAccessAssignmentEditor({
+    form,
+    setForm,
+    opciones: catalog?.opciones,
+    setErrors,
+    setSubmitError,
+  });
 
   const activeUserOptions = useMemo(
     () =>
@@ -183,79 +155,6 @@ export const useAsignarAccesosUsuarioModal = ({
     [catalog?.grupos]
   );
 
-  const activeOption = useMemo(
-    () =>
-      treeState.items.find(
-        (item) =>
-          item.idModulo ===
-          form.activeOptionId
-      ) ?? null,
-    [
-      form.activeOptionId,
-      treeState.items,
-    ]
-  );
-
-  const activePermissionStates = useMemo(
-    () =>
-      form.activeOptionId === null
-        ? {
-            consultar:
-              'unchecked' as const,
-            insertar:
-              'unchecked' as const,
-            editar:
-              'unchecked' as const,
-            eliminar:
-              'unchecked' as const,
-            exportar:
-              'unchecked' as const,
-          }
-        : getPerfilOpcionBranchPermissionStates(
-            form,
-            treeState.items,
-            form.activeOptionId
-          ),
-    [form, treeState.items]
-  );
-
-  const activeSelectAllState = useMemo(
-    () =>
-      activeOption?.isPermissionTarget
-        ? getPerfilOpcionBranchAllPermissionsState(
-            activePermissionStates,
-            activeOption
-          )
-        : 'unchecked',
-    [
-      activeOption,
-      activePermissionStates,
-    ]
-  );
-
-  const clearFormErrors = useCallback(
-    (...fieldNames: string[]) => {
-      setErrors((previousErrors) => {
-        const nextErrors = {
-          ...previousErrors,
-        };
-
-        fieldNames.forEach(
-          (fieldName) => {
-            delete nextErrors[
-              fieldName
-            ];
-          }
-        );
-
-        return nextErrors;
-      });
-
-      setSubmitError(null);
-    },
-    []
-  );
-
   const handleUsuarioChange = useCallback(
     (usuarioId: number | '') => {
       setForm((previousForm) => ({
@@ -285,99 +184,6 @@ export const useAsignarAccesosUsuarioModal = ({
     [clearFormErrors]
   );
 
-  const handleActivateOption = useCallback(
-    (optionId: number) => {
-      setForm((previousForm) => ({
-        ...previousForm,
-        activeOptionId: optionId,
-      }));
-    },
-    []
-  );
-
-  const handleToggleOption = useCallback(
-    (
-      optionId: number,
-      selected: boolean
-    ) => {
-      setForm((previousForm) =>
-        setPerfilOpcionBranchSelected(
-          previousForm,
-          treeState.items,
-          optionId,
-          selected
-        )
-      );
-      clearFormErrors(
-        'selectedOptionIds',
-        'permissionsByOptionId'
-      );
-    },
-    [
-      clearFormErrors,
-      treeState.items,
-    ]
-  );
-
-  const handlePermissionChange = useCallback(
-    (
-      permission: PerfilOpcionPermissionKey,
-      checked: boolean
-    ) => {
-      if (form.activeOptionId === null) {
-        return;
-      }
-
-      setForm((previousForm) =>
-        setPerfilOpcionBranchPermission(
-          previousForm,
-          treeState.items,
-          form.activeOptionId as number,
-          permission,
-          checked
-        )
-      );
-      clearFormErrors(
-        'selectedOptionIds',
-        'permissionsByOptionId'
-      );
-    },
-    [
-      clearFormErrors,
-      form.activeOptionId,
-      treeState.items,
-    ]
-  );
-
-  const handleSelectAllPermissions =
-    useCallback(
-      (checked: boolean) => {
-        if (
-          form.activeOptionId === null
-        ) {
-          return;
-        }
-
-        setForm((previousForm) =>
-          setAllPerfilOpcionBranchPermissions(
-            previousForm,
-            treeState.items,
-            form.activeOptionId as number,
-            checked
-          )
-        );
-        clearFormErrors(
-          'selectedOptionIds',
-          'permissionsByOptionId'
-        );
-      },
-      [
-        clearFormErrors,
-        form.activeOptionId,
-        treeState.items,
-      ]
-    );
-
   const resetAndClose = useCallback(() => {
     if (
       mutationControllerRef.current.isPending()
@@ -403,7 +209,7 @@ export const useAsignarAccesosUsuarioModal = ({
     const validationErrors =
       validateAsignarAccesosUsuarioForm(
         form,
-        treeState.items
+        treeItems
       );
 
     if (
@@ -452,7 +258,7 @@ export const useAsignarAccesosUsuarioModal = ({
           await onRegistrar(
             normalizeAsignarAccesosUsuarioForm(
               form,
-              treeState.items
+              treeItems
             )
           );
         }
@@ -471,8 +277,9 @@ export const useAsignarAccesosUsuarioModal = ({
 
     if (result.status === 'error') {
       setSubmitError(
-        resolveSubmitError(
-          result.error
+        resolveOperationErrorMessage(
+          result.error,
+          'No se pudieron registrar los accesos del usuario.'
         )
       );
     }
@@ -482,13 +289,13 @@ export const useAsignarAccesosUsuarioModal = ({
     form,
     onClose,
     onRegistrar,
-    treeState.items,
+    treeItems,
   ]);
 
   const emptyCatalogMessage =
     !isLoading &&
     !resourceError &&
-    !treeState.error &&
+    !treeError &&
     catalog
       ? activeUserOptions.length === 0
         ? MODAL_ASIGNAR_ACCESOS_USUARIO_TEXTS
@@ -496,7 +303,7 @@ export const useAsignarAccesosUsuarioModal = ({
         : groupOptions.length === 0
           ? MODAL_ASIGNAR_ACCESOS_USUARIO_TEXTS
               .emptyGroups
-          : treeState.items.length === 0
+          : treeItems.length === 0
             ? MODAL_ASIGNAR_ACCESOS_USUARIO_TEXTS
                 .emptyOptions
             : null
@@ -504,7 +311,7 @@ export const useAsignarAccesosUsuarioModal = ({
 
   const catalogError =
     resourceError ??
-    treeState.error ??
+    treeError ??
     emptyCatalogMessage;
 
   const isReady = Boolean(
@@ -533,7 +340,7 @@ export const useAsignarAccesosUsuarioModal = ({
     groupOptions,
     hasSelectedGroup,
     hasAvailableUsersForSelectedGroup,
-    treeItems: treeState.items,
+    treeItems,
     activeOption,
     activePermissionStates,
     activeSelectAllState,

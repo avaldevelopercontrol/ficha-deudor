@@ -1,11 +1,9 @@
-import { env } from '@app/config/env';
 import { apiClient } from '@shared/api/apiClient';
 import { fetchAllPagesInParallel } from '@shared/utils/pagedCollection.utils';
 
 import type {
   DocumentoApi,
   ColumnApi,
-  BotonApi,
 } from '../../../shared/types';
 
 import {
@@ -14,21 +12,17 @@ import {
   DOCUMENTOS_FETCH_PAGE_SIZE,
 } from '../constants/documentos.constants';
 import { DOCUMENTOS_API_ENDPOINTS } from '../constants/documentosApi.constants';
-import { buildDocumentosBotones } from '../constants/documentosBotones.constants';
 import { mapCabecerasToColumns } from '../mappers/documentos.mapper';
 import {
-  ensureArrayResponse,
   unwrapApiArrayResponse,
   unwrapApiPaginatedArrayResponse,
   type ApiPaginatedData,
 } from '../../../shared/utils/apiResponse.utils';
 import {
-  isBotonApi,
   isCabeceraPantallaApi,
   isDocumentoApi,
 } from './documentosApi.validators';
 import {
-  buildDocumentosBotonesParams,
   buildDocumentosCabeceraParams,
   buildGestionDocumentosParams,
 } from '../utils/documentosParams.utils';
@@ -36,10 +30,6 @@ import {
 interface FetchDocumentosColumnasParams {
   idCliente: string;
   idContrato: string;
-}
-
-interface FetchDocumentosBotonesParams {
-  idCliente: string;
 }
 
 interface FetchDocumentosParams {
@@ -75,31 +65,6 @@ export async function fetchColumnas(
   );
 
   return mapCabecerasToColumns(cabeceras);
-}
-
-export async function fetchBotones(
-  { idCliente }: FetchDocumentosBotonesParams,
-  signal?: AbortSignal
-): Promise<BotonApi[]> {
-  const params = buildDocumentosBotonesParams(idCliente);
-
-  const result = await apiClient<unknown>(
-    `${DOCUMENTOS_API_ENDPOINTS.BOTONES}?${params.toString()}`,
-    {
-      mock: () =>
-        buildDocumentosBotones({
-          idCliente,
-        }),
-      useMock: env.useDocumentosMock,
-      signal,
-    }
-  );
-
-  return ensureArrayResponse(
-    result,
-    DOCUMENTOS_ERROR_MESSAGES.BUTTONS,
-    isBotonApi
-  );
 }
 
 const fetchGestionesPage = async (

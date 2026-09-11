@@ -113,4 +113,26 @@ export const suite = defineSuite('validateGestionDeudorSearch', [
     assert.equal(maximum.isValid, true);
     assert.equal(tooLong.isValid, false);
   }),
+  test('construye la búsqueda por número de documento con prefijo T', () => {
+    const result = validateGestionDeudorSearch({
+      idCliente: '10',
+      tipoBusqueda: 'T',
+      valorBusqueda: ' CE 001234 ',
+    });
+
+    assert.equal(result.isValid, true);
+    assert.equal(result.valorNormalizado, 'CE001234');
+    assert.equal(result.busqueda, 'TCE001234');
+  }),
+  test('construye la búsqueda por código del cliente con prefijo C', () => {
+    const result = validateGestionDeudorSearch({
+      idCliente: '10',
+      tipoBusqueda: 'C',
+      valorBusqueda: ' CLI-001 ',
+    });
+
+    assert.equal(result.isValid, true);
+    assert.equal(result.valorNormalizado, 'CLI-001');
+    assert.equal(result.busqueda, 'CCLI-001');
+  }),
 ]);

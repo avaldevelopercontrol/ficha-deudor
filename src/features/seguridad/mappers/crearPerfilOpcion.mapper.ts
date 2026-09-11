@@ -7,7 +7,7 @@ import {
 
 import type {
   RegistrarPerfilOpcionesData,
-} from '../modules/mantener-accesos-perfil/types/asignarAccesosPerfil.types';
+} from '../domain/accesos/perfilAccess.types';
 
 import type {
   CreatePerfilOpcionRequest,

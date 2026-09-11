@@ -10,6 +10,7 @@ import type {
 } from '../../../types/opcion.types';
 
 import {
+  attachModuloImplementacion,
   resolveModuloImplementacion,
 } from './moduloImplementation.utils';
 
@@ -95,6 +96,34 @@ export const suite = defineSuite(
             [root]
           ),
           'AGRUPADOR'
+        );
+      }
+    ),
+    test(
+      'resuelve toda la tabla reutilizando el índice de módulos con hijos',
+      () => {
+        const padre = buildModulo({
+          idModulo: 124,
+          tipo: 2,
+        });
+        const hijo = buildModulo({
+          idModulo: 114,
+          idPadre: 124,
+        });
+
+        const result =
+          attachModuloImplementacion([
+            padre,
+            hijo,
+          ]);
+
+        assert.equal(
+          result[0]?.implementacion,
+          'AGRUPADOR'
+        );
+        assert.equal(
+          result[1]?.implementacion,
+          'SIN IMPLEMENTAR'
         );
       }
     ),

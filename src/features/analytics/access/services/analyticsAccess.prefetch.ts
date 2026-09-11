@@ -6,7 +6,7 @@ import {
 } from '../store/analyticsAccess.store';
 import type {
   AnalyticsAccessContext,
-} from '../types/analyticsAccess.types';
+} from '../domain/analyticsAccess.types';
 
 interface PendingAnalyticsAccessState {
   invalidated: boolean;

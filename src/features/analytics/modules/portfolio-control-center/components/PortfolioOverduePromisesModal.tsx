@@ -1,20 +1,17 @@
 import type React from 'react';
 import { useMemo } from 'react';
 
-import Modal from '@shared/components/modals/Modal';
-import Table from '@shared/components/table/Table';
-import TableResourceState from '@shared/components/table/TableResourceState';
 import type { Column } from '@shared/types';
-import { SisgesIcon } from '@shared/icons/sisges';
 
 import type {
   PortfolioOperationalContext,
+} from '../domain/portfolioOverview.types';
+import type {
   PortfolioOverdueAgingFilter,
   PortfolioOverduePromiseItem,
   PortfolioOverduePromisesSortKey,
   PortfolioSortDirection,
-} from '../../../types/portfolioControlCenter.types';
-import { PortfolioPromiseDetailPagination } from './PortfolioPromiseDetailPagination';
+} from '../domain/portfolioPromises.types';
 import { usePortfolioOverduePromises } from '../hooks/usePortfolioOverduePromises';
 import { usePortfolioPromiseDetailTableState } from '../hooks/usePortfolioPromiseDetailTableState';
 import {
@@ -25,6 +22,10 @@ import {
   formatPortfolioPromiseCurrencyFilterOption,
   formatPortfolioPromiseDate,
 } from '../utils/portfolioPromiseDetail.utils';
+import { PortfolioPromiseDetailModalFrame } from './PortfolioPromiseDetailModalFrame';
+import { PortfolioPromiseDistribution } from './PortfolioPromiseDistribution';
+import { PortfolioPromiseSummary } from './PortfolioPromiseSummary';
+import { PortfolioPromiseTableSection } from './PortfolioPromiseTableSection';
 
 interface PortfolioOverduePromisesModalProps {
   isOpen: boolean;
@@ -39,6 +40,16 @@ const DEFAULT_PAGE_SIZE = 5;
 const DEFAULT_AGING: PortfolioOverdueAgingFilter = 'all';
 const DEFAULT_SORT_KEY: PortfolioOverduePromisesSortKey = 'overdueDays';
 const DEFAULT_SORT_DIRECTION: PortfolioSortDirection = 'desc';
+const OVERDUE_SORT_KEYS: readonly PortfolioOverduePromisesSortKey[] = [
+  'debtorId',
+  'dueDate',
+  'overdueDays',
+  'promiseAmount',
+  'paidAmount',
+  'outstandingAmount',
+  'advisorName',
+  'supervisorName',
+];
 
 const AGING_OPTIONS: ReadonlyArray<{
   value: PortfolioOverdueAgingFilter;
@@ -99,6 +110,7 @@ export const PortfolioOverduePromisesModal: React.FC<
   >({
     defaultFilter: DEFAULT_AGING,
     defaultSortKey: DEFAULT_SORT_KEY,
+    sortKeys: OVERDUE_SORT_KEYS,
     defaultSortDirection: DEFAULT_SORT_DIRECTION,
     defaultPageSize: DEFAULT_PAGE_SIZE,
   });
@@ -275,196 +287,90 @@ export const PortfolioOverduePromisesModal: React.FC<
   };
 
   return (
-    <Modal
+    <PortfolioPromiseDetailModalFrame
       isOpen={isOpen}
       title="Promesas vencidas"
       onClose={handleClose}
-      size="3xl"
+      rootClassName="portfolio-overdue-modal"
+      introIcon="warning"
+      eyebrow="Atención operativa"
+      heading="Compromisos vencidos que requieren priorización"
+      description="El resumen muestra la exposición total. Los filtros de la tabla se combinan entre sí y no alteran los KPIs globales del modal."
+      isInitialLoading={isLoading && data === null}
+      error={error}
+      onRetry={() => {
+        void refetch();
+      }}
+      loadingMessage="Cargando promesas vencidas..."
     >
-      <div className="portfolio-overdue-modal">
-        <section className="portfolio-overdue-modal__intro">
-          <span className="portfolio-overdue-modal__intro-icon" aria-hidden="true">
-            <SisgesIcon name="warning" />
-          </span>
-          <div>
-            <span className="portfolio-overdue-modal__eyebrow">
-              Atención operativa
-            </span>
-            <h3>Compromisos vencidos que requieren priorización</h3>
-            <p>
-              El resumen muestra la exposición total. Los filtros de la tabla
-              se combinan entre sí y no alteran los KPIs globales del modal.
-            </p>
-          </div>
-        </section>
+      {data && (
+        <>
+          <PortfolioPromiseSummary
+            className="portfolio-overdue-summary"
+            items={[
+              {
+                key: 'overdue-count',
+                icon: 'warning',
+                label: 'Promesas vencidas',
+                value: formatPortfolioInteger(data.summary.overdueCount),
+              },
+              {
+                key: 'overdue-amount',
+                icon: 'money',
+                label: 'Monto prometido vencido',
+                value: formatPortfolioCurrency(data.summary.overdueAmount),
+              },
+              {
+                key: 'outstanding-amount',
+                icon: 'target',
+                label: 'Saldo pendiente',
+                value: formatPortfolioCurrency(data.summary.outstandingAmount),
+                className: 'portfolio-overdue-summary__critical',
+              },
+            ]}
+          />
 
-        <TableResourceState
-          isLoading={isLoading && data === null}
-          error={error}
-          onRetry={() => {
-            void refetch();
-          }}
-          loadingMessage="Cargando promesas vencidas..."
-        >
-          {data && (
-            <>
-              <div className="portfolio-overdue-summary">
-                <article>
-                  <span className="portfolio-overdue-summary__icon" aria-hidden="true">
-                    <SisgesIcon name="warning" />
-                  </span>
-                  <div>
-                    <span>Promesas vencidas</span>
-                    <strong>
-                      {formatPortfolioInteger(data.summary.overdueCount)}
-                    </strong>
-                  </div>
-                </article>
-                <article>
-                  <span className="portfolio-overdue-summary__icon" aria-hidden="true">
-                    <SisgesIcon name="money" />
-                  </span>
-                  <div>
-                    <span>Monto prometido vencido</span>
-                    <strong>
-                      {formatPortfolioCurrency(data.summary.overdueAmount)}
-                    </strong>
-                  </div>
-                </article>
-                <article className="portfolio-overdue-summary__critical">
-                  <span className="portfolio-overdue-summary__icon" aria-hidden="true">
-                    <SisgesIcon name="target" />
-                  </span>
-                  <div>
-                    <span>Saldo pendiente</span>
-                    <strong>
-                      {formatPortfolioCurrency(
-                        data.summary.outstandingAmount
-                      )}
-                    </strong>
-                  </div>
-                </article>
-              </div>
+          <PortfolioPromiseDistribution
+            className="portfolio-overdue-aging"
+            title="Antigüedad de vencimiento"
+            description="Distribución sobre las promesas vencidas del contexto seleccionado."
+            cutoff={
+              data.asOfDate ? `Corte ${formatDate(data.asOfDate)}` : null
+            }
+            buckets={agingBuckets}
+            activeKey={aging}
+            maxCount={maxAgingCount}
+            onToggle={(bucketKey) => {
+              handleAgingChange(aging === bucketKey ? 'all' : bucketKey);
+            }}
+          />
 
-              <section className="portfolio-overdue-aging">
-                <div className="portfolio-overdue-aging__heading">
-                  <div>
-                    <span>Antigüedad de vencimiento</span>
-                    <small>
-                      Distribución sobre las promesas vencidas del contexto
-                      seleccionado.
-                    </small>
-                  </div>
-                  {data.asOfDate && (
-                    <span className="portfolio-overdue-aging__cutoff">
-                      Corte {formatDate(data.asOfDate)}
-                    </span>
-                  )}
-                </div>
-
-                <div className="portfolio-overdue-aging__bars">
-                  {agingBuckets.map((bucket) => (
-                    <button
-                      key={bucket.key}
-                      type="button"
-                      className={`portfolio-overdue-aging__row${
-                        aging === bucket.key ? ' is-active' : ''
-                      }`}
-                      onClick={() => {
-                        handleAgingChange(
-                          aging === bucket.key
-                            ? 'all'
-                            : bucket.key
-                        );
-                      }}
-                      aria-pressed={aging === bucket.key}
-                    >
-                      <span className="portfolio-overdue-aging__label">
-                        {bucket.label}
-                      </span>
-                      <span className="portfolio-overdue-aging__track">
-                        <span
-                          className="portfolio-overdue-aging__fill"
-                          style={{
-                            width: `${(bucket.count / maxAgingCount) * 100}%`,
-                          }}
-                        />
-                      </span>
-                      <strong>{formatPortfolioInteger(bucket.count)}</strong>
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              <section className="portfolio-overdue-table-section">
-                <div className="portfolio-overdue-table-toolbar">
-                  <div className="portfolio-overdue-table-toolbar__filter">
-                    <label
-                      className="portfolio-overdue-table-toolbar__label"
-                      htmlFor="portfolio-overdue-aging-filter"
-                    >
-                      Antigüedad
-                    </label>
-                    <select
-                      id="portfolio-overdue-aging-filter"
-                      className="portfolio-overdue-table-toolbar__select"
-                      value={aging}
-                      onChange={(event) => {
-                        handleAgingChange(
-                          event.target.value as PortfolioOverdueAgingFilter
-                        );
-                      }}
-                    >
-                      {availableAgingOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <span
-                      className="portfolio-overdue-table-toolbar__filter-icon"
-                      aria-hidden="true"
-                    >
-                      <SisgesIcon name="filter" />
-                    </span>
-                  </div>
-                </div>
-
-                {isLoading && (
-                  <div
-                    className="portfolio-overdue-table__refreshing"
-                    role="status"
-                  >
-                    Actualizando datos desde Analytics...
-                  </div>
-                )}
-
-                <div className="portfolio-overdue-table">
-                  <Table
-                    columns={columns}
-                    data={[...normalizedItems]}
-                    emptyMessage="No hay promesas vencidas para los filtros seleccionados."
-                    sortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSortChange={handleSortChange}
-                    fitToPanel
-                  />
-                </div>
-
-                <PortfolioPromiseDetailPagination
-                  className="portfolio-overdue-table__pagination"
-                  pagination={data.pagination}
-                  requestedPage={page}
-                  requestedPageSize={pageSize}
-                  onPageChange={setPage}
-                  onPageSizeChange={handlePageSizeChange}
-                />
-              </section>
-            </>
-          )}
-        </TableResourceState>
-      </div>
-    </Modal>
+          <PortfolioPromiseTableSection
+            sectionClassName="portfolio-overdue-table-section"
+            toolbarClassName="portfolio-overdue-table-toolbar"
+            tableClassName="portfolio-overdue-table"
+            filterId="portfolio-overdue-aging-filter"
+            filterLabel="Antigüedad"
+            filterValue={aging}
+            filterOptions={availableAgingOptions}
+            onFilterChange={handleAgingChange}
+            isRefreshing={isLoading}
+            refreshingMessage="Actualizando datos desde Analytics..."
+            columns={columns}
+            data={[...normalizedItems]}
+            emptyMessage="No hay promesas vencidas para los filtros seleccionados."
+            sortKey={sortKey}
+            sortDirection={sortDirection}
+            onSortChange={handleSortChange}
+            pagination={data.pagination}
+            requestedPage={page}
+            requestedPageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        </>
+      )}
+    </PortfolioPromiseDetailModalFrame>
   );
 };
 

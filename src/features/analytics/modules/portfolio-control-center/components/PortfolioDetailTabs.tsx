@@ -9,9 +9,11 @@ import type {
   AdvisorPerformanceItem,
   CampaignPerformanceItem,
   PortfolioDetailTab,
-  PortfolioSupervisorFilterOption,
   SupervisorPerformanceItem,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
+import type {
+  PortfolioSupervisorFilterOption,
+} from '../domain/portfolioFilters.types';
 import {
   PORTFOLIO_DETAIL_SORT_OPTIONS,
   sortAdvisorPerformanceByHighest,
@@ -20,7 +22,7 @@ import {
 } from '../utils/portfolioDetailSort.utils';
 import {
   PORTFOLIO_UNASSIGNED_SUPERVISOR_FILTER_ID,
-} from '../utils/portfolioFilterContext.utils';
+} from '../domain/portfolioFilterContext';
 import {
   AdvisorPerformanceTable,
 } from './AdvisorPerformanceTable';

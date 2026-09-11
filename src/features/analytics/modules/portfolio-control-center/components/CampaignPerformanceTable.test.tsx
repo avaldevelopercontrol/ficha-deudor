@@ -7,7 +7,7 @@ import {
 } from '../../../../../test/testHarness';
 import type {
   CampaignPerformanceItem,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   CampaignPerformanceTable,
 } from './CampaignPerformanceTable';

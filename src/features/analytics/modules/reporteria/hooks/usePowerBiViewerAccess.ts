@@ -5,29 +5,15 @@ import {
 } from 'react';
 
 import {
-  APPLICATION_OPTION_IDS,
-  type AccessControlStatus,
-  type AuthorizedOption,
-} from '@features/access-control';
-
-import {
-  getAnalyticsPowerBiViewerContext,
-} from '../../../access/api/analyticsAccess.api';
-
+  loadPowerBiViewerAccess,
+  resolvePowerBiViewerEmbedState,
+  resolvePowerBiViewerReport,
+  type ReporteriaViewerAccess,
+} from '../application/reporteriaViewer.application';
 import type {
-  AnalyticsPowerBiClientSelectionStatus,
-  AnalyticsReportClientOption,
-} from '../../../access/types/analyticsAccess.types';
-
-import {
-  findAuthorizedOptionById,
-  resolvePowerBiEmbedUrl,
-  resolvePowerBiPublishToWebUrl,
-} from '../utils/reporteria.utils';
-
-import {
-  parseReportClientSelection,
-} from '../utils/reporteriaClientScope.utils';
+  ReporteriaAccessStatus,
+  ReporteriaCatalog,
+} from '../domain/reporteria.types';
 
 type ViewerAnalyticsAccessState =
   | {
@@ -37,55 +23,32 @@ type ViewerAnalyticsAccessState =
   | {
       key: string;
       status: 'ready';
-      allowed: boolean;
-      clientSelectionStatus: AnalyticsPowerBiClientSelectionStatus;
-      selectedClient: AnalyticsReportClientOption | null;
-      scopedEmbedUrl: string | null;
+      access: ReporteriaViewerAccess;
     };
 
 interface UsePowerBiViewerAccessParams {
   optionIdParam: string | undefined;
   routeSearch: string;
-  status: AccessControlStatus;
-  menuTree: readonly AuthorizedOption[];
+  status: ReporteriaAccessStatus;
+  catalog: ReporteriaCatalog;
 }
 
 export const usePowerBiViewerAccess = ({
   optionIdParam,
   routeSearch,
   status,
-  menuTree,
+  catalog,
 }: UsePowerBiViewerAccessParams) => {
-  const optionId = Number(optionIdParam);
-  const accessRequestKey = `${optionId}:${routeSearch}`;
-
-  const reporteria = useMemo(
+  const { optionId, report } = useMemo(
     () =>
-      findAuthorizedOptionById(
-        menuTree,
-        APPLICATION_OPTION_IDS.REPORTERIA
+      resolvePowerBiViewerReport(
+        catalog,
+        optionIdParam
       ),
-    [menuTree]
+    [catalog, optionIdParam]
   );
-
-  const report = useMemo(
-    () =>
-      Number.isSafeInteger(optionId) &&
-      optionId > 0
-        ? findAuthorizedOptionById(
-            menuTree,
-            optionId
-          )
-        : null,
-    [menuTree, optionId]
-  );
-
-  const isValidReport = Boolean(
-    report &&
-      report.parentId ===
-        APPLICATION_OPTION_IDS.REPORTERIA &&
-      report.permissions.consultar
-  );
+  const accessRequestKey = `${optionId}:${routeSearch}`;
+  const isValidReport = report !== null;
 
   const [analyticsAccess, setAnalyticsAccess] =
     useState<ViewerAnalyticsAccessState | null>(null);
@@ -103,19 +66,12 @@ export const usePowerBiViewerAccess = ({
     let active = true;
     const controller = new AbortController();
 
-    void (async () => {
-      try {
-        const requestedClient =
-          parseReportClientSelection(
-            new URLSearchParams(routeSearch)
-          );
-        const context =
-          await getAnalyticsPowerBiViewerContext(
-            optionId,
-            requestedClient,
-            controller.signal
-          );
-
+    void loadPowerBiViewerAccess(
+      optionId,
+      routeSearch,
+      controller.signal
+    )
+      .then((access) => {
         if (!active) {
           return;
         }
@@ -123,14 +79,10 @@ export const usePowerBiViewerAccess = ({
         setAnalyticsAccess({
           key: accessRequestKey,
           status: 'ready',
-          allowed: context.allowed,
-          clientSelectionStatus:
-            context.clientSelectionStatus,
-          selectedClient:
-            context.selectedClient,
-          scopedEmbedUrl: context.embedUrl,
+          access,
         });
-      } catch {
+      })
+      .catch(() => {
         if (
           !active ||
           controller.signal.aborted
@@ -142,8 +94,7 @@ export const usePowerBiViewerAccess = ({
           key: accessRequestKey,
           status: 'error',
         });
-      }
-    })();
+      });
 
     return () => {
       active = false;
@@ -167,42 +118,31 @@ export const usePowerBiViewerAccess = ({
     isValidReport &&
     currentAnalyticsAccess === null;
 
-  const baseEmbedUrl = isValidReport
-    ? resolvePowerBiEmbedUrl(report?.urlBI ?? null)
-    : null;
-
-  const selectedClient =
+  const currentAccess =
     currentAnalyticsAccess?.status === 'ready'
-      ? currentAnalyticsAccess.selectedClient
+      ? currentAnalyticsAccess.access
       : null;
 
-  const requiresScopedEmbed =
-    selectedClient !== null;
-
-  const rawScopedEmbedUrl =
-    currentAnalyticsAccess?.status === 'ready'
-      ? currentAnalyticsAccess.scopedEmbedUrl
-      : null;
-
-  const scopedEmbedUrl =
-    resolvePowerBiPublishToWebUrl(
-      rawScopedEmbedUrl
+  const embedState =
+    resolvePowerBiViewerEmbedState(
+      report,
+      currentAccess
     );
-
-  const embedUrl = requiresScopedEmbed
-    ? scopedEmbedUrl
-    : baseEmbedUrl;
 
   return {
     reporteriaName:
-      reporteria?.name || 'Reportería',
+      catalog.section?.name || 'Reportería',
     report,
     isValidReport,
-    analyticsAccess: currentAnalyticsAccess,
+    analyticsAccess:
+      currentAnalyticsAccess?.status === 'ready'
+        ? {
+            key: currentAnalyticsAccess.key,
+            status: 'ready' as const,
+            ...currentAnalyticsAccess.access,
+          }
+        : currentAnalyticsAccess,
     isAnalyticsAccessLoading,
-    baseEmbedUrl,
-    requiresScopedEmbed,
-    rawScopedEmbedUrl,
-    embedUrl,
+    ...embedState,
   };
 };

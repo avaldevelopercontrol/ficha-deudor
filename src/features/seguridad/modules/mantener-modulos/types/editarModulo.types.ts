@@ -1,8 +1,3 @@
-import type {
-  ModuloFormData,
-} from './registrarModulo.types';
-
-export interface EditarModuloFormData
-  extends ModuloFormData {
-  orden: number;
-}
+export type {
+  EditarModuloFormData,
+} from '../../../domain/modulos/moduloForm.types';

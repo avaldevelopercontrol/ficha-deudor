@@ -2,6 +2,12 @@ import { isPositiveIntegerValue } from '@shared/utils/number.utils';
 
 import type { TipoBusquedaGestionDeudor } from '../types/gestionDeudor.types';
 
+const NUMERIC_SEARCH_TYPES = new Set<TipoBusquedaGestionDeudor>([
+  'R',
+  'D',
+  'F',
+]);
+
 interface ValidateGestionDeudorSearchParams {
   idCliente?: string | null;
   tipoBusqueda: TipoBusquedaGestionDeudor;
@@ -49,7 +55,10 @@ export function validateGestionDeudorSearch({
     };
   }
 
-  if (!/^\d+$/.test(valorNormalizado)) {
+  if (
+    NUMERIC_SEARCH_TYPES.has(tipoBusqueda) &&
+    !/^\d+$/.test(valorNormalizado)
+  ) {
     return {
       isValid: false,
       message: 'El dato ingresado solo debe contener números.',

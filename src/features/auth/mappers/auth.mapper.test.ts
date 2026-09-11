@@ -11,6 +11,7 @@ export const suite = defineSuite('auth.mapper', [
         cUsr_ApePat: ' Ramírez ',
         cUsr_ApeMat: ' López ',
         cUsr_Login: ' cramirez ',
+        per_Nombre: ' Administrador Base Datos      ',
       })
     );
 
@@ -43,9 +44,10 @@ export const suite = defineSuite('auth.mapper', [
     assert.equal(personal.email, 'personal@correo.pe');
     assert.equal(perfil.email, 'perfil@correo.pe');
   }),
-  test('usa el perfil alternativo cuando nid_perfil no está disponible', () => {
+  test('usa per_Nombre de la API y conserva el identificador alternativo del perfil', () => {
     const usuario = mapUsuarioApiToUsuario(
       createLoginUsuarioApi({
+        per_Nombre: ' Gestor Call   ',
         nid_perfil: undefined,
         nId_PerfilGest: 2,
       })
@@ -53,6 +55,17 @@ export const suite = defineSuite('auth.mapper', [
 
     assert.equal(usuario.perfilId, 2);
     assert.equal(usuario.perfil, 'Gestor Call');
+  }),
+  test('no infiere el nombre del perfil por id cuando la API no lo informa', () => {
+    const usuario = mapUsuarioApiToUsuario(
+      createLoginUsuarioApi({
+        per_Nombre: '   ',
+        nid_perfil: 9,
+      })
+    );
+
+    assert.equal(usuario.perfilId, 9);
+    assert.equal(usuario.perfil, 'Perfil no definido');
   }),
   test('mantiene apellido y correo vacíos cuando la API no los informa', () => {
     const usuario = mapUsuarioApiToUsuario(

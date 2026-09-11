@@ -1,28 +1,22 @@
-import {
-  useCallback,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useRef, useState } from 'react';
 
+import { useAsyncResource } from '@shared/hooks/useAsyncResource';
 import {
-  useAsyncResource,
-} from '@shared/hooks/useAsyncResource';
-import type {
-  PortfolioControlCenterData,
-  PortfolioControlCenterFilterOptions,
-  PortfolioControlCenterFilters,
-} from '../../../types/portfolioControlCenter.types';
+  createPortfolioBootstrapSession,
+  getPortfolioControlCenterResourceKey,
+  loadPortfolioControlCenterResource,
+  requestPortfolioBootstrap,
+} from '../application/portfolioBootstrap.application';
 import {
   PORTFOLIO_CONTROL_CENTER_ERROR_MESSAGE,
 } from '../constants/portfolioControlCenter.constants';
-import {
-  getPortfolioControlCenterResourceKey,
-  resolvePortfolioControlCenterLoadMode,
-} from '../utils/portfolioControlCenterRequest.utils';
-import {
-  loadPortfolioControlCenter,
-  loadPortfolioControlCenterBootstrap,
-} from '../services/portfolioControlCenter.service';
+import type {
+  PortfolioControlCenterFilterOptions,
+  PortfolioControlCenterFilters,
+} from '../domain/portfolioFilters.types';
+import type {
+  PortfolioControlCenterData,
+} from '../domain/portfolioOverview.types';
 
 const EMPTY_FILTER_OPTIONS: PortfolioControlCenterFilterOptions = {
   availableDateFrom: null,
@@ -43,118 +37,62 @@ export const usePortfolioControlCenterBootstrap = (
   crmClientId: number,
   filters: PortfolioControlCenterFilters
 ) => {
-  const filterOptionsLoadedRef = useRef(false);
-  const forceBootstrapRef = useRef(false);
-  const selectedBusinessUnitRef = useRef<string | null>(null);
-  const currentCampaignUnavailableRef = useRef(false);
+  const sessionRef = useRef(createPortfolioBootstrapSession());
   const [filterOptions, setFilterOptions] =
-    useState<PortfolioControlCenterFilterOptions>(
-      EMPTY_FILTER_OPTIONS
-    );
+    useState<PortfolioControlCenterFilterOptions>(EMPTY_FILTER_OPTIONS);
   const [filterOptionsLoaded, setFilterOptionsLoaded] =
     useState(false);
 
   const loader = useCallback(
     async (signal: AbortSignal) => {
-      const loadMode =
-        resolvePortfolioControlCenterLoadMode({
-          filterOptionsLoaded:
-            filterOptionsLoadedRef.current,
-          forceBootstrap:
-            forceBootstrapRef.current,
-          selectedBusinessUnit:
-            selectedBusinessUnitRef.current,
-          requestedBusinessUnit:
-            filters.businessUnit,
-          currentCampaignUnavailable:
-            currentCampaignUnavailableRef.current,
-          requestedCampaignId: filters.campaignId,
-        });
-
-      forceBootstrapRef.current = false;
-
-      if (loadMode === 'bootstrap') {
-        const bootstrap =
-          await loadPortfolioControlCenterBootstrap(
-            crmClientId,
-            filters,
-            signal
-          );
-
-        if (!signal.aborted) {
-          filterOptionsLoadedRef.current = true;
-          selectedBusinessUnitRef.current =
-            bootstrap.filterOptions.selectedBusinessUnit;
-          if (
-            filters.campaignId === null &&
-            filters.subPortfolioId === null
-          ) {
-            currentCampaignUnavailableRef.current =
-              bootstrap.data === null;
-          }
-          setFilterOptions(bootstrap.filterOptions);
-          setFilterOptionsLoaded(true);
-        }
-
-        return bootstrap.data;
-      }
-
-      return loadPortfolioControlCenter(
+      const result = await loadPortfolioControlCenterResource(
         crmClientId,
-        {
-          ...filters,
-          businessUnit:
-            filters.businessUnit ??
-            selectedBusinessUnitRef.current,
-        },
+        filters,
+        sessionRef.current,
         signal
       );
+
+      if (result.filterOptions && !signal.aborted) {
+        setFilterOptions(result.filterOptions);
+        setFilterOptionsLoaded(true);
+      }
+
+      return result.data;
     },
     [crmClientId, filters]
   );
 
-  const resource = useAsyncResource<
-    PortfolioControlCenterData | null
-  >({
+  const resource = useAsyncResource<PortfolioControlCenterData | null>({
     loader,
-    resourceKey:
-      getPortfolioControlCenterResourceKey(
-        crmClientId,
-        filters
-      ),
+    resourceKey: getPortfolioControlCenterResourceKey(
+      crmClientId,
+      filters
+    ),
     initialData: null,
     initialLoading: true,
-    errorMessage:
-      PORTFOLIO_CONTROL_CENTER_ERROR_MESSAGE,
+    errorMessage: PORTFOLIO_CONTROL_CENTER_ERROR_MESSAGE,
   });
 
   const refetchResource = resource.refetch;
-
   const refetchFilterOptions = useCallback(async () => {
-    forceBootstrapRef.current = true;
+    requestPortfolioBootstrap(sessionRef.current);
     await refetchResource();
   }, [refetchResource]);
 
-  const requestedBusinessUnit =
-    filters.businessUnit?.trim() || null;
+  const requestedBusinessUnit = filters.businessUnit?.trim() || null;
   const filterOptionsBusinessUnitStale =
     requestedBusinessUnit !== null &&
-    requestedBusinessUnit !==
-      filterOptions.selectedBusinessUnit;
+    requestedBusinessUnit !== filterOptions.selectedBusinessUnit;
   const filterOptionsUnavailable =
-    !filterOptionsLoaded ||
-    filterOptionsBusinessUnitStale;
+    !filterOptionsLoaded || filterOptionsBusinessUnitStale;
 
   return {
     ...resource,
     filterOptions,
     areFiltersLoading:
-      filterOptionsUnavailable &&
-      resource.error === null,
+      filterOptionsUnavailable && resource.error === null,
     filterOptionsError:
-      filterOptionsUnavailable
-        ? resource.error
-        : null,
+      filterOptionsUnavailable ? resource.error : null,
     refetchFilterOptions,
   };
 };

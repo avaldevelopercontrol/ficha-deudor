@@ -55,6 +55,47 @@ export const suite = defineSuite(
     ),
 
     test(
+      'prepara búsquedas por número de documento y código del cliente con sus prefijos',
+      () => {
+        const documentSearch =
+          prepareGestionDeudorSearch({
+            idCliente: '25',
+            tipoBusqueda: 'T',
+            valorBusqueda: 'CE001234',
+            requestId: 8,
+          });
+        const clientCodeSearch =
+          prepareGestionDeudorSearch({
+            idCliente: '25',
+            tipoBusqueda: 'C',
+            valorBusqueda: 'CLI-001',
+            requestId: 9,
+          });
+
+        assert.equal(documentSearch.status, 'ready');
+        assert.equal(clientCodeSearch.status, 'ready');
+
+        if (
+          documentSearch.status !== 'ready' ||
+          clientCodeSearch.status !== 'ready'
+        ) {
+          throw new Error(
+            'Se esperaban búsquedas válidas.'
+          );
+        }
+
+        assert.equal(
+          documentSearch.request.requestParams.busqueda,
+          'TCE001234'
+        );
+        assert.equal(
+          clientCodeSearch.request.requestParams.busqueda,
+          'CCLI-001'
+        );
+      }
+    ),
+
+    test(
       'devuelve el mensaje de validación sin construir una consulta',
       () => {
         const result =

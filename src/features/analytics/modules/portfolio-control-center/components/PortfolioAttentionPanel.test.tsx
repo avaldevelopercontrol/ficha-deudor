@@ -8,7 +8,7 @@ import {
 import type {
   PortfolioAttentionItem,
   PortfolioTargetProgress,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioOverview.types';
 import {
   PortfolioAttentionPanel,
 } from './PortfolioAttentionPanel';

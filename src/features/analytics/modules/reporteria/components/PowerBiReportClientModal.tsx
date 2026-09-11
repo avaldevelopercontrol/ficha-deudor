@@ -5,8 +5,8 @@ import {
 } from 'react';
 
 import type {
-  AuthorizedOption,
-} from '@features/access-control';
+  PowerBiReport,
+} from '../domain/reporteria.types';
 
 import Modal from '@shared/components/modals/Modal';
 import {
@@ -15,10 +15,10 @@ import {
 
 import type {
   AnalyticsReportClientOption,
-} from '../../../access/types/analyticsAccess.types';
+} from '../../../access/domain/analyticsAccess.types';
 
 interface PowerBiReportClientModalProps {
-  report: AuthorizedOption | null;
+  report: PowerBiReport | null;
   clients: readonly AnalyticsReportClientOption[];
   isLoading: boolean;
   error: string | null;

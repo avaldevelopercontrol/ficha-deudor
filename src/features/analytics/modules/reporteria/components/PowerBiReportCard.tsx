@@ -4,8 +4,8 @@ import {
 } from 'react';
 
 import type {
-  AuthorizedOption,
-} from '@features/access-control';
+  PowerBiReport,
+} from '../domain/reporteria.types';
 
 import {
   SisgesIcon,
@@ -20,9 +20,9 @@ import {
 } from '../utils/reporteria.utils';
 
 interface PowerBiReportCardProps {
-  report: AuthorizedOption;
+  report: PowerBiReport;
   onOpen: (
-    report: AuthorizedOption
+    report: PowerBiReport
   ) => void;
 }
 

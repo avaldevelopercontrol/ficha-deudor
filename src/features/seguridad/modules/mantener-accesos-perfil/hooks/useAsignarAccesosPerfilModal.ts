@@ -6,14 +6,6 @@ import {
 } from 'react';
 
 import {
-  fetchOpciones,
-} from '../../../api/opcionesApi';
-
-import {
-  fetchPerfilesAcceso,
-} from '../../../api/perfilOpcionesApi';
-
-import {
   useApiResource,
 } from '@shared/hooks/useApiResource';
 
@@ -22,31 +14,33 @@ import {
 } from '@shared/utils/asyncMutation.utils';
 
 import {
+  useAccessAssignmentEditor,
+} from '../../../hooks/useAccessAssignmentEditor';
+
+import {
+  resolveOperationErrorMessage,
+} from '../../../utils/operationError.utils';
+
+import {
+  loadAsignarAccesosPerfilCatalog,
+} from '../../../application/accesos/accessCatalog.application';
+
+import {
   MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS,
 } from '../constants/modalAsignarAccesosPerfil.constants';
 
 import type {
   AsignarAccesosPerfilCatalog,
   AsignarAccesosPerfilFormData,
-  PerfilOpcionPermissionKey,
   RegistrarPerfilOpcionesData,
-} from '../types/asignarAccesosPerfil.types';
-
-import {
-  buildAccesosPerfilTree,
-} from '../utils/accesosPerfilTree.utils';
+} from '../../../domain/accesos/perfilAccess.types';
 
 import {
   ASIGNAR_ACCESOS_PERFIL_INITIAL_FORM,
   filterAssignablePerfilOptions,
-  getPerfilOpcionBranchAllPermissionsState,
-  getPerfilOpcionBranchPermissionStates,
   normalizeAsignarAccesosPerfilForm,
-  setAllPerfilOpcionBranchPermissions,
-  setPerfilOpcionBranchPermission,
-  setPerfilOpcionBranchSelected,
   validateAsignarAccesosPerfilForm,
-} from '../utils/asignarAccesosPerfil.utils';
+} from '../../../domain/accesos/perfilAccessAssignment.utils';
 
 interface UseAsignarAccesosPerfilModalParams {
   isOpen: boolean;
@@ -56,34 +50,6 @@ interface UseAsignarAccesosPerfilModalParams {
     data: RegistrarPerfilOpcionesData
   ) => Promise<void> | void;
 }
-
-const resolveSubmitError = (
-  error: unknown
-): string => {
-  if (
-    error instanceof Error &&
-    error.message.trim()
-  ) {
-    return error.message.trim();
-  }
-
-  return 'No se pudieron registrar los accesos del perfil.';
-};
-
-const loadCatalog = async (
-  signal: AbortSignal
-): Promise<AsignarAccesosPerfilCatalog> => {
-  const [perfiles, opciones] =
-    await Promise.all([
-      fetchPerfilesAcceso(signal),
-      fetchOpciones(signal),
-    ]);
-
-  return {
-    perfiles,
-    opciones,
-  };
-};
 
 export const useAsignarAccesosPerfilModal = ({
   isOpen,
@@ -116,7 +82,7 @@ export const useAsignarAccesosPerfilModal = ({
     error: resourceError,
     refetch,
   } = useApiResource<AsignarAccesosPerfilCatalog>(
-    loadCatalog,
+    loadAsignarAccesosPerfilCatalog,
     [isOpen],
     {
       enabled: isOpen,
@@ -126,31 +92,24 @@ export const useAsignarAccesosPerfilModal = ({
     }
   );
 
-  const treeState = useMemo(() => {
-    if (!catalog) {
-      return {
-        items: [],
-        error: null,
-      };
-    }
-
-    try {
-      return {
-        items: buildAccesosPerfilTree(
-          catalog.opciones
-        ),
-        error: null,
-      };
-    } catch (error) {
-      return {
-        items: [],
-        error:
-          error instanceof Error
-            ? error.message
-            : 'La jerarquía de opciones no es válida.',
-      };
-    }
-  }, [catalog]);
+  const {
+    treeItems,
+    treeError,
+    activeOption,
+    activePermissionStates,
+    activeSelectAllState,
+    clearFormErrors,
+    handleActivateOption,
+    handleToggleOption,
+    handlePermissionChange,
+    handleSelectAllPermissions,
+  } = useAccessAssignmentEditor({
+    form,
+    setForm,
+    opciones: catalog?.opciones,
+    setErrors,
+    setSubmitError,
+  });
 
   const assignedPerfilIdSet = useMemo(
     () => new Set(assignedPerfilIds),
@@ -190,77 +149,6 @@ export const useAsignarAccesosPerfilModal = ({
     [availablePerfiles]
   );
 
-  const activeOption = useMemo(
-    () =>
-      treeState.items.find(
-        (item) =>
-          item.idModulo ===
-          form.activeOptionId
-      ) ?? null,
-    [
-      form.activeOptionId,
-      treeState.items,
-    ]
-  );
-
-  const activePermissionStates = useMemo(
-    () =>
-      form.activeOptionId === null
-        ? {
-            consultar: 'unchecked' as const,
-            insertar: 'unchecked' as const,
-            editar: 'unchecked' as const,
-            eliminar: 'unchecked' as const,
-            exportar: 'unchecked' as const,
-          }
-        : getPerfilOpcionBranchPermissionStates(
-            form,
-            treeState.items,
-            form.activeOptionId
-          ),
-    [
-      form,
-      treeState.items,
-    ]
-  );
-
-  const activeSelectAllState = useMemo(
-    () =>
-      activeOption?.isPermissionTarget
-        ? getPerfilOpcionBranchAllPermissionsState(
-            activePermissionStates,
-            activeOption
-          )
-        : 'unchecked',
-    [
-      activeOption,
-      activePermissionStates,
-    ]
-  );
-
-  const clearFormErrors = useCallback(
-    (...fieldNames: string[]) => {
-      setErrors((previousErrors) => {
-        const nextErrors = {
-          ...previousErrors,
-        };
-
-        fieldNames.forEach(
-          (fieldName) => {
-            delete nextErrors[
-              fieldName
-            ];
-          }
-        );
-
-        return nextErrors;
-      });
-
-      setSubmitError(null);
-    },
-    []
-  );
-
   const handlePerfilChange = useCallback(
     (perfilId: number | '') => {
       setForm((previousForm) => ({
@@ -272,102 +160,6 @@ export const useAsignarAccesosPerfilModal = ({
     },
     [clearFormErrors]
   );
-
-  const handleActivateOption = useCallback(
-    (optionId: number) => {
-      setForm((previousForm) => ({
-        ...previousForm,
-        activeOptionId: optionId,
-      }));
-    },
-    []
-  );
-
-  const handleToggleOption = useCallback(
-    (
-      optionId: number,
-      selected: boolean
-    ) => {
-      setForm((previousForm) =>
-        setPerfilOpcionBranchSelected(
-          previousForm,
-          treeState.items,
-          optionId,
-          selected
-        )
-      );
-
-      clearFormErrors(
-        'selectedOptionIds',
-        'permissionsByOptionId'
-      );
-    },
-    [
-      clearFormErrors,
-      treeState.items,
-    ]
-  );
-
-  const handlePermissionChange = useCallback(
-    (
-      permission: PerfilOpcionPermissionKey,
-      checked: boolean
-    ) => {
-      if (form.activeOptionId === null) {
-        return;
-      }
-
-      setForm((previousForm) =>
-        setPerfilOpcionBranchPermission(
-          previousForm,
-          treeState.items,
-          form.activeOptionId as number,
-          permission,
-          checked
-        )
-      );
-
-      clearFormErrors(
-        'selectedOptionIds',
-        'permissionsByOptionId'
-      );
-    },
-    [
-      clearFormErrors,
-      form.activeOptionId,
-      treeState.items,
-    ]
-  );
-
-  const handleSelectAllPermissions =
-    useCallback(
-      (checked: boolean) => {
-        if (
-          form.activeOptionId === null
-        ) {
-          return;
-        }
-
-        setForm((previousForm) =>
-          setAllPerfilOpcionBranchPermissions(
-            previousForm,
-            treeState.items,
-            form.activeOptionId as number,
-            checked
-          )
-        );
-
-        clearFormErrors(
-          'selectedOptionIds',
-          'permissionsByOptionId'
-        );
-      },
-      [
-        clearFormErrors,
-        form.activeOptionId,
-        treeState.items,
-      ]
-    );
 
   const resetAndClose = useCallback(() => {
     if (
@@ -424,7 +216,7 @@ export const useAsignarAccesosPerfilModal = ({
     const validationErrors =
       validateAsignarAccesosPerfilForm(
         form,
-        treeState.items
+        treeItems
       );
 
     if (
@@ -444,7 +236,7 @@ export const useAsignarAccesosPerfilModal = ({
           await onRegistrar(
             normalizeAsignarAccesosPerfilForm(
               form,
-              treeState.items
+              treeItems
             )
           );
         }
@@ -463,8 +255,9 @@ export const useAsignarAccesosPerfilModal = ({
 
     if (result.status === 'error') {
       setSubmitError(
-        resolveSubmitError(
-          result.error
+        resolveOperationErrorMessage(
+          result.error,
+          'No se pudieron registrar los accesos del perfil.'
         )
       );
     }
@@ -474,13 +267,13 @@ export const useAsignarAccesosPerfilModal = ({
     form,
     onClose,
     onRegistrar,
-    treeState.items,
+    treeItems,
   ]);
 
   const emptyCatalogMessage =
     !isLoading &&
     !resourceError &&
-    !treeState.error &&
+    !treeError &&
     catalog
       ? !catalog.perfiles.some(
           (perfil) => perfil.estadoActivo
@@ -490,7 +283,7 @@ export const useAsignarAccesosPerfilModal = ({
         : availablePerfiles.length === 0
           ? MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS
               .allProfilesAssigned
-          : treeState.items.length === 0
+          : treeItems.length === 0
             ? MODAL_ASIGNAR_ACCESOS_PERFIL_TEXTS
                 .emptyOptions
             : null
@@ -498,7 +291,7 @@ export const useAsignarAccesosPerfilModal = ({
 
   const catalogError =
     resourceError ??
-    treeState.error ??
+    treeError ??
     emptyCatalogMessage;
 
   const isReady = Boolean(
@@ -519,7 +312,7 @@ export const useAsignarAccesosPerfilModal = ({
     refetch,
 
     profileOptions,
-    treeItems: treeState.items,
+    treeItems: treeItems,
     activeOption,
     activePermissionStates,
     activeSelectAllState,

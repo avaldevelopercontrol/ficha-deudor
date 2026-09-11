@@ -9,6 +9,7 @@ import {
   getAnalyticsAccess,
   getAnalyticsPowerBiOptionAccess,
   getAnalyticsPowerBiViewerContext,
+  getAnalyticsReportClients,
 } from './analyticsAccess.api';
 
 export const suite = defineSuite(
@@ -134,6 +135,99 @@ export const suite = defineSuite(
       }
     ),
     test(
+      'rechaza una cartera mal tipada en vez de descartarla silenciosamente',
+      async () => {
+        const originalFetch = globalThis.fetch;
+
+        globalThis.fetch = async () =>
+          Response.json({
+            optionId: 23,
+            clients: [
+              { clientId: '95', name: 'CLARO' },
+            ],
+          });
+
+        try {
+          await assert.rejects(
+            () => getAnalyticsAccess(23),
+            /response\.clients\[0\]\.clientId debe ser un entero positivo/
+          );
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'mantiene el 404 de scopes como acceso vacío por compatibilidad del endpoint',
+      async () => {
+        const originalFetch = globalThis.fetch;
+
+        globalThis.fetch = async () =>
+          Response.json(
+            { message: 'No encontrado' },
+            { status: 404 }
+          );
+
+        try {
+          assert.deepEqual(
+            await getAnalyticsAccess(23),
+            { scopes: [] }
+          );
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'normaliza y ordena las carteras publicadas para un reporte',
+      async () => {
+        const originalFetch = globalThis.fetch;
+
+        globalThis.fetch = async () =>
+          Response.json({
+            optionId: 27,
+            clients: [
+              { clientId: 8, name: ' DIRECTV ' },
+              { clientId: 2, name: ' ADEX ' },
+              { clientId: 8, name: 'DIRECTV' },
+            ],
+          });
+
+        try {
+          assert.deepEqual(
+            await getAnalyticsReportClients(27),
+            [
+              { clientId: 2, name: 'ADEX' },
+              { clientId: 8, name: 'DIRECTV' },
+            ]
+          );
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'rechaza report-clients si clients no es un arreglo contractual',
+      async () => {
+        const originalFetch = globalThis.fetch;
+
+        globalThis.fetch = async () =>
+          Response.json({
+            optionId: 27,
+            clients: null,
+          });
+
+        try {
+          await assert.rejects(
+            () => getAnalyticsReportClients(27),
+            /response\.clients debe ser un arreglo/
+          );
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
       'resuelve el acceso de varios reportes Power BI con una sola solicitud',
       async () => {
         const originalFetch = globalThis.fetch;
@@ -194,7 +288,6 @@ export const suite = defineSuite(
         }
       }
     ),
-
     test(
       'rechaza una respuesta batch incompleta para mantener el acceso fail-closed',
       async () => {
@@ -224,7 +317,32 @@ export const suite = defineSuite(
         }
       }
     ),
+    test(
+      'rechaza flags Power BI mal tipados en vez de convertirlos a false',
+      async () => {
+        const originalFetch = globalThis.fetch;
 
+        globalThis.fetch = async () =>
+          Response.json({
+            options: [
+              {
+                optionId: 27,
+                allowed: 'true',
+                requiresClientSelection: false,
+              },
+            ],
+          });
+
+        try {
+          await assert.rejects(
+            () => getAnalyticsPowerBiOptionAccess([27]),
+            /response\.options\[0\]\.allowed debe ser un booleano/
+          );
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
     test(
       'obtiene autorización cartera y publicación del viewer en una sola solicitud',
       async () => {
@@ -282,7 +400,6 @@ export const suite = defineSuite(
         }
       }
     ),
-
     test(
       'rechaza un contexto viewer inconsistente antes de renderizar el iframe',
       async () => {
@@ -310,6 +427,55 @@ export const suite = defineSuite(
               ),
             /inconsistente/
           );
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'rechaza una selección de viewer inválida antes de ejecutar HTTP',
+      async () => {
+        const originalFetch = globalThis.fetch;
+        let requestCount = 0;
+
+        globalThis.fetch = async () => {
+          requestCount += 1;
+          throw new Error('No debe ejecutarse HTTP');
+        };
+
+        try {
+          await assert.rejects(
+            () =>
+              getAnalyticsPowerBiViewerContext(27, {
+                clientId: 0,
+                name: 'DIRECTV',
+              }),
+            /selección de cartera no es válida/
+          );
+          assert.equal(requestCount, 0);
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'propaga el AbortSignal al boundary HTTP',
+      async () => {
+        const originalFetch = globalThis.fetch;
+        const controller = new AbortController();
+        let receivedSignal: AbortSignal | null = null;
+
+        globalThis.fetch = async (_input, init) => {
+          receivedSignal = init?.signal ?? null;
+          return Response.json({
+            optionId: 23,
+            clients: [],
+          });
+        };
+
+        try {
+          await getAnalyticsAccess(23, controller.signal);
+          assert.equal(receivedSignal, controller.signal);
         } finally {
           globalThis.fetch = originalFetch;
         }

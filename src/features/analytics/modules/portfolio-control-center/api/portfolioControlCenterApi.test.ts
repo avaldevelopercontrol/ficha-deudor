@@ -6,7 +6,7 @@ import {
 } from '../../../../../test/testHarness';
 import type {
   PortfolioOverduePromisesQuery,
-} from '../../../types/portfolioControlCenter.types';
+} from '../domain/portfolioPromises.types';
 import {
   buildPortfolioAdvisorPerformanceEndpoint,
   buildPortfolioBootstrapEndpoint,

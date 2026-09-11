@@ -1,108 +1,59 @@
 import assert from 'node:assert/strict';
 
-import type {
-  AuthorizedOption,
-} from '@features/access-control';
-
 import {
   defineSuite,
   test,
 } from '../../../../../test/testHarness';
 
+import type {
+  PowerBiReport,
+} from '../domain/reporteria.types';
+
 import {
   buildPowerBiReportAccessKey,
   filterPowerBiReports,
   filterPowerBiReportsBySelection,
-  findAuthorizedOptionById,
-  getAuthorizedPowerBiReports,
+  findPowerBiReportById,
+  getAvailablePowerBiReports,
   retainAvailablePowerBiReportIds,
   resolvePowerBiEmbedUrl,
   resolvePowerBiPublishToWebUrl,
   resolveReportImageSource,
 } from './reporteria.utils';
 
-const permissions = {
-  consultar: true,
-  insertar: false,
-  editar: false,
-  eliminar: false,
-  exportar: false,
-};
-
-const buildOption = (
-  overrides: Partial<AuthorizedOption>
-): AuthorizedOption => ({
+const buildReport = (
+  overrides: Partial<PowerBiReport>
+): PowerBiReport => ({
   id: 26,
   code: 'mBackusCobranza',
   name: 'Backus Cobranza',
   description: 'Seguimiento de cobranza.',
-  urlBI: 'https://app.powerbi.com/view?r=demo',
+  serviceUrl: 'https://app.powerbi.com/view?r=demo',
   image: '/logos/backus.webp',
   email: 'ngutierrez@avalperu.com',
   icon: 'analytics',
-  type: 4,
-  parentId: 25,
-  order: 1,
-  route: null,
-  permissions,
-  children: [],
   ...overrides,
 });
 
-const report = buildOption({});
-const withoutPermission = buildOption({
-  id: 27,
-  code: 'mNoAutorizado',
-  name: 'Sin acceso',
-  permissions: {
-    ...permissions,
-    consultar: false,
-  },
-});
-const notBi = buildOption({
-  id: 28,
-  code: 'mNormal',
-  name: 'Módulo normal',
-  urlBI: null,
-});
-
-const reporteria = buildOption({
-  id: 25,
-  code: 'mReporteria',
-  name: 'Reportería',
-  description: '',
-  urlBI: null,
-  image: null,
-  icon: 'client-reports',
-  type: 3,
-  parentId: 24,
-  route: '/analytics/reporteria',
-  children: [report, withoutPermission, notBi],
-});
-
-const gestionAnalitica = buildOption({
-  id: 24,
-  code: 'mGestionAnalitica',
-  name: 'Gestión Analítica',
-  description: '',
-  urlBI: null,
-  image: null,
-  icon: 'general-reports',
-  type: 2,
-  parentId: 1,
-  route: null,
-  children: [reporteria],
-});
+const report = buildReport({});
 
 export const suite = defineSuite(
   'reporteria.utils',
   [
     test(
-      'obtiene solo Power BI directos y autorizados debajo de Reportería',
+      'expone solo reportes con una URL Power BI de servicio válida',
       () => {
         assert.deepEqual(
-          getAuthorizedPowerBiReports([
-            gestionAnalitica,
+          getAvailablePowerBiReports([
+            report,
+            buildReport({
+              id: 27,
+              serviceUrl: null,
+            }),
+            buildReport({
+              id: 28,
+              serviceUrl: 'https://example.com/view?r=demo',
+            }),
           ]).map((item) => item.id),
           [26]
         );
@@ -111,7 +62,7 @@ export const suite = defineSuite(
     test(
       'construye una key de acceso estable aunque cambie el orden del catálogo',
       () => {
-        const anotherReport = buildOption({
+        const anotherReport = buildReport({
           id: 30,
           name: 'Otro reporte',
         });
@@ -135,7 +86,7 @@ export const suite = defineSuite(
     test(
       'descarta selecciones que ya no están disponibles y filtra el catálogo efectivo',
       () => {
-        const anotherReport = buildOption({
+        const anotherReport = buildReport({
           id: 30,
           name: 'Otro reporte',
         });
@@ -184,11 +135,11 @@ export const suite = defineSuite(
       }
     ),
     test(
-      'resuelve el reporte por Id y rechaza esquemas inseguros',
+      'resuelve reportes por Id y rechaza esquemas de URL inseguros',
       () => {
         assert.equal(
-          findAuthorizedOptionById(
-            [gestionAnalitica],
+          findPowerBiReportById(
+            [report],
             26
           )?.name,
           'Backus Cobranza'

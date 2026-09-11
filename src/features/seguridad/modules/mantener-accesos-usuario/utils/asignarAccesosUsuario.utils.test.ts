@@ -6,15 +6,15 @@ import {
 } from '../../../../../test/testHarness';
 
 import type {
-  OpcionTreeItem,
-} from '../../mantener-accesos-perfil/types/asignarAccesosPerfil.types';
+  AccessTreeItem,
+} from '../../../domain/accesos/access.types';
 
 import {
   createAsignarAccesosUsuarioFormFromAssignments,
   normalizeAsignarAccesosUsuarioForm,
 } from './asignarAccesosUsuario.utils';
 
-const treeItems: OpcionTreeItem[] = [
+const treeItems: AccessTreeItem[] = [
   {
     idModulo: 2,
     nombre: 'Seguridad',

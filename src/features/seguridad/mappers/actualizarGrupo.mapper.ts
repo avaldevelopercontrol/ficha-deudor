@@ -1,6 +1,6 @@
 import type {
-  RegistrarGrupoFormData,
-} from '../modules/mantener-grupo/types/registrarGrupo.types';
+  GrupoFormData,
+} from '../domain/grupos/grupoForm.types';
 
 import type {
   UpdateGrupoRequestApi,
@@ -16,7 +16,7 @@ import type {
  */
 export const mapGrupoDetalleApiToForm = (
   grupo: GrupoDetalleApi
-): RegistrarGrupoFormData => ({
+): GrupoFormData => ({
   nombre:
     grupo.cNombre_Grupo?.trim() ?? '',
 
@@ -86,7 +86,7 @@ export const assertGrupoDetalleMatchesSelectedId = (
 export const buildUpdateGrupoRequest = (
   selectedGrupoId: number,
   grupo: GrupoDetalleApi,
-  form: RegistrarGrupoFormData
+  form: GrupoFormData
 ): UpdateGrupoRequestApi => {
   assertGrupoDetalleMatchesSelectedId(
     selectedGrupoId,

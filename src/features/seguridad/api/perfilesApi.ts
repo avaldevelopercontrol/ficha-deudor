@@ -1,5 +1,4 @@
 import {
-  ApiError,
   apiClient,
 } from '@shared/api/apiClient';
 
@@ -24,8 +23,8 @@ import {
 } from '../mappers/perfil.mapper';
 
 import type {
-  RegistrarPerfilFormData,
-} from '../modules/mantener-perfil/types/registrarPerfil.types';
+  PerfilFormData,
+} from '../domain/perfiles/perfilForm.types';
 
 import type {
   UpdatePerfilApiResponse,
@@ -43,6 +42,10 @@ import type {
   Perfil,
   PerfilApi,
 } from '../types/perfil.types';
+
+import {
+  resolveSeguridadApiError,
+} from './seguridadApiError';
 
 const PERFIL_FETCH_PAGE_NUMBER =
   1;
@@ -63,71 +66,6 @@ const PERFIL_ERROR_MESSAGES = {
   update:
     'No se pudo actualizar el perfil.',
 } as const;
-
-const isRecord = (
-  value: unknown
-): value is Record<
-  string,
-  unknown
-> =>
-  typeof value === 'object' &&
-  value !== null;
-
-const getStringProperty = (
-  value:
-    Record<string, unknown>,
-
-  property:
-    string
-): string | null => {
-  const propertyValue =
-    value[property];
-
-  if (
-    typeof propertyValue !==
-      'string' ||
-    !propertyValue.trim()
-  ) {
-    return null;
-  }
-
-  return propertyValue.trim();
-};
-
-const resolvePerfilApiError = (
-  error: unknown,
-  fallbackMessage: string
-): string => {
-  if (
-    error instanceof ApiError &&
-    isRecord(error.data)
-  ) {
-    const apiMessage =
-      getStringProperty(
-        error.data,
-        'messageUser'
-      ) ??
-      getStringProperty(
-        error.data,
-        'message'
-      );
-
-    return (
-      apiMessage ||
-      error.message.trim() ||
-      fallbackMessage
-    );
-  }
-
-  if (
-    error instanceof Error &&
-    error.message.trim()
-  ) {
-    return error.message.trim();
-  }
-
-  return fallbackMessage;
-};
 
 const buildPerfilesEndpoint =
   (): string => {
@@ -192,11 +130,9 @@ export const fetchPerfiles = async (
       result.response
     );
   } catch (error) {
-    throw new Error(
-      resolvePerfilApiError(
+    throw resolveSeguridadApiError(
         error,
         PERFIL_ERROR_MESSAGES.list
-      )
     );
   }
 };
@@ -234,18 +170,16 @@ export const fetchPerfilById = async (
 
     return result.response;
   } catch (error) {
-    throw new Error(
-      resolvePerfilApiError(
+    throw resolveSeguridadApiError(
         error,
         PERFIL_ERROR_MESSAGES.detail
-      )
     );
   }
 };
 
 export const createPerfil = async (
   form:
-    RegistrarPerfilFormData
+    PerfilFormData
 ): Promise<
   CreatePerfilResponseApi
 > => {
@@ -274,11 +208,9 @@ export const createPerfil = async (
 
     return result.response;
   } catch (error) {
-    throw new Error(
-      resolvePerfilApiError(
+    throw resolveSeguridadApiError(
         error,
         PERFIL_ERROR_MESSAGES.create
-      )
     );
   }
 };
@@ -288,7 +220,7 @@ export const updatePerfil = async (
     PerfilApi,
 
   form:
-    RegistrarPerfilFormData
+    PerfilFormData
 ): Promise<
   UpdatePerfilResponseApi
 > => {
@@ -318,11 +250,9 @@ export const updatePerfil = async (
 
     return result.response;
   } catch (error) {
-    throw new Error(
-      resolvePerfilApiError(
+    throw resolveSeguridadApiError(
         error,
         PERFIL_ERROR_MESSAGES.update
-      )
     );
   }
 };

@@ -10,23 +10,18 @@ import {
 } from 'react-router-dom';
 
 import type {
-  AuthorizedOption,
-} from '@features/access-control';
-
-import {
-  getAnalyticsReportClients,
-} from '../../../access/api/analyticsAccess.api';
-
-import type {
   AnalyticsReportClientOption,
-} from '../../../access/types/analyticsAccess.types';
-
+} from '../../../access/domain/analyticsAccess.types';
 import {
-  buildReporteriaBiRoute,
-} from '../../../constants/reporteriaRoutes.constants';
+  buildPowerBiReportRoute,
+  resolvePowerBiReportOpen,
+} from '../application/reporteriaNavigation.application';
+import type {
+  PowerBiReport,
+} from '../domain/reporteria.types';
 
 export interface ReportClientModalState {
-  report: AuthorizedOption | null;
+  report: PowerBiReport | null;
   clients: readonly AnalyticsReportClientOption[];
   isLoading: boolean;
   error: string | null;
@@ -74,7 +69,7 @@ export const usePowerBiReportClientSelection = ({
   }, [cancelPendingRequest]);
 
   const openClientScopedReport = useCallback(
-    async (report: AuthorizedOption) => {
+    async (report: PowerBiReport) => {
       cancelPendingRequest();
 
       const controller = new AbortController();
@@ -88,9 +83,10 @@ export const usePowerBiReportClientSelection = ({
       });
 
       try {
-        const clients =
-          await getAnalyticsReportClients(
-            report.id,
+        const resolution =
+          await resolvePowerBiReportOpen(
+            report,
+            true,
             controller.signal
           );
 
@@ -103,25 +99,20 @@ export const usePowerBiReportClientSelection = ({
 
         requestRef.current = null;
 
-        if (clients.length === 1) {
+        if (resolution.kind === 'navigate') {
           setModal(
             EMPTY_REPORT_CLIENT_MODAL_STATE
           );
-          navigate(
-            buildReporteriaBiRoute(
-              report.id,
-              clients[0]
-            )
-          );
+          navigate(resolution.route);
           return;
         }
 
         setModal({
           report,
-          clients,
+          clients: resolution.clients,
           isLoading: false,
           error:
-            clients.length === 0
+            resolution.clients.length === 0
               ? 'No tienes carteras habilitadas para consultar este reporte.'
               : null,
         });
@@ -148,14 +139,16 @@ export const usePowerBiReportClientSelection = ({
   );
 
   const open = useCallback(
-    (report: AuthorizedOption) => {
-      if (clientScopedReportIds.has(report.id)) {
+    (report: PowerBiReport) => {
+      if (
+        clientScopedReportIds.has(report.id)
+      ) {
         void openClientScopedReport(report);
         return;
       }
 
       cancelPendingRequest();
-      navigate(buildReporteriaBiRoute(report.id));
+      navigate(buildPowerBiReportRoute(report));
     },
     [
       cancelPendingRequest,
@@ -176,7 +169,10 @@ export const usePowerBiReportClientSelection = ({
       cancelPendingRequest();
       setModal(EMPTY_REPORT_CLIENT_MODAL_STATE);
       navigate(
-        buildReporteriaBiRoute(report.id, client)
+        buildPowerBiReportRoute(
+          report,
+          client
+        )
       );
     },
     [cancelPendingRequest, modal.report, navigate]

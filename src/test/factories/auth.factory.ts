@@ -40,6 +40,7 @@ export const createLoginUsuarioApi = (
   cUsr_Email: 'carlos@avalperu.pe',
   cUsr_EmailPersonal: '',
   cUsr_EmailProfile: '',
+  per_Nombre: 'Administrador Base Datos      ',
   nid_perfil: 9,
   ...overrides,
 });
