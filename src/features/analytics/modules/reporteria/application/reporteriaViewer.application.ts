@@ -1,11 +1,11 @@
 import {
   getAnalyticsPowerBiViewerContext,
-} from '../../../access/api/analyticsAccess.api';
+} from '../../../acceso/api/accesoAnalitica.api';
 import type {
   AnalyticsPowerBiClientSelectionStatus,
   AnalyticsPowerBiViewerContext,
   AnalyticsReportClientOption,
-} from '../../../access/domain/analyticsAccess.types';
+} from '../../../acceso/domain/accesoAnalitica.types';
 import type {
   PowerBiReport,
   ReporteriaCatalog,

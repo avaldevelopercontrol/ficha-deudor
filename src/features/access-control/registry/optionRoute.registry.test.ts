@@ -49,9 +49,9 @@ export const suite = defineSuite(
         assert.equal(
           getOptionRoute(
             APPLICATION_OPTION_IDS
-              .REPORTERIA
+              .SESIONES_BI
           ),
-          '/analytics/reporteria'
+          '/analytics/sesiones-bi'
         );
 
         assert.equal(

@@ -1,9 +1,9 @@
 import {
   getAnalyticsReportClients,
-} from '../../../access/api/analyticsAccess.api';
+} from '../../../acceso/api/accesoAnalitica.api';
 import type {
   AnalyticsReportClientOption,
-} from '../../../access/domain/analyticsAccess.types';
+} from '../../../acceso/domain/accesoAnalitica.types';
 import {
   buildReporteriaBiRoute,
 } from '../../../constants/reporteriaRoutes.constants';

@@ -136,7 +136,7 @@ export const suite = defineSuite(
           join(
             ANALYTICS_ROOT,
             'modules',
-            'portfolio-control-center',
+            'centro-control-cartera',
             'domain'
           )
         );
@@ -166,7 +166,7 @@ export const suite = defineSuite(
         const applicationFiles = listSourceFiles(
           join(
             ANALYTICS_ROOT,
-            'access',
+            'acceso',
             'application'
           )
         );
@@ -226,7 +226,7 @@ export const suite = defineSuite(
         const hookFiles = listSourceFiles(
           join(
             ANALYTICS_ROOT,
-            'access',
+            'acceso',
             'hooks'
           )
         );
@@ -264,9 +264,9 @@ export const suite = defineSuite(
           findFilesContainingAny(
             hookFiles,
             [
-              'access/api/analyticsAccess.api',
-              'access/services/',
-              'access/store/',
+              'acceso/api/accesoAnalitica.api',
+              'acceso/services/',
+              'acceso/store/',
             ]
           );
 
@@ -284,7 +284,7 @@ export const suite = defineSuite(
           join(
             ANALYTICS_ROOT,
             'modules',
-            'portfolio-control-center',
+            'centro-control-cartera',
             'application'
           )
         );
@@ -313,7 +313,7 @@ export const suite = defineSuite(
           join(
             ANALYTICS_ROOT,
             'modules',
-            'portfolio-control-center',
+            'centro-control-cartera',
             'hooks'
           )
         );
@@ -340,7 +340,7 @@ export const suite = defineSuite(
         const legacyTypesFile = join(
           ANALYTICS_ROOT,
           'types',
-          'portfolioControlCenter.types.ts'
+          'centroControlCartera.types.ts'
         );
         const sourceFiles =
           listSourceFiles(ANALYTICS_ROOT);
@@ -349,15 +349,15 @@ export const suite = defineSuite(
           findFilesContainingAny(
             sourceFiles,
             [
-              'types/portfolioControlCenter.types',
-              'portfolioControlCenter.types',
+              'types/centroControlCartera.types',
+              'centroControlCartera.types',
             ]
           );
 
         assert.equal(
           existsSync(legacyTypesFile),
           false,
-          'El archivo legacy portfolioControlCenter.types.ts no debe volver a existir'
+          'El archivo legacy centroControlCartera.types.ts no debe volver a existir'
         );
         assert.deepEqual(
           violations,

@@ -14,6 +14,7 @@ interface ApiRequestOptions<T = unknown> {
   mock?: MockFn<T>;
   useMock?: boolean;
   baseUrl?: string;
+  keepalive?: boolean;
 }
 
 interface ApiFileRequestOptions {
@@ -134,6 +135,7 @@ export async function apiClient<T>(
     mock,
     useMock = env.useMocks,
     baseUrl = env.apiBaseUrl,
+    keepalive = false,
   } = options;
 
   if (useMock && mock) {
@@ -157,6 +159,7 @@ export async function apiClient<T>(
     headers: requestHeaders,
     cache,
     referrerPolicy,
+    keepalive,
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 

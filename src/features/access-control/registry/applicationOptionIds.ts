@@ -18,6 +18,7 @@ export const APPLICATION_OPTION_IDS = {
   MANTENER_ACCESOS_POR_USUARIO: 22,
   PORTFOLIO_CONTROL_CENTER: 23,
   REPORTERIA: 25,
+  SESIONES_BI: 52,
 } as const;
 
 export type ApplicationOptionId =

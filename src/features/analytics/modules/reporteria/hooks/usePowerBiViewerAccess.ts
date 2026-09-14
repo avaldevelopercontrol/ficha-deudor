@@ -15,7 +15,7 @@ import type {
   ReporteriaCatalog,
 } from '../domain/reporteria.types';
 
-type ViewerAnalyticsAccessState =
+type ViewerAccesoAnaliticaState =
   | {
       key: string;
       status: 'error';
@@ -50,8 +50,8 @@ export const usePowerBiViewerAccess = ({
   const accessRequestKey = `${optionId}:${routeSearch}`;
   const isValidReport = report !== null;
 
-  const [analyticsAccess, setAnalyticsAccess] =
-    useState<ViewerAnalyticsAccessState | null>(null);
+  const [accesoAnalitica, setAccesoAnalitica] =
+    useState<ViewerAccesoAnaliticaState | null>(null);
 
   useEffect(() => {
     if (
@@ -76,7 +76,7 @@ export const usePowerBiViewerAccess = ({
           return;
         }
 
-        setAnalyticsAccess({
+        setAccesoAnalitica({
           key: accessRequestKey,
           status: 'ready',
           access,
@@ -90,7 +90,7 @@ export const usePowerBiViewerAccess = ({
           return;
         }
 
-        setAnalyticsAccess({
+        setAccesoAnalitica({
           key: accessRequestKey,
           status: 'error',
         });
@@ -108,19 +108,19 @@ export const usePowerBiViewerAccess = ({
     status,
   ]);
 
-  const currentAnalyticsAccess =
-    analyticsAccess?.key === accessRequestKey
-      ? analyticsAccess
+  const currentAccesoAnalitica =
+    accesoAnalitica?.key === accessRequestKey
+      ? accesoAnalitica
       : null;
 
-  const isAnalyticsAccessLoading =
+  const isAccesoAnaliticaLoading =
     status === 'ready' &&
     isValidReport &&
-    currentAnalyticsAccess === null;
+    currentAccesoAnalitica === null;
 
   const currentAccess =
-    currentAnalyticsAccess?.status === 'ready'
-      ? currentAnalyticsAccess.access
+    currentAccesoAnalitica?.status === 'ready'
+      ? currentAccesoAnalitica.access
       : null;
 
   const embedState =
@@ -134,15 +134,15 @@ export const usePowerBiViewerAccess = ({
       catalog.section?.name || 'Reportería',
     report,
     isValidReport,
-    analyticsAccess:
-      currentAnalyticsAccess?.status === 'ready'
+    accesoAnalitica:
+      currentAccesoAnalitica?.status === 'ready'
         ? {
-            key: currentAnalyticsAccess.key,
+            key: currentAccesoAnalitica.key,
             status: 'ready' as const,
-            ...currentAnalyticsAccess.access,
+            ...currentAccesoAnalitica.access,
           }
-        : currentAnalyticsAccess,
-    isAnalyticsAccessLoading,
+        : currentAccesoAnalitica,
+    isAccesoAnaliticaLoading,
     ...embedState,
   };
 };

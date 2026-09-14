@@ -6,6 +6,7 @@ interface AnalyticsApiRequestOptions {
   includeSelectedCrmClientId?: boolean;
   crmClientId?: number | null;
   signal?: AbortSignal;
+  keepalive?: boolean;
 }
 
 const SELECTED_CRM_CLIENT_ID_KEY =
@@ -169,6 +170,34 @@ export const analyticsApiClient = {
     );
   },
 
+  post<T = void>(
+    path: string,
+    body: unknown,
+    options:
+      AnalyticsApiRequestOptions = {}
+  ): Promise<T> {
+    return apiClient<T>(
+      appendSelectedCrmClient(
+        path,
+        options
+          .includeSelectedCrmClientId ??
+          true,
+        options.crmClientId
+      ),
+      {
+        method: 'POST',
+        baseUrl:
+          env.analyticsApiBaseUrl,
+        headers:
+          getAnalyticsIdentityHeaders(),
+        body,
+        signal: options.signal,
+        keepalive: options.keepalive,
+        useMock: false,
+      }
+    );
+  },
+
   put<T = void>(
     path: string,
     body: unknown,
@@ -191,6 +220,7 @@ export const analyticsApiClient = {
           getAnalyticsIdentityHeaders(),
         body,
         signal: options.signal,
+        keepalive: options.keepalive,
         useMock: false,
       }
     );
@@ -218,6 +248,7 @@ export const analyticsApiClient = {
           getAnalyticsIdentityHeaders(),
         body,
         signal: options.signal,
+        keepalive: options.keepalive,
         useMock: false,
       }
     );

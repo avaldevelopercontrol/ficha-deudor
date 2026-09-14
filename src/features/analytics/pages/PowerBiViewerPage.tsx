@@ -1,6 +1,7 @@
 import {
   useEffect,
   useMemo,
+  useState,
   type ReactNode,
 } from 'react';
 
@@ -26,6 +27,9 @@ import {
   adaptAccessControlToReporteriaCatalog,
 } from '../modules/reporteria/adapters/accessControlReporteria.adapter';
 
+import {
+  usePowerBiSessionTracking,
+} from '../modules/reporteria/hooks/usePowerBiSessionTracking';
 import {
   usePowerBiViewerAccess,
 } from '../modules/reporteria/hooks/usePowerBiViewerAccess';
@@ -57,6 +61,8 @@ export const PowerBiViewerPage = (): ReactNode => {
   }>();
 
   const [searchParams] = useSearchParams();
+  const [loadedEmbedUrl, setLoadedEmbedUrl] =
+    useState<string | null>(null);
 
   const {
     status,
@@ -78,8 +84,8 @@ export const PowerBiViewerPage = (): ReactNode => {
     reporteriaName,
     report,
     isValidReport,
-    analyticsAccess,
-    isAnalyticsAccessLoading,
+    accesoAnalitica,
+    isAccesoAnaliticaLoading,
     baseEmbedUrl,
     requiresScopedEmbed,
     rawScopedEmbedUrl,
@@ -89,6 +95,19 @@ export const PowerBiViewerPage = (): ReactNode => {
     routeSearch,
     status,
     catalog,
+  });
+
+  usePowerBiSessionTracking({
+    enabled:
+      embedUrl !== null &&
+      loadedEmbedUrl === embedUrl &&
+      accesoAnalitica?.status === 'ready' &&
+      accesoAnalitica.allowed,
+    optionId: report?.id ?? null,
+    client:
+      accesoAnalitica?.status === 'ready'
+        ? accesoAnalitica.selectedClient
+        : null,
   });
 
   useEffect(() => {
@@ -148,7 +167,7 @@ export const PowerBiViewerPage = (): ReactNode => {
     );
   }
 
-  if (isAnalyticsAccessLoading) {
+  if (isAccesoAnaliticaLoading) {
     return (
       <main className="reporteria-viewer reporteria-viewer--state">
         Validando acceso al reporte...
@@ -156,7 +175,7 @@ export const PowerBiViewerPage = (): ReactNode => {
     );
   }
 
-  if (analyticsAccess?.status === 'error') {
+  if (accesoAnalitica?.status === 'error') {
     return (
       <main className="reporteria-viewer reporteria-viewer--state">
         <strong>
@@ -170,8 +189,8 @@ export const PowerBiViewerPage = (): ReactNode => {
   }
 
   if (
-    analyticsAccess?.status === 'ready' &&
-    !analyticsAccess.allowed
+    accesoAnalitica?.status === 'ready' &&
+    !accesoAnalitica.allowed
   ) {
     return (
       <main className="reporteria-viewer reporteria-viewer--state">
@@ -186,8 +205,8 @@ export const PowerBiViewerPage = (): ReactNode => {
   }
 
   if (
-    analyticsAccess?.status === 'ready' &&
-    analyticsAccess.clientSelectionStatus ===
+    accesoAnalitica?.status === 'ready' &&
+    accesoAnalitica.clientSelectionStatus ===
       'MISSING'
   ) {
     return (
@@ -209,8 +228,8 @@ export const PowerBiViewerPage = (): ReactNode => {
   }
 
   if (
-    analyticsAccess?.status === 'ready' &&
-    analyticsAccess.clientSelectionStatus ===
+    accesoAnalitica?.status === 'ready' &&
+    accesoAnalitica.clientSelectionStatus ===
       'INVALID'
   ) {
     return (
@@ -291,6 +310,7 @@ export const PowerBiViewerPage = (): ReactNode => {
           className="reporteria-viewer__frame"
           allowFullScreen
           referrerPolicy="no-referrer"
+          onLoad={() => setLoadedEmbedUrl(embedUrl)}
         />
       </div>
     </main>

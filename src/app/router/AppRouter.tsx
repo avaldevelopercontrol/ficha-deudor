@@ -117,6 +117,13 @@ const PowerBiViewerPage = lazy(
     )
 );
 
+const SesionesBiPage = lazy(
+  () =>
+    import(
+      '../../features/analytics/pages/SesionesBiPage'
+    )
+);
+
 const FichaDeudor = lazy(
   () =>
     import(
@@ -344,6 +351,23 @@ export function AppRouter() {
                     }
                   >
                     <PortfolioControlCenterPage />
+                  </OptionAccessRoute>
+                }
+              />
+
+              <Route
+                path={
+                  ANALYTICS_ROUTES
+                    .SESIONES_BI
+                }
+                element={
+                  <OptionAccessRoute
+                    optionId={
+                      APPLICATION_OPTION_IDS
+                        .SESIONES_BI
+                    }
+                  >
+                    <SesionesBiPage />
                   </OptionAccessRoute>
                 }
               />

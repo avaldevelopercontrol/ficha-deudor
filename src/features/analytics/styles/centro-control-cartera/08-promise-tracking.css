@@ -1,0 +1,607 @@
+/* ── Seguimiento operativo de promesas: hoy / ayer ─────────── */
+.portfolio-promise-tracking-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--ap-text);
+}
+
+.portfolio-promise-tracking-modal__intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid rgba(26, 37, 64, 0.09);
+  border-radius: 13px;
+  background: linear-gradient(120deg, rgba(35, 92, 170, 0.07), #ffffff 64%);
+}
+
+.portfolio-promise-tracking-modal__intro-icon {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 38px;
+  border-radius: 11px;
+  background: #ffffff;
+  color: var(--ap-navy);
+  box-shadow: 0 4px 12px rgba(26, 37, 64, 0.07);
+}
+
+.portfolio-promise-tracking-modal__intro-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.portfolio-promise-tracking-modal__eyebrow {
+  display: block;
+  margin-bottom: 2px;
+  color: #52627e;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.portfolio-promise-tracking-modal__intro h3 {
+  margin: 0;
+  color: var(--ap-navy);
+  font-size: 16px;
+  font-weight: 780;
+  line-height: 1.25;
+}
+
+.portfolio-promise-tracking-modal__intro p {
+  margin: 5px 0 0;
+  color: var(--ap-text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.portfolio-promise-tracking-period {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 410px);
+  padding: 3px;
+  border: 1px solid rgba(26, 37, 64, 0.11);
+  border-radius: 11px;
+  background: #f3f6fa;
+}
+
+.portfolio-promise-tracking-period button {
+  display: flex;
+  min-width: 0;
+  min-height: 44px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 7px 11px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #657089;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.portfolio-promise-tracking-period button > span {
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+.portfolio-promise-tracking-period button > small {
+  margin-top: 1px;
+  font-size: 9px;
+  font-weight: 650;
+  opacity: 0.78;
+}
+
+.portfolio-promise-tracking-period button.is-active {
+  background: #ffffff;
+  color: var(--ap-navy);
+  box-shadow: 0 2px 8px rgba(26, 37, 64, 0.09);
+}
+
+.portfolio-promise-tracking-period button:focus-visible {
+  outline: 2px solid var(--ap-navy);
+  outline-offset: 2px;
+}
+
+.portfolio-promise-tracking-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.portfolio-promise-tracking-summary article {
+  --tracking-summary-accent: var(--ap-navy);
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 11px;
+  border: 1px solid rgba(26, 37, 64, 0.08);
+  border-radius: 11px;
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgba(26, 37, 64, 0.04);
+}
+
+.portfolio-promise-tracking-summary article:nth-child(2) {
+  --tracking-summary-accent: var(--ap-info);
+}
+
+.portfolio-promise-tracking-summary__positive {
+  --tracking-summary-accent: #16803a !important;
+  background: linear-gradient(110deg, rgba(22, 128, 58, 0.045), #ffffff 62%) !important;
+}
+
+.portfolio-promise-tracking-summary__critical {
+  --tracking-summary-accent: var(--ap-red) !important;
+  background: linear-gradient(110deg, rgba(192, 0, 30, 0.045), #ffffff 62%) !important;
+}
+
+.portfolio-promise-tracking-summary__icon {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--tracking-summary-accent) 9%, #ffffff);
+  color: var(--tracking-summary-accent);
+}
+
+.portfolio-promise-tracking-summary__icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.portfolio-promise-tracking-summary article > div {
+  min-width: 0;
+}
+
+.portfolio-promise-tracking-summary article > div > span {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ap-text-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.portfolio-promise-tracking-summary article > div > strong {
+  display: block;
+  overflow: hidden;
+  color: var(--tracking-summary-accent);
+  font-size: 16px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-promise-tracking-status-panel {
+  padding: 11px 12px;
+  border: 1px solid rgba(26, 37, 64, 0.08);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.portfolio-promise-tracking-status-panel__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+}
+
+.portfolio-promise-tracking-status-panel__heading > div > span {
+  display: block;
+  color: var(--ap-navy);
+  font-size: 11px;
+  font-weight: 780;
+}
+
+.portfolio-promise-tracking-status-panel__heading small {
+  display: block;
+  margin-top: 2px;
+  color: var(--ap-text-muted);
+  font-size: 9px;
+}
+
+.portfolio-promise-tracking-status-panel__cutoff {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(35, 92, 170, 0.07);
+  color: #365b92;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.portfolio-promise-tracking-status-panel__bars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 7px;
+}
+
+.portfolio-promise-tracking-status-panel__row {
+  --tracking-status-accent: #6c7890;
+  display: grid;
+  grid-template-columns: auto minmax(36px, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.82);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.portfolio-promise-tracking-status-panel__row--pending,
+.portfolio-promise-tracking-status-panel__row--broken {
+  --tracking-status-accent: var(--ap-red);
+}
+
+.portfolio-promise-tracking-status-panel__row--partial {
+  --tracking-status-accent: #c27b00;
+}
+
+.portfolio-promise-tracking-status-panel__row--fulfilled {
+  --tracking-status-accent: #16803a;
+}
+
+.portfolio-promise-tracking-status-panel__row--paid-out-of-range {
+  --tracking-status-accent: #5265a8;
+}
+
+.portfolio-promise-tracking-status-panel__row:hover,
+.portfolio-promise-tracking-status-panel__row.is-active {
+  border-color: color-mix(in srgb, var(--tracking-status-accent) 28%, transparent);
+  background: color-mix(in srgb, var(--tracking-status-accent) 5%, #ffffff);
+}
+
+.portfolio-promise-tracking-status-panel__label {
+  color: var(--ap-navy);
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.portfolio-promise-tracking-status-panel__track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(26, 37, 64, 0.08);
+}
+
+.portfolio-promise-tracking-status-panel__fill {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+  border-radius: inherit;
+  background: var(--tracking-status-accent);
+}
+
+.portfolio-promise-tracking-status-panel__row strong {
+  min-width: 18px;
+  color: var(--ap-navy);
+  font-size: 10px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.portfolio-promise-tracking-table-section {
+  overflow: hidden;
+  border: 1px solid rgba(26, 37, 64, 0.09);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.portfolio-promise-tracking-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 9px 11px;
+  border-bottom: 1px solid rgba(26, 37, 64, 0.08);
+  background: #f8fafc;
+}
+
+.portfolio-promise-tracking-table-toolbar__filter {
+  display: grid;
+  grid-template-columns: auto minmax(150px, 185px) 30px;
+  align-items: center;
+  gap: 7px;
+}
+
+.portfolio-promise-tracking-table-toolbar__label,
+.portfolio-promise-tracking-table-toolbar__filter-icon {
+  display: inline-flex;
+  height: 30px;
+  align-items: center;
+}
+
+.portfolio-promise-tracking-table-toolbar__label {
+  color: var(--ap-navy);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.portfolio-promise-tracking-table-toolbar__select {
+  width: 100%;
+  height: 30px;
+  padding: 0 27px 0 8px;
+  border: 1px solid #cfd6e4;
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--ap-navy);
+  font-size: 10px;
+  font-weight: 600;
+  outline: none;
+}
+
+.portfolio-promise-tracking-table-toolbar__filter-icon {
+  width: 30px;
+  justify-content: center;
+  border: 1px solid rgba(26, 37, 64, 0.12);
+  border-radius: 7px;
+  background: #ffffff;
+  color: #60708d;
+}
+
+.portfolio-promise-tracking-table-toolbar__filter-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.portfolio-promise-tracking-table__refreshing {
+  padding: 5px 11px;
+  border-bottom: 1px solid rgba(26, 37, 64, 0.06);
+  background: rgba(35, 92, 170, 0.045);
+  color: #52627e;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.portfolio-promise-tracking-table .table-wrapper {
+  border-bottom: 0;
+}
+
+.portfolio-promise-tracking-table .data-table {
+  font-size: 10px;
+}
+
+.portfolio-promise-tracking-table .data-table th {
+  padding: 7px 6px;
+  font-size: 9.5px;
+}
+
+.portfolio-promise-tracking-table .data-table td {
+  padding: 8px 6px;
+  font-size: 10px;
+  vertical-align: middle;
+}
+
+.portfolio-promise-tracking-table__pagination {
+  padding: 0 10px 8px;
+  border-top: 1px solid rgba(26, 37, 64, 0.06);
+  background: #ffffff;
+}
+
+.portfolio-promise-tracking-debtor,
+.portfolio-promise-tracking-owner,
+.portfolio-promise-tracking-amount {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.portfolio-promise-tracking-debtor strong,
+.portfolio-promise-tracking-owner strong {
+  overflow: hidden;
+  color: var(--ap-navy);
+  font-size: 10px;
+  font-weight: 780;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-promise-tracking-debtor span,
+.portfolio-promise-tracking-owner span,
+.portfolio-promise-tracking-amount span,
+.portfolio-promise-tracking-amount small {
+  overflow: hidden;
+  color: var(--ap-text-muted);
+  font-size: 8.8px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-promise-tracking-amount {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.portfolio-promise-tracking-amount strong {
+  color: var(--ap-navy);
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+.portfolio-promise-tracking-activity {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.portfolio-promise-tracking-activity__counts,
+.portfolio-promise-tracking-activity__signals {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.portfolio-promise-tracking-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 5px;
+  border: 1px solid rgba(26, 37, 64, 0.08);
+  border-radius: 6px;
+  background: #f7f9fc;
+  color: #657089;
+  font-size: 8.5px;
+  white-space: nowrap;
+}
+
+.portfolio-promise-tracking-metric.is-active {
+  border-color: rgba(35, 92, 170, 0.14);
+  background: rgba(35, 92, 170, 0.055);
+  color: #365b92;
+}
+
+.portfolio-promise-tracking-metric svg {
+  width: 11px;
+  height: 11px;
+}
+
+.portfolio-promise-tracking-metric strong {
+  color: currentColor;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.portfolio-promise-tracking-contact,
+.portfolio-promise-tracking-confirmation,
+.portfolio-promise-tracking-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 8.3px;
+  font-weight: 800;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.portfolio-promise-tracking-contact--direct,
+.portfolio-promise-tracking-confirmation--confirmed,
+.portfolio-promise-tracking-status--fulfilled {
+  background: #e8f7ed;
+  color: #147332;
+}
+
+.portfolio-promise-tracking-contact--indirect {
+  background: #eaf2ff;
+  color: #315f9f;
+}
+
+.portfolio-promise-tracking-contact--no-contact,
+.portfolio-promise-tracking-confirmation--not-confirmed,
+.portfolio-promise-tracking-status--partial {
+  background: #fff4d6;
+  color: #936100;
+}
+
+.portfolio-promise-tracking-contact--no-management,
+.portfolio-promise-tracking-confirmation--unknown {
+  background: #eef1f5;
+  color: #69758a;
+}
+
+.portfolio-promise-tracking-status--pending,
+.portfolio-promise-tracking-status--broken {
+  background: var(--ap-danger-bg);
+  color: var(--ap-danger);
+}
+
+.portfolio-promise-tracking-status--paid-out-of-range {
+  background: #edf0ff;
+  color: #4b5d9b;
+}
+
+.portfolio-promise-tracking-outstanding {
+  color: var(--ap-danger);
+  font-size: 10.5px;
+  font-weight: 820;
+}
+
+.portfolio-promise-tracking-outstanding.is-covered {
+  color: #16803a;
+}
+
+@media (max-width: 1100px) {
+  .portfolio-promise-tracking-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .portfolio-promise-tracking-table .data-table td,
+  .portfolio-promise-tracking-table .data-table th {
+    padding-right: 4px;
+    padding-left: 4px;
+  }
+}
+
+@media (max-width: 720px) {
+  .portfolio-promise-tracking-modal__intro {
+    padding: 11px;
+  }
+
+  .portfolio-promise-tracking-modal__intro h3 {
+    font-size: 14px;
+  }
+
+  .portfolio-promise-tracking-period {
+    width: 100%;
+  }
+
+  .portfolio-promise-tracking-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-promise-tracking-status-panel__heading {
+    flex-direction: column;
+  }
+}
+
+.portfolio-promise-tracking-empty-activity {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 8.6px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.portfolio-promise-tracking-empty-activity.is-resolved {
+  background: #e8f7ed;
+  color: #147332;
+}
+
+.portfolio-promise-tracking-empty-activity.is-action-required {
+  background: var(--ap-danger-bg);
+  color: var(--ap-danger);
+}
+
+.portfolio-promise-tracking-activity__hint {
+  color: var(--ap-text-muted);
+  font-size: 8.3px;
+  line-height: 1.3;
+}

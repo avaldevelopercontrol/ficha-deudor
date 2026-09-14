@@ -1,9 +1,9 @@
 import {
   getAnalyticsPowerBiOptionAccess,
-} from '../../../access/api/analyticsAccess.api';
+} from '../../../acceso/api/accesoAnalitica.api';
 import type {
   AnalyticsPowerBiOptionAccess,
-} from '../../../access/domain/analyticsAccess.types';
+} from '../../../acceso/domain/accesoAnalitica.types';
 import type {
   PowerBiReport,
 } from '../domain/reporteria.types';

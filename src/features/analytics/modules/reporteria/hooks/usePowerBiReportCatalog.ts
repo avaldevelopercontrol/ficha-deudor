@@ -37,7 +37,7 @@ export const usePowerBiReportCatalog = ({
   const [selectedReportIds, setSelectedReportIds] =
     useState<number[]>([]);
 
-  const [analyticsAccess, setAnalyticsAccess] =
+  const [accesoAnalitica, setAccesoAnalitica] =
     useState<AnalyticsReportAccessState | null>(null);
 
   const reports = useMemo(
@@ -70,7 +70,7 @@ export const usePowerBiReportCatalog = ({
           return;
         }
 
-        setAnalyticsAccess({
+        setAccesoAnalitica({
           key: reportAccessKey,
           access,
           hasErrors: false,
@@ -84,7 +84,7 @@ export const usePowerBiReportCatalog = ({
           return;
         }
 
-        setAnalyticsAccess({
+        setAccesoAnalitica({
           key: reportAccessKey,
           access: {
             allowedReportIds: [],
@@ -100,37 +100,37 @@ export const usePowerBiReportCatalog = ({
     };
   }, [reportAccessKey, reports, status]);
 
-  const currentAnalyticsAccess =
-    analyticsAccess?.key === reportAccessKey
-      ? analyticsAccess
+  const currentAccesoAnalitica =
+    accesoAnalitica?.key === reportAccessKey
+      ? accesoAnalitica
       : null;
 
-  const isAnalyticsAccessLoading =
+  const isAccesoAnaliticaLoading =
     status === 'ready' &&
     reports.length > 0 &&
-    currentAnalyticsAccess === null;
+    currentAccesoAnalitica === null;
 
   const analyticsReports = useMemo(() => {
-    if (!currentAnalyticsAccess) {
+    if (!currentAccesoAnalitica) {
       return [];
     }
 
     const allowedIds = new Set(
-      currentAnalyticsAccess.access.allowedReportIds
+      currentAccesoAnalitica.access.allowedReportIds
     );
 
     return reports.filter((report) =>
       allowedIds.has(report.id)
     );
-  }, [currentAnalyticsAccess, reports]);
+  }, [currentAccesoAnalitica, reports]);
 
   const clientScopedReportIds = useMemo(
     () =>
       new Set(
-        currentAnalyticsAccess?.access
+        currentAccesoAnalitica?.access
           .clientScopedReportIds ?? []
       ),
-    [currentAnalyticsAccess]
+    [currentAccesoAnalitica]
   );
 
   const effectiveSelectedReportIds = useMemo(
@@ -162,11 +162,11 @@ export const usePowerBiReportCatalog = ({
     selectedReportIds:
       effectiveSelectedReportIds,
     filteredReports,
-    hasAnalyticsAccessErrors:
-      currentAnalyticsAccess?.hasErrors === true,
-    isAnalyticsAccessReady:
-      currentAnalyticsAccess !== null,
-    isAnalyticsAccessLoading,
+    hasAccesoAnaliticaErrors:
+      currentAccesoAnalitica?.hasErrors === true,
+    isAccesoAnaliticaReady:
+      currentAccesoAnalitica !== null,
+    isAccesoAnaliticaLoading,
     setSelectedReportIds,
   };
 };

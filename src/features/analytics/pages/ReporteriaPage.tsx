@@ -45,9 +45,9 @@ export const ReporteriaPage = (): ReactNode => {
     clientScopedReportIds,
     selectedReportIds,
     filteredReports,
-    hasAnalyticsAccessErrors,
-    isAnalyticsAccessReady,
-    isAnalyticsAccessLoading,
+    hasAccesoAnaliticaErrors,
+    isAccesoAnaliticaReady,
+    isAccesoAnaliticaLoading,
     setSelectedReportIds,
   } = usePowerBiReportCatalog({
     status,
@@ -135,7 +135,7 @@ export const ReporteriaPage = (): ReactNode => {
             </div>
           )}
 
-          {isAnalyticsAccessLoading && (
+          {isAccesoAnaliticaLoading && (
             <div
               className="reporteria-page__state"
               role="status"
@@ -145,9 +145,9 @@ export const ReporteriaPage = (): ReactNode => {
           )}
 
           {status === 'ready' &&
-            !isAnalyticsAccessLoading &&
-            isAnalyticsAccessReady &&
-            hasAnalyticsAccessErrors && (
+            !isAccesoAnaliticaLoading &&
+            isAccesoAnaliticaReady &&
+            hasAccesoAnaliticaErrors && (
               <div
                 className="reporteria-page__state reporteria-page__state--error"
                 role="alert"
@@ -173,9 +173,9 @@ export const ReporteriaPage = (): ReactNode => {
 
           {status === 'ready' &&
             reports.length > 0 &&
-            !isAnalyticsAccessLoading &&
-            isAnalyticsAccessReady &&
-            !hasAnalyticsAccessErrors &&
+            !isAccesoAnaliticaLoading &&
+            isAccesoAnaliticaReady &&
+            !hasAccesoAnaliticaErrors &&
             analyticsReports.length === 0 && (
               <div
                 className="reporteria-page__state"

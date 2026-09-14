@@ -64,6 +64,15 @@ const APPLICATION_OPTION_REGISTRY:
     {
       optionId:
         APPLICATION_OPTION_IDS
+          .SESIONES_BI,
+      path:
+        ANALYTICS_ROUTES
+          .SESIONES_BI,
+      enabled: true,
+    },
+    {
+      optionId:
+        APPLICATION_OPTION_IDS
           .GESTION_DEUDOR,
       path:
         GESTION_COBRANZAS_ROUTES
