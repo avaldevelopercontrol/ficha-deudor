@@ -1,27 +1,19 @@
-import {
-  analyticsApiClient,
-} from '@shared/api/analyticsApiClient';
-
 import type {
-  SesionBiDetail,
   SesionBiEstado,
-  SesionBiEvent,
-  SesionBiRow,
-  SesionesBiCatalogs,
-  SesionesBiFilterOption,
-  SesionesBiPanel,
-  SesionesBiPanelFilters,
-  SesionesBiReportFilterOption,
-  SesionesBiReportUsage,
-  SesionesBiSummary,
-  SesionesBiTrendPoint,
-  SesionesBiUserUsage,
 } from '../domain/sesionesBi.types';
-
-const PANEL_PATH =
-  '/v1/Analitica/PowerBi/Sesiones/Panel';
-const SESSIONS_PATH =
-  '/v1/Analitica/PowerBi/Sesiones';
+import type {
+  SesionBiDetailApiResponse,
+  SesionBiEventApiResponse,
+  SesionBiRowApiResponse,
+  SesionesBiCatalogsApiResponse,
+  SesionesBiFilterOptionApiResponse,
+  SesionesBiPanelApiResponse,
+  SesionesBiReportFilterOptionApiResponse,
+  SesionesBiReportUsageApiResponse,
+  SesionesBiSummaryApiResponse,
+  SesionesBiTrendPointApiResponse,
+  SesionesBiUserUsageApiResponse,
+} from './sesionesBiApi.types';
 
 const isRecord = (
   value: unknown
@@ -166,178 +158,177 @@ const expectArray = <T>(
   );
 };
 
-const mapSummary = (
+const parseSummary = (
   value: unknown,
   path: string
-): SesionesBiSummary => {
+): SesionesBiSummaryApiResponse => {
   const row = expectRecord(value, path);
 
   return {
-    activeSessions: expectNonNegativeInteger(
+    sesionesActivas: expectNonNegativeInteger(
       row.sesionesActivas,
       `${path}.sesionesActivas`
     ),
-    totalSessions: expectNonNegativeInteger(
+    totalSesiones: expectNonNegativeInteger(
       row.totalSesiones,
       `${path}.totalSesiones`
     ),
-    uniqueUsers: expectNonNegativeInteger(
+    usuariosUnicos: expectNonNegativeInteger(
       row.usuariosUnicos,
       `${path}.usuariosUnicos`
     ),
-    visibleSeconds: expectNonNegativeInteger(
+    segundosVisibles: expectNonNegativeInteger(
       row.segundosVisibles,
       `${path}.segundosVisibles`
     ),
-    averageSecondsPerSession: expectNonNegativeInteger(
+    promedioSegundosPorSesion: expectNonNegativeInteger(
       row.promedioSegundosPorSesion,
       `${path}.promedioSegundosPorSesion`
     ),
   };
 };
 
-const mapReportUsage = (
+const parseReportUsage = (
   value: unknown,
   path: string
-): SesionesBiReportUsage => {
+): SesionesBiReportUsageApiResponse => {
   const row = expectRecord(value, path);
 
   return {
-    reportId: expectPositiveInteger(
+    idOpcionReporte: expectPositiveInteger(
       row.idOpcionReporte,
       `${path}.idOpcionReporte`
     ),
-    reportName: expectString(
+    reporteNombre: expectString(
       row.reporteNombre,
       `${path}.reporteNombre`
     ),
-    sessions: expectNonNegativeInteger(
+    sesiones: expectNonNegativeInteger(
       row.sesiones,
       `${path}.sesiones`
     ),
-    uniqueUsers: expectNonNegativeInteger(
+    usuariosUnicos: expectNonNegativeInteger(
       row.usuariosUnicos,
       `${path}.usuariosUnicos`
     ),
-    visibleSeconds: expectNonNegativeInteger(
+    segundosVisibles: expectNonNegativeInteger(
       row.segundosVisibles,
       `${path}.segundosVisibles`
     ),
   };
 };
 
-const mapUserUsage = (
+const parseUserUsage = (
   value: unknown,
   path: string
-): SesionesBiUserUsage => {
+): SesionesBiUserUsageApiResponse => {
   const row = expectRecord(value, path);
 
   return {
-    userId: expectPositiveInteger(
+    idUsuario: expectPositiveInteger(
       row.idUsuario,
       `${path}.idUsuario`
     ),
-    userLogin: expectString(
+    usuarioLogin: expectString(
       row.usuarioLogin,
       `${path}.usuarioLogin`
     ),
-    userName: expectString(
+    usuarioNombre: expectString(
       row.usuarioNombre,
       `${path}.usuarioNombre`
     ),
-    sessions: expectNonNegativeInteger(
+    sesiones: expectNonNegativeInteger(
       row.sesiones,
       `${path}.sesiones`
     ),
-    uniqueReports: expectNonNegativeInteger(
+    reportesUnicos: expectNonNegativeInteger(
       row.reportesUnicos,
       `${path}.reportesUnicos`
     ),
-    visibleSeconds: expectNonNegativeInteger(
+    segundosVisibles: expectNonNegativeInteger(
       row.segundosVisibles,
       `${path}.segundosVisibles`
     ),
   };
 };
 
-const mapTrend = (
+const parseTrend = (
   value: unknown,
   path: string
-): SesionesBiTrendPoint => {
+): SesionesBiTrendPointApiResponse => {
   const row = expectRecord(value, path);
 
   return {
-    periodUtc: expectIsoDateTime(
+    periodoUtc: expectIsoDateTime(
       row.periodoUtc,
       `${path}.periodoUtc`
     ),
-    sessions: expectNonNegativeInteger(
+    sesiones: expectNonNegativeInteger(
       row.sesiones,
       `${path}.sesiones`
     ),
-    uniqueUsers: expectNonNegativeInteger(
+    usuariosUnicos: expectNonNegativeInteger(
       row.usuariosUnicos,
       `${path}.usuariosUnicos`
     ),
-    visibleSeconds: expectNonNegativeInteger(
+    segundosVisibles: expectNonNegativeInteger(
       row.segundosVisibles,
       `${path}.segundosVisibles`
     ),
   };
 };
 
-const mapFilterOption = (
+const parseFilterOption = (
   value: unknown,
   path: string
-): SesionesBiFilterOption => {
+): SesionesBiFilterOptionApiResponse => {
   const row = expectRecord(value, path);
 
   return {
     id: expectPositiveInteger(row.id, `${path}.id`),
-    name: expectString(row.nombre, `${path}.nombre`),
+    nombre: expectString(row.nombre, `${path}.nombre`),
   };
 };
 
-
-const mapReportFilterOption = (
+const parseReportFilterOption = (
   value: unknown,
   path: string
-): SesionesBiReportFilterOption => {
+): SesionesBiReportFilterOptionApiResponse => {
   const row = expectRecord(value, path);
 
   return {
     id: expectPositiveInteger(row.id, `${path}.id`),
-    name: expectString(row.nombre, `${path}.nombre`),
-    requiresClientSelection: expectBoolean(
+    nombre: expectString(row.nombre, `${path}.nombre`),
+    requiereSeleccionCliente: expectBoolean(
       row.requiereSeleccionCliente,
       `${path}.requiereSeleccionCliente`
     ),
   };
 };
 
-const mapCatalogs = (
+const parseCatalogs = (
   value: unknown,
   path: string
-): SesionesBiCatalogs => {
+): SesionesBiCatalogsApiResponse => {
   const row = expectRecord(value, path);
 
   return {
-    reports: expectArray(
+    reportes: expectArray(
       row.reportes,
       `${path}.reportes`,
-      mapReportFilterOption
+      parseReportFilterOption
     ),
-    users: expectArray(
+    usuarios: expectArray(
       row.usuarios,
       `${path}.usuarios`,
-      mapFilterOption
+      parseFilterOption
     ),
-    clients: expectArray(
+    clientes: expectArray(
       row.clientes,
       `${path}.clientes`,
-      mapFilterOption
+      parseFilterOption
     ),
-    statuses: expectArray(
+    estados: expectArray(
       row.estados,
       `${path}.estados`,
       expectSessionState
@@ -345,82 +336,106 @@ const mapCatalogs = (
   };
 };
 
-const mapSession = (
+const parseSession = (
   value: unknown,
   path: string
-): SesionBiRow => {
+): SesionBiRowApiResponse => {
   const row = expectRecord(value, path);
 
   return {
-    sessionId: expectString(row.idSesion, `${path}.idSesion`),
-    userId: expectPositiveInteger(row.idUsuario, `${path}.idUsuario`),
-    userLogin: expectString(row.usuarioLogin, `${path}.usuarioLogin`),
-    userName: expectString(row.usuarioNombre, `${path}.usuarioNombre`),
-    reportId: expectPositiveInteger(
+    idSesion: expectString(row.idSesion, `${path}.idSesion`),
+    idUsuario: expectPositiveInteger(row.idUsuario, `${path}.idUsuario`),
+    usuarioLogin: expectString(row.usuarioLogin, `${path}.usuarioLogin`),
+    usuarioNombre: expectString(row.usuarioNombre, `${path}.usuarioNombre`),
+    idOpcionReporte: expectPositiveInteger(
       row.idOpcionReporte,
       `${path}.idOpcionReporte`
     ),
-    reportName: expectString(row.reporteNombre, `${path}.reporteNombre`),
-    clientId: expectNullablePositiveInteger(
+    reporteNombre: expectString(row.reporteNombre, `${path}.reporteNombre`),
+    idCliente: expectNullablePositiveInteger(
       row.idCliente,
       `${path}.idCliente`
     ),
-    clientName: expectNullableString(
+    clienteNombre: expectNullableString(
       row.clienteNombre,
       `${path}.clienteNombre`
     ),
-    startedAtUtc: expectIsoDateTime(
+    fechaInicioUtc: expectIsoDateTime(
       row.fechaInicioUtc,
       `${path}.fechaInicioUtc`
     ),
-    lastHeartbeatAtUtc: expectIsoDateTime(
+    fechaUltimoHeartbeatUtc: expectIsoDateTime(
       row.fechaUltimoHeartbeatUtc,
       `${path}.fechaUltimoHeartbeatUtc`
     ),
-    endedAtUtc: expectNullableIsoDateTime(
+    fechaFinUtc: expectNullableIsoDateTime(
       row.fechaFinUtc,
       `${path}.fechaFinUtc`
     ),
-    visibleSeconds: expectNonNegativeInteger(
+    segundosVisibles: expectNonNegativeInteger(
       row.segundosVisibles,
       `${path}.segundosVisibles`
     ),
-    isVisible: expectBoolean(row.estaVisible, `${path}.estaVisible`),
-    status: expectSessionState(row.estado, `${path}.estado`),
-    closeReason: expectNullableString(
+    estaVisible: expectBoolean(row.estaVisible, `${path}.estaVisible`),
+    estado: expectSessionState(row.estado, `${path}.estado`),
+    motivoCierre: expectNullableString(
       row.motivoCierre,
       `${path}.motivoCierre`
     ),
   };
 };
 
-const mapPanel = (value: unknown): SesionesBiPanel => {
+const parseEvent = (
+  value: unknown,
+  path: string
+): SesionBiEventApiResponse => {
+  const row = expectRecord(value, path);
+
+  return {
+    idEvento: expectPositiveInteger(row.idEvento, `${path}.idEvento`),
+    tipoEvento: expectString(row.tipoEvento, `${path}.tipoEvento`),
+    fechaEventoUtc: expectIsoDateTime(
+      row.fechaEventoUtc,
+      `${path}.fechaEventoUtc`
+    ),
+    segundosVisibles: expectNonNegativeInteger(
+      row.segundosVisibles,
+      `${path}.segundosVisibles`
+    ),
+    origen: expectString(row.origen, `${path}.origen`),
+    detalle: expectNullableString(row.detalle, `${path}.detalle`),
+  };
+};
+
+export const parseSesionesBiPanelApiResponse = (
+  value: unknown
+): SesionesBiPanelApiResponse => {
   const row = expectRecord(value, '$');
   const sessions = expectRecord(row.sesiones, '$.sesiones');
 
   return {
-    fromUtc: expectIsoDateTime(row.desdeUtc, '$.desdeUtc'),
-    toUtc: expectIsoDateTime(row.hastaUtc, '$.hastaUtc'),
-    trendGranularity: expectString(
+    desdeUtc: expectIsoDateTime(row.desdeUtc, '$.desdeUtc'),
+    hastaUtc: expectIsoDateTime(row.hastaUtc, '$.hastaUtc'),
+    granularidadTendencia: expectString(
       row.granularidadTendencia,
       '$.granularidadTendencia'
     ),
-    summary: mapSummary(row.resumen, '$.resumen'),
-    reportUsage: expectArray(
+    resumen: parseSummary(row.resumen, '$.resumen'),
+    usoReportes: expectArray(
       row.usoReportes,
       '$.usoReportes',
-      mapReportUsage
+      parseReportUsage
     ),
-    topUsers: expectArray(
+    usuariosMayorUso: expectArray(
       row.usuariosMayorUso,
       '$.usuariosMayorUso',
-      mapUserUsage
+      parseUserUsage
     ),
-    trend: expectArray(row.tendencia, '$.tendencia', mapTrend),
-    catalogs: mapCatalogs(row.catalogos, '$.catalogos'),
-    sessions: {
-      page: expectPositiveInteger(sessions.pagina, '$.sesiones.pagina'),
-      pageSize: expectPositiveInteger(
+    tendencia: expectArray(row.tendencia, '$.tendencia', parseTrend),
+    catalogos: parseCatalogs(row.catalogos, '$.catalogos'),
+    sesiones: {
+      pagina: expectPositiveInteger(sessions.pagina, '$.sesiones.pagina'),
+      tamanoPagina: expectPositiveInteger(
         sessions.tamanoPagina,
         '$.sesiones.tamanoPagina'
       ),
@@ -428,105 +443,27 @@ const mapPanel = (value: unknown): SesionesBiPanel => {
       items: expectArray(
         sessions.items,
         '$.sesiones.items',
-        mapSession
+        parseSession
       ),
     },
   };
 };
 
-const mapEvent = (
-  value: unknown,
-  path: string
-): SesionBiEvent => {
-  const row = expectRecord(value, path);
-
-  return {
-    eventId: expectPositiveInteger(row.idEvento, `${path}.idEvento`),
-    eventType: expectString(row.tipoEvento, `${path}.tipoEvento`),
-    eventAtUtc: expectIsoDateTime(row.fechaEventoUtc, `${path}.fechaEventoUtc`),
-    visibleSeconds: expectNonNegativeInteger(
-      row.segundosVisibles,
-      `${path}.segundosVisibles`
-    ),
-    origin: expectString(row.origen, `${path}.origen`),
-    detail: expectNullableString(row.detalle, `${path}.detalle`),
-  };
-};
-
-const mapDetail = (value: unknown): SesionBiDetail => {
+export const parseSesionBiDetailApiResponse = (
+  value: unknown
+): SesionBiDetailApiResponse => {
   const row = expectRecord(value, '$');
 
   return {
-    session: mapSession(row.sesion, '$.sesion'),
-    elapsedSeconds: expectNonNegativeInteger(
+    sesion: parseSession(row.sesion, '$.sesion'),
+    segundosTranscurridos: expectNonNegativeInteger(
       row.segundosTranscurridos,
       '$.segundosTranscurridos'
     ),
-    estimatedHiddenSeconds: expectNonNegativeInteger(
+    segundosNoVisiblesEstimados: expectNonNegativeInteger(
       row.segundosNoVisiblesEstimados,
       '$.segundosNoVisiblesEstimados'
     ),
-    events: expectArray(row.eventos, '$.eventos', mapEvent),
+    eventos: expectArray(row.eventos, '$.eventos', parseEvent),
   };
-};
-
-const appendQuery = (
-  params: URLSearchParams,
-  key: string,
-  value: string | number | null
-) => {
-  if (value === null || value === '') {
-    return;
-  }
-
-  params.set(key, String(value));
-};
-
-export const buildSesionesBiPanelPath = (
-  filters: SesionesBiPanelFilters
-): string => {
-  const params = new URLSearchParams();
-
-  appendQuery(params, 'desdeUtc', filters.fromUtc);
-  appendQuery(params, 'hastaUtc', filters.toUtc);
-  appendQuery(params, 'idOpcionReporte', filters.reportId);
-  appendQuery(params, 'idUsuario', filters.userId);
-  appendQuery(params, 'idCliente', filters.clientId);
-  appendQuery(params, 'estado', filters.status);
-  appendQuery(params, 'busqueda', filters.search.trim());
-  appendQuery(params, 'orden', filters.order);
-  appendQuery(params, 'pagina', filters.page);
-  appendQuery(params, 'tamanoPagina', filters.pageSize);
-
-  return `${PANEL_PATH}?${params.toString()}`;
-};
-
-export const getSesionesBiPanel = async (
-  filters: SesionesBiPanelFilters,
-  signal?: AbortSignal
-): Promise<SesionesBiPanel> => {
-  const response = await analyticsApiClient.get<unknown>(
-    buildSesionesBiPanelPath(filters),
-    {
-      includeSelectedCrmClientId: false,
-      signal,
-    }
-  );
-
-  return mapPanel(response);
-};
-
-export const getSesionBiDetail = async (
-  sessionId: string,
-  signal?: AbortSignal
-): Promise<SesionBiDetail> => {
-  const response = await analyticsApiClient.get<unknown>(
-    `${SESSIONS_PATH}/${encodeURIComponent(sessionId)}`,
-    {
-      includeSelectedCrmClientId: false,
-      signal,
-    }
-  );
-
-  return mapDetail(response);
 };

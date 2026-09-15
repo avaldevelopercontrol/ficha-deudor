@@ -103,6 +103,7 @@ export const SupervisorPerformanceTable: React.FC<
       data={[...items]}
       emptyMessage="No hay supervisores para los filtros seleccionados."
       fitToPanel={false}
+      appearance="analytics"
     />
   );
 };

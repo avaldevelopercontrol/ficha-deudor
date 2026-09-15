@@ -1,5 +1,7 @@
 import React from 'react';
 
+import '../../styles/components/pagination.css';
+
 interface PaginacionProps {
   paginaActual: number;
   totalPaginas: number;
@@ -14,9 +16,13 @@ interface PaginacionProps {
   pageSize?: number;
   pageSizeOptions?: number[];
   onPageSizeChange?: (newSize: number) => void;
+  variant?: 'default' | 'compact';
+  disabled?: boolean;
+  summaryNoun?: string;
+  className?: string;
 }
 
-const Paginacion: React.FC<PaginacionProps> = ({
+export const Paginacion: React.FC<PaginacionProps> = ({
   paginaActual,
   totalPaginas,
   totalRegistros,
@@ -29,6 +35,10 @@ const Paginacion: React.FC<PaginacionProps> = ({
   pageSize = 5,
   pageSizeOptions = [5, 10, 30, 50],
   onPageSizeChange,
+  variant = 'default',
+  disabled = false,
+  summaryNoun = 'registro(s)',
+  className = '',
 }) => {
   const getPaginasVisibles = () => {
     const paginas: (number | string)[] = [];
@@ -57,6 +67,37 @@ const Paginacion: React.FC<PaginacionProps> = ({
     }
     return paginas;
   };
+
+  if (variant === 'compact') {
+    const inicioVisible = totalRegistros === 0 ? 0 : indiceInicio + 1;
+    const finVisible = Math.min(indiceFin, totalRegistros);
+
+    return (
+      <div className={`pagination-compact ${className}`.trim()}>
+        <span>
+          {inicioVisible.toLocaleString('es-PE')}–{finVisible.toLocaleString('es-PE')} de{' '}
+          {totalRegistros.toLocaleString('es-PE')} {summaryNoun}
+        </span>
+        <div className="pagination-compact__actions">
+          <button
+            type="button"
+            disabled={disabled || paginaActual <= 1}
+            onClick={onPaginaAnterior}
+          >
+            Anterior
+          </button>
+          <span>Página {paginaActual} de {Math.max(1, totalPaginas)}</span>
+          <button
+            type="button"
+            disabled={disabled || paginaActual >= Math.max(1, totalPaginas)}
+            onClick={onPaginaSiguiente}
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (totalPaginas <= 1 && !showPageSizeSelector) return null; // Si solo hay una página y no hay selector, no mostrar nada
 

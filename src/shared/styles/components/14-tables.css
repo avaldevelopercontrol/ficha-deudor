@@ -158,3 +158,38 @@
     padding: 6px 5px;
   }
 }
+/* Analytics tables share one visual language across modules. */
+.data-table--analytics thead tr {
+  background: linear-gradient(
+    90deg,
+    var(--ap-navy) 0%,
+    #223050 60%,
+    var(--ap-navy-light) 100%
+  );
+}
+
+.data-table--analytics th {
+  padding-top: 9px;
+  padding-bottom: 9px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.45px;
+  text-transform: none;
+}
+
+.data-table--analytics td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  color: #25314d;
+  font-size: 10.5px;
+}
+
+.data-table--analytics tbody tr:nth-child(even) {
+  background: #f8f9fb;
+}
+
+.data-table--analytics tbody tr:hover,
+.data-table--analytics tbody tr:focus-within {
+  background: #eef4fb;
+}

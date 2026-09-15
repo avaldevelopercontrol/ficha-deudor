@@ -1,0 +1,46 @@
+.resource-state {
+  color: var(--ap-text-muted);
+}
+
+.resource-state--error {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+  padding: 13px 15px;
+  border: 1px solid rgba(192, 0, 30, 0.18);
+  border-radius: var(--radius-lg);
+  background: var(--ap-danger-bg);
+  color: var(--ap-danger);
+}
+
+.resource-state--error strong,
+.resource-state--error span {
+  display: block;
+}
+
+.resource-state--error span {
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.resource-state--error .resource-state__retry {
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+}
+
+.resource-state--empty {
+  display: flex;
+  min-height: 112px;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  border: 1px dashed var(--ap-gray-300);
+  border-radius: 10px;
+  background: var(--ap-gray-50);
+  color: var(--ap-text-muted);
+  font-size: 12px;
+  text-align: center;
+}

@@ -1,5 +1,6 @@
 import type React from 'react';
 
+import { AnalyticsPageHeader } from '../../../shared/components';
 import { SisgesIcon } from '@shared/icons/sisges';
 
 import type {
@@ -27,11 +28,9 @@ const formatFreshnessValue = (
 
 const formatTooltipFreshnessValue = (
   value: string | null | undefined
-): string => {
-  return formatFreshnessValue(value).replace(', ', ' ');
-};
+): string => formatFreshnessValue(value).replace(', ', ' ');
 
-export const CentroControlCarteraHeader: React.FC<
+const CentroControlCarteraFreshnessInfo: React.FC<
   CentroControlCarteraHeaderProps
 > = ({ freshness, isLoading = false }) => {
   const operationValue = isLoading
@@ -52,76 +51,73 @@ export const CentroControlCarteraHeader: React.FC<
   );
 
   return (
-    <header className="portfolio-control-center__header">
-      <div className="portfolio-control-center__headline">
-        <span
-          className="portfolio-control-center__header-icon"
-          aria-hidden="true"
-        >
-          <SisgesIcon name="analytics" />
+    <div className="portfolio-control-center__freshness">
+      <span
+        className="portfolio-control-center__freshness-icon"
+        aria-hidden="true"
+      >
+        <SisgesIcon name="history" />
+      </span>
+
+      <div className="portfolio-control-center__freshness-copy">
+        <span className="portfolio-control-center__freshness-label">
+          Información operativa hasta
         </span>
 
-        <div className="portfolio-control-center__header-copy">
-          <h1 className="portfolio-control-center__title">
-            Análisis de Carteras
-          </h1>
+        <div className="portfolio-control-center__freshness-value-row">
+          <strong className="portfolio-control-center__freshness-value">
+            {operationValue}
+          </strong>
 
-          <p className="portfolio-control-center__subtitle">
-            Seguimiento operativo de cartera, avance y resultados.
-          </p>
-        </div>
-      </div>
+          <span className="portfolio-control-center__freshness-help">
+            <button
+              type="button"
+              className="portfolio-control-center__freshness-help-button"
+              aria-label="Ver detalle de actualización de la información"
+              aria-describedby="portfolio-control-center-freshness-tooltip"
+            >
+              ⓘ
+            </button>
 
-      <div className="portfolio-control-center__freshness">
-        <span
-          className="portfolio-control-center__freshness-icon"
-          aria-hidden="true"
-        >
-          <SisgesIcon name="history" />
-        </span>
-
-        <div className="portfolio-control-center__freshness-copy">
-          <span className="portfolio-control-center__freshness-label">
-            Información operativa hasta
-          </span>
-
-          <div className="portfolio-control-center__freshness-value-row">
-            <strong className="portfolio-control-center__freshness-value">
-              {operationValue}
-            </strong>
-
-            <span className="portfolio-control-center__freshness-help">
-              <button
-                type="button"
-                className="portfolio-control-center__freshness-help-button"
-                aria-label="Ver detalle de actualización de la información"
-                aria-describedby="portfolio-control-center-freshness-tooltip"
-              >
-                ⓘ
-              </button>
-
-              <span
-                id="portfolio-control-center-freshness-tooltip"
-                className="portfolio-control-center__freshness-tooltip"
-                role="tooltip"
-              >
-                <span className="portfolio-control-center__freshness-tooltip-row">
-                  <span>Operación:</span>
-                  <strong>{operationDetail}</strong>
-                </span>
-                <span className="portfolio-control-center__freshness-tooltip-row">
-                  <span>Cartera base:</span>
-                  <strong>{portfolioBaseDetail}</strong>
-                </span>
-                <span className="portfolio-control-center__freshness-tooltip-row">
-                  <span>Último refresh:</span>
-                  <strong>{refreshedAtDetail}</strong>
-                </span>
+            <span
+              id="portfolio-control-center-freshness-tooltip"
+              className="portfolio-control-center__freshness-tooltip"
+              role="tooltip"
+            >
+              <span className="portfolio-control-center__freshness-tooltip-row">
+                <span>Operación:</span>
+                <strong>{operationDetail}</strong>
+              </span>
+              <span className="portfolio-control-center__freshness-tooltip-row">
+                <span>Cartera base:</span>
+                <strong>{portfolioBaseDetail}</strong>
+              </span>
+              <span className="portfolio-control-center__freshness-tooltip-row">
+                <span>Último refresh:</span>
+                <strong>{refreshedAtDetail}</strong>
               </span>
             </span>
-          </div>
+          </span>
         </div>
       </div>
-    </header>
+    </div>
   );
 };
+
+export const CentroControlCarteraHeader: React.FC<
+  CentroControlCarteraHeaderProps
+> = ({ freshness, isLoading = false }) => (
+  <AnalyticsPageHeader
+    variant="hero"
+    className="portfolio-control-center__header"
+    icon={<SisgesIcon name="analytics" />}
+    title="Análisis de Carteras"
+    description="Seguimiento operativo de cartera, avance y resultados."
+    actions={(
+      <CentroControlCarteraFreshnessInfo
+        freshness={freshness}
+        isLoading={isLoading}
+      />
+    )}
+  />
+);

@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, Key } from 'react';
 import type { Column } from '../../types';
 import ColumnFilter from '../ui/ColumnFilter';
 
@@ -20,6 +20,12 @@ interface Props<TData> {
   sortDirection?: 'asc' | 'desc';
   onSortChange?: (colKey: string, direction: 'asc' | 'desc') => void;
   fitToPanel?: boolean;
+  getRowKey?: (row: TData, index: number) => Key;
+  rowAriaLabel?: (row: TData) => string;
+  wrapperClassName?: string;
+  tableClassName?: string;
+  ariaBusy?: boolean;
+  appearance?: 'default' | 'analytics';
 }
 
 interface HeaderCellGroup<TData> {
@@ -84,6 +90,12 @@ function Table<TData>({
   sortDirection = 'asc',
   onSortChange,
   fitToPanel = true,
+  getRowKey,
+  rowAriaLabel,
+  wrapperClassName = '',
+  tableClassName = '',
+  ariaBusy,
+  appearance = 'default',
 }: Props<TData>) {
   const hasGroupedHeaders = columns.some((col) => col.group && col.groupLabel);
 
@@ -224,7 +236,8 @@ function Table<TData>({
     <div
       className={`table-wrapper ${
         fitToPanel ? 'table-wrapper--fit' : 'table-wrapper--auto'
-      }`}
+      } ${wrapperClassName}`.trim()}
+      aria-busy={ariaBusy}
       style={{
         width: '100%',
         maxWidth: '100%',
@@ -240,7 +253,13 @@ function Table<TData>({
         }}
       >
         <table
-          className="data-table"
+          className={[
+            'data-table',
+            appearance !== 'default' ? `data-table--${appearance}` : '',
+            tableClassName,
+          ]
+            .filter(Boolean)
+            .join(' ')}
           style={{
             width: fitToPanel ? '100%' : undefined,
             maxWidth: fitToPanel ? '100%' : undefined,
@@ -368,8 +387,17 @@ function Table<TData>({
             ) : (
               data.map((row, index) => (
                 <tr
-                  key={index}
-                  onClick={() => onRowClick?.(row)}
+                  key={getRowKey ? getRowKey(row, index) : index}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  onKeyDown={onRowClick ? (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      onRowClick(row);
+                    }
+                  } : undefined}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  role={onRowClick ? 'button' : undefined}
+                  aria-label={rowAriaLabel?.(row)}
                   className={`${onRowClick ? 'clickable' : ''} ${
                     rowClassName ? rowClassName(row) : ''
                   }`}

@@ -24,7 +24,6 @@ export interface SesionesBiPanelFilters {
   userId: number | null;
   clientId: number | null;
   status: SesionBiEstado | null;
-  search: string;
   order: SesionesBiOrden;
   page: number;
   pageSize: number;

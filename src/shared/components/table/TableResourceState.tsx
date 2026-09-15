@@ -3,6 +3,7 @@ import type React from 'react';
 import {
   ActionButton,
   FeedbackMessage,
+  LoadingState,
 } from '../ui';
 
 import '../../styles/components/table-resource-state.css';
@@ -30,18 +31,10 @@ export const TableResourceState: React.FC<
 }) => {
   if (isLoading) {
     return (
-      <div
+      <LoadingState
+        message={loadingMessage}
         className="table-resource-state"
-        role="status"
-        aria-live="polite"
-      >
-        <span
-          className="table-resource-state__spinner"
-          aria-hidden="true"
-        />
-
-        <span>{loadingMessage}</span>
-      </div>
+      />
     );
   }
 

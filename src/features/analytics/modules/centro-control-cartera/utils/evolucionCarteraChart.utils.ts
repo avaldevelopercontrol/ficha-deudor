@@ -2,6 +2,9 @@ import type {
   EvolucionCarteraPoint,
 } from '../domain/panoramaCartera.types';
 import {
+  buildLineChartModel,
+} from '../../../shared/utils/lineChart.utils';
+import {
   calculatePortfolioRate,
 } from './centroControlCartera.formatters';
 
@@ -126,70 +129,45 @@ export const buildEvolucionCarteraChartModel = (
     getMetricValue(point, metric)
   );
   const maxValue = getMaxValue(values, metric);
-  const {
-    width,
-    height,
-    left,
-    right,
-    top,
-    bottom,
-  } = PORTFOLIO_EVOLUTION_VIEWBOX;
-  const plotWidth = width - left - right;
-  const plotHeight = height - top - bottom;
-  const denominator = Math.max(
-    evolution.length - 1,
-    1
-  );
-
-  const points = evolution.map((item, index) => {
-    const value = values[index] ?? 0;
-    const x =
-      left + (plotWidth * index) / denominator;
-    const y =
-      top +
-      plotHeight *
-        (1 - Math.min(value / maxValue, 1));
-
-    return {
-      period: item.period,
-      value,
-      x,
-      y,
-      showLabel: shouldShowLabel(
-        index,
-        evolution.length
-      ),
-    };
+  const geometry = buildLineChartModel(values, {
+    width: PORTFOLIO_EVOLUTION_VIEWBOX.width,
+    height: PORTFOLIO_EVOLUTION_VIEWBOX.height,
+    padding: {
+      left: PORTFOLIO_EVOLUTION_VIEWBOX.left,
+      right: PORTFOLIO_EVOLUTION_VIEWBOX.right,
+      top: PORTFOLIO_EVOLUTION_VIEWBOX.top,
+      bottom: PORTFOLIO_EVOLUTION_VIEWBOX.bottom,
+    },
+    maxValue,
   });
 
-  const linePath = points
-    .map(
-      (point, index) =>
-        `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`
-    )
-    .join(' ');
+  const points = geometry.coordinates.map((coordinate, index) => ({
+    period: evolution[index]!.period,
+    value: coordinate.value,
+    x: coordinate.x,
+    y: coordinate.y,
+    showLabel: shouldShowLabel(index, evolution.length),
+  }));
 
-  const baselineY = top + plotHeight;
-  const firstPoint = points[0];
-  const lastPoint = points[points.length - 1];
-  const areaPath =
-    firstPoint && lastPoint
-      ? `${linePath} L ${lastPoint.x.toFixed(2)} ${baselineY.toFixed(2)} L ${firstPoint.x.toFixed(2)} ${baselineY.toFixed(2)} Z`
-      : '';
-
+  const plotHeight =
+    PORTFOLIO_EVOLUTION_VIEWBOX.height -
+    PORTFOLIO_EVOLUTION_VIEWBOX.top -
+    PORTFOLIO_EVOLUTION_VIEWBOX.bottom;
   const ticks = [1, 0.75, 0.5, 0.25, 0].map(
     (ratio) => ({
-      value: maxValue * ratio,
-      y: top + plotHeight * (1 - ratio),
+      value: geometry.maxValue * ratio,
+      y:
+        PORTFOLIO_EVOLUTION_VIEWBOX.top +
+        plotHeight * (1 - ratio),
     })
   );
 
   return {
     points,
     ticks,
-    linePath,
-    areaPath,
-    maxValue,
+    linePath: geometry.linePath,
+    areaPath: geometry.areaPath,
+    maxValue: geometry.maxValue,
     currentValue: values[values.length - 1] ?? 0,
     deltaValue:
       (values[values.length - 1] ?? 0) -

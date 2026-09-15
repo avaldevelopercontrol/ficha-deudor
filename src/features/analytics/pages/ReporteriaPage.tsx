@@ -98,7 +98,7 @@ export const ReporteriaPage = (): ReactNode => {
                 Reportes disponibles
               </h2>
               <p>
-                Los reportes mostrados respetan los permisos de SISGES y los grupos autorizados en Analytics.
+                Los reportes mostrados respetan los permisos de SISGES y, cuando corresponde, los grupos autorizados en Analytics.
               </p>
             </div>
 
@@ -182,10 +182,10 @@ export const ReporteriaPage = (): ReactNode => {
                 role="status"
               >
                 <strong>
-                  No tienes reportes Power BI habilitados para tus grupos asignados.
+                  No tienes reportes Power BI habilitados para tu acceso.
                 </strong>
                 <span>
-                  Solicita la asociación del reporte con uno de tus grupos asignados.
+                  Solicita la habilitación del reporte para tu usuario o grupo correspondiente.
                 </span>
               </div>
             )}

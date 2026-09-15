@@ -7,6 +7,9 @@ import type {
 import {
   buildReporteriaBiRoute,
 } from '../../../constants/reporteriaRoutes.constants';
+import {
+  requiresExplicitClientSelection,
+} from '../domain/reporteriaAccessPolicy';
 import type {
   PowerBiReport,
 } from '../domain/reporteria.types';
@@ -52,7 +55,10 @@ export const resolvePowerBiReportOpen = async (
       signal
     );
 
-  if (clients.length === 1) {
+  if (
+    clients.length === 1 &&
+    !requiresExplicitClientSelection(report.id)
+  ) {
     return {
       kind: 'navigate',
       route: buildReporteriaBiRoute(

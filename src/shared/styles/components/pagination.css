@@ -1,0 +1,31 @@
+.pagination-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  color: var(--ap-text-muted);
+  font-size: 10.5px;
+}
+
+.pagination-compact__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-compact button {
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--ap-text);
+  padding: 5px 9px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pagination-compact button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

@@ -1,0 +1,103 @@
+.side-drawer-layer {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(26, 37, 64, 0.24);
+  backdrop-filter: blur(1px);
+}
+
+.side-drawer {
+  height: 100%;
+  overflow-y: auto;
+  background: #fff;
+  box-shadow: -12px 0 34px rgba(26, 37, 64, 0.16);
+  animation: side-drawer-in 170ms ease-out;
+}
+
+.side-drawer--sm { width: min(400px, 94vw); }
+.side-drawer--md { width: min(480px, 94vw); }
+.side-drawer--lg { width: min(640px, 96vw); }
+
+@keyframes side-drawer-in {
+  from { transform: translateX(18px); opacity: 0.7; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.side-drawer__header {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 17px;
+  border-bottom: 1px solid var(--ap-gray-200);
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(6px);
+}
+
+.side-drawer__title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.side-drawer__title h2 {
+  margin: 1px 0 0;
+  color: var(--ap-navy);
+  font-size: 16px;
+}
+
+.side-drawer__eyebrow {
+  display: block;
+  color: var(--ap-red);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.side-drawer__icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  flex: 0 0 36px;
+  border-radius: 9px;
+  background: var(--ap-gray-100);
+  color: var(--ap-navy);
+}
+
+.side-drawer__close {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  flex: 0 0 34px;
+  padding: 0;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ap-gray-700);
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+}
+
+.side-drawer__close:hover {
+  border-color: rgba(192, 0, 30, 0.28);
+  background: var(--ap-red-light);
+  color: var(--ap-red);
+}
+
+.side-drawer__close:focus-visible {
+  outline: 2px solid rgba(192, 0, 30, 0.35);
+  outline-offset: 2px;
+}
+
+.side-drawer__content {
+  padding: 17px;
+}

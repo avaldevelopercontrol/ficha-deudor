@@ -9,6 +9,7 @@ interface ActionButtonProps {
   ariaLabel?: string;
   title?: string;
   disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
 
   /**
    * Muestra un spinner, cambia el texto
@@ -30,6 +31,7 @@ export const ActionButton:
     ariaLabel,
     title,
     disabled = false,
+    type = 'button',
     loading = false,
     loadingLabel = 'Procesando...',
     className = '',
@@ -44,7 +46,7 @@ export const ActionButton:
 
     return (
       <button
-        type="button"
+        type={type}
         className={[
           'btn',
           `btn-${variant}`,

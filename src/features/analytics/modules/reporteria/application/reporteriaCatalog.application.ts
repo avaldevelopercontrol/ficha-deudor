@@ -4,6 +4,10 @@ import {
 import type {
   AnalyticsPowerBiOptionAccess,
 } from '../../../acceso/domain/accesoAnalitica.types';
+import {
+  bypassesAnalyticsGroupAccess,
+  requiresExplicitClientSelection,
+} from '../domain/reporteriaAccessPolicy';
 import type {
   PowerBiReport,
 } from '../domain/reporteria.types';
@@ -31,24 +35,47 @@ export const loadReporteriaReportAccess = async (
   dependencies: ReporteriaCatalogDependencies =
     defaultDependencies
 ): Promise<ReporteriaReportAccess> => {
-  const access =
-    await dependencies.getPowerBiOptionAccess(
-      reports.map((report) => report.id),
-      signal
+  const analyticsControlledReports =
+    reports.filter(
+      (report) =>
+        !bypassesAnalyticsGroupAccess(report.id)
     );
 
+  const access =
+    analyticsControlledReports.length > 0
+      ? await dependencies.getPowerBiOptionAccess(
+          analyticsControlledReports.map(
+            (report) => report.id
+          ),
+          signal
+        )
+      : [];
+
+  const allowedByAnalytics = new Set(
+    access.flatMap((option) =>
+      option.allowed ? [option.optionId] : []
+    )
+  );
+  const clientScopedByAnalytics = new Set(
+    access.flatMap((option) =>
+      option.allowed && option.requiresClientSelection
+        ? [option.optionId]
+        : []
+    )
+  );
+
   return {
-    allowedReportIds: access.flatMap(
-      (option) =>
-        option.allowed
-          ? [option.optionId]
-          : []
+    allowedReportIds: reports.flatMap((report) =>
+      bypassesAnalyticsGroupAccess(report.id) ||
+      allowedByAnalytics.has(report.id)
+        ? [report.id]
+        : []
     ),
-    clientScopedReportIds: access.flatMap(
-      (option) =>
-        option.allowed &&
-        option.requiresClientSelection
-          ? [option.optionId]
+    clientScopedReportIds: reports.flatMap(
+      (report) =>
+        requiresExplicitClientSelection(report.id) ||
+        clientScopedByAnalytics.has(report.id)
+          ? [report.id]
           : []
     ),
   };

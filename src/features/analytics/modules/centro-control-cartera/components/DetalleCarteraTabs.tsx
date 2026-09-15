@@ -5,6 +5,8 @@ import {
   SelectField,
 } from '@shared/components/ui';
 import { SisgesIcon } from '@shared/icons/sisges';
+
+import { AnalyticsPanel } from '../../../shared/components';
 import type {
   AdvisorPerformanceItem,
   RendimientoCampanaItem,
@@ -165,23 +167,15 @@ export const DetalleCarteraTabs: React.FC<
   };
 
   return (
-    <section className="portfolio-control-center__section portfolio-control-center__section--detail">
-      <div className="portfolio-control-center__detail-header">
-        <div>
-          <h2>
-            <span
-              className="portfolio-heading-icon portfolio-heading-icon--detail"
-              aria-hidden="true"
-            >
-              <SisgesIcon name="bar-chart" />
-            </span>
-            Detalle operativo
-          </h2>
-          <p>
-            Compara campañas, equipos y asesores sin abandonar el Control Center.
-          </p>
-        </div>
-
+    <AnalyticsPanel
+      variant="integrated"
+      className="analytics-data-panel portfolio-control-center__section--detail"
+      headerClassName="analytics-data-panel__header portfolio-control-center__detail-header"
+      iconClassName="analytics-heading-icon"
+      icon={<SisgesIcon name="bar-chart" />}
+      title="Detalle operativo"
+      description="Compara campañas, equipos y asesores sin abandonar el Control Center."
+      actions={(
         <div className="portfolio-control-center__detail-actions">
           <div className="portfolio-control-center__detail-sort-filter">
             <SelectField<string>
@@ -284,10 +278,10 @@ export const DetalleCarteraTabs: React.FC<
             </button>
           </div>
         </div>
-      </div>
-
+      )}
+    >
       <div
-        className="portfolio-detail-panel"
+        className="analytics-table-surface portfolio-detail-panel"
         role="tabpanel"
       >
         {activeTab === 'campaigns' && (
@@ -296,6 +290,6 @@ export const DetalleCarteraTabs: React.FC<
         {activeTab !== 'campaigns' &&
           renderSupervisorOrAdvisorPanel()}
       </div>
-    </section>
+    </AnalyticsPanel>
   );
 };

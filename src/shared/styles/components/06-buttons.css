@@ -57,3 +57,15 @@
     transform: rotate(360deg);
   }
 }
+.btn-outline-danger {
+  border: 1px solid rgba(192, 0, 30, 0.6);
+  background: #ffffff;
+  color: var(--ap-red);
+  box-shadow: 0 2px 7px rgba(192, 0, 30, 0.06);
+}
+
+.btn-outline-danger:hover:not(:disabled) {
+  border-color: var(--ap-red);
+  background: var(--ap-red);
+  color: #ffffff;
+}

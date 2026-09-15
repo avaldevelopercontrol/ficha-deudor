@@ -1,7 +1,10 @@
 import type React from 'react';
 import { useMemo, useState } from 'react';
 
+import { SegmentedControl } from '@shared/components/ui';
 import { SisgesIcon } from '@shared/icons/sisges';
+
+import { AnalyticsPanel } from '../../../shared/components';
 
 import type {
   EvolucionCarteraPoint,
@@ -28,19 +31,16 @@ interface EvolucionCarteraChartProps {
   onRetry: () => void;
 }
 
-const METRIC_OPTIONS: ReadonlyArray<{
-  id: EvolucionCarteraMetric;
-  label: string;
-}> = [
+const METRIC_OPTIONS = [
   {
-    id: 'progress',
+    value: 'progress',
     label: 'Avance de cartera',
   },
   {
-    id: 'recovery',
+    value: 'recovery',
     label: 'Recuperación',
   },
-];
+] as const;
 
 const formatMetricValue = (
   metric: EvolucionCarteraMetric,
@@ -95,48 +95,24 @@ export const EvolucionCarteraChart: React.FC<
       : 'Recuperado acumulado';
 
   return (
-    <section className="portfolio-control-center__section portfolio-evolution-panel">
-      <div className="portfolio-evolution-panel__header">
-        <div className="portfolio-control-center__section-heading portfolio-control-center__section-heading--compact">
-          <h2>
-            <span
-              className="portfolio-heading-icon portfolio-heading-icon--chart"
-              aria-hidden="true"
-            >
-              <SisgesIcon name="analytics" />
-            </span>
-            Evolución operativa
-          </h2>
-          <p>
-            Seguimiento temporal del avance de cartera y recuperación.
-          </p>
-        </div>
-
-        <div
+    <AnalyticsPanel
+      variant="integrated"
+      className="portfolio-control-center__section portfolio-evolution-panel"
+      headerClassName="portfolio-evolution-panel__header portfolio-control-center__section-heading portfolio-control-center__section-heading--compact"
+      iconClassName="analytics-heading-icon analytics-heading-icon--info"
+      icon={<SisgesIcon name="analytics" />}
+      title="Evolución operativa"
+      description="Seguimiento temporal del avance de cartera y recuperación."
+      actions={(
+        <SegmentedControl
+          value={metric}
+          options={METRIC_OPTIONS}
+          onChange={setMetric}
+          ariaLabel="Métrica de evolución"
           className="portfolio-evolution-metric-tabs"
-          role="group"
-          aria-label="Métrica de evolución"
-        >
-          {METRIC_OPTIONS.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              className={`portfolio-evolution-metric-tab${
-                metric === option.id
-                  ? ' portfolio-evolution-metric-tab--active'
-                  : ''
-              }`}
-              aria-pressed={metric === option.id}
-              onClick={() => {
-                setMetric(option.id);
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
+        />
+      )}
+    >
       <EstadoRecursoCartera
         isLoading={isLoading}
         error={error}
@@ -242,6 +218,6 @@ export const EvolucionCarteraChart: React.FC<
           </div>
         </div>
       </EstadoRecursoCartera>
-    </section>
+    </AnalyticsPanel>
   );
 };

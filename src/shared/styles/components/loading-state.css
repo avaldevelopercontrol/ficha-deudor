@@ -1,0 +1,35 @@
+.loading-state {
+  display: flex;
+  min-height: 180px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px;
+  color: var(--ap-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.loading-state__spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  border: 2px solid var(--ap-gray-200);
+  border-top-color: var(--ap-red);
+  border-radius: 50%;
+  animation: shared-loading-state-spinner 700ms linear infinite;
+}
+
+@keyframes shared-loading-state-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-state__spinner {
+    animation: none;
+  }
+}

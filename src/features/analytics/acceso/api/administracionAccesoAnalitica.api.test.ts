@@ -122,6 +122,127 @@ export const suite = defineSuite(
       }
     ),
     test(
+      'normaliza una publicación todavía sin embedUrl aunque el backend la devuelva como texto vacío',
+      async () => {
+        const originalFetch = globalThis.fetch;
+
+        globalThis.fetch = async () =>
+          Response.json({
+            optionId: 27,
+            isConfigured: true,
+            groupIds: [156],
+            availableGroups: [],
+            clients: [
+              {
+                clientId: 178,
+                name: 'ADEX',
+                isAvailable: true,
+                groupResolution: 'MISSING',
+                hasExplicitGroupConfiguration: false,
+                groupIds: [],
+                candidateGroups: [],
+                embedUrl: '   ',
+                isReady: false,
+              },
+            ],
+          });
+
+        try {
+          const result =
+            await getAnalyticsPowerBiConfiguration(27);
+
+          assert.equal(result.clients[0]?.embedUrl, null);
+          assert.equal(result.clients[0]?.isReady, false);
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'normaliza una publicación todavía sin embedUrl cuando el backend omite la propiedad',
+      async () => {
+        const originalFetch = globalThis.fetch;
+
+        globalThis.fetch = async () =>
+          Response.json({
+            optionId: 27,
+            isConfigured: true,
+            groupIds: [156],
+            availableGroups: [
+              {
+                groupId: 156,
+                clientId: 178,
+                name: 'ADEX - COBRANZAS',
+              },
+            ],
+            clients: [
+              {
+                clientId: 178,
+                name: 'ADEX',
+                isAvailable: true,
+                groupResolution: 'AUTO_DETECTED',
+                hasExplicitGroupConfiguration: false,
+                groupIds: [156],
+                candidateGroups: [
+                  {
+                    groupId: 156,
+                    name: 'ADEX - COBRANZAS',
+                  },
+                ],
+                isReady: false,
+              },
+            ],
+          });
+
+        try {
+          const result =
+            await getAnalyticsPowerBiConfiguration(27);
+
+          assert.equal(result.clients[0]?.embedUrl, null);
+          assert.deepEqual(result.groupIds, [156]);
+          assert.equal(result.availableGroups.length, 1);
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
+      'sigue rechazando embedUrl de tipos inválidos en la configuración Power BI',
+      async () => {
+        const originalFetch = globalThis.fetch;
+
+        globalThis.fetch = async () =>
+          Response.json({
+            optionId: 27,
+            isConfigured: true,
+            groupIds: [156],
+            availableGroups: [],
+            clients: [
+              {
+                clientId: 178,
+                name: 'ADEX',
+                isAvailable: true,
+                groupResolution: 'MISSING',
+                hasExplicitGroupConfiguration: false,
+                groupIds: [],
+                candidateGroups: [],
+                embedUrl: 123,
+                isReady: false,
+              },
+            ],
+          });
+
+        try {
+          await assert.rejects(
+            () => getAnalyticsPowerBiConfiguration(27),
+            /response\.clients\[0\]\.embedUrl debe ser un texto no vacío/
+          );
+        } finally {
+          globalThis.fetch = originalFetch;
+        }
+      }
+    ),
+    test(
       'rechaza publicaciones con resolución de grupo fuera del contrato',
       async () => {
         const originalFetch = globalThis.fetch;

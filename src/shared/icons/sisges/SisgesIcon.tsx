@@ -514,6 +514,30 @@ const SISGES_ICON_GLYPHS: Record<SisgesIconName, React.ReactNode> = {
       <path d="M3 3v5h5M12 7v5l3 2" />
     </>
   ),
+  activity: <path d="M3 12h4l2-6 4 12 2-6h6" />,
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
+  gauge: (
+    <>
+      <path d="M4 18a8 8 0 1 1 16 0" />
+      <path d="m12 14 4-5" />
+      <path d="M7 18h10" />
+    </>
+  ),
+  refresh: (
+    <>
+      <path d="M20 6v5h-5" />
+      <path d="M4 18v-5h5" />
+      <path d="M18.5 10a7 7 0 0 0-12-3L4 11" />
+      <path d="M5.5 14a7 7 0 0 0 12 3L20 13" />
+    </>
+  ),
+  'chevron-right': <path d="m9 18 6-6-6-6" />,
+  close: <path d="m6 6 12 12M18 6 6 18" />,
   audit: (
     <>
       <path d="M9 2h6l1 3h4v17H4V5h4Z" />

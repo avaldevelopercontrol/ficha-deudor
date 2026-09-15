@@ -130,6 +130,7 @@ export const RendimientoCampanaTable: React.FC<
       data={[...items]}
       emptyMessage="No hay campañas para los filtros seleccionados."
       fitToPanel={false}
+      appearance="analytics"
     />
   );
 };

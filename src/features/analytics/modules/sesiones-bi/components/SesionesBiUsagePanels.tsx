@@ -3,6 +3,9 @@ import {
   useState,
 } from 'react';
 
+import { SegmentedControl } from '@shared/components/ui';
+
+import { AnalyticsPanel } from '../../../shared/components';
 import type {
   SesionesBiReportUsage,
   SesionesBiUserUsage,
@@ -15,6 +18,11 @@ interface SesionesBiUsagePanelsProps {
 }
 
 type ReportMetric = 'sessions' | 'time';
+
+const REPORT_METRIC_OPTIONS = [
+  { value: 'time', label: 'Tiempo' },
+  { value: 'sessions', label: 'Sesiones' },
+] as const;
 
 export const SesionesBiUsagePanels = ({
   reports,
@@ -34,31 +42,21 @@ export const SesionesBiUsagePanels = ({
 
   return (
     <section className="sessions-bi-insights-grid">
-      <article className="sessions-bi-panel sessions-bi-panel--reports">
-        <header className="sessions-bi-panel__header">
-          <div>
-            <span className="sessions-bi-eyebrow">Adopción</span>
-            <h2>Uso de reportes BI</h2>
-            <p>Compara qué reportes concentran uso real en el período.</p>
-          </div>
-          <div className="sessions-bi-segmented" aria-label="Métrica del ranking">
-            <button
-              type="button"
-              className={metric === 'time' ? 'is-active' : ''}
-              onClick={() => setMetric('time')}
-            >
-              Tiempo
-            </button>
-            <button
-              type="button"
-              className={metric === 'sessions' ? 'is-active' : ''}
-              onClick={() => setMetric('sessions')}
-            >
-              Sesiones
-            </button>
-          </div>
-        </header>
-
+      <AnalyticsPanel
+        as="article"
+        className="sessions-bi-panel--reports"
+        eyebrow="Adopción"
+        title="Uso de reportes BI"
+        description="Compara qué reportes concentran uso real en el período."
+        actions={(
+          <SegmentedControl
+            value={metric}
+            options={REPORT_METRIC_OPTIONS}
+            onChange={setMetric}
+            ariaLabel="Métrica del ranking"
+          />
+        )}
+      >
         {reports.length === 0 ? (
           <div className="sessions-bi-empty">No hay uso de reportes para los filtros seleccionados.</div>
         ) : (
@@ -91,17 +89,15 @@ export const SesionesBiUsagePanels = ({
             })}
           </div>
         )}
-      </article>
+      </AnalyticsPanel>
 
-      <article className="sessions-bi-panel sessions-bi-panel--users">
-        <header className="sessions-bi-panel__header">
-          <div>
-            <span className="sessions-bi-eyebrow">Participación</span>
-            <h2>Usuarios con mayor uso</h2>
-            <p>Ranking por tiempo visible acumulado.</p>
-          </div>
-        </header>
-
+      <AnalyticsPanel
+        as="article"
+        className="sessions-bi-panel--users"
+        eyebrow="Participación"
+        title="Usuarios con mayor uso"
+        description="Ranking por tiempo visible acumulado."
+      >
         {users.length === 0 ? (
           <div className="sessions-bi-empty">No hay usuarios con sesiones en el período.</div>
         ) : (
@@ -123,7 +119,7 @@ export const SesionesBiUsagePanels = ({
             ))}
           </div>
         )}
-      </article>
+      </AnalyticsPanel>
     </section>
   );
 };

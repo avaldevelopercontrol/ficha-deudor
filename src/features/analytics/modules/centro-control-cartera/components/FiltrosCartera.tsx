@@ -4,7 +4,8 @@ import {
   ActionButton,
   FeedbackMessage,
 } from '@shared/components/ui';
-import { SisgesIcon } from '@shared/icons/sisges';
+
+import { AnalyticsFilterPanel } from '../../../shared/components';
 
 import type {
   CentroControlCarteraFilterOptions,
@@ -59,29 +60,11 @@ export const FiltrosCartera: React.FC<
   });
 
   return (
-    <section className="portfolio-control-center__section portfolio-control-center__section--filters">
-      <div className="portfolio-control-center__filter-heading">
-        <div>
-          <h2>
-            <span
-              className="portfolio-heading-icon"
-              aria-hidden="true"
-            >
-              <SisgesIcon name="filter" />
-            </span>
-            Filtros operativos
-          </h2>
-        </div>
-
-        <ActionButton
-          label="Limpiar"
-          variant="secondary"
-          size="sm"
-          disabled={isLoading}
-          onClick={onClear}
-        />
-      </div>
-
+    <AnalyticsFilterPanel
+      title="Filtros operativos"
+      disabled={isLoading}
+      onClear={onClear}
+    >
       {error ? (
         <div className="portfolio-control-center__filter-error">
           <FeedbackMessage
@@ -109,6 +92,6 @@ export const FiltrosCartera: React.FC<
           onDateToChange={updateDateTo}
         />
       )}
-    </section>
+    </AnalyticsFilterPanel>
   );
 };

@@ -95,6 +95,32 @@ const parseAvailableGroup = (
   };
 };
 
+const parsePublicationEmbedUrl = (
+  value: unknown,
+  contract: string,
+  path: string
+): string | null => {
+  // Una cartera todavía sin publicación puede llegar desde el backend legacy
+  // con null, sin la propiedad de URL o como texto vacío. En el dominio todos
+  // esos estados significan "sin URL publicada" y se normalizan a null.
+  if (
+    value === undefined ||
+    value === null ||
+    (
+      typeof value === 'string' &&
+      value.trim().length === 0
+    )
+  ) {
+    return null;
+  }
+
+  return expectAnalyticsNullableNonEmptyString(
+    value,
+    contract,
+    path
+  );
+};
+
 const parsePublication = (
   value: unknown,
   contract: string,
@@ -162,7 +188,7 @@ const parsePublication = (
     ),
     groupIds,
     candidateGroups,
-    embedUrl: expectAnalyticsNullableNonEmptyString(
+    embedUrl: parsePublicationEmbedUrl(
       record.urlIncrustacion ?? record.embedUrl,
       contract,
       `${path}.embedUrl`

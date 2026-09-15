@@ -6,7 +6,10 @@ import {
   useAsyncResource,
 } from '@shared/hooks/useAsyncResource';
 
-import { getSesionesBiPanel } from '../api/sesionesBi.api';
+import {
+  getSesionesBiPanelResourceKey,
+  loadSesionesBiPanel,
+} from '../application/sesionesBi.application';
 import type {
   SesionesBiPanel,
   SesionesBiPanelFilters,
@@ -17,24 +20,13 @@ export const useSesionesBiPanel = (
 ) => {
   const loader = useCallback(
     (signal: AbortSignal) =>
-      getSesionesBiPanel(filters, signal),
+      loadSesionesBiPanel(filters, signal),
     [filters]
   );
 
   const resource = useAsyncResource<SesionesBiPanel | null>({
     loader,
-    resourceKey: [
-      filters.fromUtc,
-      filters.toUtc,
-      filters.reportId,
-      filters.userId,
-      filters.clientId,
-      filters.status,
-      filters.search,
-      filters.order,
-      filters.page,
-      filters.pageSize,
-    ],
+    resourceKey: getSesionesBiPanelResourceKey(filters),
     initialData: null,
     initialLoading: true,
     errorMessage: 'No se pudo cargar la trazabilidad de sesiones BI.',

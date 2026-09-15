@@ -6,7 +6,10 @@ import {
   useAsyncResource,
 } from '@shared/hooks/useAsyncResource';
 
-import { getSesionBiDetail } from '../api/sesionesBi.api';
+import {
+  getSesionBiDetailResourceKey,
+  loadSesionBiDetail,
+} from '../application/sesionesBi.application';
 import type {
   SesionBiDetail,
 } from '../domain/sesionesBi.types';
@@ -22,14 +25,14 @@ export const useSesionBiDetail = (
         );
       }
 
-      return getSesionBiDetail(sessionId, signal);
+      return loadSesionBiDetail(sessionId, signal);
     },
     [sessionId]
   );
 
   const resource = useAsyncResource<SesionBiDetail | null>({
     loader,
-    resourceKey: [sessionId],
+    resourceKey: getSesionBiDetailResourceKey(sessionId),
     initialData: null,
     enabled: sessionId !== null,
     initialLoading: false,
@@ -42,5 +45,6 @@ export const useSesionBiDetail = (
     data: resource.data,
     loading: resource.isLoading,
     error: resource.error,
+    refetch: resource.refetch,
   };
 };

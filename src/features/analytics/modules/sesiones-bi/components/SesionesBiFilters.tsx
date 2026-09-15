@@ -1,14 +1,16 @@
-import type { FormEvent } from 'react';
+import {
+  InputField,
+  SelectField,
+} from '@shared/components/ui';
+
+import { AnalyticsFilterPanel } from '../../../shared/components';
 
 import type {
   SesionBiEstado,
   SesionesBiCatalogs,
   SesionesBiPeriodoPreset,
 } from '../domain/sesionesBi.types';
-import {
-  getSesionBiStatusLabel,
-} from '../utils/sesionesBi.utils';
-import { SearchIcon } from './SesionesBiIcons';
+import { getSesionBiStatusLabel } from '../utils/sesionesBi.utils';
 
 interface SesionesBiFiltersProps {
   preset: SesionesBiPeriodoPreset;
@@ -19,7 +21,6 @@ interface SesionesBiFiltersProps {
   clientId: number | null;
   clientFilterDisabled: boolean;
   status: SesionBiEstado | null;
-  searchDraft: string;
   catalogs: SesionesBiCatalogs | null;
   disabled?: boolean;
   onPresetChange: (value: SesionesBiPeriodoPreset) => void;
@@ -28,8 +29,6 @@ interface SesionesBiFiltersProps {
   onUserChange: (value: number | null) => void;
   onClientChange: (value: number | null) => void;
   onStatusChange: (value: SesionBiEstado | null) => void;
-  onSearchDraftChange: (value: string) => void;
-  onSearchSubmit: () => void;
   onClear: () => void;
 }
 
@@ -42,6 +41,14 @@ const toOptionalId = (value: string): number | null => {
   return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
 };
 
+const PERIOD_OPTIONS = [
+  { id: 'TODAY', label: 'Hoy' },
+  { id: 'YESTERDAY', label: 'Ayer' },
+  { id: 'LAST_7_DAYS', label: 'Últimos 7 días' },
+  { id: 'LAST_30_DAYS', label: 'Últimos 30 días' },
+  { id: 'CUSTOM', label: 'Personalizado' },
+] satisfies { id: SesionesBiPeriodoPreset; label: string }[];
+
 export const SesionesBiFilters = ({
   preset,
   customFrom,
@@ -51,7 +58,6 @@ export const SesionesBiFilters = ({
   clientId,
   clientFilterDisabled,
   status,
-  searchDraft,
   catalogs,
   disabled = false,
   onPresetChange,
@@ -60,54 +66,50 @@ export const SesionesBiFilters = ({
   onUserChange,
   onClientChange,
   onStatusChange,
-  onSearchDraftChange,
-  onSearchSubmit,
   onClear,
 }: SesionesBiFiltersProps) => {
-  const handleSearch = (event: FormEvent) => {
-    event.preventDefault();
-    onSearchSubmit();
-  };
-
   return (
-    <section className="sessions-bi-filters" aria-label="Filtros de sesiones BI">
-      <div className="sessions-bi-filters__row">
-        <label className="sessions-bi-filter">
-          <span>Período</span>
-          <select
-            value={preset}
-            disabled={disabled}
-            onChange={(event) =>
-              onPresetChange(event.target.value as SesionesBiPeriodoPreset)
-            }
-          >
-            <option value="TODAY">Hoy</option>
-            <option value="YESTERDAY">Ayer</option>
-            <option value="LAST_7_DAYS">Últimos 7 días</option>
-            <option value="LAST_30_DAYS">Últimos 30 días</option>
-            <option value="CUSTOM">Personalizado</option>
-          </select>
-        </label>
+    <AnalyticsFilterPanel
+      className="sessions-bi-filters"
+      title="Filtros de trazabilidad"
+      clearLabel="Limpiar"
+      disabled={disabled}
+      onClear={onClear}
+    >
+      <div className="analytics-filter-surface sessions-bi-filter-surface">
+        <div className="sessions-bi-filters__row">
+        <SelectField
+          id="sessions-bi-period"
+          label="Período"
+          wrapperClassName="sessions-bi-filter"
+          options={PERIOD_OPTIONS}
+          value={preset}
+          disabled={disabled}
+          hidePlaceholder
+          onChange={onPresetChange}
+        />
 
         {preset === 'CUSTOM' && (
           <div className="sessions-bi-filter sessions-bi-filter--dates">
-            <span>Rango</span>
+            <span className="form-label">Rango</span>
             <div className="sessions-bi-filter__dates">
-              <input
+              <InputField
                 type="date"
                 value={customFrom}
                 disabled={disabled}
                 aria-label="Fecha desde"
+                wrapperClassName="sessions-bi-filter__date-field"
                 onChange={(event) =>
                   onCustomRangeChange(event.target.value, customTo)
                 }
               />
               <span aria-hidden="true">—</span>
-              <input
+              <InputField
                 type="date"
                 value={customTo}
                 disabled={disabled}
                 aria-label="Fecha hasta"
+                wrapperClassName="sessions-bi-filter__date-field"
                 onChange={(event) =>
                   onCustomRangeChange(customFrom, event.target.value)
                 }
@@ -116,113 +118,75 @@ export const SesionesBiFilters = ({
           </div>
         )}
 
-        <label className="sessions-bi-filter">
-          <span>Reporte BI</span>
-          <select
-            value={reportId ?? ''}
-            disabled={disabled}
-            onChange={(event) => onReportChange(toOptionalId(event.target.value))}
-          >
-            <option value="">Todos los reportes</option>
-            {(catalogs?.reports ?? []).map((option) => (
-              <option key={option.id} value={option.id}>{option.name}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="sessions-bi-filter">
-          <span>Usuario</span>
-          <select
-            value={userId ?? ''}
-            disabled={disabled}
-            onChange={(event) => onUserChange(toOptionalId(event.target.value))}
-          >
-            <option value="">Todos los usuarios</option>
-            {(catalogs?.users ?? []).map((option) => (
-              <option key={option.id} value={option.id}>{option.name}</option>
-            ))}
-          </select>
-        </label>
-
-        <label
-          className={
-            clientFilterDisabled
-              ? 'sessions-bi-filter is-disabled'
-              : 'sessions-bi-filter'
-          }
-        >
-          <span>Cliente</span>
-          <select
-            value={clientFilterDisabled ? '' : clientId ?? ''}
-            disabled={disabled || clientFilterDisabled}
-            aria-describedby={
-              clientFilterDisabled
-                ? 'sessions-bi-client-filter-hint'
-                : undefined
-            }
-            onChange={(event) => onClientChange(toOptionalId(event.target.value))}
-          >
-            <option value="">
-              {clientFilterDisabled
-                ? 'No aplica para este reporte'
-                : 'Todos los clientes'}
-            </option>
-            {!clientFilterDisabled && (catalogs?.clients ?? []).map((option) => (
-              <option key={option.id} value={option.id}>{option.name}</option>
-            ))}
-          </select>
-          {clientFilterDisabled && (
-            <small id="sessions-bi-client-filter-hint">
-              Este BI no utiliza contexto de cliente.
-            </small>
-          )}
-        </label>
-
-        <label className="sessions-bi-filter">
-          <span>Estado</span>
-          <select
-            value={status ?? ''}
-            disabled={disabled}
-            onChange={(event) =>
-              onStatusChange(
-                event.target.value
-                  ? event.target.value as SesionBiEstado
-                  : null
-              )
-            }
-          >
-            <option value="">Todos los estados</option>
-            {(catalogs?.statuses ?? ['ACTIVA', 'PAUSADA', 'CERRADA', 'EXPIRADA']).map(
-              (option) => (
-                <option key={option} value={option}>{getSesionBiStatusLabel(option)}</option>
-              )
-            )}
-          </select>
-        </label>
-      </div>
-
-      <div className="sessions-bi-filters__footer">
-        <form className="sessions-bi-search" onSubmit={handleSearch}>
-          <SearchIcon size={16} />
-          <input
-            value={searchDraft}
-            disabled={disabled}
-            placeholder="Buscar usuario, login, reporte o cliente"
-            aria-label="Buscar sesiones"
-            onChange={(event) => onSearchDraftChange(event.target.value)}
-          />
-          <button type="submit" disabled={disabled}>Buscar</button>
-        </form>
-
-        <button
-          type="button"
-          className="sessions-bi-clear"
+        <SelectField
+          id="sessions-bi-report"
+          label="Reporte BI"
+          wrapperClassName="sessions-bi-filter"
+          options={(catalogs?.reports ?? []).map((option) => ({
+            id: String(option.id),
+            label: option.name,
+          }))}
+          value={reportId === null ? '' : String(reportId)}
+          placeholder="Todos los reportes"
           disabled={disabled}
-          onClick={onClear}
-        >
-          Limpiar filtros
-        </button>
+          onChange={(value) => onReportChange(toOptionalId(value))}
+        />
+
+        <SelectField
+          id="sessions-bi-user"
+          label="Usuario"
+          wrapperClassName="sessions-bi-filter"
+          options={(catalogs?.users ?? []).map((option) => ({
+            id: String(option.id),
+            label: option.name,
+          }))}
+          value={userId === null ? '' : String(userId)}
+          placeholder="Todos los usuarios"
+          disabled={disabled}
+          onChange={(value) => onUserChange(toOptionalId(value))}
+        />
+
+        <SelectField
+          id="sessions-bi-client"
+          label="Cliente"
+          wrapperClassName={`sessions-bi-filter${clientFilterDisabled ? ' is-disabled' : ''}`}
+          options={clientFilterDisabled
+            ? []
+            : (catalogs?.clients ?? []).map((option) => ({
+                id: String(option.id),
+                label: option.name,
+              }))}
+          value={clientFilterDisabled || clientId === null ? '' : String(clientId)}
+          placeholder={clientFilterDisabled
+            ? 'No aplica para este reporte'
+            : 'Todos los clientes'}
+          disabled={disabled || clientFilterDisabled}
+          ariaDescribedBy={clientFilterDisabled
+            ? 'sessions-bi-client-filter-hint'
+            : undefined}
+          hint={clientFilterDisabled
+            ? 'Este BI no utiliza contexto de cliente.'
+            : undefined}
+          hintId={clientFilterDisabled
+            ? 'sessions-bi-client-filter-hint'
+            : undefined}
+          onChange={(value) => onClientChange(toOptionalId(value))}
+        />
+
+        <SelectField
+          id="sessions-bi-status"
+          label="Estado"
+          wrapperClassName="sessions-bi-filter"
+          options={(catalogs?.statuses ?? ['ACTIVA', 'PAUSADA', 'CERRADA', 'EXPIRADA']).map(
+            (option) => ({ id: option, label: getSesionBiStatusLabel(option) })
+          )}
+          value={status ?? ''}
+          placeholder="Todos los estados"
+          disabled={disabled}
+          onChange={(value) => onStatusChange(value ? value as SesionBiEstado : null)}
+        />
+        </div>
       </div>
-    </section>
+    </AnalyticsFilterPanel>
   );
 };

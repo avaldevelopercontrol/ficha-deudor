@@ -1,0 +1,41 @@
+.segmented-control {
+  display: inline-flex;
+  flex: none;
+  padding: 2px;
+  border: 1px solid var(--ap-gray-200);
+  border-radius: 7px;
+  background: var(--ap-gray-50);
+}
+
+.segmented-control button {
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ap-text-muted);
+  padding: 5px 9px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented-control button:hover:not(:disabled):not(.is-active) {
+  color: var(--ap-text);
+}
+
+.segmented-control button.is-active {
+  background: #fff;
+  color: var(--ap-navy);
+  box-shadow: 0 1px 3px rgba(26, 37, 64, 0.12);
+}
+
+
+.segmented-control button:focus-visible {
+  outline: 2px solid var(--ap-red);
+  outline-offset: 2px;
+}
+
+.segmented-control button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}

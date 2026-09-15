@@ -33,40 +33,6 @@
   background: #f4f6f9;
 }
 
-.portfolio-evolution-metric-tab {
-  min-height: 30px;
-  padding: 6px 11px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--ap-text-muted);
-  font-family: inherit;
-  font-size: 10.5px;
-  font-weight: 650;
-  cursor: pointer;
-  transition:
-    color 150ms ease,
-    background 150ms ease,
-    box-shadow 150ms ease;
-}
-
-.portfolio-evolution-metric-tab:hover {
-  color: var(--ap-text);
-}
-
-.portfolio-evolution-metric-tab:focus-visible {
-  outline: 2px solid var(--ap-red);
-  outline-offset: 2px;
-}
-
-.portfolio-evolution-metric-tab--active {
-  background: #ffffff;
-  color: var(--ap-navy);
-  box-shadow:
-    0 2px 7px rgba(26, 37, 64, 0.08),
-    inset 0 -2px 0 var(--ap-red);
-}
-
 .portfolio-evolution-chart-wrap {
   min-width: 0;
 }

@@ -12,6 +12,13 @@ type SelectFieldProps<T extends string | number | boolean = string> = {
   required?: boolean;
   layout?: 'vertical' | 'inline';
   hidePlaceholder?: boolean;
+  wrapperClassName?: string;
+  className?: string;
+  id?: string;
+  ariaLabel?: string;
+  ariaDescribedBy?: string;
+  hint?: string;
+  hintId?: string;
 };
 
 export const SelectField = <T extends string | number | boolean = string>({
@@ -26,11 +33,21 @@ export const SelectField = <T extends string | number | boolean = string>({
   required,
   layout = 'vertical',
   hidePlaceholder = false,
+  wrapperClassName = '',
+  className = '',
+  id,
+  ariaLabel,
+  ariaDescribedBy,
+  hint,
+  hintId,
 }: SelectFieldProps<T>) => {
   const hasValue = String(value) !== '';
 
   const select = (
     <select
+      id={id}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
       className={`form-select ${
         hasValue
           ? 'form-select--has-value'
@@ -39,12 +56,11 @@ export const SelectField = <T extends string | number | boolean = string>({
         layout === 'inline'
           ? 'form-input--inline-field'
           : ''
-      } ${error ? 'form-select--error' : ''}`}
+      } ${error ? 'form-select--error' : ''} ${className}`.trim()}
       value={String(value)}
       onChange={(e) => {
         const rawValue = e.target.value;
 
-        // ✅ FIX DEFINITIVO: Si seleccionó placeholder (vacío), enviar string vacío
         if (rawValue === '') {
           onChange('' as T);
           return;
@@ -76,10 +92,14 @@ export const SelectField = <T extends string | number | boolean = string>({
     </select>
   );
 
+  const hintNode = hint ? (
+    <small className="form-hint" id={hintId}>{hint}</small>
+  ) : null;
+
   if (layout === 'inline' && label) {
     return (
-      <div className="form-row-inline">
-        <label className="form-label form-label--inline">
+      <div className={`form-row-inline ${wrapperClassName}`.trim()}>
+        <label className="form-label form-label--inline" htmlFor={id}>
           {badge && <span className="form-badge">{badge}</span>}
           {label}
           {required && (
@@ -91,15 +111,16 @@ export const SelectField = <T extends string | number | boolean = string>({
         <div style={{ flex: 1, minWidth: 0 }}>
           {select}
           {error && <span className="form-error">{error}</span>}
+          {hintNode}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="form-group">
+    <div className={`form-group ${wrapperClassName}`.trim()}>
       {label && (
-        <label className="form-label">
+        <label className="form-label" htmlFor={id}>
           {badge && <span className="form-badge">{badge}</span>}
           {label}
           {required && (
@@ -123,6 +144,7 @@ export const SelectField = <T extends string | number | boolean = string>({
           {error}
         </span>
       )}
+      {hintNode}
     </div>
   );
 };

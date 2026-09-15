@@ -77,11 +77,6 @@ export const suite = defineSuite(
                     requiresClientSelection: false,
                   },
                   {
-                    optionId: 27,
-                    allowed: true,
-                    requiresClientSelection: true,
-                  },
-                  {
                     optionId: 28,
                     allowed: false,
                     requiresClientSelection: true,
@@ -91,10 +86,38 @@ export const suite = defineSuite(
             }
           );
 
-        assert.deepEqual(receivedIds, [26, 27, 28]);
+        assert.deepEqual(receivedIds, [26, 28]);
         assert.deepEqual(
           result.allowedReportIds,
           [26, 27]
+        );
+        assert.deepEqual(
+          result.clientScopedReportIds,
+          [27]
+        );
+      }
+    ),
+    test(
+      'el reporte 27 queda autorizado por SISGES sin consultar el grupo Analytics y mantiene selección de cartera',
+      async () => {
+        let requestCount = 0;
+
+        const result =
+          await loadReporteriaReportAccess(
+            [reports[1]],
+            undefined,
+            {
+              getPowerBiOptionAccess: async () => {
+                requestCount++;
+                return [];
+              },
+            }
+          );
+
+        assert.equal(requestCount, 0);
+        assert.deepEqual(
+          result.allowedReportIds,
+          [27]
         );
         assert.deepEqual(
           result.clientScopedReportIds,
@@ -157,6 +180,29 @@ export const suite = defineSuite(
             /reportClient=CLARO/
           );
         }
+      }
+    ),
+    test(
+      'el reporte 27 abre Seleccionar cartera incluso cuando solo existe una opción',
+      async () => {
+        const clients = [
+          { clientId: 95, name: 'CLARO' },
+        ];
+
+        const result =
+          await resolvePowerBiReportOpen(
+            reports[1],
+            true,
+            undefined,
+            {
+              getReportClients: async () => clients,
+            }
+          );
+
+        assert.deepEqual(result, {
+          kind: 'client-selection',
+          clients,
+        });
       }
     ),
     test(

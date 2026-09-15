@@ -3,9 +3,11 @@ import {
   useState,
 } from 'react';
 
-import type {
-  SesionesBiTrendPoint,
-} from '../domain/sesionesBi.types';
+import { SegmentedControl } from '@shared/components/ui';
+
+import { AnalyticsPanel } from '../../../shared/components';
+import { buildLineChartModel } from '../../../shared/utils/lineChart.utils';
+import type { SesionesBiTrendPoint } from '../domain/sesionesBi.types';
 import {
   formatSesionesBiDuration,
   formatSesionesBiTrendLabel,
@@ -23,65 +25,52 @@ const HEIGHT = 220;
 const PAD_X = 32;
 const PAD_Y = 26;
 
+const TREND_METRIC_OPTIONS = [
+  { value: 'sessions', label: 'Sesiones' },
+  { value: 'time', label: 'Tiempo visible' },
+] as const;
+
 export const SesionesBiTrend = ({
   points,
   granularity,
 }: SesionesBiTrendProps) => {
   const [metric, setMetric] = useState<TrendMetric>('sessions');
 
-  const geometry = useMemo(() => {
-    const values = points.map((point) =>
-      metric === 'sessions' ? point.sessions : point.visibleSeconds
-    );
-    const max = Math.max(1, ...values);
-    const innerWidth = WIDTH - PAD_X * 2;
-    const innerHeight = HEIGHT - PAD_Y * 2;
-
-    const coordinates = values.map((value, index) => {
-      const x = points.length <= 1
-        ? WIDTH / 2
-        : PAD_X + (index / (points.length - 1)) * innerWidth;
-      const y = PAD_Y + innerHeight - (value / max) * innerHeight;
-      return { x, y, value };
-    });
-
-    return {
-      coordinates,
-      polyline: coordinates.map(({ x, y }) => `${x},${y}`).join(' '),
-      max,
-    };
-  }, [metric, points]);
+  const geometry = useMemo(
+    () => buildLineChartModel(
+      points.map((point) =>
+        metric === 'sessions' ? point.sessions : point.visibleSeconds
+      ),
+      {
+        width: WIDTH,
+        height: HEIGHT,
+        paddingX: PAD_X,
+        paddingY: PAD_Y,
+      }
+    ),
+    [metric, points]
+  );
 
   return (
-    <section className="sessions-bi-panel sessions-bi-trend">
-      <header className="sessions-bi-panel__header sessions-bi-panel__header--trend">
-        <div>
-          <span className="sessions-bi-eyebrow">Evolución</span>
-          <h2>Actividad durante el período</h2>
-          <p>
-            {granularity.toUpperCase().includes('HORA') || granularity.toUpperCase().includes('HOUR')
-              ? 'Distribución por hora del día.'
-              : 'Evolución diaria del uso registrado.'}
-          </p>
-        </div>
-        <div className="sessions-bi-segmented">
-          <button
-            type="button"
-            className={metric === 'sessions' ? 'is-active' : ''}
-            onClick={() => setMetric('sessions')}
-          >
-            Sesiones
-          </button>
-          <button
-            type="button"
-            className={metric === 'time' ? 'is-active' : ''}
-            onClick={() => setMetric('time')}
-          >
-            Tiempo visible
-          </button>
-        </div>
-      </header>
-
+    <AnalyticsPanel
+      className="sessions-bi-trend"
+      headerClassName="sessions-bi-trend__header"
+      eyebrow="Evolución"
+      title="Actividad durante el período"
+      description={
+        granularity.toUpperCase().includes('HORA') || granularity.toUpperCase().includes('HOUR')
+          ? 'Distribución por hora del día.'
+          : 'Evolución diaria del uso registrado.'
+      }
+      actions={(
+        <SegmentedControl
+          value={metric}
+          options={TREND_METRIC_OPTIONS}
+          onChange={setMetric}
+          ariaLabel="Métrica de evolución"
+        />
+      )}
+    >
       {points.length === 0 ? (
         <div className="sessions-bi-empty">Todavía no hay actividad para graficar.</div>
       ) : (
@@ -152,6 +141,6 @@ export const SesionesBiTrend = ({
           </div>
         </div>
       )}
-    </section>
+    </AnalyticsPanel>
   );
 };

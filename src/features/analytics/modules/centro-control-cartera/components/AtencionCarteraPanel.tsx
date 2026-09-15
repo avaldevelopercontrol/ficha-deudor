@@ -5,6 +5,8 @@ import {
   SisgesIcon,
   type SisgesIconName,
 } from '@shared/icons/sisges';
+
+import { AnalyticsPanel } from '../../../shared/components';
 import type {
   AtencionCarteraItem,
   AtencionCarteraTone,
@@ -145,22 +147,15 @@ export const AtencionCarteraPanel: React.FC<
   const canOpenDueTodayPromises = context !== null;
 
   return (
-    <section className="portfolio-control-center__section portfolio-control-center__section--attention">
-      <div className="portfolio-control-center__section-heading portfolio-control-center__section-heading--compact">
-        <h2>
-          <span
-            className="portfolio-heading-icon portfolio-heading-icon--attention"
-            aria-hidden="true"
-          >
-            <SisgesIcon name="warning" />
-          </span>
-          Requiere atención
-        </h2>
-        <p>
-          Señales operativas para actuar durante el día, no solo al cierre.
-        </p>
-      </div>
-
+    <AnalyticsPanel
+      variant="integrated"
+      className="portfolio-control-center__section portfolio-control-center__section--attention"
+      headerClassName="portfolio-control-center__section-heading portfolio-control-center__section-heading--compact"
+      iconClassName="analytics-heading-icon analytics-heading-icon--danger"
+      icon={<SisgesIcon name="warning" />}
+      title="Requiere atención"
+      description="Señales operativas para actuar durante el día, no solo al cierre."
+    >
       <EstadoRecursoCartera
         isLoading={isLoading}
         error={error}
@@ -318,6 +313,6 @@ export const AtencionCarteraPanel: React.FC<
         />
       )}
 
-    </section>
+    </AnalyticsPanel>
   );
 };

@@ -102,6 +102,7 @@ export const AdvisorPerformanceTable: React.FC<
       data={[...items]}
       emptyMessage="No hay asesores para los filtros seleccionados."
       fitToPanel={false}
+      appearance="analytics"
     />
   );
 };

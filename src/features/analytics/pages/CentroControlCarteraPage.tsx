@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react';
 
 import { SisgesIcon } from '@shared/icons/sisges';
 
+import { AnalyticsPanel } from '../shared/components';
+
 import { APPLICATION_OPTION_IDS } from '@features/access-control/registry/applicationOptionIds';
 
 import {
@@ -189,22 +191,15 @@ const CentroControlCarteraContent: React.FC<
             }}
           />
 
-          <section className="portfolio-control-center__section portfolio-control-center__section--kpis">
-            <div className="portfolio-control-center__section-heading portfolio-control-center__section-heading--compact">
-              <h2>
-                <span
-                  className="portfolio-heading-icon portfolio-heading-icon--kpi"
-                  aria-hidden="true"
-                >
-                  <SisgesIcon name="dashboard" />
-                </span>
-                Indicadores clave
-              </h2>
-              <p>
-                Estado operativo principal del portafolio en el corte seleccionado.
-              </p>
-            </div>
-
+          <AnalyticsPanel
+            variant="integrated"
+            className="portfolio-control-center__section portfolio-control-center__section--kpis"
+            headerClassName="portfolio-control-center__section-heading portfolio-control-center__section-heading--compact"
+            iconClassName="analytics-heading-icon analytics-heading-icon--brand"
+            icon={<SisgesIcon name="dashboard" />}
+            title="Indicadores clave"
+            description="Estado operativo principal del portafolio en el corte seleccionado."
+          >
             <EstadoRecursoCartera
               isLoading={visibleIsLoading}
               error={error}
@@ -224,7 +219,7 @@ const CentroControlCarteraContent: React.FC<
                 </div>
               )}
             </EstadoRecursoCartera>
-          </section>
+          </AnalyticsPanel>
 
           <div className="portfolio-control-center__overview-grid">
             <EvolucionCarteraChart

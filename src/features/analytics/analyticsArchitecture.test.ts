@@ -335,6 +335,127 @@ export const suite = defineSuite(
       }
     ),
     test(
+      'el dominio de sesiones BI no depende de React, API ni presentación',
+      () => {
+        const domainFiles = listSourceFiles(
+          join(
+            ANALYTICS_ROOT,
+            'modules',
+            'sesiones-bi',
+            'domain'
+          )
+        );
+
+        const violations = findFilesContainingAny(
+          domainFiles,
+          [
+            "from 'react'",
+            'components/',
+            'hooks/',
+            'pages/',
+            '/api/',
+          ]
+        );
+
+        assert.deepEqual(
+          violations,
+          [],
+          `El dominio de Sesiones BI depende de infraestructura o presentación: ${violations.join(', ')}`
+        );
+      }
+    ),
+    test(
+      'application de sesiones BI no depende de React ni presentación',
+      () => {
+        const applicationFiles = listSourceFiles(
+          join(
+            ANALYTICS_ROOT,
+            'modules',
+            'sesiones-bi',
+            'application'
+          )
+        );
+
+        const violations = findFilesContainingAny(
+          applicationFiles,
+          [
+            "from 'react'",
+            'components/',
+            'hooks/',
+            'pages/',
+          ]
+        );
+
+        assert.deepEqual(
+          violations,
+          [],
+          `Application de Sesiones BI depende de presentación: ${violations.join(', ')}`
+        );
+      }
+    ),
+    test(
+      'hooks de sesiones BI consumen application y no infraestructura directamente',
+      () => {
+        const hookFiles = listSourceFiles(
+          join(
+            ANALYTICS_ROOT,
+            'modules',
+            'sesiones-bi',
+            'hooks'
+          )
+        );
+
+        const violations = findFilesContainingAny(
+          hookFiles,
+          [
+            '../api/',
+            '../mappers/',
+            '../services/',
+          ]
+        );
+
+        assert.deepEqual(
+          violations,
+          [],
+          `Hooks de Sesiones BI dependen directamente de infraestructura: ${violations.join(', ')}`
+        );
+      }
+    ),
+    test(
+      'sesiones BI no recrea el API monolítico previo',
+      () => {
+        const legacyApiFile = join(
+          ANALYTICS_ROOT,
+          'modules',
+          'sesiones-bi',
+          'api',
+          'sesionesBi.api.ts'
+        );
+        const moduleFiles = listSourceFiles(
+          join(
+            ANALYTICS_ROOT,
+            'modules',
+            'sesiones-bi'
+          )
+        );
+        const violations = findFilesContainingAny(
+          moduleFiles,
+          ['sesionesBi.api']
+        );
+
+        assert.equal(
+          existsSync(legacyApiFile),
+          false,
+          'El archivo monolítico sesionesBi.api.ts no debe volver a existir'
+        );
+        assert.deepEqual(
+          violations,
+          [],
+          `Imports legacy de Sesiones BI detectados: ${violations.join(', ')}`
+        );
+      }
+    ),
+    test(
       'analytics no vuelve a depender ni recrear el antiguo archivo monolítico de tipos de portfolio',
       () => {
         const legacyTypesFile = join(

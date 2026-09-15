@@ -52,29 +52,7 @@ export const FiltroCarteraFields: React.FC<
   } = viewModel;
 
   return (
-    <div className="portfolio-filter-grid portfolio-filter-grid--without-supervisor">
-      <SelectField
-        label="Cartera"
-        value={effectiveBusinessUnit ?? ''}
-        options={businessUnitOptions}
-        hidePlaceholder
-        disabled={
-          isLoading ||
-          isBusinessUnitTransitionPending ||
-          businessUnitOptions.length <= 1
-        }
-        onChange={onBusinessUnitChange}
-      />
-
-      <SelectField
-        label="Sub cartera"
-        value={filters.subPortfolioId ?? ''}
-        options={subPortfolioOptions}
-        placeholder="Todas"
-        disabled={isLoading || effectiveCampaign === null}
-        onChange={onSubPortfolioChange}
-      />
-
+    <div className="analytics-filter-surface portfolio-filter-grid portfolio-filter-grid--without-supervisor">
       <SelectField
         label="Año"
         value={
@@ -111,6 +89,28 @@ export const FiltroCarteraFields: React.FC<
           selectedCampaignYear === null
         }
         onChange={onCampaignMonthChange}
+      />
+
+      <SelectField
+        label="Cartera"
+        value={effectiveBusinessUnit ?? ''}
+        options={businessUnitOptions}
+        hidePlaceholder
+        disabled={
+          isLoading ||
+          isBusinessUnitTransitionPending ||
+          businessUnitOptions.length <= 1
+        }
+        onChange={onBusinessUnitChange}
+      />
+
+      <SelectField
+        label="Sub cartera"
+        value={filters.subPortfolioId ?? ''}
+        options={subPortfolioOptions}
+        placeholder="Todas"
+        disabled={isLoading || effectiveCampaign === null}
+        onChange={onSubPortfolioChange}
       />
 
       <InputField

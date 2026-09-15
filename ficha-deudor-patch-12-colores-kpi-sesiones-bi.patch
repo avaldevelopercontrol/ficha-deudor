@@ -1,0 +1,94 @@
+diff --git a/src/features/analytics/modules/sesiones-bi/components/SesionesBiKpis.test.tsx b/src/features/analytics/modules/sesiones-bi/components/SesionesBiKpis.test.tsx
+index 641cde5..dd0eb67 100644
+--- a/src/features/analytics/modules/sesiones-bi/components/SesionesBiKpis.test.tsx
++++ b/src/features/analytics/modules/sesiones-bi/components/SesionesBiKpis.test.tsx
+@@ -27,5 +27,9 @@ export const suite = defineSuite('SesionesBiKpis', [
+       (html.match(/analytics-kpi-card--stacked/g) ?? []).length,
+       5
+     );
++    assert.match(html, /analytics-kpi-card--success/);
++    assert.match(html, /analytics-kpi-card--info/);
++    assert.match(html, /analytics-kpi-card--violet/);
++    assert.match(html, /analytics-kpi-card--warning/);
+   }),
+ ]);
+diff --git a/src/features/analytics/modules/sesiones-bi/components/SesionesBiKpis.tsx b/src/features/analytics/modules/sesiones-bi/components/SesionesBiKpis.tsx
+index d20802f..01214af 100644
+--- a/src/features/analytics/modules/sesiones-bi/components/SesionesBiKpis.tsx
++++ b/src/features/analytics/modules/sesiones-bi/components/SesionesBiKpis.tsx
+@@ -10,7 +10,7 @@ interface KpiDefinition {
+   value: string;
+   hint: string;
+   icon: 'activity' | 'history' | 'users' | 'clock' | 'gauge';
+-  tone?: 'success';
++  tone?: 'info' | 'violet' | 'success' | 'warning';
+ }
+ 
+ export const SesionesBiKpis = ({
+@@ -33,6 +33,7 @@ export const SesionesBiKpis = ({
+       value: summary.totalSessions.toLocaleString('es-PE'),
+       hint: 'Ingresos registrados en el período',
+       icon: 'history',
++      tone: 'info',
+     },
+     {
+       key: 'users',
+@@ -40,6 +41,7 @@ export const SesionesBiKpis = ({
+       value: summary.uniqueUsers.toLocaleString('es-PE'),
+       hint: 'Personas que consultaron al menos un BI',
+       icon: 'users',
++      tone: 'violet',
+     },
+     {
+       key: 'time',
+@@ -47,6 +49,7 @@ export const SesionesBiKpis = ({
+       value: formatSesionesBiDuration(summary.visibleSeconds),
+       hint: 'Tiempo acumulado con el visor visible',
+       icon: 'clock',
++      tone: 'warning',
+     },
+     {
+       key: 'average',
+diff --git a/src/features/analytics/shared/components/AnalyticsKpiCard.tsx b/src/features/analytics/shared/components/AnalyticsKpiCard.tsx
+index b2f0346..0eef875 100644
+--- a/src/features/analytics/shared/components/AnalyticsKpiCard.tsx
++++ b/src/features/analytics/shared/components/AnalyticsKpiCard.tsx
+@@ -4,6 +4,8 @@ import '../styles/analytics-primitives.css';
+ 
+ export type AnalyticsKpiTone =
+   | 'default'
++  | 'info'
++  | 'violet'
+   | 'success'
+   | 'warning'
+   | 'danger';
+diff --git a/src/features/analytics/shared/styles/analytics-primitives.css b/src/features/analytics/shared/styles/analytics-primitives.css
+index da5651c..fb7fd09 100644
+--- a/src/features/analytics/shared/styles/analytics-primitives.css
++++ b/src/features/analytics/shared/styles/analytics-primitives.css
+@@ -141,6 +141,16 @@
+   background: transparent;
+ }
+ 
++.analytics-kpi-card--info {
++  --analytics-kpi-accent: var(--ap-info);
++  --analytics-kpi-soft: var(--ap-info-bg);
++}
++
++.analytics-kpi-card--violet {
++  --analytics-kpi-accent: #6d4aa2;
++  --analytics-kpi-soft: #f1ebf8;
++}
++
+ .analytics-kpi-card--success {
+   --analytics-kpi-accent: var(--ap-success);
+   --analytics-kpi-soft: var(--ap-success-bg);
+@@ -156,6 +166,8 @@
+   --analytics-kpi-soft: var(--ap-danger-bg);
+ }
+ 
++.analytics-kpi-card--info::after,
++.analytics-kpi-card--violet::after,
+ .analytics-kpi-card--success::after,
+ .analytics-kpi-card--warning::after,
+ .analytics-kpi-card--danger::after {
