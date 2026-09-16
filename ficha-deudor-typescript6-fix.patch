@@ -1,0 +1,63 @@
+diff --git a/src/features/ficha-deudor/modules/reportar-casos/api/reportarCasosApi.test.ts b/src/features/ficha-deudor/modules/reportar-casos/api/reportarCasosApi.test.ts
+index c130ec5..6408874 100644
+--- a/src/features/ficha-deudor/modules/reportar-casos/api/reportarCasosApi.test.ts
++++ b/src/features/ficha-deudor/modules/reportar-casos/api/reportarCasosApi.test.ts
+@@ -228,7 +228,7 @@ export const suite = defineSuite('reportarCasosApi', [
+   test('obtiene un caso por nId_DocxCobrarOpeResult para editar', async () => {
+     const originalFetch = globalThis.fetch;
+     const controller = new AbortController();
+-    let capturedUrl: URL | null = null;
++    const capturedUrls: URL[] = [];
+     let capturedSignal: AbortSignal | null | undefined;
+ 
+     const detail = {
+@@ -246,7 +246,7 @@ export const suite = defineSuite('reportarCasosApi', [
+     };
+ 
+     globalThis.fetch = async (input, init) => {
+-      capturedUrl = getRequestUrl(input);
++      capturedUrls.push(getRequestUrl(input));
+       capturedSignal = init?.signal;
+ 
+       return new Response(
+@@ -264,8 +264,10 @@ export const suite = defineSuite('reportarCasosApi', [
+         controller.signal
+       );
+ 
++      const capturedUrl = capturedUrls[0];
++      assert.ok(capturedUrl);
+       assert.equal(
+-        capturedUrl?.pathname,
++        capturedUrl.pathname,
+         '/v1/Boton/GetReportarCasos/161915'
+       );
+       assert.equal(capturedSignal, controller.signal);
+@@ -277,7 +279,7 @@ export const suite = defineSuite('reportarCasosApi', [
+   test('actualiza un caso mediante EditReportarCasos preservando identidad y fecha inicial', async () => {
+     const originalFetch = globalThis.fetch;
+     const controller = new AbortController();
+-    let capturedUrl: URL | null = null;
++    const capturedUrls: URL[] = [];
+     let capturedInit: RequestInit | undefined;
+ 
+     const original = {
+@@ -295,7 +297,7 @@ export const suite = defineSuite('reportarCasosApi', [
+     };
+ 
+     globalThis.fetch = async (input, init) => {
+-      capturedUrl = getRequestUrl(input);
++      capturedUrls.push(getRequestUrl(input));
+       capturedInit = init;
+ 
+       return new Response(
+@@ -331,7 +333,9 @@ export const suite = defineSuite('reportarCasosApi', [
+         controller.signal
+       );
+ 
+-      assert.equal(capturedUrl?.pathname, '/v1/Boton/EditReportarCasos');
++      const capturedUrl = capturedUrls[0];
++      assert.ok(capturedUrl);
++      assert.equal(capturedUrl.pathname, '/v1/Boton/EditReportarCasos');
+       assert.equal(capturedInit?.method, 'PUT');
+       assert.equal(capturedInit?.signal, controller.signal);
+ 
