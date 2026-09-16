@@ -13,6 +13,7 @@ export const suite = defineSuite('gestionBotones.registry', [
     assert.equal(isGestionBotonImplemented('email'), true);
     assert.equal(isGestionBotonImplemented('agendas'), true);
     assert.equal(isGestionBotonImplemented('informacionDeudor'), true);
+    assert.equal(isGestionBotonImplemented('reportarCaso'), true);
   }),
   test('un botón nuevo queda disponible para el fallback de módulo en construcción', () => {
     assert.equal(isGestionBotonImplemented('nuevoModulo'), false);

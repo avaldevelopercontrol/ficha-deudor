@@ -61,6 +61,17 @@ export const suite = defineSuite(
         );
         assert.equal(
           isFichaDeudorPopupContext(
+            'reportar-caso',
+            {
+              ...baseContext,
+              idCartera: '4',
+              idUsuario: '3',
+            }
+          ),
+          true
+        );
+        assert.equal(
+          isFichaDeudorPopupContext(
             'lista-gestores',
             {
               idCliente: '1',
@@ -86,6 +97,16 @@ export const suite = defineSuite(
         assert.equal(
           isFichaDeudorPopupContext(
             'agenda-deudor',
+            {
+              ...baseContext,
+              idCartera: '4',
+            }
+          ),
+          false
+        );
+        assert.equal(
+          isFichaDeudorPopupContext(
+            'reportar-caso',
             {
               ...baseContext,
               idCartera: '4',

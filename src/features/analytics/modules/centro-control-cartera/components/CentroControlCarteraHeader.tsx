@@ -76,7 +76,16 @@ const CentroControlCarteraFreshnessInfo: React.FC<
               aria-label="Ver detalle de actualización de la información"
               aria-describedby="portfolio-control-center-freshness-tooltip"
             >
-              ⓘ
+              <svg
+                className="portfolio-control-center__freshness-help-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 11v5" />
+                <path d="M12 8h.01" />
+              </svg>
             </button>
 
             <span

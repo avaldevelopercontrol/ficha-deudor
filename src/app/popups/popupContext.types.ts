@@ -6,6 +6,7 @@ export const FICHA_DEUDOR_POPUP_TYPES = [
   'lista-gestores',
   'estado-cuenta',
   'produccion-gestor-hoy',
+  'reportar-caso',
 ] as const;
 
 export type FichaDeudorPopupType =
@@ -43,6 +44,11 @@ export interface FichaDeudorPopupContextMap {
 
   'estado-cuenta': DeudorPopupBaseContext & {
     idCartera: string;
+  };
+
+  'reportar-caso': DeudorPopupBaseContext & {
+    idCartera: string;
+    idUsuario: string;
   };
 
   'produccion-gestor-hoy': {
@@ -138,6 +144,13 @@ export const isFichaDeudorPopupContext = <
 
     case 'agenda-deudor':
     case 'inf-deudor':
+      return (
+        isDeudorPopupBaseContext(value) &&
+        hasIdProperty(value, 'idCartera') &&
+        hasIdProperty(value, 'idUsuario')
+      );
+
+    case 'reportar-caso':
       return (
         isDeudorPopupBaseContext(value) &&
         hasIdProperty(value, 'idCartera') &&

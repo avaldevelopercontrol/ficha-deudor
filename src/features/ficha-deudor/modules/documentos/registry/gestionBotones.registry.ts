@@ -56,6 +56,17 @@ const GESTION_BOTONES_REGISTRY: Readonly<
       documento: data.dniRuc,
     });
   },
+
+  reportarcaso: ({ data, params }) => {
+    openFichaDeudorPopup('reportar-caso', {
+      idCliente: params.id_cliente,
+      idCartera: params.id_cartera,
+      idDeudor: params.id_deudor,
+      idUsuario: params.id_usuario,
+      nombre: data.nombreRazonSocial,
+      documento: data.dniRuc,
+    });
+  },
   informaciondeudor: ({ data, params }) => {
     openFichaDeudorPopup('inf-deudor', {
       idCliente: params.id_cliente,

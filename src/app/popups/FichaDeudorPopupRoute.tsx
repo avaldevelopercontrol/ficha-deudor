@@ -54,6 +54,14 @@ const POPUP_COMPONENTS = {
       )
   ),
 
+
+  'reportar-caso': lazy(
+    () =>
+      import(
+        '@features/ficha-deudor/modules/reportar-casos/components/ReportarCasosPopup'
+      )
+  ),
+
   'produccion-gestor-hoy': lazy(
     () =>
       import(

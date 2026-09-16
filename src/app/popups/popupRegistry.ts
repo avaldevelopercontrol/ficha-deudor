@@ -52,6 +52,14 @@ export const FICHA_DEUDOR_POPUP_REGISTRY = {
     height: 650,
   },
 
+
+  'reportar-caso': {
+    path: '/popup/reportar-caso',
+    windowName: 'reportar-caso',
+    width: 1300,
+    height: 750,
+  },
+
   'produccion-gestor-hoy': {
     path:
       '/popup/produccion-gestor-hoy',

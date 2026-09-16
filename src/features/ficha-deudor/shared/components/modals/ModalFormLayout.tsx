@@ -38,6 +38,7 @@ interface ModalFormLayoutProps {
   deudorData?: DeudorInfo | null;
 
   isSubmitting?: boolean;
+  submitDisabled?: boolean;
   submitError?: string | null;
 }
 
@@ -56,6 +57,7 @@ export const ModalFormLayout:
     deudorData:
       deudorDataProp,
     isSubmitting = false,
+    submitDisabled = false,
     submitError = null,
   }) => {
     const deudorDataContext =
@@ -135,7 +137,7 @@ export const ModalFormLayout:
               size="md"
               icon="✓"
               onClick={onSubmit}
-              disabled={isSubmitting}
+              disabled={isSubmitting || submitDisabled}
               className={
                 'modal-form-layout__submit-button'
               }
