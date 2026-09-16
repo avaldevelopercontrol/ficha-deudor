@@ -10,6 +10,7 @@ import type {
   PromesasCarteraVenceHoyData,
   PromesasCarteraVenceHoyQuery,
   PromesasCarteraVenceHoySortKey,
+  SeguimientoPromesaCarteraItem,
   SeguimientoPromesasCarteraData,
   SeguimientoPromesasCarteraQuery,
   SeguimientoPromesasCarteraSortKey,
@@ -123,4 +124,65 @@ export const loadSeguimientoPromesasCartera = async (
   );
 
   return mapSeguimientoPromesasCarteraResponse(response);
+};
+
+export type SeguimientoPromesasCarteraExportQuery = Omit<
+  SeguimientoPromesasCarteraQuery,
+  'page' | 'pageSize'
+>;
+
+const SEGUIMIENTO_PROMESAS_EXPORT_PAGE_SIZE = 50;
+const SEGUIMIENTO_PROMESAS_EXPORT_MAX_PAGES = 2000;
+
+export const loadAllSeguimientoPromesasCartera = async (
+  crmClientId: number,
+  context: DetallePromesaCarteraContext,
+  query: SeguimientoPromesasCarteraExportQuery,
+  signal: AbortSignal
+): Promise<readonly SeguimientoPromesaCarteraItem[]> => {
+  const firstPage = await loadSeguimientoPromesasCartera(
+    crmClientId,
+    context,
+    {
+      ...query,
+      page: 1,
+      pageSize: SEGUIMIENTO_PROMESAS_EXPORT_PAGE_SIZE,
+    },
+    signal
+  );
+
+  const totalPages = firstPage.pagination.totalPages;
+
+  if (totalPages <= 1) {
+    return firstPage.items;
+  }
+
+  if (totalPages > SEGUIMIENTO_PROMESAS_EXPORT_MAX_PAGES) {
+    throw new Error(
+      'La exportación contiene demasiadas páginas para procesarse de forma segura.'
+    );
+  }
+
+  const items: SeguimientoPromesaCarteraItem[] = [...firstPage.items];
+
+  for (let page = 2; page <= totalPages; page += 1) {
+    if (signal.aborted) {
+      throw new DOMException('La exportación fue cancelada.', 'AbortError');
+    }
+
+    const currentPage = await loadSeguimientoPromesasCartera(
+      crmClientId,
+      context,
+      {
+        ...query,
+        page,
+        pageSize: SEGUIMIENTO_PROMESAS_EXPORT_PAGE_SIZE,
+      },
+      signal
+    );
+
+    items.push(...currentPage.items);
+  }
+
+  return items;
 };

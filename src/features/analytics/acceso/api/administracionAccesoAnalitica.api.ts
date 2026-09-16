@@ -33,6 +33,11 @@ export type {
 export type AnalyticsPowerBiConfigurationResponse =
   AnalyticsPowerBiConfiguration;
 
+const buildAnalyticsPowerBiConfigurationPath = (
+  optionId: number
+): string =>
+  `/v1/Analitica/Acceso/Opciones/${optionId}/ConfiguracionPowerBi`;
+
 export const getAnalyticsPowerBiConfiguration =
   async (
     optionId: number,
@@ -41,7 +46,7 @@ export const getAnalyticsPowerBiConfiguration =
     assertAnalyticsPositiveInteger('optionId', optionId);
 
     const rawResponse = await analyticsApiClient.get<unknown>(
-      `/v1/Analitica/Acceso/Opciones/${optionId}/ConfiguracionPowerBi`,
+      buildAnalyticsPowerBiConfigurationPath(optionId),
       {
         includeSelectedCrmClientId: false,
         signal,
@@ -69,7 +74,7 @@ export const syncAnalyticsPowerBiConfiguration =
     );
 
     await analyticsApiClient.patch<void>(
-      `/api/v1/analytics-access/options/${input.optionId}/power-bi-configuration`,
+      buildAnalyticsPowerBiConfigurationPath(input.optionId),
       payload,
       {
         includeSelectedCrmClientId: false,

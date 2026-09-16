@@ -5,7 +5,7 @@ import {
 import type { Agenda } from '../types/agenda.types';
 import { isAgendaApi } from './agendaApi.validators';
 
-const BASE_GESTION = '/v1/Gestion';
+const BASE_GESTION = '/v1/Boton';
 const AGENDAS_ERROR_MESSAGE = 'Error cargando agendas';
 
 export interface FetchAgendasByDeudorParams {
@@ -29,7 +29,7 @@ export async function fetchAgendasByDeudor(
   });
 
   const result = await apiClient<unknown>(
-    `${BASE_GESTION}/GetGestionAgendasDeudor?${params.toString()}`,
+    `${BASE_GESTION}/GetAgendasDeudor?${params.toString()}`,
     { signal }
   );
 

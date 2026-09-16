@@ -5,7 +5,7 @@ import {
 import type { Pago } from '../types/pago.types';
 import { isPagoApi } from './pagosApi.validators';
 
-const BASE_GESTION = '/v1/Gestion';
+const BASE_GESTION = '/v1/Boton';
 const PAGOS_ERROR_MESSAGE = 'Error cargando pagos';
 
 export interface FetchPagosByDeudorParams {
@@ -27,7 +27,7 @@ export async function fetchPagosByDeudor(
   });
 
   const result = await apiClient<unknown>(
-    `${BASE_GESTION}/GetGestionPagosDeudor?${params.toString()}`,
+    `${BASE_GESTION}/GetPagosDeudor?${params.toString()}`,
     { signal }
   );
 

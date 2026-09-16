@@ -272,6 +272,13 @@ function PrivateAppLayout() {
         REPORTERIA_ROUTES
           .POWER_BI,
       ]}
+      clientSwitcherDisabledPaths={[
+        FICHA_DEUDOR_ROUTES
+          .FICHA_DEUDOR,
+
+        REPORTERIA_ROUTES
+          .POWER_BI,
+      ]}
     />
   );
 }

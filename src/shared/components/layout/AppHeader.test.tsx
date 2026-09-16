@@ -59,7 +59,8 @@ const authValue: AuthContextValue = {
 };
 
 const renderHeader = (
-  showLogoutButton: boolean
+  showLogoutButton: boolean,
+  onChangeClient?: () => void
 ): string =>
   renderToStaticMarkup(
     <MemoryRouter>
@@ -67,6 +68,7 @@ const renderHeader = (
         <AppHeader
           breadcrumb="MENÚ DE MÓDULOS"
           showLogoutButton={showLogoutButton}
+          onChangeClient={onChangeClient}
         />
       </AuthContext.Provider>
     </MemoryRouter>
@@ -98,6 +100,26 @@ export const suite = defineSuite(
         assert.doesNotMatch(
           html,
           /app-header__logout-label/
+        );
+      }
+    ),
+    test(
+      'convierte el cliente del header en una acción solo cuando se habilita el cambio',
+      () => {
+        const switchableHtml = renderHeader(true, () => undefined);
+        const readonlyHtml = renderHeader(true);
+
+        assert.match(
+          switchableHtml,
+          /app-header__client-switcher/
+        );
+        assert.match(
+          switchableHtml,
+          /Cambiar cliente\. Cliente actual: CLARO CORPORATIVO/
+        );
+        assert.doesNotMatch(
+          readonlyHtml,
+          /app-header__client-switcher/
         );
       }
     ),

@@ -1,3 +1,5 @@
+import type React from 'react';
+
 import type { Column } from '@shared/types';
 import Table from '@shared/components/table/Table';
 import { SisgesIcon } from '@shared/icons/sisges';
@@ -25,6 +27,8 @@ interface PortfolioPromiseTableSectionProps<
   filterValue: TFilter;
   filterOptions: readonly PortfolioPromiseFilterOption<TFilter>[];
   onFilterChange: (value: TFilter) => void;
+  toolbarLeadingContent?: React.ReactNode;
+  toolbarStatus?: React.ReactNode;
   isRefreshing?: boolean;
   refreshingMessage?: string;
   columns: Column<TItem>[];
@@ -52,6 +56,8 @@ export function PortfolioPromiseTableSection<
   filterValue,
   filterOptions,
   onFilterChange,
+  toolbarLeadingContent,
+  toolbarStatus,
   isRefreshing = false,
   refreshingMessage,
   columns,
@@ -69,6 +75,12 @@ export function PortfolioPromiseTableSection<
   return (
     <section className={sectionClassName}>
       <div className={toolbarClassName}>
+        {toolbarLeadingContent && (
+          <div className={`${toolbarClassName}__actions`}>
+            {toolbarLeadingContent}
+          </div>
+        )}
+
         <div className={`${toolbarClassName}__filter`}>
           <label
             className={`${toolbarClassName}__label`}
@@ -104,6 +116,8 @@ export function PortfolioPromiseTableSection<
           </span>
         </div>
       </div>
+
+      {toolbarStatus}
 
       {isRefreshing && refreshingMessage && (
         <div

@@ -15,6 +15,7 @@ import type {
 
 import {
   getAccessPermissionAvailability,
+  getVisibleAccessPermissionKeys,
   sanitizeAccessPermissions,
 } from './accessCapabilities.utils';
 
@@ -131,13 +132,62 @@ export const suite = defineSuite(
       }
     ),
     test(
-      'Análisis de Carteras y Reportería solo habilitan consultar',
+      'Análisis de Carteras habilita consultar y exportar, sin permisos de escritura',
+      () => {
+        const option = createOption(
+          APPLICATION_OPTION_IDS
+            .PORTFOLIO_CONTROL_CENTER
+        );
+
+        assert.deepEqual(
+          getAccessPermissionAvailability(
+            option
+          ),
+          {
+            consultar: true,
+            insertar: false,
+            editar: false,
+            eliminar: false,
+            exportar: true,
+          }
+        );
+
+        assert.deepEqual(
+          getVisibleAccessPermissionKeys(
+            option
+          ),
+          ['consultar', 'exportar']
+        );
+
+        assert.deepEqual(
+          sanitizeAccessPermissions(
+            option,
+            {
+              consultar: true,
+              insertar: true,
+              editar: true,
+              eliminar: true,
+              exportar: true,
+            }
+          ),
+          {
+            consultar: true,
+            insertar: false,
+            editar: false,
+            eliminar: false,
+            exportar: true,
+          }
+        );
+      }
+    ),
+    test(
+      'Reportería y Sesiones BI continúan siendo exclusivamente de consulta',
       () => {
         [
           APPLICATION_OPTION_IDS
-            .PORTFOLIO_CONTROL_CENTER,
-          APPLICATION_OPTION_IDS
             .REPORTERIA,
+          APPLICATION_OPTION_IDS
+            .SESIONES_BI,
         ].forEach((optionId) => {
           const option = createOption(
             optionId
@@ -176,6 +226,23 @@ export const suite = defineSuite(
             }
           );
         });
+      }
+    ),
+    test(
+      'Sesiones BI muestra únicamente el permiso consultar en el editor',
+      () => {
+        const option = createOption(
+          APPLICATION_OPTION_IDS
+            .SESIONES_BI,
+          'mSesionesBiRenombrado'
+        );
+
+        assert.deepEqual(
+          getVisibleAccessPermissionKeys(
+            option
+          ),
+          ['consultar']
+        );
       }
     ),
     test(

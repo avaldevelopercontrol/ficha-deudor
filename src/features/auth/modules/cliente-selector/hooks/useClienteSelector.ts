@@ -30,12 +30,14 @@ interface UseClienteSelectorParams {
   isOpen: boolean;
   usuarioId: string;
   onContinue: (cliente: Cliente) => void;
+  excludedClienteKey?: string | null;
 }
 
 export const useClienteSelector = ({
   isOpen,
   usuarioId,
   onContinue,
+  excludedClienteKey = null,
 }: UseClienteSelectorParams) => {
   const [state, dispatch] = useReducer(
     clienteSelectorReducer,
@@ -102,7 +104,12 @@ export const useClienteSelector = ({
 
         dispatch({
           type: 'LOAD_SUCCESS',
-          clientes: result.data,
+          clientes: excludedClienteKey
+            ? result.data.filter(
+                (cliente) =>
+                  buildClienteGrupoSelectionKey(cliente) !== excludedClienteKey
+              )
+            : result.data,
         });
       });
 
@@ -113,6 +120,7 @@ export const useClienteSelector = ({
     aniosRequestController,
     carterasRequestController,
     clientesRequestController,
+    excludedClienteKey,
     isOpen,
     usuarioId,
   ]);

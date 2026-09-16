@@ -93,6 +93,7 @@ export const suite = defineSuite('secciones internas de datos principales de ges
 
     assert.match(html, /gestion-compact-grid--resultado-gestor/);
     assert.match(html, /Estado de Gestión/);
+    assert.match(html, /role="combobox"/);
     assert.match(html, /Tipo de Gestión/);
     assert.match(html, /Buscar Gestor/);
     assert.match(html, /GESTOR PRUEBA/);

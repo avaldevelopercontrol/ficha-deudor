@@ -102,6 +102,17 @@ const powerBiItem: AccessTreeItem = {
     '3. Power BI futuro',
 };
 
+const sesionesBiItem: AccessTreeItem = {
+  ...item,
+  idModulo: 52,
+  nombre: 'Sesiones BI',
+  codigo: 'mSesionesBi',
+  orden: 4,
+  treeCode: '4',
+  displayLabel:
+    '4. Sesiones BI',
+};
+
 const parentItem: AccessTreeItem = {
   ...item,
   idModulo: 2,
@@ -265,6 +276,47 @@ export const suite = defineSuite(
             )
           );
         });
+      }
+    ),
+    test(
+      'Sesiones BI muestra únicamente consultar y omite seleccionar todo',
+      () => {
+        const html =
+          renderToStaticMarkup(
+            <AccesosPerfilPermissionsPanel
+              activeOption={sesionesBiItem}
+              permissionStates={{
+                consultar: 'checked',
+                insertar: 'unchecked',
+                editar: 'unchecked',
+                eliminar: 'unchecked',
+                exportar: 'unchecked',
+              }}
+              selectAllState="checked"
+              titleLabel="Seleccionaste:"
+              noSelectionMessage="Seleccione una opción"
+              selectAllLabel="Seleccionar todo"
+              globalHint="Root no se registra"
+              containerHint="Es un contenedor automático"
+              singleHint="Se aplica solo a esta opción"
+              onPermissionChange={() => undefined}
+              onSelectAll={() => undefined}
+            />
+          );
+
+        assert.match(html, /CONSULTAR/);
+        assert.doesNotMatch(html, /INSERTAR/);
+        assert.doesNotMatch(html, /EDITAR/);
+        assert.doesNotMatch(html, /ELIMINAR/);
+        assert.doesNotMatch(html, /EXPORTAR/);
+        assert.doesNotMatch(
+          html,
+          /Seleccionar todo/
+        );
+        assert.doesNotMatch(
+          html,
+          /aria-label="CONSULTAR"[^>]*disabled=""|disabled=""[^>]*aria-label="CONSULTAR"/
+        );
       }
     ),
     test(

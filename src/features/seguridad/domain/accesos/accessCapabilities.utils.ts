@@ -8,6 +8,10 @@ import type {
   AccessPermissions,
 } from './access.types';
 
+import {
+  ACCESS_PERMISSION_KEYS,
+} from './access.constants';
+
 export type AccessPermissionAvailability =
   Record<
     AccessPermissionKey,
@@ -50,6 +54,15 @@ const READ_ONLY_PERMISSIONS:
     exportar: false,
   };
 
+const READ_EXPORT_PERMISSIONS:
+  AccessPermissionAvailability = {
+    consultar: true,
+    insertar: false,
+    editar: false,
+    eliminar: false,
+    exportar: true,
+  };
+
 const CHANGE_PASSWORD_PERMISSIONS:
   AccessPermissionAvailability = {
     consultar: true,
@@ -58,6 +71,15 @@ const CHANGE_PASSWORD_PERMISSIONS:
     eliminar: false,
     exportar: false,
   };
+
+const CONSULT_ONLY_PERMISSION_KEYS = [
+  'consultar',
+] as const satisfies readonly AccessPermissionKey[];
+
+const CONSULT_EXPORT_PERMISSION_KEYS = [
+  'consultar',
+  'exportar',
+] as const satisfies readonly AccessPermissionKey[];
 
 /**
  * Capacidades funcionales reales de cada opción final.
@@ -78,11 +100,16 @@ const OPTION_PERMISSION_AVAILABILITY_BY_ID:
     [
       APPLICATION_OPTION_IDS
         .PORTFOLIO_CONTROL_CENTER,
-      READ_ONLY_PERMISSIONS,
+      READ_EXPORT_PERMISSIONS,
     ],
     [
       APPLICATION_OPTION_IDS
         .REPORTERIA,
+      READ_ONLY_PERMISSIONS,
+    ],
+    [
+      APPLICATION_OPTION_IDS
+        .SESIONES_BI,
       READ_ONLY_PERMISSIONS,
     ],
     [
@@ -116,6 +143,37 @@ const OPTION_PERMISSION_AVAILABILITY_BY_ID:
       MAINTENANCE_PERMISSIONS,
     ],
   ]);
+
+/**
+ * Permisos que se muestran en el editor de accesos.
+ *
+ * Las excepciones se indexan por nId_Opcion para no depender del nombre o
+ * código configurable del módulo: Sesiones BI es solo consulta, mientras que
+ * Análisis de Carteras permite consulta y exportación del seguimiento.
+ */
+export const getVisibleAccessPermissionKeys = (
+  option: AccessTreeItem | null | undefined
+): readonly AccessPermissionKey[] => {
+  if (!option?.isPermissionTarget) {
+    return ACCESS_PERMISSION_KEYS;
+  }
+
+  if (
+    option.idModulo ===
+    APPLICATION_OPTION_IDS.SESIONES_BI
+  ) {
+    return CONSULT_ONLY_PERMISSION_KEYS;
+  }
+
+  if (
+    option.idModulo ===
+    APPLICATION_OPTION_IDS.PORTFOLIO_CONTROL_CENTER
+  ) {
+    return CONSULT_EXPORT_PERMISSION_KEYS;
+  }
+
+  return ACCESS_PERMISSION_KEYS;
+};
 
 export const getAccessPermissionAvailability = (
   option: AccessTreeItem | null | undefined

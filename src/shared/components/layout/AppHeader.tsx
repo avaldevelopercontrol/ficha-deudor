@@ -10,6 +10,7 @@ interface AppHeaderProps {
   actions?: React.ReactNode;
   showClientInfo?: boolean;
   showLogoutButton?: boolean;
+  onChangeClient?: () => void;
 }
 
 function LogoutIcon() {
@@ -37,6 +38,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   actions,
   showClientInfo = true,
   showLogoutButton = false,
+  onChangeClient,
 }) => {
   const navigate = useNavigate();
   const { usuario, clienteSeleccionada, logout } = useAuth();
@@ -82,9 +84,30 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             <>
               <span className="app-header__separator">•</span>
 
-              <span>
-                <strong>Cliente:</strong> {clienteSeleccionada.nombre}
-              </span>
+              {onChangeClient ? (
+                <button
+                  type="button"
+                  className="app-header__client-switcher"
+                  onClick={onChangeClient}
+                  title="Cambiar cliente"
+                  aria-label={`Cambiar cliente. Cliente actual: ${clienteSeleccionada.nombre}`}
+                >
+                  <span>
+                    <strong>Cliente:</strong> {clienteSeleccionada.nombre}
+                  </span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    className="app-header__client-switcher-icon"
+                  >
+                    <path d="M7 7h10l-3-3m3 3-3 3M17 17H7l3 3m-3-3 3-3" />
+                  </svg>
+                </button>
+              ) : (
+                <span>
+                  <strong>Cliente:</strong> {clienteSeleccionada.nombre}
+                </span>
+              )}
             </>
           )}
         </div>

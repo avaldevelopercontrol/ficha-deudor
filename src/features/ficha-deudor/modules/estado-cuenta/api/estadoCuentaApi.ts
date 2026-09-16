@@ -7,7 +7,7 @@ import {
   ESTADO_CUENTA_EXPORT_CONFIG,
 } from '../constants/estadoCuentaPopup.constants';
 
-const BASE_GESTION = '/v1/Gestion';
+const BASE_GESTION = '/v1/Boton';
 
 interface ExportEstadoCuentaParams {
   idCliente: string;

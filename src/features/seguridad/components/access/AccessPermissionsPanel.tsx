@@ -14,10 +14,7 @@ import type {
 } from '../../domain/accesos/access.types';
 
 import {
-  ACCESS_PERMISSION_KEYS,
-} from '../../domain/accesos/access.constants';
-
-import {
+  getVisibleAccessPermissionKeys,
   isAccessPermissionAvailable,
 } from '../../domain/accesos/accessCapabilities.utils';
 
@@ -59,6 +56,12 @@ export const AccessPermissionsPanel = ({
     disabled ||
     !activeOption ||
     !activeOption.isPermissionTarget;
+  const visiblePermissionKeys =
+    getVisibleAccessPermissionKeys(
+      activeOption
+    );
+  const showSelectAll =
+    visiblePermissionKeys.length > 1;
 
   return (
     <div className="asignar-accesos-permissions">
@@ -72,16 +75,18 @@ export const AccessPermissionsPanel = ({
           </span>
         </strong>
 
-        <label className="asignar-accesos-permissions__select-all">
-          <AccessStateCheckbox
-            state={selectAllState}
-            disabled={controlsDisabled}
-            ariaLabel={selectAllLabel}
-            onChange={onSelectAll}
-          />
+        {showSelectAll && (
+          <label className="asignar-accesos-permissions__select-all">
+            <AccessStateCheckbox
+              state={selectAllState}
+              disabled={controlsDisabled}
+              ariaLabel={selectAllLabel}
+              onChange={onSelectAll}
+            />
 
-          <span>{selectAllLabel}</span>
-        </label>
+            <span>{selectAllLabel}</span>
+          </label>
+        )}
       </div>
 
       <div
@@ -98,7 +103,7 @@ export const AccessPermissionsPanel = ({
           </p>
         )}
 
-        {ACCESS_PERMISSION_KEYS.map(
+        {visiblePermissionKeys.map(
           (permission) => {
             const isAvailable =
               isAccessPermissionAvailable(

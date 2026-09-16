@@ -19,13 +19,15 @@ export const suite = defineSuite(
         const originalFetch = globalThis.fetch;
         let requestCount = 0;
         let capturedMethod = '';
+        let capturedUrl = '';
 
         globalThis.fetch = async (
-          _input,
+          input,
           init
         ) => {
           requestCount++;
           capturedMethod = init?.method ?? '';
+          capturedUrl = String(input);
 
           return Response.json({
             optionId: 27,
@@ -66,6 +68,10 @@ export const suite = defineSuite(
 
           assert.equal(requestCount, 1);
           assert.equal(capturedMethod, 'GET');
+          assert.match(
+            capturedUrl,
+            /\/v1\/Analitica\/Acceso\/Opciones\/27\/ConfiguracionPowerBi$/
+          );
           assert.deepEqual(result.groupIds, [156]);
           assert.deepEqual(result.availableGroups, [
             {
@@ -346,14 +352,16 @@ export const suite = defineSuite(
         const originalFetch = globalThis.fetch;
         let requestCount = 0;
         let capturedMethod = '';
+        let capturedUrl = '';
         let capturedBody: unknown = null;
 
         globalThis.fetch = async (
-          _input,
+          input,
           init
         ) => {
           requestCount++;
           capturedMethod = init?.method ?? '';
+          capturedUrl = String(input);
           capturedBody = JSON.parse(String(init?.body));
 
           return new Response(null, {
@@ -383,6 +391,10 @@ export const suite = defineSuite(
 
           assert.equal(requestCount, 1);
           assert.equal(capturedMethod, 'PATCH');
+          assert.match(
+            capturedUrl,
+            /\/v1\/Analitica\/Acceso\/Opciones\/27\/ConfiguracionPowerBi$/
+          );
           assert.deepEqual(capturedBody, {
             codigoOpcion:
               'GESTION_INTEGRAL_COBRANZA',

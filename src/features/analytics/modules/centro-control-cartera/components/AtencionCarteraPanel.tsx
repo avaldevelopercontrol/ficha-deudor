@@ -41,6 +41,7 @@ interface AtencionCarteraPanelProps {
     PortfolioOperationalContext,
     'businessUnit' | 'campaignId' | 'subPortfolioId'
   > & { crmClientId: number } | null;
+  operationAsOfAt?: string | null;
   isLoading: boolean;
   error: string | null;
   onRetry: () => void;
@@ -130,6 +131,7 @@ export const AtencionCarteraPanel: React.FC<
   target,
   recoveredAmount,
   context,
+  operationAsOfAt = null,
   isLoading,
   error,
   onRetry,
@@ -310,6 +312,7 @@ export const AtencionCarteraPanel: React.FC<
             setIsDueTodayPromisesOpen(false);
           }}
           context={context}
+          operationAsOfAt={operationAsOfAt}
         />
       )}
 

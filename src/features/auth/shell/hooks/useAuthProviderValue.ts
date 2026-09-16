@@ -124,6 +124,12 @@ export const useAuthProviderValue = (): AuthContextValue => {
   }, [resetTransientAuthState]);
 
   const seleccionarCliente = useCallback((cliente: Cliente) => {
+    // El contexto analítico está asociado al cliente CRM seleccionado.
+    // Limpiarlo también al cambiar de cliente evita reutilizar datos del
+    // contexto anterior sin necesidad de cerrar la sesión completa.
+    clearAnalyticsAccessSession();
+    clearSelectedCrmClientId();
+
     setState((currentState) => {
       const nextState = selectAuthClient(currentState, cliente);
 

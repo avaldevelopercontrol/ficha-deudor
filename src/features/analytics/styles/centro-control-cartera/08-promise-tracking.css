@@ -316,6 +316,69 @@
   background: #f8fafc;
 }
 
+.portfolio-promise-tracking-table-toolbar__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-right: 8px;
+}
+
+.portfolio-promise-tracking-export-button {
+  display: inline-flex;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid #cfd6e4;
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--ap-navy);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.portfolio-promise-tracking-export-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.portfolio-promise-tracking-export-button:hover:not(:disabled) {
+  border-color: rgba(26, 37, 64, 0.28);
+  background: #f2f5f9;
+}
+
+.portfolio-promise-tracking-export-button:focus-visible {
+  outline: 2px solid rgba(26, 37, 64, 0.28);
+  outline-offset: 2px;
+}
+
+.portfolio-promise-tracking-export-button:disabled {
+  opacity: 0.56;
+  cursor: not-allowed;
+}
+
+.portfolio-promise-tracking-export-status {
+  padding: 6px 11px;
+  border-bottom: 1px solid rgba(26, 37, 64, 0.06);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.portfolio-promise-tracking-export-status.is-success {
+  background: #eef8f1;
+  color: #147332;
+}
+
+.portfolio-promise-tracking-export-status.is-error {
+  background: var(--ap-danger-bg);
+  color: var(--ap-danger);
+}
+
 .portfolio-promise-tracking-table-toolbar__filter {
   display: grid;
   grid-template-columns: auto minmax(150px, 185px) 30px;
@@ -572,6 +635,15 @@
 
   .portfolio-promise-tracking-summary {
     grid-template-columns: 1fr;
+  }
+
+  .portfolio-promise-tracking-table-toolbar {
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .portfolio-promise-tracking-table-toolbar__actions {
+    margin-right: 0;
   }
 
   .portfolio-promise-tracking-status-panel__heading {

@@ -5,6 +5,10 @@ import {
   test,
 } from '../../../../test/testHarness';
 
+import {
+  APPLICATION_OPTION_IDS,
+} from '@features/access-control';
+
 import type {
   AccessTreeItem,
 } from './access.types';
@@ -482,6 +486,74 @@ export const suite = defineSuite(
                 },
               },
             ],
+          }
+        );
+      }
+    ),
+    test(
+      'Sesiones BI persiste únicamente consultar en accesos por perfil',
+      () => {
+        const sesionesBiTreeItems = [
+          ...treeItems,
+          createTreeItem({
+            idModulo:
+              APPLICATION_OPTION_IDS
+                .SESIONES_BI,
+            nombre: 'Sesiones BI',
+            codigo: 'mSesionesBi',
+            tipo: 3,
+            idPadre: 2,
+            depth: 2,
+            treeCode: '1.3',
+            displayLabel:
+              '1.3. Sesiones BI',
+            hasChildren: false,
+            isAssignmentTarget: true,
+            isPermissionTarget: true,
+          }),
+        ];
+
+        const normalized =
+          normalizeAsignarAccesosPerfilForm(
+            {
+              perfilId: 9,
+              selectedOptionIds: [
+                2,
+                APPLICATION_OPTION_IDS
+                  .SESIONES_BI,
+              ],
+              activeOptionId:
+                APPLICATION_OPTION_IDS
+                  .SESIONES_BI,
+              permissionsByOptionId: {
+                [String(
+                  APPLICATION_OPTION_IDS
+                    .SESIONES_BI
+                )]: {
+                  consultar: true,
+                  insertar: true,
+                  editar: true,
+                  eliminar: true,
+                  exportar: true,
+                },
+              },
+            },
+            sesionesBiTreeItems
+          );
+
+        assert.deepEqual(
+          normalized.assignments.find(
+            (assignment) =>
+              assignment.opcionId ===
+              APPLICATION_OPTION_IDS
+                .SESIONES_BI
+          )?.permissions,
+          {
+            consultar: true,
+            insertar: false,
+            editar: false,
+            eliminar: false,
+            exportar: false,
           }
         );
       }

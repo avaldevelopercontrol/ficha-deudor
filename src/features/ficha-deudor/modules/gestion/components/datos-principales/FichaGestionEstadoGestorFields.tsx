@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { SelectField } from '@shared/components/ui';
+import { SearchableSelectField, SelectField } from '@shared/components/ui';
 
 import type { FichaGestionDatosPrincipalesCatalogos } from '../../types/fichaGestionCatalogos.types';
 
@@ -34,7 +34,7 @@ const FichaGestionEstadoGestorFields: React.FC<Props> = ({
 
   return (
     <div className="gestion-compact-grid gestion-compact-grid--resultado-gestor">
-      <SelectField
+      <SearchableSelectField
         label="Estado de Gestión"
         options={estados.options}
         value={estadoGestion}
@@ -44,6 +44,8 @@ const FichaGestionEstadoGestorFields: React.FC<Props> = ({
             ? 'Cargando...'
             : 'Seleccionar estado...'
         }
+        searchPlaceholder="Buscar estado de gestión..."
+        emptyMessage="No se encontraron estados de gestión."
         disabled={estados.isLoading}
         error={estados.error || ''}
       />

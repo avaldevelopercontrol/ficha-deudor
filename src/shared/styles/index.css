@@ -24,6 +24,7 @@
 @import './components/15-badges.css';
 @import '../../features/ficha-deudor/styles/16-actions-and-gestion.css';
 @import './components/17-forms.css';
+@import './components/17-searchable-select.css';
 @import './components/18-buttons-checkbox-and-static-actions.css';
 @import './components/19-modals-and-divider.css';
 @import '../../features/ficha-deudor/styles/20-responsive-panels-and-actions.css';

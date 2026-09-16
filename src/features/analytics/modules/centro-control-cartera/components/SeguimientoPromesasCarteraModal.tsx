@@ -1,6 +1,10 @@
 import type React from 'react';
 import { useMemo, useState } from 'react';
 
+import {
+  APPLICATION_OPTION_IDS,
+  useOptionPermissions,
+} from '@features/access-control';
 import { SisgesIcon } from '@shared/icons/sisges';
 import type { Column } from '@shared/types';
 
@@ -17,6 +21,9 @@ import type {
 } from '../domain/promesasCartera.types';
 import { useDetallePromesaCarteraTableState } from '../hooks/useDetallePromesaCarteraTableState';
 import { useSeguimientoPromesasCartera } from '../hooks/useSeguimientoPromesasCartera';
+import {
+  useSeguimientoPromesasCarteraExport,
+} from '../hooks/useSeguimientoPromesasCarteraExport';
 import {
   formatPortfolioCurrency,
   formatPortfolioInteger,
@@ -40,6 +47,7 @@ interface SeguimientoPromesasCarteraModalProps {
     PortfolioOperationalContext,
     'businessUnit' | 'campaignId' | 'subPortfolioId'
   > & { crmClientId: number };
+  operationAsOfAt?: string | null;
 }
 
 const DEFAULT_PAGE_SIZE = 5;
@@ -109,7 +117,7 @@ const getConfirmationTone = (
 
 export const SeguimientoPromesasCarteraModal: React.FC<
   SeguimientoPromesasCarteraModalProps
-> = ({ isOpen, onClose, context }) => {
+> = ({ isOpen, onClose, context, operationAsOfAt = null }) => {
   const [period, setPeriod] =
     useState<SeguimientoPromesasCarteraPeriodo>('today');
 
@@ -159,6 +167,25 @@ export const SeguimientoPromesasCarteraModal: React.FC<
 
   const visibleData = data?.dueDate === dueDate ? data : null;
   const isToday = period === 'today';
+  const { exportar: canExport } = useOptionPermissions(
+    APPLICATION_OPTION_IDS.PORTFOLIO_CONTROL_CENTER
+  );
+
+  const {
+    isExporting,
+    error: exportError,
+    lastExportedCount,
+    exportExcel,
+  } = useSeguimientoPromesasCarteraExport({
+    crmClientId: context.crmClientId,
+    context,
+    period,
+    dueDate,
+    status,
+    sortKey,
+    sortDirection,
+    operationAsOfAt,
+  });
 
   const columns = useMemo<Column<SeguimientoPromesaCarteraItem>[]>(
     () => [
@@ -487,6 +514,44 @@ export const SeguimientoPromesasCarteraModal: React.FC<
             filterValue={status}
             filterOptions={statusOptions}
             onFilterChange={handleStatusChange}
+            toolbarLeadingContent={
+              canExport ? (
+                <button
+                  type="button"
+                  className="portfolio-promise-tracking-export-button"
+                  onClick={() => {
+                    void exportExcel();
+                  }}
+                  disabled={
+                    isExporting ||
+                    isLoading ||
+                    visibleData.pagination.totalItems <= 0
+                  }
+                >
+                  <SisgesIcon name="export" />
+                  <span>
+                    {isExporting ? 'Generando Excel...' : 'Exportar Excel'}
+                  </span>
+                </button>
+              ) : null
+            }
+            toolbarStatus={
+              exportError ? (
+                <div
+                  className="portfolio-promise-tracking-export-status is-error"
+                  role="alert"
+                >
+                  {exportError}
+                </div>
+              ) : lastExportedCount !== null ? (
+                <div
+                  className="portfolio-promise-tracking-export-status is-success"
+                  role="status"
+                >
+                  Excel generado con {formatPortfolioInteger(lastExportedCount)} registro(s).
+                </div>
+              ) : null
+            }
             isRefreshing={isLoading}
             refreshingMessage="Actualizando seguimiento..."
             columns={columns}

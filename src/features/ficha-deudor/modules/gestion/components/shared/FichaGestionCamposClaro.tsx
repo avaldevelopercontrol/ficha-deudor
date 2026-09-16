@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { SelectField } from '@shared/components/ui';
+import { SearchableSelectField } from '@shared/components/ui';
 
 import type { FichaGestionResultadosLlamadaProps } from '../../types/fichaGestionViewModel.types';
 
@@ -56,34 +56,26 @@ const FichaGestionCamposClaro: React.FC<Props> = ({
 
   return (
     <div className="resultados-llamada__campos-claro">
-      <SelectField
+      <SearchableSelectField
         label="Estado Gestión Claro:"
         options={estadoGestionClaroOptions}
         value={form.estadoGestionClaro}
-        onChange={
-          handleEstadoGestionClaroChange
-        }
-        placeholder={
-          estadoGestionClaroPlaceholder
-        }
-        disabled={
-          isLoadingEstadoGestionClaro
-        }
-        error={
-          errorEstadoGestionClaro || ''
-        }
+        onChange={handleEstadoGestionClaroChange}
+        placeholder={estadoGestionClaroPlaceholder}
+        searchPlaceholder="Buscar estado de gestión Claro..."
+        emptyMessage="No se encontraron estados de gestión Claro."
+        disabled={isLoadingEstadoGestionClaro}
+        error={errorEstadoGestionClaro || ''}
       />
 
-      <SelectField
+      <SearchableSelectField
         label="Motivo No Pago:"
         options={motivoNoPagoOptions}
         value={form.motivoNoPago}
-        onChange={
-          handleMotivoNoPagoChange
-        }
-        placeholder={
-          motivoNoPagoPlaceholder
-        }
+        onChange={handleMotivoNoPagoChange}
+        placeholder={motivoNoPagoPlaceholder}
+        searchPlaceholder="Buscar motivo de no pago..."
+        emptyMessage="No se encontraron motivos de no pago."
         disabled={isLoadingMotivoNoPago}
         error={errorMotivoNoPago || ''}
       />

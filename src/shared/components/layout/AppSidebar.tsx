@@ -45,6 +45,7 @@ interface AppSidebarProps {
   onExpandedChange?: (
     isExpanded: boolean
   ) => void;
+  onChangeClient?: () => void;
 }
 
 const getRoleInitials = (
@@ -131,7 +132,7 @@ const LogoutIcon = () => (
 
 export const AppSidebar: React.FC<
   AppSidebarProps
-> = () => {
+> = ({ onChangeClient }) => {
   const navigate = useNavigate();
 
   const {
@@ -238,15 +239,42 @@ export const AppSidebar: React.FC<
         </div>
 
         {clienteSeleccionada && (
-          <div className="app-sidebar__client">
-            <span className="app-sidebar__client-label">
-              Cliente activo
-            </span>
+          onChangeClient ? (
+            <button
+              type="button"
+              className="app-sidebar__client app-sidebar__client--switchable"
+              onClick={onChangeClient}
+              title="Cambiar cliente"
+              aria-label={`Cambiar cliente. Cliente actual: ${clienteSeleccionada.nombre}`}
+            >
+              <span className="app-sidebar__client-heading">
+                <span className="app-sidebar__client-label">
+                  Cliente activo
+                </span>
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="app-sidebar__client-switch-icon"
+                >
+                  <path d="M7 7h10l-3-3m3 3-3 3M17 17H7l3 3m-3-3 3-3" />
+                </svg>
+              </span>
 
-            <span className="app-sidebar__client-name">
-              {clienteSeleccionada.nombre}
-            </span>
-          </div>
+              <span className="app-sidebar__client-name">
+                {clienteSeleccionada.nombre}
+              </span>
+            </button>
+          ) : (
+            <div className="app-sidebar__client">
+              <span className="app-sidebar__client-label">
+                Cliente activo
+              </span>
+
+              <span className="app-sidebar__client-name">
+                {clienteSeleccionada.nombre}
+              </span>
+            </div>
+          )
         )}
 
         <nav

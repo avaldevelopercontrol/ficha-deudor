@@ -251,6 +251,9 @@ const CentroControlCarteraContent: React.FC<
                     }
                   : null
               }
+              operationAsOfAt={
+                visibleData?.freshness.operationAsOfAt ?? null
+              }
               isLoading={visibleIsLoading}
               error={error}
               onRetry={() => {

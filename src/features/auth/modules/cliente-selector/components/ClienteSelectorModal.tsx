@@ -4,6 +4,7 @@ import Modal from '@shared/components/modals/Modal';
 import { SelectField } from '@shared/components/ui';
 
 import type { Cliente, Usuario } from '../../../types';
+import { buildClienteGrupoSelectionKey } from '../../../utils/clienteGrupo.utils';
 import {
   aniosToSelectOptions,
   clienteToSelectOptions,
@@ -16,6 +17,8 @@ interface ClienteSelectorModalProps {
   usuario: Usuario;
   onClose: () => void;
   onContinue: (cliente: Cliente) => void;
+  mode?: 'initial' | 'switch';
+  currentCliente?: Cliente | null;
 }
 
 export const ClienteSelectorModal: React.FC<ClienteSelectorModalProps> = ({
@@ -23,7 +26,14 @@ export const ClienteSelectorModal: React.FC<ClienteSelectorModalProps> = ({
   usuario,
   onClose,
   onContinue,
+  mode = 'initial',
+  currentCliente = null,
 }) => {
+  const isSwitchMode = mode === 'switch';
+  const currentClienteKey = currentCliente
+    ? buildClienteGrupoSelectionKey(currentCliente)
+    : null;
+
   const {
     clientes,
     selectedClienteKey,
@@ -48,7 +58,11 @@ export const ClienteSelectorModal: React.FC<ClienteSelectorModalProps> = ({
     isOpen,
     usuarioId: usuario.id_usuario,
     onContinue,
+    excludedClienteKey: isSwitchMode ? currentClienteKey : null,
   });
+
+  const clienteOptions = clienteToSelectOptions(clientes);
+  const hasAlternativeClientes = clienteOptions.length > 0;
 
   const shouldShowAnioField =
     Boolean(selectedClienteKey) &&
@@ -67,23 +81,37 @@ export const ClienteSelectorModal: React.FC<ClienteSelectorModalProps> = ({
   return (
     <Modal
       isOpen={isOpen}
-      title="Seleccionar Cliente"
+      title={isSwitchMode ? 'Cambiar Cliente' : 'Seleccionar Cliente'}
       onClose={onClose}
       size="sm"
-      closeOnEsc={false}
+      closeOnEsc={isSwitchMode}
     >
       <div className="cliente-selector">
-        <div className="cliente-selector__user-info">
-          <p>
-            <strong>
-              Bienvenido, {usuario.nombre} {usuario.apellido}
+        {isSwitchMode ? (
+          <div className="cliente-selector__current-client">
+            <span className="cliente-selector__current-client-label">
+              Cliente actual
+            </span>
+            <strong className="cliente-selector__current-client-name">
+              {currentCliente?.nombre ?? 'No definido'}
             </strong>
-          </p>
+            <p className="cliente-selector__hint">
+              Seleccione otro cliente para continuar.
+            </p>
+          </div>
+        ) : (
+          <div className="cliente-selector__user-info">
+            <p>
+              <strong>
+                Bienvenido, {usuario.nombre} {usuario.apellido}
+              </strong>
+            </p>
 
-          <p className="cliente-selector__hint">
-            Seleccione el cliente con el que desea trabajar:
-          </p>
-        </div>
+            <p className="cliente-selector__hint">
+              Seleccione el cliente con el que desea trabajar:
+            </p>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="cliente-selector__loading">
@@ -95,12 +123,18 @@ export const ClienteSelectorModal: React.FC<ClienteSelectorModalProps> = ({
           <>
             <SelectField
               label="Cliente"
-              options={clienteToSelectOptions(clientes)}
+              options={clienteOptions}
               value={selectedClienteKey}
               onChange={handleSelectCliente}
               placeholder="Seleccione un cliente..."
               required
             />
+
+            {isSwitchMode && !hasAlternativeClientes && (
+              <p className="cliente-selector__detail">
+                No hay otros clientes disponibles para este usuario.
+              </p>
+            )}
 
             {shouldShowAnioField && (
               <div className="cliente-selector__year-field">
@@ -173,7 +207,7 @@ export const ClienteSelectorModal: React.FC<ClienteSelectorModalProps> = ({
             disabled={!canContinue}
             type="button"
           >
-            Continuar
+            {isSwitchMode ? 'Cambiar cliente' : 'Continuar'}
           </button>
         </div>
       </div>

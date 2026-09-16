@@ -5,6 +5,10 @@ import {
   test,
 } from '../../../../../test/testHarness';
 
+import {
+  APPLICATION_OPTION_IDS,
+} from '@features/access-control';
+
 import type {
   AccessTreeItem,
 } from '../../../domain/accesos/access.types';
@@ -198,6 +202,72 @@ export const suite = defineSuite(
           normalized.assignments.find(
             (assignment) =>
               assignment.opcionId === 999
+          )?.permissions,
+          {
+            consultar: true,
+            insertar: false,
+            editar: false,
+            eliminar: false,
+            exportar: false,
+          }
+        );
+      }
+    ),
+    test(
+      'Sesiones BI persiste únicamente consultar en accesos por usuario',
+      () => {
+        const sesionesBiTreeItems = [
+          ...treeItems,
+          {
+            ...treeItems[2],
+            idModulo:
+              APPLICATION_OPTION_IDS
+                .SESIONES_BI,
+            nombre: 'Sesiones BI',
+            codigo: 'mSesionesBi',
+            urlBI: null,
+            orden: 3,
+            treeCode: '1.3',
+            displayLabel:
+              '1.3. Sesiones BI',
+          } satisfies AccessTreeItem,
+        ];
+
+        const normalized =
+          normalizeAsignarAccesosUsuarioForm(
+            {
+              usuarioId: 10,
+              grupoId: 20,
+              selectedOptionIds: [
+                2,
+                APPLICATION_OPTION_IDS
+                  .SESIONES_BI,
+              ],
+              activeOptionId:
+                APPLICATION_OPTION_IDS
+                  .SESIONES_BI,
+              permissionsByOptionId: {
+                [String(
+                  APPLICATION_OPTION_IDS
+                    .SESIONES_BI
+                )]: {
+                  consultar: true,
+                  insertar: true,
+                  editar: true,
+                  eliminar: true,
+                  exportar: true,
+                },
+              },
+            },
+            sesionesBiTreeItems
+          );
+
+        assert.deepEqual(
+          normalized.assignments.find(
+            (assignment) =>
+              assignment.opcionId ===
+              APPLICATION_OPTION_IDS
+                .SESIONES_BI
           )?.permissions,
           {
             consultar: true,

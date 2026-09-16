@@ -12,6 +12,7 @@ export * from './Paginacion';
 export * from './PasswordField';
 export * from './SectionHeader';
 export * from './SelectField';
+export * from './SearchableSelectField';
 export * from './StatusBadge';
 export * from './TextAreaField';
 export * from './FeedbackMessage';
