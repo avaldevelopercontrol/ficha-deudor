@@ -9,7 +9,6 @@ import { APPLICATION_OPTION_IDS } from '@features/access-control/registry/applic
 
 import {
   AnalyticsScopesEmpty,
-  CrmClientSelector,
   useAccesoAnalitica,
 } from '../acceso';
 import type {
@@ -159,13 +158,15 @@ const CentroControlCarteraContent: React.FC<
         />
 
         <div className="portfolio-control-center__sections">
-          <CrmClientSelector
-            scopes={scopes}
-            value={selectedCrmClientId}
-            onChange={onCrmClientChange}
-          />
-
           <FiltrosCartera
+            clientOptions={scopes.map((scope) => ({
+              id: String(scope.crmClientId),
+              label:
+                scope.name ||
+                `Cliente ${scope.crmClientId}`,
+            }))}
+            selectedClientId={selectedCrmClientId}
+            onClientChange={onCrmClientChange}
             filters={filters}
             options={filterOptions}
             portfolioOption={portfolioOption}

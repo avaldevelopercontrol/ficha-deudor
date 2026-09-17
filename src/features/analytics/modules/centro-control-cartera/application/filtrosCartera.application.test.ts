@@ -104,6 +104,10 @@ export const suite = defineSuite(
       assert.equal(model.selectedCampaignYear, 2026);
       assert.deepEqual(model.campaignMonthOptions, [
         { id: '2026-08', label: 'Agosto' },
+        { id: '2026-07', label: 'Julio' },
+      ]);
+      assert.deepEqual(model.subPortfolioOptions, [
+        { id: '20', label: 'Vigente' },
       ]);
       assert.deepEqual(model.dateBounds, {
         min: '2026-08-02',
@@ -137,7 +141,7 @@ export const suite = defineSuite(
       assert.equal(result.campaignId, null);
       assert.equal(result.supervisorId, null);
     }),
-    test('seleccionar un año aplica la campaña más reciente disponible en la subcartera', () => {
+    test('seleccionar un año aplica la campaña más reciente y limpia una subcartera incompatible', () => {
       const result = changePortfolioCampaignYear(
         {
           ...FILTERS,
@@ -149,7 +153,26 @@ export const suite = defineSuite(
         2026
       );
 
-      assert.equal(result.campaignId, '2026-07');
+      assert.equal(result.campaignId, '2026-08');
+      assert.equal(result.subPortfolioId, null);
+    }),
+    test('al iniciar filtra subcarteras por el año y mes visibles antes de persistir la campaña automática', () => {
+      const model = resolveFiltrosCarteraViewModel({
+        filters: {
+          ...FILTERS,
+          campaignId: null,
+          subPortfolioId: null,
+          supervisorId: null,
+        },
+        options: OPTIONS,
+        portfolioOption: null,
+        resolvedCampaignId: null,
+      });
+
+      assert.equal(model.displayedCampaign?.id, '2026-08');
+      assert.deepEqual(model.subPortfolioOptions, [
+        { id: '20', label: 'Vigente' },
+      ]);
     }),
     test('la selección automática de campaña conserva solo fechas dentro del rango disponible', () => {
       const result = resolveAutomaticPortfolioCampaignSelection(

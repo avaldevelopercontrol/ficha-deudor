@@ -3,7 +3,7 @@ import {
   useState,
 } from 'react';
 
-import { SegmentedControl } from '@shared/components/ui';
+import { Paginacion, SegmentedControl } from '@shared/components/ui';
 
 import { AnalyticsPanel } from '../../../shared/components';
 import type {
@@ -19,6 +19,8 @@ interface SesionesBiUsagePanelsProps {
 
 type ReportMetric = 'sessions' | 'time';
 
+const RANKING_PAGE_SIZE = 5;
+
 const REPORT_METRIC_OPTIONS = [
   { value: 'time', label: 'Tiempo' },
   { value: 'sessions', label: 'Sesiones' },
@@ -29,6 +31,23 @@ export const SesionesBiUsagePanels = ({
   users,
 }: SesionesBiUsagePanelsProps) => {
   const [metric, setMetric] = useState<ReportMetric>('time');
+  const [reportPage, setReportPage] = useState(1);
+  const [userPage, setUserPage] = useState(1);
+
+  const reportTotalPages = Math.max(1, Math.ceil(reports.length / RANKING_PAGE_SIZE));
+  const userTotalPages = Math.max(1, Math.ceil(users.length / RANKING_PAGE_SIZE));
+  const currentReportPage = Math.min(reportPage, reportTotalPages);
+  const currentUserPage = Math.min(userPage, userTotalPages);
+  const reportStartIndex = (currentReportPage - 1) * RANKING_PAGE_SIZE;
+  const userStartIndex = (currentUserPage - 1) * RANKING_PAGE_SIZE;
+  const visibleReports = reports.slice(
+    reportStartIndex,
+    reportStartIndex + RANKING_PAGE_SIZE
+  );
+  const visibleUsers = users.slice(
+    userStartIndex,
+    userStartIndex + RANKING_PAGE_SIZE
+  );
 
   const maxValue = useMemo(
     () => Math.max(
@@ -61,13 +80,13 @@ export const SesionesBiUsagePanels = ({
           <div className="sessions-bi-empty">No hay uso de reportes para los filtros seleccionados.</div>
         ) : (
           <div className="sessions-bi-report-ranking">
-            {reports.slice(0, 7).map((report, index) => {
+            {visibleReports.map((report, index) => {
               const value = metric === 'time' ? report.visibleSeconds : report.sessions;
               const width = Math.max(4, (value / maxValue) * 100);
 
               return (
                 <div className="sessions-bi-report-row" key={report.reportId}>
-                  <span className="sessions-bi-report-row__rank">{index + 1}</span>
+                  <span className="sessions-bi-report-row__rank">{reportStartIndex + index + 1}</span>
                   <div className="sessions-bi-report-row__main">
                     <div className="sessions-bi-report-row__labels">
                       <strong title={report.reportName}>{report.reportName}</strong>
@@ -89,6 +108,24 @@ export const SesionesBiUsagePanels = ({
             })}
           </div>
         )}
+
+        {reports.length > 0 && (
+          <Paginacion
+            className="sessions-bi-ranking-pagination"
+            variant="compact"
+            paginaActual={currentReportPage}
+            totalPaginas={reportTotalPages}
+            totalRegistros={reports.length}
+            indiceInicio={reportStartIndex}
+            indiceFin={reportStartIndex + visibleReports.length}
+            summaryNoun="reportes"
+            onPaginaAnterior={() => setReportPage(Math.max(1, currentReportPage - 1))}
+            onPaginaSiguiente={() =>
+              setReportPage(Math.min(reportTotalPages, currentReportPage + 1))
+            }
+            onIrAPagina={setReportPage}
+          />
+        )}
       </AnalyticsPanel>
 
       <AnalyticsPanel
@@ -102,10 +139,10 @@ export const SesionesBiUsagePanels = ({
           <div className="sessions-bi-empty">No hay usuarios con sesiones en el período.</div>
         ) : (
           <div className="sessions-bi-user-ranking">
-            {users.slice(0, 6).map((user, index) => (
+            {visibleUsers.map((user, index) => (
               <div className="sessions-bi-user-row" key={user.userId}>
-                <span className={`sessions-bi-user-row__rank sessions-bi-user-row__rank--${Math.min(index + 1, 4)}`}>
-                  {index + 1}
+                <span className={`sessions-bi-user-row__rank sessions-bi-user-row__rank--${Math.min(userStartIndex + index + 1, 4)}`}>
+                  {userStartIndex + index + 1}
                 </span>
                 <div className="sessions-bi-user-row__identity">
                   <strong>{user.userName}</strong>
@@ -118,6 +155,24 @@ export const SesionesBiUsagePanels = ({
               </div>
             ))}
           </div>
+        )}
+
+        {users.length > 0 && (
+          <Paginacion
+            className="sessions-bi-ranking-pagination"
+            variant="compact"
+            paginaActual={currentUserPage}
+            totalPaginas={userTotalPages}
+            totalRegistros={users.length}
+            indiceInicio={userStartIndex}
+            indiceFin={userStartIndex + visibleUsers.length}
+            summaryNoun="usuarios"
+            onPaginaAnterior={() => setUserPage(Math.max(1, currentUserPage - 1))}
+            onPaginaSiguiente={() =>
+              setUserPage(Math.min(userTotalPages, currentUserPage + 1))
+            }
+            onIrAPagina={setUserPage}
+          />
         )}
       </AnalyticsPanel>
     </section>

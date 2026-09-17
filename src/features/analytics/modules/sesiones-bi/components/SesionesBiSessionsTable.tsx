@@ -1,9 +1,14 @@
+import {
+  useMemo,
+} from 'react';
+
 import Table from '@shared/components/table/Table';
 import {
   Badge,
   Paginacion,
   SelectField,
 } from '@shared/components/ui';
+import { useClientSideTable } from '@shared/hooks/useClientSideTable';
 import { SisgesIcon } from '@shared/icons/sisges';
 import type { Column } from '@shared/types';
 
@@ -21,15 +26,21 @@ import {
 
 interface SesionesBiSessionsTableProps {
   sessions: readonly SesionBiRow[];
-  total: number;
-  page: number;
-  pageSize: number;
   order: SesionesBiOrden;
   loading?: boolean;
   onOrderChange: (order: SesionesBiOrden) => void;
-  onPageChange: (page: number) => void;
   onSelect: (sessionId: string) => void;
 }
+
+interface SesionBiTableRow extends SesionBiRow {
+  clientDisplayName: string;
+  startedAtDisplay: string;
+  lastActivityDisplay: string;
+  visibleTimeDisplay: string;
+  statusDisplay: string;
+}
+
+const PAGE_SIZE_OPTIONS = [5, 10, 15, 30] as const;
 
 const statusVariant = (
   status: SesionBiEstado
@@ -53,9 +64,9 @@ const ORDER_OPTIONS = [
   { id: 'reporte_asc', label: 'Reporte A–Z' },
 ] satisfies { id: SesionesBiOrden; label: string }[];
 
-const COLUMNS: Column<SesionBiRow>[] = [
+const COLUMNS: Column<SesionBiTableRow>[] = [
   {
-    key: 'user',
+    key: 'userName',
     label: 'Usuario',
     width: '17%',
     render: (session) => (
@@ -66,38 +77,35 @@ const COLUMNS: Column<SesionBiRow>[] = [
     ),
   },
   {
-    key: 'report',
+    key: 'reportName',
     label: 'Reporte BI',
     width: '22%',
     render: (session) => <strong>{session.reportName}</strong>,
   },
   {
-    key: 'client',
+    key: 'clientDisplayName',
     label: 'Cliente',
     width: '13%',
-    render: (session) => session.clientName ?? 'Sin cliente asociado',
   },
   {
-    key: 'startedAtUtc',
+    key: 'startedAtDisplay',
     label: 'Inicio',
     width: '12%',
-    render: (session) => formatSesionesBiDateTime(session.startedAtUtc),
   },
   {
-    key: 'lastHeartbeatAtUtc',
+    key: 'lastActivityDisplay',
     label: 'Última actividad',
     width: '12%',
-    render: (session) => formatSesionesBiDateTime(session.lastHeartbeatAtUtc),
   },
   {
-    key: 'visibleSeconds',
+    key: 'visibleTimeDisplay',
     label: 'Tiempo visible',
     width: '10%',
     align: 'right',
-    render: (session) => <strong>{formatSesionesBiDuration(session.visibleSeconds)}</strong>,
+    render: (session) => <strong>{session.visibleTimeDisplay}</strong>,
   },
   {
-    key: 'status',
+    key: 'statusDisplay',
     label: 'Estado',
     width: '10%',
     render: (session) => (
@@ -108,7 +116,7 @@ const COLUMNS: Column<SesionBiRow>[] = [
         dot
         preserveCase
       >
-        {getSesionBiStatusLabel(session.status)}
+        {session.statusDisplay}
       </Badge>
     ),
   },
@@ -117,6 +125,7 @@ const COLUMNS: Column<SesionBiRow>[] = [
     label: '',
     width: '4%',
     align: 'center',
+    filterable: false,
     render: () => (
       <span className="sessions-bi-table__chevron" aria-hidden="true">
         <SisgesIcon name="chevron-right" width={16} height={16} />
@@ -125,20 +134,38 @@ const COLUMNS: Column<SesionBiRow>[] = [
   },
 ];
 
+const toTableRow = (session: SesionBiRow): SesionBiTableRow => ({
+  ...session,
+  clientDisplayName: session.clientName ?? 'Sin cliente asociado',
+  startedAtDisplay: formatSesionesBiDateTime(session.startedAtUtc),
+  lastActivityDisplay: formatSesionesBiDateTime(session.lastHeartbeatAtUtc),
+  visibleTimeDisplay: formatSesionesBiDuration(session.visibleSeconds),
+  statusDisplay: getSesionBiStatusLabel(session.status),
+});
+
 export const SesionesBiSessionsTable = ({
   sessions,
-  total,
-  page,
-  pageSize,
   order,
   loading = false,
   onOrderChange,
-  onPageChange,
   onSelect,
 }: SesionesBiSessionsTableProps) => {
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = Math.min(page * pageSize, total);
+  const allData = useMemo(
+    () => sessions.map(toTableRow),
+    [sessions]
+  );
+  const table = useClientSideTable(
+    allData,
+    [order],
+    {
+      initialPageSize: 10,
+    }
+  );
+  const startIndex = (table.pageNumber - 1) * table.pageSize;
+  const endIndex = Math.min(
+    startIndex + table.pageSize,
+    table.totalRecords
+  );
 
   return (
     <AnalyticsPanel
@@ -168,10 +195,15 @@ export const SesionesBiSessionsTable = ({
       <div className="analytics-table-surface sessions-bi-table-surface">
         <Table
           columns={COLUMNS}
-          data={[...sessions]}
+          data={table.paginatedData}
+          allData={allData}
           emptyMessage="No hay sesiones para los filtros seleccionados."
-          fitToPanel={false}
-          appearance="analytics"
+          enableColumnFilters
+          textFilters={table.textFilters}
+          selectedFilters={table.selectedFilters}
+          onTextFilterChange={table.onTextFilterChange}
+          onSelectedFilterChange={table.onSelectedFilterChange}
+          fitToPanel
           ariaBusy={loading}
           wrapperClassName="sessions-bi-table-wrap"
           tableClassName="sessions-bi-table"
@@ -181,19 +213,29 @@ export const SesionesBiSessionsTable = ({
           onRowClick={(session) => onSelect(session.sessionId)}
         />
 
-        <Paginacion
-          variant="compact"
-          paginaActual={page}
-          totalPaginas={totalPages}
-          totalRegistros={total}
-          indiceInicio={startIndex}
-          indiceFin={endIndex}
-          disabled={loading}
-          summaryNoun="sesiones"
-          onPaginaAnterior={() => onPageChange(page - 1)}
-          onPaginaSiguiente={() => onPageChange(page + 1)}
-          onIrAPagina={onPageChange}
-        />
+        {table.totalRecords > 0 && (
+          <div className="sessions-bi-table-pagination">
+            <Paginacion
+              paginaActual={table.pageNumber}
+              totalPaginas={table.totalPages}
+              totalRegistros={table.totalRecords}
+              indiceInicio={startIndex}
+              indiceFin={endIndex}
+              disabled={loading}
+              onPaginaAnterior={() =>
+                table.setPageNumber(table.pageNumber - 1)
+              }
+              onPaginaSiguiente={() =>
+                table.setPageNumber(table.pageNumber + 1)
+              }
+              onIrAPagina={table.setPageNumber}
+              showPageSizeSelector
+              pageSize={table.pageSize}
+              pageSizeOptions={[...PAGE_SIZE_OPTIONS]}
+              onPageSizeChange={table.setPageSize}
+            />
+          </div>
+        )}
       </div>
     </AnalyticsPanel>
   );

@@ -275,12 +275,14 @@
 
 .portfolio-filter-grid--without-supervisor {
   grid-template-columns:
-    minmax(110px, 0.62fr)
-    minmax(150px, 0.84fr)
-    minmax(180px, 1fr)
-    minmax(190px, 1.05fr)
-    minmax(120px, 0.68fr)
-    minmax(120px, 0.68fr);
+    minmax(150px, 1.08fr)
+    minmax(135px, 0.92fr)
+    minmax(82px, 0.52fr)
+    minmax(112px, 0.68fr)
+    minmax(140px, 0.95fr)
+    minmax(116px, 0.72fr)
+    minmax(116px, 0.72fr);
+  gap: 9px 10px;
 }
 
 .portfolio-control-center__filter-error {

@@ -10,12 +10,16 @@ import type {
 } from '../application/filtrosCartera.application';
 import type {
   CentroControlCarteraFilters,
+  FiltroCarteraOption,
 } from '../domain/filtrosCartera.types';
 
 interface FiltroCarteraFieldsProps {
+  clientOptions: readonly FiltroCarteraOption[];
+  selectedClientId: number;
   filters: CentroControlCarteraFilters;
   viewModel: FiltrosCarteraViewModel;
   isLoading: boolean;
+  onClientChange: (clientId: number) => void;
   onBusinessUnitChange: (value: string) => void;
   onSubPortfolioChange: (value: string) => void;
   onCampaignYearChange: (value: string) => void;
@@ -27,9 +31,12 @@ interface FiltroCarteraFieldsProps {
 export const FiltroCarteraFields: React.FC<
   FiltroCarteraFieldsProps
 > = ({
+  clientOptions,
+  selectedClientId,
   filters,
   viewModel,
   isLoading,
+  onClientChange,
   onBusinessUnitChange,
   onSubPortfolioChange,
   onCampaignYearChange,
@@ -38,7 +45,6 @@ export const FiltroCarteraFields: React.FC<
   onDateToChange,
 }) => {
   const {
-    effectiveCampaign,
     displayedCampaign,
     isAutomaticCampaignSelectionPending,
     campaignYearOptions,
@@ -53,6 +59,34 @@ export const FiltroCarteraFields: React.FC<
 
   return (
     <div className="analytics-filter-surface portfolio-filter-grid portfolio-filter-grid--without-supervisor">
+      <SelectField
+        label="Cliente"
+        value={String(selectedClientId)}
+        options={[...clientOptions]}
+        hidePlaceholder
+        disabled={isLoading || clientOptions.length <= 1}
+        onChange={(value) => {
+          const clientId = Number(value);
+
+          if (Number.isSafeInteger(clientId) && clientId > 0) {
+            onClientChange(clientId);
+          }
+        }}
+      />
+
+      <SelectField
+        label="Cartera"
+        value={effectiveBusinessUnit ?? ''}
+        options={businessUnitOptions}
+        hidePlaceholder
+        disabled={
+          isLoading ||
+          isBusinessUnitTransitionPending ||
+          businessUnitOptions.length <= 1
+        }
+        onChange={onBusinessUnitChange}
+      />
+
       <SelectField
         label="Año"
         value={
@@ -92,24 +126,11 @@ export const FiltroCarteraFields: React.FC<
       />
 
       <SelectField
-        label="Cartera"
-        value={effectiveBusinessUnit ?? ''}
-        options={businessUnitOptions}
-        hidePlaceholder
-        disabled={
-          isLoading ||
-          isBusinessUnitTransitionPending ||
-          businessUnitOptions.length <= 1
-        }
-        onChange={onBusinessUnitChange}
-      />
-
-      <SelectField
         label="Sub cartera"
         value={filters.subPortfolioId ?? ''}
         options={subPortfolioOptions}
         placeholder="Todas"
-        disabled={isLoading || effectiveCampaign === null}
+        disabled={isLoading || displayedCampaign === null}
         onChange={onSubPortfolioChange}
       />
 
@@ -119,7 +140,7 @@ export const FiltroCarteraFields: React.FC<
         value={filters.dateFrom ?? ''}
         min={dateBounds.min ?? undefined}
         max={filters.dateTo ?? dateBounds.max ?? undefined}
-        disabled={isLoading || effectiveCampaign === null}
+        disabled={isLoading || displayedCampaign === null}
         onChange={(event) => {
           onDateFromChange(event.target.value);
         }}
@@ -131,7 +152,7 @@ export const FiltroCarteraFields: React.FC<
         value={filters.dateTo ?? ''}
         min={filters.dateFrom ?? dateBounds.min ?? undefined}
         max={dateBounds.max ?? undefined}
-        disabled={isLoading || effectiveCampaign === null}
+        disabled={isLoading || displayedCampaign === null}
         onChange={(event) => {
           onDateToChange(event.target.value);
         }}

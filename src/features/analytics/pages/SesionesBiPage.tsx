@@ -109,13 +109,9 @@ const SesionesBiPage = () => {
 
               <SesionesBiSessionsTable
                 sessions={data.sessions.items}
-                total={data.sessions.total}
-                page={data.sessions.page}
-                pageSize={data.sessions.pageSize}
                 order={filters.state.order}
                 loading={loading}
                 onOrderChange={filters.setOrder}
-                onPageChange={filters.setPage}
                 onSelect={setSelectedSessionId}
               />
             </div>

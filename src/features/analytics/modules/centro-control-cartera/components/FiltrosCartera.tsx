@@ -16,6 +16,9 @@ import { useFiltrosCarteraController } from '../hooks/useFiltrosCarteraControlle
 import { FiltroCarteraFields } from './FiltroCarteraFields';
 
 interface FiltrosCarteraProps {
+  clientOptions: readonly FiltroCarteraOption[];
+  selectedClientId: number;
+  onClientChange: (clientId: number) => void;
   filters: CentroControlCarteraFilters;
   options: CentroControlCarteraFilterOptions;
   portfolioOption: FiltroCarteraOption | null;
@@ -32,6 +35,9 @@ interface FiltrosCarteraProps {
 export const FiltrosCartera: React.FC<
   FiltrosCarteraProps
 > = ({
+  clientOptions,
+  selectedClientId,
+  onClientChange,
   filters,
   options,
   portfolioOption,
@@ -81,9 +87,12 @@ export const FiltrosCartera: React.FC<
         </div>
       ) : (
         <FiltroCarteraFields
+          clientOptions={clientOptions}
+          selectedClientId={selectedClientId}
           filters={filters}
           viewModel={viewModel}
           isLoading={isLoading}
+          onClientChange={onClientChange}
           onBusinessUnitChange={updateBusinessUnit}
           onSubPortfolioChange={updateSubPortfolio}
           onCampaignYearChange={updateCampaignYear}

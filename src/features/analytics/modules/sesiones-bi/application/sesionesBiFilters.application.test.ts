@@ -49,6 +49,8 @@ export const suite = defineSuite(
 
         assert.equal(state.preset, 'LAST_7_DAYS');
         assert.equal(state.page, 1);
+        assert.equal(state.pageSize, 10);
+        assert.equal(filters.pageSize, 10);
         assert.equal(filters.fromUtc, '2026-09-09T05:00:00.000Z');
         assert.equal(filters.toUtc, '2026-09-16T05:00:00.000Z');
       }

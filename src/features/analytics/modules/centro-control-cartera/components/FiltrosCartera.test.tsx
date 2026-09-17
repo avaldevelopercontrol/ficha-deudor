@@ -54,6 +54,12 @@ export const suite = defineSuite(
       () => {
         const html = renderToStaticMarkup(
           <FiltrosCartera
+            clientOptions={[
+              { id: '95', label: 'CLARO CORPORATIVO' },
+              { id: '59', label: 'MITSUI AUTO FINANCE' },
+            ]}
+            selectedClientId={95}
+            onClientChange={() => undefined}
             filters={FILTERS}
             options={OPTIONS}
             portfolioOption={{
@@ -76,6 +82,22 @@ export const suite = defineSuite(
           html,
           /value="CLARO ADMINISTRATIVO" selected=""/
         );
+
+        const clienteIndex = html.indexOf('>Cliente</label>');
+        const carteraIndex = html.indexOf('>Cartera</label>');
+        const anioIndex = html.indexOf('>Año</label>');
+        const mesIndex = html.indexOf('>Mes</label>');
+        const subCarteraIndex = html.indexOf('>Sub cartera</label>');
+        const desdeIndex = html.indexOf('>Desde</label>');
+        const hastaIndex = html.indexOf('>Hasta</label>');
+
+        assert.ok(clienteIndex >= 0);
+        assert.ok(clienteIndex < carteraIndex);
+        assert.ok(carteraIndex < anioIndex);
+        assert.ok(anioIndex < mesIndex);
+        assert.ok(mesIndex < subCarteraIndex);
+        assert.ok(subCarteraIndex < desdeIndex);
+        assert.ok(desdeIndex < hastaIndex);
       }
     ),
     test(
@@ -83,6 +105,12 @@ export const suite = defineSuite(
       () => {
         const html = renderToStaticMarkup(
           <FiltrosCartera
+            clientOptions={[
+              { id: '95', label: 'CLARO CORPORATIVO' },
+              { id: '59', label: 'MITSUI AUTO FINANCE' },
+            ]}
+            selectedClientId={95}
+            onClientChange={() => undefined}
             filters={{
               ...FILTERS,
               businessUnit: 'CLARO GOBIERNO',
@@ -136,7 +164,11 @@ export const suite = defineSuite(
           /<option value="2026-08" selected="">Agosto<\/option>/
         );
         assert.doesNotMatch(html, /Selecciona mes/);
-        assert.match(html, /Sub cartera<\/label><select[^>]*disabled=""/);
+        assert.match(html, /Sub cartera<\/label><select/);
+        assert.doesNotMatch(
+          html,
+          /Sub cartera<\/label><select[^>]*disabled=""/
+        );
       }
     ),
   ]

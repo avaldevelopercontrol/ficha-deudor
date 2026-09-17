@@ -76,24 +76,24 @@ export const resolveFiltrosCarteraViewModel = ({
     findAvailableCampaign(
       index,
       filters.campaignId,
-      filters.subPortfolioId
+      null
     ) ??
     findAvailableCampaign(
       index,
       resolvedCampaignId,
-      filters.subPortfolioId
+      null
     );
 
   const campaignYearOptions = getPortfolioCampaignYearOptions(
     options,
-    filters.subPortfolioId,
+    null,
     index
   );
   const latestAvailableCampaign =
     filters.campaignId === null && resolvedCampaignId === null
       ? getLatestPortfolioCampaign(
           options,
-          filters.subPortfolioId,
+          null,
           null,
           index
         )
@@ -108,15 +108,16 @@ export const resolveFiltrosCarteraViewModel = ({
   const campaignMonthOptions = getPortfolioCampaignMonthOptions(
     options,
     selectedCampaignYear,
-    filters.subPortfolioId,
+    null,
     index
   );
+  const displayedCampaignId = displayedCampaign?.id ?? null;
   const subPortfolioOptions = options.subPortfolios.filter(
     (subPortfolio) =>
-      !filters.campaignId ||
+      displayedCampaignId !== null &&
       isPortfolioCampaignAvailable(
         index,
-        filters.campaignId,
+        displayedCampaignId,
         subPortfolio.id
       )
   );
@@ -151,7 +152,7 @@ export const resolveFiltrosCarteraViewModel = ({
       ),
     dateBounds: getFiltroCarteraDateBounds(
       options,
-      filters.campaignId,
+      displayedCampaignId,
       filters.subPortfolioId,
       index
     ),
@@ -168,16 +169,26 @@ export const resolveAutomaticPortfolioCampaignSelection = (
   }
 
   const index = buildFiltroCarteraIndex(options);
+  const subPortfolioId =
+    filters.subPortfolioId &&
+    isPortfolioCampaignAvailable(
+      index,
+      latestAvailableCampaign.id,
+      filters.subPortfolioId
+    )
+      ? filters.subPortfolioId
+      : null;
   const dateBounds = getFiltroCarteraDateBounds(
     options,
     latestAvailableCampaign.id,
-    filters.subPortfolioId,
+    subPortfolioId,
     index
   );
 
   return {
     ...filters,
     campaignId: latestAvailableCampaign.id,
+    subPortfolioId,
     dateFrom: keepDateWithinBounds(filters.dateFrom, dateBounds),
     dateTo: keepDateWithinBounds(filters.dateTo, dateBounds),
     supervisorId: null,
@@ -247,6 +258,16 @@ const changePortfolioCampaignWithIndex = (
   campaignId: string | null,
   index: FiltroCarteraIndex
 ): CentroControlCarteraFilters => {
+  const subPortfolioId =
+    !campaignId ||
+    !filters.subPortfolioId ||
+    isPortfolioCampaignAvailable(
+      index,
+      campaignId,
+      filters.subPortfolioId
+    )
+      ? filters.subPortfolioId
+      : null;
   const supervisorStillAvailable =
     !campaignId ||
     !filters.supervisorId ||
@@ -254,12 +275,12 @@ const changePortfolioCampaignWithIndex = (
       index,
       filters.supervisorId,
       campaignId,
-      filters.subPortfolioId
+      subPortfolioId
     );
   const dateBounds = getFiltroCarteraDateBounds(
     options,
     campaignId,
-    filters.subPortfolioId,
+    subPortfolioId,
     index
   );
 
@@ -267,6 +288,7 @@ const changePortfolioCampaignWithIndex = (
     ...filters,
     dateFrom: keepDateWithinBounds(filters.dateFrom, dateBounds),
     dateTo: keepDateWithinBounds(filters.dateTo, dateBounds),
+    subPortfolioId,
     campaignId,
     supervisorId: supervisorStillAvailable
       ? filters.supervisorId
@@ -297,7 +319,7 @@ export const changePortfolioCampaignYear = (
       ? null
       : getLatestPortfolioCampaign(
           options,
-          filters.subPortfolioId,
+          null,
           campaignYear,
           index
         );

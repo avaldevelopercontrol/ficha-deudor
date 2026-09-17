@@ -12,7 +12,7 @@ import {
 
 export const DEFAULT_SESIONES_BI_PRESET: SesionesBiPeriodoPreset =
   'LAST_7_DAYS';
-export const DEFAULT_SESIONES_BI_PAGE_SIZE = 20;
+export const DEFAULT_SESIONES_BI_PAGE_SIZE = 10;
 
 export interface SesionesBiFiltersState {
   preset: SesionesBiPeriodoPreset;
