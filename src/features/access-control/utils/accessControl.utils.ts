@@ -4,6 +4,7 @@ import {
 
 import {
   getOptionRoute,
+  hasRegisteredOptionDestination,
 } from '../registry/optionRoute.registry';
 
 import type {
@@ -72,6 +73,9 @@ const buildNavigableTree = (
 
     if (
       option.route === null &&
+      !hasRegisteredOptionDestination(
+        option.id
+      ) &&
       children.length === 0
     ) {
       continue;

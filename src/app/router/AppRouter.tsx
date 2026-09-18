@@ -24,16 +24,17 @@ import {
 } from '../../features/access-control';
 
 import {
-  ANALYTICS_ROUTES,
-} from '../../features/analytics/constants/analyticsRoutes.constants';
-
-import {
-  loadPortfolioControlCenterPage,
-} from '../../features/analytics/navigation/portfolioControlCenterNavigation.preload';
-
-import {
+  GESTION_ANALITICA_ROUTES,
   REPORTERIA_ROUTES,
-} from '../../features/analytics/constants/reporteriaRoutes.constants';
+} from '@features/gestion-analitica/constants';
+
+import {
+  loadCentroControlCarteraPage,
+  loadPowerBiViewerPage,
+  loadReporteriaPage,
+  loadSesionesBiPage,
+} from '@features/gestion-analitica/navigation';
+
 
 import {
   AUTH_ROUTES,
@@ -99,29 +100,20 @@ const GestionDeudorPage = lazy(
     )
 );
 
-const PortfolioControlCenterPage = lazy(
-  loadPortfolioControlCenterPage
+const CentroControlCarteraPage = lazy(
+  loadCentroControlCarteraPage
 );
 
 const ReporteriaPage = lazy(
-  () =>
-    import(
-      '../../features/analytics/pages/ReporteriaPage'
-    )
+  loadReporteriaPage
 );
 
 const PowerBiViewerPage = lazy(
-  () =>
-    import(
-      '../../features/analytics/pages/PowerBiViewerPage'
-    )
+  loadPowerBiViewerPage
 );
 
 const SesionesBiPage = lazy(
-  () =>
-    import(
-      '../../features/analytics/pages/SesionesBiPage'
-    )
+  loadSesionesBiPage
 );
 
 const FichaDeudor = lazy(
@@ -347,24 +339,24 @@ export function AppRouter() {
 
               <Route
                 path={
-                  ANALYTICS_ROUTES
-                    .PORTFOLIO_CONTROL_CENTER
+                  GESTION_ANALITICA_ROUTES
+                    .ANALISIS_CARTERAS
                 }
                 element={
                   <OptionAccessRoute
                     optionId={
                       APPLICATION_OPTION_IDS
-                        .PORTFOLIO_CONTROL_CENTER
+                        .ANALISIS_CARTERAS
                     }
                   >
-                    <PortfolioControlCenterPage />
+                    <CentroControlCarteraPage />
                   </OptionAccessRoute>
                 }
               />
 
               <Route
                 path={
-                  ANALYTICS_ROUTES
+                  GESTION_ANALITICA_ROUTES
                     .SESIONES_BI
                 }
                 element={
@@ -645,16 +637,7 @@ export function AppRouter() {
                 FICHA_DEUDOR_ROUTES
                   .POPUP
               }
-              element={
-                <OptionAccessRoute
-                  optionId={
-                    APPLICATION_OPTION_IDS
-                      .GESTION_DEUDOR
-                  }
-                >
-                  <FichaDeudorPopupRoute />
-                </OptionAccessRoute>
-              }
+              element={<FichaDeudorPopupRoute />}
             />
           </Route>
 

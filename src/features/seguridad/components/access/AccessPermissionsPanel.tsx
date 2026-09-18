@@ -3,6 +3,7 @@ import type {
 } from 'react';
 
 import {
+  ACCESS_PERMISSION_KEYS,
   ACCESS_PERMISSION_LABELS,
 } from '../../domain/accesos/access.constants';
 
@@ -14,7 +15,6 @@ import type {
 } from '../../domain/accesos/access.types';
 
 import {
-  getVisibleAccessPermissionKeys,
   isAccessPermissionAvailable,
 } from '../../domain/accesos/accessCapabilities.utils';
 
@@ -57,9 +57,7 @@ export const AccessPermissionsPanel = ({
     !activeOption ||
     !activeOption.isPermissionTarget;
   const visiblePermissionKeys =
-    getVisibleAccessPermissionKeys(
-      activeOption
-    );
+    ACCESS_PERMISSION_KEYS;
   const showSelectAll =
     visiblePermissionKeys.length > 1;
 

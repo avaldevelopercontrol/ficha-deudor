@@ -1,0 +1,73 @@
+import type {
+  AnalyticsReportClientOption,
+} from '../../../acceso/domain/accesoAnalitica.types';
+import {
+  buildReporteriaBiRoute,
+} from '../../../constants/reporteriaRoutes.constants';
+import {
+  requiresExplicitClientSelection,
+} from '../domain/reporteriaAccessPolicy';
+import type {
+  PowerBiReport,
+} from '../domain/reporteria.types';
+
+export type PowerBiReportOpenResolution =
+  | {
+      kind: 'navigate';
+      route: string;
+    }
+  | {
+      kind: 'client-selection';
+      clients: readonly AnalyticsReportClientOption[];
+    };
+
+export interface ReporteriaNavigationDependencies {
+  getReportClients: (
+    optionId: number,
+    signal?: AbortSignal
+  ) => Promise<AnalyticsReportClientOption[]>;
+}
+
+export const resolvePowerBiReportOpen = async (
+  report: PowerBiReport,
+  requiresClientSelection: boolean,
+  signal: AbortSignal | undefined,
+  dependencies: ReporteriaNavigationDependencies
+): Promise<PowerBiReportOpenResolution> => {
+  if (!requiresClientSelection) {
+    return {
+      kind: 'navigate',
+      route: buildReporteriaBiRoute(report.id),
+    };
+  }
+
+  const clients =
+    await dependencies.getReportClients(
+      report.id,
+      signal
+    );
+
+  if (
+    clients.length === 1 &&
+    !requiresExplicitClientSelection(report.id)
+  ) {
+    return {
+      kind: 'navigate',
+      route: buildReporteriaBiRoute(
+        report.id,
+        clients[0]
+      ),
+    };
+  }
+
+  return {
+    kind: 'client-selection',
+    clients,
+  };
+};
+
+export const buildPowerBiReportRoute = (
+  report: PowerBiReport,
+  client?: AnalyticsReportClientOption
+): string =>
+  buildReporteriaBiRoute(report.id, client);

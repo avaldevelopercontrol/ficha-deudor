@@ -765,6 +765,43 @@ export const suite = defineSuite(
       }
     ),
     test(
+      'conserva Producción online en el sidebar aunque su destino sea un popup sin ruta',
+      () => {
+        const snapshot =
+          buildAccessControlSnapshot(
+            9,
+            [
+              option(1, 'Root', 'Root', 1, 0, 0),
+              option(
+                9,
+                'mProduccionOnline',
+                'Producción online',
+                2,
+                1,
+                1,
+                {
+                  icon: 'online-production',
+                }
+              ),
+            ],
+            [allow(1, 9, 9)]
+          );
+
+        assert.equal(
+          snapshot.navigationTree.length,
+          1
+        );
+        assert.equal(
+          snapshot.navigationTree[0]?.id,
+          9
+        );
+        assert.equal(
+          snapshot.navigationTree[0]?.route,
+          null
+        );
+      }
+    ),
+    test(
       'conserva los Power BI autorizados en menuTree y los excluye del sidebar',
       () => {
         const snapshot =

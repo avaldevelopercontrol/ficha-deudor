@@ -1,10 +1,7 @@
 import {
-  ANALYTICS_ROUTES,
-} from '@features/analytics/constants/analyticsRoutes.constants';
-
-import {
+  GESTION_ANALITICA_ROUTES,
   REPORTERIA_ROUTES,
-} from '@features/analytics/constants/reporteriaRoutes.constants';
+} from '@features/gestion-analitica/constants';
 
 import {
   GESTION_COBRANZAS_ROUTES,
@@ -41,15 +38,28 @@ export interface ApplicationOptionDefinition {
   readonly enabled: boolean;
 }
 
+export type ApplicationOptionPopupType =
+  'produccion-online';
+
+interface ApplicationOptionPopupDefinition {
+  /** nId_Opcion persistente en la base de datos. */
+  readonly optionId: ApplicationOptionId;
+
+  /** Popup React asociado a una opción que no navega a una ruta normal. */
+  readonly popupType: ApplicationOptionPopupType;
+
+  readonly enabled: boolean;
+}
+
 const APPLICATION_OPTION_REGISTRY:
   readonly ApplicationOptionDefinition[] = [
     {
       optionId:
         APPLICATION_OPTION_IDS
-          .PORTFOLIO_CONTROL_CENTER,
+          .ANALISIS_CARTERAS,
       path:
-        ANALYTICS_ROUTES
-          .PORTFOLIO_CONTROL_CENTER,
+        GESTION_ANALITICA_ROUTES
+          .ANALISIS_CARTERAS,
       enabled: true,
     },
     {
@@ -66,7 +76,7 @@ const APPLICATION_OPTION_REGISTRY:
         APPLICATION_OPTION_IDS
           .SESIONES_BI,
       path:
-        ANALYTICS_ROUTES
+        GESTION_ANALITICA_ROUTES
           .SESIONES_BI,
       enabled: true,
     },
@@ -164,6 +174,17 @@ const APPLICATION_OPTION_REGISTRY:
     },
   ];
 
+const APPLICATION_OPTION_POPUP_REGISTRY:
+  readonly ApplicationOptionPopupDefinition[] = [
+    {
+      optionId:
+        APPLICATION_OPTION_IDS
+          .PRODUCCION_ONLINE,
+      popupType: 'produccion-online',
+      enabled: true,
+    },
+  ];
+
 export const getApplicationOptionCatalog = ():
   readonly ApplicationOptionDefinition[] =>
   APPLICATION_OPTION_REGISTRY;
@@ -208,3 +229,35 @@ export const hasRegisteredOptionRoute = (
   optionId: number
 ): boolean =>
   getOptionRoute(optionId) !== null;
+
+export const getOptionPopupType = (
+  optionId: number
+): ApplicationOptionPopupType | null => {
+  if (
+    !Number.isSafeInteger(optionId) ||
+    optionId <= 0
+  ) {
+    return null;
+  }
+
+  const definition =
+    APPLICATION_OPTION_POPUP_REGISTRY.find(
+      (item) =>
+        item.optionId === optionId
+    );
+
+  if (
+    !definition ||
+    !definition.enabled
+  ) {
+    return null;
+  }
+
+  return definition.popupType;
+};
+
+export const hasRegisteredOptionDestination = (
+  optionId: number
+): boolean =>
+  hasRegisteredOptionRoute(optionId) ||
+  getOptionPopupType(optionId) !== null;

@@ -4,7 +4,7 @@ import {
   syncAnalyticsPowerBiConfiguration,
   type AnalyticsOptionReportClientPublication,
   type AnalyticsReportClientPublicationInput,
-} from '@features/analytics/access/api/analyticsAccessAdmin.api';
+} from '@features/gestion-analitica/acceso/administracion';
 
 import {
   createOpcion,

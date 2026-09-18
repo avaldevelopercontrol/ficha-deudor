@@ -9,6 +9,7 @@ export interface SidebarNavigationItem {
   id: number;
   label: string;
   to?: string;
+  onSelect?: () => void;
   disabled?: boolean;
   children?: SidebarNavigationItem[];
   onNavigationIntent?: () => void;
@@ -21,6 +22,7 @@ interface SidebarMenuSectionProps {
   items: SidebarNavigationItem[];
   openSections: Readonly<Record<number, boolean>>;
   to?: string;
+  onSelect?: () => void;
   disabled?: boolean;
   onToggle: (optionId: number) => void;
 }
@@ -217,6 +219,18 @@ const NestedNavigationItem = ({
   }
 
   if (!item.to || item.disabled) {
+    if (item.onSelect && !item.disabled) {
+      return (
+        <button
+          type="button"
+          className="app-sidebar__sub-item app-sidebar__sub-item--action"
+          onClick={item.onSelect}
+        >
+          {item.label}
+        </button>
+      );
+    }
+
     return (
       <span
         className="app-sidebar__sub-item app-sidebar__sub-item--disabled"
@@ -265,6 +279,7 @@ export const SidebarMenuSection: React.FC<
   items,
   openSections,
   to,
+  onSelect,
   disabled = false,
   onToggle,
 }) => {
@@ -291,7 +306,7 @@ export const SidebarMenuSection: React.FC<
 
   if (
     items.length === 0 &&
-    to
+    (to || onSelect)
   ) {
     if (disabled) {
       return (
@@ -312,9 +327,24 @@ export const SidebarMenuSection: React.FC<
       );
     }
 
+    if (onSelect) {
+      return (
+        <button
+          type="button"
+          className="app-sidebar__nav-item"
+          onClick={onSelect}
+        >
+          <NavigationContent
+            icon={icon}
+            label={label}
+          />
+        </button>
+      );
+    }
+
     return (
       <NavLink
-        to={to}
+        to={to!}
         className={({ isActive }) =>
           [
             'app-sidebar__nav-item',

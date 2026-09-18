@@ -2,11 +2,16 @@ import type {
   FichaDeudorPopupType,
 } from './popupContext.types';
 
+import {
+  APPLICATION_OPTION_IDS,
+} from '@features/access-control';
+
 interface PopupConfig {
   path: string;
   windowName: string;
   width: number;
   height: number;
+  requiredOptionId: number;
 }
 
 export const FICHA_DEUDOR_POPUP_REGISTRY = {
@@ -15,6 +20,8 @@ export const FICHA_DEUDOR_POPUP_REGISTRY = {
     windowName: 'email-deudor',
     width: 1300,
     height: 750,
+    requiredOptionId:
+      APPLICATION_OPTION_IDS.GESTION_DEUDOR,
   },
 
   'agenda-deudor': {
@@ -22,6 +29,8 @@ export const FICHA_DEUDOR_POPUP_REGISTRY = {
     windowName: 'agenda-deudor',
     width: 1300,
     height: 750,
+    requiredOptionId:
+      APPLICATION_OPTION_IDS.GESTION_DEUDOR,
   },
 
   'pago-deudor': {
@@ -29,6 +38,8 @@ export const FICHA_DEUDOR_POPUP_REGISTRY = {
     windowName: 'pago-deudor',
     width: 1300,
     height: 750,
+    requiredOptionId:
+      APPLICATION_OPTION_IDS.GESTION_DEUDOR,
   },
 
   'inf-deudor': {
@@ -36,6 +47,8 @@ export const FICHA_DEUDOR_POPUP_REGISTRY = {
     windowName: 'inf-deudor',
     width: 1300,
     height: 400,
+    requiredOptionId:
+      APPLICATION_OPTION_IDS.GESTION_DEUDOR,
   },
 
   'lista-gestores': {
@@ -43,6 +56,8 @@ export const FICHA_DEUDOR_POPUP_REGISTRY = {
     windowName: 'lista-gestores',
     width: 1300,
     height: 750,
+    requiredOptionId:
+      APPLICATION_OPTION_IDS.GESTION_DEUDOR,
   },
 
   'estado-cuenta': {
@@ -50,6 +65,8 @@ export const FICHA_DEUDOR_POPUP_REGISTRY = {
     windowName: 'estado-cuenta',
     width: 1300,
     height: 650,
+    requiredOptionId:
+      APPLICATION_OPTION_IDS.GESTION_DEUDOR,
   },
 
 
@@ -58,6 +75,8 @@ export const FICHA_DEUDOR_POPUP_REGISTRY = {
     windowName: 'reportar-caso',
     width: 1300,
     height: 750,
+    requiredOptionId:
+      APPLICATION_OPTION_IDS.GESTION_DEUDOR,
   },
 
   'produccion-gestor-hoy': {
@@ -69,6 +88,21 @@ export const FICHA_DEUDOR_POPUP_REGISTRY = {
 
     width: 1100,
     height: 560,
+    requiredOptionId:
+      APPLICATION_OPTION_IDS.GESTION_DEUDOR,
+  },
+
+  'produccion-online': {
+    path:
+      '/popup/produccion-online',
+
+    windowName:
+      'produccion-online',
+
+    width: 1400,
+    height: 800,
+    requiredOptionId:
+      APPLICATION_OPTION_IDS.PRODUCCION_ONLINE,
   },
 
 } satisfies Record<

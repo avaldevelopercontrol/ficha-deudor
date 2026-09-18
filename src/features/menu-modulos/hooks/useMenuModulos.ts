@@ -11,6 +11,10 @@ import {
 } from 'react-router-dom';
 
 import {
+  openFichaDeudorPopup,
+} from '@app/popups';
+
+import {
   APPLICATION_OPTION_IDS,
   getOptionRoute,
   useAccessControl,
@@ -23,6 +27,10 @@ import {
 import {
   MENU_MODULOS_ROUTES,
 } from '../constants/menuModulosRoutes.constants';
+import {
+  MENU_MODULO_ACTIONS,
+  type MenuModuloAction,
+} from '../constants/menuModuloActions.constants';
 
 import type {
   MenuModulo,
@@ -53,6 +61,21 @@ export const useMenuModulos = () => {
     useState<MenuModulo | null>(
       null
     );
+
+  const executeModuloAction = useCallback(
+    (action: MenuModuloAction) => {
+      if (
+        action ===
+        MENU_MODULO_ACTIONS.PRODUCCION_ONLINE
+      ) {
+        openFichaDeudorPopup(
+          'produccion-online',
+          {}
+        );
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     if (!location.search) {
@@ -88,11 +111,18 @@ export const useMenuModulos = () => {
         return;
       }
 
+      if (modulo.action) {
+        executeModuloAction(
+          modulo.action
+        );
+        return;
+      }
+
       if (modulo.path) {
         navigate(modulo.path);
       }
     },
-    [navigate]
+    [executeModuloAction, navigate]
   );
 
   const handleSelectChildModulo =
@@ -103,6 +133,14 @@ export const useMenuModulos = () => {
           return;
         }
 
+        if (modulo.action) {
+          setSelectedModulo(null);
+          executeModuloAction(
+            modulo.action
+          );
+          return;
+        }
+
         if (!modulo.path) {
           return;
         }
@@ -110,7 +148,7 @@ export const useMenuModulos = () => {
         setSelectedModulo(null);
         navigate(modulo.path);
       },
-      [navigate]
+      [executeModuloAction, navigate]
     );
 
   const handleCloseModal =

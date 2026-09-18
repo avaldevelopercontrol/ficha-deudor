@@ -62,7 +62,7 @@ export const suite = defineSuite(
           id: 25,
           name: 'Reportería',
           parentId: 24,
-          route: '/analytics/reporteria',
+          route: '/gestion-analitica/reporteria',
           children: [americatel],
         });
 
@@ -87,7 +87,7 @@ export const suite = defineSuite(
         );
         assert.equal(
           reporteriaMenu?.path,
-          '/analytics/reporteria'
+          '/gestion-analitica/reporteria'
         );
         assert.equal(
           reporteriaMenu?.children,
@@ -96,6 +96,38 @@ export const suite = defineSuite(
         assert.equal(
           reporteriaMenu?.badge,
           'Disponible'
+        );
+      }
+    ),
+    test(
+      'habilita Producción online como acción del menú aunque no tenga una ruta React',
+      () => {
+        const produccionOnline = option({
+          id: 9,
+          name: 'Producción online',
+          route: null,
+          icon: 'online-production',
+        });
+
+        const [result] = buildMenuModulos([
+          produccionOnline,
+        ]);
+
+        assert.equal(
+          result?.badge,
+          'Disponible'
+        );
+        assert.equal(
+          result?.isEnabled,
+          true
+        );
+        assert.equal(
+          result?.action,
+          'produccion-online'
+        );
+        assert.equal(
+          result?.path,
+          undefined
         );
       }
     ),

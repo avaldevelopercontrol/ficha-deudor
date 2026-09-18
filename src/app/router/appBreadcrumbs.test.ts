@@ -1,13 +1,10 @@
 import assert from 'node:assert/strict';
 
 import {
-  ANALYTICS_ROUTES,
-} from '@features/analytics/constants/analyticsRoutes.constants';
-
-import {
+  GESTION_ANALITICA_ROUTES,
   REPORTERIA_ROUTES,
   buildReporteriaBiRoute,
-} from '@features/analytics/constants/reporteriaRoutes.constants';
+} from '@features/gestion-analitica/constants';
 
 import type {
   AuthorizedOption,
@@ -40,8 +37,8 @@ const portfolio: AuthorizedOption = {
   parentId: 24,
   order: 1,
   route:
-    ANALYTICS_ROUTES
-      .PORTFOLIO_CONTROL_CENTER,
+    GESTION_ANALITICA_ROUTES
+      .ANALISIS_CARTERAS,
   urlBI: null,
   image: null,
   permissions,
@@ -104,8 +101,8 @@ export const suite = defineSuite(
       () => {
         assert.equal(
           getAppBreadcrumb(
-            ANALYTICS_ROUTES
-              .PORTFOLIO_CONTROL_CENTER,
+            GESTION_ANALITICA_ROUTES
+              .ANALISIS_CARTERAS,
             [businessIntelligence]
           ),
           'INTELIGENCIA DE NEGOCIO › PORTFOLIO RENOVADO'

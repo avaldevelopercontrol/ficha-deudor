@@ -61,6 +61,24 @@ export const suite = defineSuite(
       }
     ),
     test(
+      'identifica Producción online como implementado aunque abra en popup',
+      () => {
+        const modulo =
+          buildModulo({
+            idModulo: 9,
+            nombre: 'Producción online',
+          });
+
+        assert.equal(
+          resolveModuloImplementacion(
+            modulo,
+            [modulo]
+          ),
+          'IMPLEMENTADO'
+        );
+      }
+    ),
+    test(
       'identifica estructuras por raíz o por tener hijos',
       () => {
         const padre =

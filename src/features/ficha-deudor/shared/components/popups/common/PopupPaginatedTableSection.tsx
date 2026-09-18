@@ -28,6 +28,7 @@ interface PopupPaginatedTableSectionProps<T> {
   onPageNumberChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   actions?: ReactNode;
+  showToolbarInfo?: boolean;
 }
 
 export const PopupPaginatedTableSection = <T,>({
@@ -48,6 +49,7 @@ export const PopupPaginatedTableSection = <T,>({
   onPageNumberChange,
   onPageSizeChange,
   actions,
+  showToolbarInfo = true,
 }: PopupPaginatedTableSectionProps<T>) => {
   const { indiceInicio, indiceFin } = getPopupPaginationRange({
     pageNumber,
@@ -65,6 +67,7 @@ export const PopupPaginatedTableSection = <T,>({
         totalPages={totalPages}
         countSuffix={countSuffix}
         actions={actions}
+        showInfo={showToolbarInfo}
       />
 
       <PopupDataTable

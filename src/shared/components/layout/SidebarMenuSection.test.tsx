@@ -58,6 +58,40 @@ export const suite = defineSuite(
       }
     ),
     test(
+      'renderiza un módulo popup como botón de navegación y no como enlace',
+      () => {
+        const html =
+          renderToStaticMarkup(
+            <MemoryRouter>
+              <SidebarMenuSection
+                sectionId={9}
+                label="Producción online"
+                icon={<span>icono</span>}
+                items={[]}
+                openSections={
+                  OPEN_SECTIONS
+                }
+                onSelect={() => undefined}
+                onToggle={() => undefined}
+              />
+            </MemoryRouter>
+          );
+
+        assert.match(
+          html,
+          /<button[^>]*class="app-sidebar__nav-item"/
+        );
+        assert.match(
+          html,
+          /Producción online/
+        );
+        assert.doesNotMatch(
+          html,
+          /href=/
+        );
+      }
+    ),
+    test(
       'mantiene visibles los hijos sin consulta y solo enlaza los autorizados',
       () => {
         const html =

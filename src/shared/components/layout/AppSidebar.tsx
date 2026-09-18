@@ -9,6 +9,12 @@ import {
 } from 'react-router-dom';
 
 import {
+  openFichaDeudorPopup,
+} from '@app/popups';
+
+import {
+  APPLICATION_OPTION_IDS,
+  getOptionPopupType,
   useAccessControl,
   type AuthorizedOption,
 } from '../../../features/access-control';
@@ -22,12 +28,8 @@ import {
 } from '../../../features/auth/hooks/useAuth';
 
 import {
-  APPLICATION_OPTION_IDS,
-} from '../../../features/access-control/registry/applicationOptionIds';
-
-import {
-  preloadPortfolioControlCenterNavigation,
-} from '../../../features/analytics/navigation/portfolioControlCenterNavigation.preload';
+  preloadCentroControlCarteraNavigation,
+} from '@features/gestion-analitica/navigation';
 
 import {
   SisgesIcon,
@@ -78,9 +80,27 @@ const getNavigationIntent = (
 ): (() => void) | undefined => {
   if (
     optionId ===
-    APPLICATION_OPTION_IDS.PORTFOLIO_CONTROL_CENTER
+    APPLICATION_OPTION_IDS.ANALISIS_CARTERAS
   ) {
-    return preloadPortfolioControlCenterNavigation;
+    return preloadCentroControlCarteraNavigation;
+  }
+
+  return undefined;
+};
+
+const getNavigationAction = (
+  optionId: number
+): (() => void) | undefined => {
+  const popupType =
+    getOptionPopupType(optionId);
+
+  if (popupType === 'produccion-online') {
+    return () => {
+      openFichaDeudorPopup(
+        'produccion-online',
+        {}
+      );
+    };
   }
 
   return undefined;
@@ -92,6 +112,10 @@ const mapSidebarNavigationItem = (
   id: option.id,
   label: option.name,
   to: option.route ?? undefined,
+  onSelect:
+    option.permissions.consultar
+      ? getNavigationAction(option.id)
+      : undefined,
   disabled:
     !option.permissions.consultar,
   children:
@@ -333,6 +357,14 @@ export const AppSidebar: React.FC<
                     to={
                       module.route ??
                       undefined
+                    }
+                    onSelect={
+                      module.permissions
+                        .consultar
+                        ? getNavigationAction(
+                            module.id
+                          )
+                        : undefined
                     }
                     disabled={
                       !module.permissions

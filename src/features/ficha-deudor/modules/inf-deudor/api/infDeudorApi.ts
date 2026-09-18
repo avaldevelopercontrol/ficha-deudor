@@ -11,7 +11,7 @@ import {
   isInfDeudorParamApi,
 } from './infDeudorApi.validators';
 
-const BASE_GESTION = '/v1/Gestion';
+const BASE_BOTON = '/v1/Boton';
 
 export interface FetchInfDeudorParams {
   idDeudor: string;
@@ -21,7 +21,7 @@ export async function fetchInfDeudorCabeceraFalse(
   signal?: AbortSignal
 ): Promise<InfDeudorCabeceraApi> {
   const result = await apiClient<unknown>(
-    `${BASE_GESTION}/GetGestionInformacionDeudor?bTipo_Cabecera=false`,
+    `${BASE_BOTON}/GetInformacionDeudor?bTipo_Cabecera=false`,
     { signal }
   );
 
@@ -36,7 +36,7 @@ export async function fetchInfDeudorCabeceraTrue(
   signal?: AbortSignal
 ): Promise<InfDeudorCabeceraApi> {
   const result = await apiClient<unknown>(
-    `${BASE_GESTION}/GetGestionInformacionDeudor?bTipo_Cabecera=true`,
+    `${BASE_BOTON}/GetInformacionDeudor?bTipo_Cabecera=true`,
     { signal }
   );
 
@@ -56,7 +56,7 @@ export async function fetchInfDeudorParams(
   });
 
   const result = await apiClient<unknown>(
-    `${BASE_GESTION}/GetGestionInformacionDeudorParam?${params.toString()}`,
+    `${BASE_BOTON}/GetInformacionDeudorParam?${params.toString()}`,
     { signal }
   );
 

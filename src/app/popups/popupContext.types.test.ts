@@ -30,6 +30,10 @@ export const suite = defineSuite(
           true
         );
         assert.equal(
+          isFichaDeudorPopupType('produccion-online'),
+          true
+        );
+        assert.equal(
           isFichaDeudorPopupType('popup-desconocido'),
           false
         );
@@ -89,6 +93,13 @@ export const suite = defineSuite(
           ),
           true
         );
+        assert.equal(
+          isFichaDeudorPopupContext(
+            'produccion-online',
+            {}
+          ),
+          true
+        );
       }
     ),
     test(
@@ -129,6 +140,15 @@ export const suite = defineSuite(
             {
               ...baseContext,
               idUsuario: '1.5',
+            }
+          ),
+          false
+        );
+        assert.equal(
+          isFichaDeudorPopupContext(
+            'produccion-online',
+            {
+              idCliente: '1',
             }
           ),
           false

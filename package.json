@@ -17,8 +17,8 @@
     "check:auth": "npm run typecheck && npm run lint && npm run test:auth && npm run build",
     "test:gestion-deudor": "node scripts/run-tests.mjs src/features/gestion-cobranzas/modules/gestion-deudor",
     "check:gestion-deudor": "npm run typecheck && npm run lint && npm run test:gestion-deudor && npm run build",
-    "test:portfolio-control-center": "node scripts/run-tests.mjs src/features/analytics/modules/portfolio-control-center",
-    "check:portfolio-control-center": "npm run typecheck && npm run lint && npm run test:portfolio-control-center && npm run build"
+    "test:analisis-carteras": "node scripts/run-tests.mjs src/features/gestion-analitica/modules/centro-control-cartera",
+    "check:analisis-carteras": "npm run typecheck && npm run lint && npm run test:analisis-carteras && npm run build"
   },
   "dependencies": {
     "react": "^19.2.5",

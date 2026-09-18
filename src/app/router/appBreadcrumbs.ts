@@ -7,7 +7,7 @@ import {
 
 import {
   REPORTERIA_ROUTES,
-} from '@features/analytics/constants/reporteriaRoutes.constants';
+} from '@features/gestion-analitica/constants';
 
 import { AUTH_ROUTES } from '@features/auth/constants';
 import { FICHA_DEUDOR_ROUTES } from '@features/ficha-deudor/shared/constants/fichaDeudorRoutes.constants';

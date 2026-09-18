@@ -12,7 +12,9 @@ import {
 import {
   getApplicationOptionCatalog,
   getApplicationOptionDefinition,
+  getOptionPopupType,
   getOptionRoute,
+  hasRegisteredOptionDestination,
   hasRegisteredOptionRoute,
 } from './optionRoute.registry';
 
@@ -33,9 +35,9 @@ export const suite = defineSuite(
         assert.equal(
           getOptionRoute(
             APPLICATION_OPTION_IDS
-              .PORTFOLIO_CONTROL_CENTER
+              .ANALISIS_CARTERAS
           ),
-          '/analytics/portfolio-control-center'
+          '/gestion-analitica/analisis-carteras'
         );
 
         assert.equal(
@@ -43,7 +45,7 @@ export const suite = defineSuite(
             APPLICATION_OPTION_IDS
               .REPORTERIA
           ),
-          '/analytics/reporteria'
+          '/gestion-analitica/reporteria'
         );
 
         assert.equal(
@@ -51,7 +53,7 @@ export const suite = defineSuite(
             APPLICATION_OPTION_IDS
               .SESIONES_BI
           ),
-          '/analytics/sesiones-bi'
+          '/gestion-analitica/sesiones-bi'
         );
 
         assert.equal(
@@ -68,6 +70,32 @@ export const suite = defineSuite(
               .MANTENER_ACCESOS_POR_USUARIO
           ),
           '/seguridad/mantener-accesos-por-usuario'
+        );
+      }
+    ),
+    test(
+      'registra Producción online como destino popup sin inventar una ruta React',
+      () => {
+        assert.equal(
+          getOptionRoute(
+            APPLICATION_OPTION_IDS
+              .PRODUCCION_ONLINE
+          ),
+          null
+        );
+        assert.equal(
+          getOptionPopupType(
+            APPLICATION_OPTION_IDS
+              .PRODUCCION_ONLINE
+          ),
+          'produccion-online'
+        );
+        assert.equal(
+          hasRegisteredOptionDestination(
+            APPLICATION_OPTION_IDS
+              .PRODUCCION_ONLINE
+          ),
+          true
         );
       }
     ),
@@ -109,6 +137,14 @@ export const suite = defineSuite(
         );
         assert.equal(
           hasRegisteredOptionRoute(9999),
+          false
+        );
+        assert.equal(
+          getOptionPopupType(9999),
+          null
+        );
+        assert.equal(
+          hasRegisteredOptionDestination(9999),
           false
         );
       }

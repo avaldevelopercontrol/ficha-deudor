@@ -1,5 +1,7 @@
-import { clearAnalyticsAccessSession } from '@features/analytics/access/services/analyticsAccess.prefetch';
-import { clearSelectedCrmClientId } from '@features/analytics/access/store/analyticsCrmSelection.storage';
+import {
+  clearAccesoAnaliticaSession,
+  clearSelectedCrmClientId,
+} from '@features/gestion-analitica/acceso/session';
 import { useEffect, type Dispatch, type SetStateAction } from 'react';
 
 import {
@@ -18,7 +20,7 @@ export const useAuthExternalSessionSync = (
 ) => {
   useEffect(() => {
     const resetExternalSession = () => {
-      clearAnalyticsAccessSession();
+      clearAccesoAnaliticaSession();
       clearSelectedCrmClientId();
       resetTransientAuthState?.();
       setState(initialAuthState);

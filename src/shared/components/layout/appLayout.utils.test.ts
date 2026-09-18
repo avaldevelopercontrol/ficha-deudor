@@ -12,7 +12,7 @@ import {
 const ROUTES_WITHOUT_SIDEBAR = [
   '/menu-modulos',
   '/gestion-cobranzas/gestion-deudor/ficha-deudor',
-  '/analytics/reporteria/bi/:optionId',
+  '/gestion-analitica/reporteria/bi/:optionId',
 ] as const;
 
 export const suite = defineSuite(
@@ -43,7 +43,7 @@ export const suite = defineSuite(
       () => {
         assert.equal(
           matchesWithoutSidebarPath(
-            '/analytics/reporteria/bi/26',
+            '/gestion-analitica/reporteria/bi/26',
             ROUTES_WITHOUT_SIDEBAR
           ),
           true
@@ -51,7 +51,7 @@ export const suite = defineSuite(
 
         assert.equal(
           matchesWithoutSidebarPath(
-            '/analytics/reporteria',
+            '/gestion-analitica/reporteria',
             ROUTES_WITHOUT_SIDEBAR
           ),
           false

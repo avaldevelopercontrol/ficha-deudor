@@ -2,6 +2,10 @@ import type {
   AuthorizedOption,
 } from '@features/access-control';
 
+import {
+  getMenuModuloAction,
+} from '../constants/menuModuloActions.constants';
+
 import type {
   MenuModulo,
 } from '../types';
@@ -45,7 +49,10 @@ const hasNavigableDestination = (
     return false;
   }
 
-  if (option.route !== null) {
+  if (
+    option.route !== null ||
+    getMenuModuloAction(option.id) !== null
+  ) {
     return true;
   }
 
@@ -91,6 +98,9 @@ export const mapAuthorizedOptionToMenuModulo = (
     ),
     icon: option.icon,
     path: option.route ?? undefined,
+    action:
+      getMenuModuloAction(option.id) ??
+      undefined,
     children:
       children.length > 0
         ? children

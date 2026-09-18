@@ -15,7 +15,6 @@ import type {
 
 import {
   getAccessPermissionAvailability,
-  getVisibleAccessPermissionKeys,
   sanitizeAccessPermissions,
 } from './accessCapabilities.utils';
 
@@ -136,7 +135,7 @@ export const suite = defineSuite(
       () => {
         const option = createOption(
           APPLICATION_OPTION_IDS
-            .PORTFOLIO_CONTROL_CENTER
+            .ANALISIS_CARTERAS
         );
 
         assert.deepEqual(
@@ -150,13 +149,6 @@ export const suite = defineSuite(
             eliminar: false,
             exportar: true,
           }
-        );
-
-        assert.deepEqual(
-          getVisibleAccessPermissionKeys(
-            option
-          ),
-          ['consultar', 'exportar']
         );
 
         assert.deepEqual(
@@ -184,6 +176,8 @@ export const suite = defineSuite(
       'Reportería y Sesiones BI continúan siendo exclusivamente de consulta',
       () => {
         [
+          APPLICATION_OPTION_IDS
+            .PRODUCCION_ONLINE,
           APPLICATION_OPTION_IDS
             .REPORTERIA,
           APPLICATION_OPTION_IDS
@@ -226,23 +220,6 @@ export const suite = defineSuite(
             }
           );
         });
-      }
-    ),
-    test(
-      'Sesiones BI muestra únicamente el permiso consultar en el editor',
-      () => {
-        const option = createOption(
-          APPLICATION_OPTION_IDS
-            .SESIONES_BI,
-          'mSesionesBiRenombrado'
-        );
-
-        assert.deepEqual(
-          getVisibleAccessPermissionKeys(
-            option
-          ),
-          ['consultar']
-        );
       }
     ),
     test(

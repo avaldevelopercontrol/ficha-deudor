@@ -4,7 +4,7 @@ import type {
 
 import type {
   AnalyticsReportClientPublicationInput,
-} from '@features/analytics/access/api/analyticsAccessAdmin.api';
+} from '@features/gestion-analitica/acceso/administracion';
 
 import Modal from '@shared/components/modals/Modal';
 import {

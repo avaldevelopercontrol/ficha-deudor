@@ -7,9 +7,19 @@ import {
 import { useParams } from 'react-router-dom';
 
 import {
+  OptionAccessRoute,
+} from '@features/access-control';
+import {
+  loadProduccionOnlinePopup,
+} from '@features/produccion-online/navigation';
+
+import {
   isFichaDeudorPopupType,
   type FichaDeudorPopupType,
 } from './popupContext.types';
+import {
+  FICHA_DEUDOR_POPUP_REGISTRY,
+} from './popupRegistry';
 
 const POPUP_COMPONENTS = {
   'email-deudor': lazy(
@@ -68,6 +78,10 @@ const POPUP_COMPONENTS = {
         '@features/gestion-cobranzas/modules/gestion-deudor/modules/produccion-gestor-hoy/components/ProduccionGestorHoyPopup'
       )
   ),
+
+  'produccion-online': lazy(
+    loadProduccionOnlinePopup
+  ),
 } satisfies Record<
   FichaDeudorPopupType,
   LazyExoticComponent<ComponentType>
@@ -94,10 +108,16 @@ export const FichaDeudorPopupRoute = () => {
 
   const PopupComponent =
     POPUP_COMPONENTS[popupType];
+  const config =
+    FICHA_DEUDOR_POPUP_REGISTRY[popupType];
 
   return (
-    <Suspense fallback={<div>Cargando popup...</div>}>
-      <PopupComponent />
-    </Suspense>
+    <OptionAccessRoute
+      optionId={config.requiredOptionId}
+    >
+      <Suspense fallback={<div>Cargando popup...</div>}>
+        <PopupComponent />
+      </Suspense>
+    </OptionAccessRoute>
   );
 };

@@ -1,5 +1,7 @@
-import { clearAnalyticsAccessSession } from '@features/analytics/access/services/analyticsAccess.prefetch';
-import { clearSelectedCrmClientId } from '@features/analytics/access/store/analyticsCrmSelection.storage';
+import {
+  clearAccesoAnaliticaSession,
+  clearSelectedCrmClientId,
+} from '@features/gestion-analitica/acceso/session';
 import { PUBLIC_AUTH_PATHS } from '../constants/authRoutes.constants';
 import {
   broadcastAuthLogout,
@@ -29,7 +31,7 @@ export function closePopupOrRedirectToLogin(): void {
 }
 
 export function logoutSession(): void {
-  clearAnalyticsAccessSession();
+  clearAccesoAnaliticaSession();
   clearSelectedCrmClientId();
   clearStoredAuthState();
   broadcastAuthLogout('last-main-window-closed');

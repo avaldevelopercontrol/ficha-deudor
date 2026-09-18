@@ -113,6 +113,17 @@ const sesionesBiItem: AccessTreeItem = {
     '4. Sesiones BI',
 };
 
+const produccionOnlineItem: AccessTreeItem = {
+  ...item,
+  idModulo: 9,
+  nombre: 'Producción online',
+  codigo: 'mProduccionOnline',
+  orden: 4,
+  treeCode: '4',
+  displayLabel:
+    '4. Producción online',
+};
+
 const parentItem: AccessTreeItem = {
   ...item,
   idModulo: 2,
@@ -279,44 +290,69 @@ export const suite = defineSuite(
       }
     ),
     test(
-      'Sesiones BI muestra únicamente consultar y omite seleccionar todo',
+      'los módulos de solo consulta muestran las cinco operaciones e inhabilitan las que no aplican',
       () => {
-        const html =
-          renderToStaticMarkup(
-            <AccesosPerfilPermissionsPanel
-              activeOption={sesionesBiItem}
-              permissionStates={{
-                consultar: 'checked',
-                insertar: 'unchecked',
-                editar: 'unchecked',
-                eliminar: 'unchecked',
-                exportar: 'unchecked',
-              }}
-              selectAllState="checked"
-              titleLabel="Seleccionaste:"
-              noSelectionMessage="Seleccione una opción"
-              selectAllLabel="Seleccionar todo"
-              globalHint="Root no se registra"
-              containerHint="Es un contenedor automático"
-              singleHint="Se aplica solo a esta opción"
-              onPermissionChange={() => undefined}
-              onSelectAll={() => undefined}
-            />
-          );
+        [
+          sesionesBiItem,
+          produccionOnlineItem,
+        ].forEach((activeOption) => {
+          const html =
+            renderToStaticMarkup(
+              <AccesosPerfilPermissionsPanel
+                activeOption={activeOption}
+                permissionStates={{
+                  consultar: 'checked',
+                  insertar: 'unchecked',
+                  editar: 'unchecked',
+                  eliminar: 'unchecked',
+                  exportar: 'unchecked',
+                }}
+                selectAllState="checked"
+                titleLabel="Seleccionaste:"
+                noSelectionMessage="Seleccione una opción"
+                selectAllLabel="Seleccionar todo"
+                globalHint="Root no se registra"
+                containerHint="Es un contenedor automático"
+                singleHint="Se aplica solo a esta opción"
+                onPermissionChange={() => undefined}
+                onSelectAll={() => undefined}
+              />
+            );
 
-        assert.match(html, /CONSULTAR/);
-        assert.doesNotMatch(html, /INSERTAR/);
-        assert.doesNotMatch(html, /EDITAR/);
-        assert.doesNotMatch(html, /ELIMINAR/);
-        assert.doesNotMatch(html, /EXPORTAR/);
-        assert.doesNotMatch(
-          html,
-          /Seleccionar todo/
-        );
-        assert.doesNotMatch(
-          html,
-          /aria-label="CONSULTAR"[^>]*disabled=""|disabled=""[^>]*aria-label="CONSULTAR"/
-        );
+          [
+            'CONSULTAR',
+            'INSERTAR',
+            'EDITAR',
+            'ELIMINAR',
+            'EXPORTAR',
+          ].forEach((permission) => {
+            assert.match(
+              html,
+              new RegExp(permission)
+            );
+          });
+          assert.match(
+            html,
+            /Seleccionar todo/
+          );
+          assert.doesNotMatch(
+            html,
+            /aria-label="CONSULTAR"[^>]*disabled=""|disabled=""[^>]*aria-label="CONSULTAR"/
+          );
+          [
+            'INSERTAR',
+            'EDITAR',
+            'ELIMINAR',
+            'EXPORTAR',
+          ].forEach((permission) => {
+            assert.match(
+              html,
+              new RegExp(
+                `aria-label="${permission}"[^>]*disabled=""|disabled=""[^>]*aria-label="${permission}"`
+              )
+            );
+          });
+        });
       }
     ),
     test(

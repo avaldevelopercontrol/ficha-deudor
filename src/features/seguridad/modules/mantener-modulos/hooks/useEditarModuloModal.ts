@@ -4,11 +4,11 @@ import {
 } from 'react';
 
 import {
-  hasRegisteredOptionRoute,
+  hasRegisteredOptionDestination,
 } from '@features/access-control/registry/optionRoute.registry';
 import type {
   AnalyticsReportClientPublicationInput,
-} from '@features/analytics/access/api/analyticsAccessAdmin.api';
+} from '@features/gestion-analitica/acceso/administracion';
 
 import {
   useApiResource,
@@ -84,7 +84,9 @@ export const useEditarModuloModal = ({
   onGuardar,
 }: UseEditarModuloModalOptions) => {
   const isImplementedModule =
-    hasRegisteredOptionRoute(moduloId);
+    hasRegisteredOptionDestination(
+      moduloId
+    );
 
   const fetcher = useCallback(
     (signal: AbortSignal) =>

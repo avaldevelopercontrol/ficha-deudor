@@ -1,5 +1,5 @@
 import {
-  hasRegisteredOptionRoute,
+  hasRegisteredOptionDestination,
 } from '@features/access-control';
 
 import type {
@@ -21,7 +21,7 @@ const resolveModuloImplementacionWithParentIndex = (
   parentIdsWithChildren: ReadonlySet<number>
 ): ModuloImplementacion => {
   if (
-    hasRegisteredOptionRoute(
+    hasRegisteredOptionDestination(
       modulo.idModulo
     )
   ) {

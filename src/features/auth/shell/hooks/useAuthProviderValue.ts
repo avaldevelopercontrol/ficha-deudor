@@ -1,5 +1,7 @@
-import { clearAnalyticsAccessSession } from '@features/analytics/access/services/analyticsAccess.prefetch';
-import { clearSelectedCrmClientId } from '@features/analytics/access/store/analyticsCrmSelection.storage';
+import {
+  clearAccesoAnaliticaSession,
+  clearSelectedCrmClientId,
+} from '@features/gestion-analitica/acceso/session';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useAuthExternalSessionSync } from '../../hooks/useAuthExternalSessionSync';
@@ -96,7 +98,7 @@ export const useAuthProviderValue = (): AuthContextValue => {
         return response;
       }
 
-      clearAnalyticsAccessSession();
+      clearAccesoAnaliticaSession();
       clearSelectedCrmClientId();
 
       const nextState = buildAuthenticatedUserState(response.usuario);
@@ -115,7 +117,7 @@ export const useAuthProviderValue = (): AuthContextValue => {
   );
 
   const logout = useCallback(() => {
-    clearAnalyticsAccessSession();
+    clearAccesoAnaliticaSession();
     clearSelectedCrmClientId();
     clearStoredAuthState();
     resetTransientAuthState();
@@ -127,7 +129,7 @@ export const useAuthProviderValue = (): AuthContextValue => {
     // El contexto analítico está asociado al cliente CRM seleccionado.
     // Limpiarlo también al cambiar de cliente evita reutilizar datos del
     // contexto anterior sin necesidad de cerrar la sesión completa.
-    clearAnalyticsAccessSession();
+    clearAccesoAnaliticaSession();
     clearSelectedCrmClientId();
 
     setState((currentState) => {

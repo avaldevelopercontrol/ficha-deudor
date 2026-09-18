@@ -6,6 +6,7 @@ export const FICHA_DEUDOR_POPUP_TYPES = [
   'lista-gestores',
   'estado-cuenta',
   'produccion-gestor-hoy',
+  'produccion-online',
   'reportar-caso',
 ] as const;
 
@@ -55,6 +56,11 @@ export interface FichaDeudorPopupContextMap {
     idCliente: string;
     idUsuario: string;
   };
+
+  'produccion-online': Record<
+    string,
+    never
+  >;
 }
 
 export type FichaDeudorPopupContext<
@@ -172,5 +178,8 @@ export const isFichaDeudorPopupContext = <
         hasIdProperty(value, 'idCliente') &&
         hasIdProperty(value, 'idUsuario')
       );
+
+    case 'produccion-online':
+      return Object.keys(value).length === 0;
   }
 };

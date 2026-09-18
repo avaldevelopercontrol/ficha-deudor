@@ -4,7 +4,7 @@ import type {
 
 import type {
   AnalyticsOptionReportClientPublication,
-} from '@features/analytics/access/api/analyticsAccessAdmin.api';
+} from '@features/gestion-analitica/acceso/administracion';
 
 import type {
   Grupo,

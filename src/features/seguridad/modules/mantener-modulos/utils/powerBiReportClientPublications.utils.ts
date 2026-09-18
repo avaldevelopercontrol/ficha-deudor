@@ -1,7 +1,7 @@
 import type {
   AnalyticsOptionReportClientPublication,
   AnalyticsReportClientPublicationInput,
-} from '@features/analytics/access/api/analyticsAccessAdmin.api';
+} from '@features/gestion-analitica/acceso/administracion';
 
 export const buildReportClientPublicationKey = (
   clientId: number,
