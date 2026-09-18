@@ -98,7 +98,7 @@ export const mapProduccionResumenResponse = (
       );
     const contactosHora =
       toProduccionFiniteNumber(
-        item.contactGesProm
+        item.porcentContact
       );
     const totalContactos =
       toProduccionFiniteNumber(

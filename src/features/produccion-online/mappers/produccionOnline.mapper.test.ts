@@ -118,7 +118,8 @@ export const suite = defineSuite(
               minutosGes: 120,
               contactGes: 30,
               totalesGes: 80,
-              contactGesProm: 15.5,
+              contactGesProm: 999,
+              porcentContact: 15.5,
             },
           ]),
           [
@@ -144,7 +145,7 @@ export const suite = defineSuite(
               clienteNom: 'BCP',
               contactGes: '12',
               totalesGes: '20',
-              contactGesProm: '6.5',
+              porcentContact: '6.5',
             },
           ]),
           [
@@ -170,14 +171,14 @@ export const suite = defineSuite(
               clienteNom: 'BBVA',
               contactGes: 1,
               totalesGes: 1,
-              contactGesProm: 1,
+              porcentContact: 1,
             },
             {
               nombresUsu: 'JUAN',
               clienteNom: 'BBVA',
               contactGes: 30,
               totalesGes: 80,
-              contactGesProm: 15.5,
+              porcentContact: 15.5,
             },
           ]),
           [
