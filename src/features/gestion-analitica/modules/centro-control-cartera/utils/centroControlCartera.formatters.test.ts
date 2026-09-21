@@ -9,7 +9,7 @@ import {
   formatPortfolioCompactCurrency,
   formatPortfolioInteger,
   formatPortfolioPercentage,
-  formatPortfolioIntensityPercentage,
+  formatPortfolioIntensity,
   formatPortfolioSignedPercentage,
   formatPortfolioPeriod,
   formatPortfolioUpdatedAt,
@@ -40,8 +40,8 @@ export const suite = defineSuite(
       'formatea intensidad y variaciones con signo',
       () => {
         assert.equal(
-          formatPortfolioIntensityPercentage(0.112),
-          '11.20%'
+          formatPortfolioIntensity(0.112),
+          '0.11x'
         );
         assert.equal(
           formatPortfolioSignedPercentage(11.77),

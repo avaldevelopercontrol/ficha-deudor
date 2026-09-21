@@ -1,16 +1,35 @@
-import type React from 'react';
+import {
+  useCallback,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import Table from '@shared/components/table/Table';
+import TableResourceState from '@shared/components/table/TableResourceState';
 import Paginacion from '@shared/components/ui/Paginacion';
 
-import TableResourceState from '@shared/components/table/TableResourceState';
+import {
+  OperationFeedbackMessage,
+} from '@shared/components/ui';
+
 import {
   ASIGNAR_USUARIO_PAGE_SIZE_OPTIONS,
   ASIGNAR_USUARIO_TEXTS,
 } from '../constants/asignarUsuario.constants';
-import { useAsignarUsuarioColumns } from '../hooks/useAsignarUsuarioColumns';
-import { useAsignarUsuarioTable } from '../hooks/useAsignarUsuarioTable';
-import type { UsuarioAsignable } from '../types/asignarUsuario.types';
+
+import {
+  useAsignarUsuarioColumns,
+} from '../hooks/useAsignarUsuarioColumns';
+
+import {
+  useAsignarUsuarioTable,
+} from '../hooks/useAsignarUsuarioTable';
+
+import type {
+  UsuarioAsignable,
+} from '../types/asignarUsuario.types';
+
+import ModalAsignarUsuarioZonas from './ModalAsignarUsuarioZonas';
 
 interface AsignarUsuarioTableCardProps {
   onSelectUsuario?: (
@@ -18,15 +37,13 @@ interface AsignarUsuarioTableCardProps {
   ) => void;
 }
 
-export const AsignarUsuarioTableCard: React.FC<
-  AsignarUsuarioTableCardProps
-> = ({
+export const AsignarUsuarioTableCard = ({
   onSelectUsuario,
-}) => {
-  const columns =
-    useAsignarUsuarioColumns({
-      onSelect: onSelectUsuario,
-    });
+}: AsignarUsuarioTableCardProps): ReactNode => {
+  const [
+    selectedUsuario,
+    setSelectedUsuario,
+  ] = useState<UsuarioAsignable | null>(null);
 
   const {
     allData,
@@ -52,115 +69,188 @@ export const AsignarUsuarioTableCard: React.FC<
 
     onTextFilterChange,
     onSelectedFilterChange,
+
+    idCliente,
+    clienteNombre,
+    canInsert,
+    canEdit,
+    canManage,
+    guardarUsuarioZonas,
+    feedback,
+    clearFeedback,
   } = useAsignarUsuarioTable();
 
+  const handleSelectUsuario =
+    useCallback(
+      (usuario: UsuarioAsignable) => {
+        if (!canManage || idCliente === null) {
+          return;
+        }
+
+        clearFeedback();
+        setSelectedUsuario(usuario);
+        onSelectUsuario?.(usuario);
+      },
+      [
+        canManage,
+        clearFeedback,
+        idCliente,
+        onSelectUsuario,
+      ]
+    );
+
+  const handleCloseModal =
+    useCallback(() => {
+      setSelectedUsuario(null);
+    }, []);
+
+  const selectDisabled =
+    !canManage || idCliente === null;
+
+  const selectDisabledReason =
+    idCliente === null
+      ? 'Seleccione un cliente activo antes de asignar zonas.'
+      : !canManage
+        ? 'No tiene permiso para crear o editar asignaciones de zonas.'
+        : undefined;
+
+  const columns =
+    useAsignarUsuarioColumns({
+      onSelect: handleSelectUsuario,
+      disabled: selectDisabled,
+      disabledReason:
+        selectDisabledReason,
+    });
+
   return (
-    <section
-      className="asignar-usuario-card"
-      aria-labelledby="asignar-usuario-list-title"
-    >
-      <header className="asignar-usuario-card__header">
-        <div>
-          <h1
-            id="asignar-usuario-list-title"
-            className="asignar-usuario-card__title"
-          >
-            {
-              ASIGNAR_USUARIO_TEXTS
-                .sectionTitle
-            }
-          </h1>
-
-          <p className="asignar-usuario-card__description">
-            {
-              ASIGNAR_USUARIO_TEXTS
-                .sectionDescription
-            }
-          </p>
-        </div>
-
-        <span className="asignar-usuario-card__count">
-          {totalRecords} usuario(s)
-        </span>
-      </header>
-
-      <TableResourceState
-        isLoading={isLoading}
-        error={error}
-        onRetry={refetch}
-        loadingMessage="Cargando usuarios disponibles..."
-        errorTitle="No se pudieron cargar los usuarios"
+    <>
+      <section
+        className="asignar-usuario-card"
+        aria-labelledby="asignar-usuario-list-title"
       >
-        <>
-          <div className="asignar-usuario-table">
-            <Table
-              columns={columns}
-              data={paginatedData}
-              allData={allData}
-              emptyMessage={
+        <header className="asignar-usuario-card__header">
+          <div>
+            <h1
+              id="asignar-usuario-list-title"
+              className="asignar-usuario-card__title"
+            >
+              {
                 ASIGNAR_USUARIO_TEXTS
-                  .emptyMessage
+                  .sectionTitle
               }
-              enableColumnFilters
-              textFilters={textFilters}
-              selectedFilters={
-                selectedFilters
+            </h1>
+
+            <p className="asignar-usuario-card__description">
+              {
+                ASIGNAR_USUARIO_TEXTS
+                  .sectionDescription
               }
-              onTextFilterChange={
-                onTextFilterChange
-              }
-              onSelectedFilterChange={
-                onSelectedFilterChange
-              }
-              fitToPanel
-            />
+            </p>
           </div>
 
-          {totalRecords > 0 && (
-            <div className="asignar-usuario-card__pagination">
-              <Paginacion
-                paginaActual={pageNumber}
-                totalPaginas={totalPages}
-                totalRegistros={
-                  totalRecords
+          <span className="asignar-usuario-card__count">
+            {totalRecords} usuario(s)
+          </span>
+        </header>
+
+        <OperationFeedbackMessage
+          feedback={feedback}
+          onClose={clearFeedback}
+        />
+
+        <TableResourceState
+          isLoading={isLoading}
+          error={error}
+          onRetry={refetch}
+          loadingMessage="Cargando usuarios disponibles..."
+          errorTitle="No se pudieron cargar los usuarios"
+        >
+          <>
+            <div className="asignar-usuario-table">
+              <Table
+                columns={columns}
+                data={paginatedData}
+                allData={allData}
+                emptyMessage={
+                  ASIGNAR_USUARIO_TEXTS
+                    .emptyMessage
                 }
-                indiceInicio={
-                  indiceInicio
+                enableColumnFilters
+                textFilters={textFilters}
+                selectedFilters={
+                  selectedFilters
                 }
-                indiceFin={indiceFin}
-                onPaginaAnterior={() => {
-                  setPageNumber(
-                    Math.max(
-                      1,
-                      pageNumber - 1
-                    )
-                  );
-                }}
-                onPaginaSiguiente={() => {
-                  setPageNumber(
-                    Math.min(
-                      totalPages,
-                      pageNumber + 1
-                    )
-                  );
-                }}
-                onIrAPagina={
-                  setPageNumber
+                onTextFilterChange={
+                  onTextFilterChange
                 }
-                showPageSizeSelector
-                pageSize={pageSize}
-                pageSizeOptions={[
-                  ...ASIGNAR_USUARIO_PAGE_SIZE_OPTIONS,
-                ]}
-                onPageSizeChange={
-                  setPageSize
+                onSelectedFilterChange={
+                  onSelectedFilterChange
                 }
+                fitToPanel
               />
             </div>
-          )}
-        </>
-      </TableResourceState>
-    </section>
+
+            {totalRecords > 0 && (
+              <div className="asignar-usuario-card__pagination">
+                <Paginacion
+                  paginaActual={pageNumber}
+                  totalPaginas={totalPages}
+                  totalRegistros={
+                    totalRecords
+                  }
+                  indiceInicio={
+                    indiceInicio
+                  }
+                  indiceFin={indiceFin}
+                  onPaginaAnterior={() => {
+                    setPageNumber(
+                      Math.max(
+                        1,
+                        pageNumber - 1
+                      )
+                    );
+                  }}
+                  onPaginaSiguiente={() => {
+                    setPageNumber(
+                      Math.min(
+                        totalPages,
+                        pageNumber + 1
+                      )
+                    );
+                  }}
+                  onIrAPagina={
+                    setPageNumber
+                  }
+                  showPageSizeSelector
+                  pageSize={pageSize}
+                  pageSizeOptions={[
+                    ...ASIGNAR_USUARIO_PAGE_SIZE_OPTIONS,
+                  ]}
+                  onPageSizeChange={
+                    setPageSize
+                  }
+                />
+              </div>
+            )}
+          </>
+        </TableResourceState>
+      </section>
+
+      {selectedUsuario && (
+        <ModalAsignarUsuarioZonas
+          isOpen
+          usuario={selectedUsuario}
+          idCliente={idCliente}
+          clienteNombre={clienteNombre}
+          canInsert={canInsert}
+          canEdit={canEdit}
+          onClose={handleCloseModal}
+          onGuardar={
+            guardarUsuarioZonas
+          }
+        />
+      )}
+    </>
   );
 };
 

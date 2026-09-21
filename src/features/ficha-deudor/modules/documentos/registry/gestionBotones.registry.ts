@@ -13,7 +13,10 @@ type GestionBotonHandler = (
 ) => void;
 
 const normalizeNombreBoton = (nombre: string): string => {
-  return nombre.trim().toLowerCase();
+  return nombre
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, '');
 };
 
 const GESTION_BOTONES_REGISTRY: Readonly<
@@ -73,6 +76,15 @@ const GESTION_BOTONES_REGISTRY: Readonly<
       idCartera: params.id_cartera,
       idDeudor: params.id_deudor,
       idUsuario: params.id_usuario,
+      nombre: data.nombreRazonSocial,
+      documento: data.dniRuc,
+    });
+  },
+  adicionalmaf: ({ data, params }) => {
+    openFichaDeudorPopup('adicional-maf', {
+      idCliente: params.id_cliente,
+      idCartera: params.id_cartera,
+      idDeudor: params.id_deudor,
       nombre: data.nombreRazonSocial,
       documento: data.dniRuc,
     });

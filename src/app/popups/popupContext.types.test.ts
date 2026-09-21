@@ -34,6 +34,10 @@ export const suite = defineSuite(
           true
         );
         assert.equal(
+          isFichaDeudorPopupType('adicional-maf'),
+          true
+        );
+        assert.equal(
           isFichaDeudorPopupType('popup-desconocido'),
           false
         );
@@ -85,6 +89,16 @@ export const suite = defineSuite(
         );
         assert.equal(
           isFichaDeudorPopupContext(
+            'adicional-maf',
+            {
+              ...baseContext,
+              idCartera: '4',
+            }
+          ),
+          true
+        );
+        assert.equal(
+          isFichaDeudorPopupContext(
             'produccion-gestor-hoy',
             {
               idCliente: '1',
@@ -121,6 +135,15 @@ export const suite = defineSuite(
             {
               ...baseContext,
               idCartera: '4',
+            }
+          ),
+          false
+        );
+        assert.equal(
+          isFichaDeudorPopupContext(
+            'adicional-maf',
+            {
+              ...baseContext,
             }
           ),
           false
