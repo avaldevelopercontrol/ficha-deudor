@@ -68,14 +68,14 @@ export const formatPortfolioPercentage = (
 };
 
 
-export const formatPortfolioIntensityPercentage = (
+export const formatPortfolioIntensity = (
   value: number | null
 ): string => {
   if (value === null) {
     return '—';
   }
 
-  return formatPortfolioPercentage(value * 100);
+  return `${percentageFormatter.format(value)}x`;
 };
 
 export const formatPortfolioSignedPercentage = (

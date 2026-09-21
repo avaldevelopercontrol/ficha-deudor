@@ -28,10 +28,11 @@ export const useDocumentosActions = ({
 
   const handleBotonClick = useCallback(
     (boton: GestionBoton) => {
-      const isImplemented = executeGestionBoton(
-        boton.nombre,
-        { data, params }
-      );
+      const context = { data, params };
+      const isImplemented =
+        executeGestionBoton(boton.nombre, context) ||
+        (boton.label !== boton.nombre &&
+          executeGestionBoton(boton.label, context));
 
       if (!isImplemented) {
         openModal(boton.label);

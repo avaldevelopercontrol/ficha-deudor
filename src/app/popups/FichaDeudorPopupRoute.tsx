@@ -64,6 +64,12 @@ const POPUP_COMPONENTS = {
       )
   ),
 
+  'adicional-maf': lazy(
+    () =>
+      import(
+        '@features/ficha-deudor/modules/adicional-maf/components/AdicionalMafPopup'
+      )
+  ),
 
   'reportar-caso': lazy(
     () =>

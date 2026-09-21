@@ -10,7 +10,7 @@ import type {
 import {
   formatPortfolioInteger,
   formatPortfolioPercentage,
-  formatPortfolioIntensityPercentage,
+  formatPortfolioIntensity,
 } from '../utils/centroControlCartera.formatters';
 
 interface MetricasSecundariasCarteraProps {
@@ -61,7 +61,7 @@ export const MetricasSecundariasCartera: React.FC<
       />
       <SecondaryMetric
         label="Intensidad"
-        value={formatPortfolioIntensityPercentage(
+        value={formatPortfolioIntensity(
           summary.managementIntensity
         )}
         icon="analytics"

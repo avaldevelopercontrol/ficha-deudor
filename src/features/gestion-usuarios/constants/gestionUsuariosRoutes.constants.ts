@@ -45,4 +45,16 @@ export const GESTION_USUARIOS_API_ENDPOINTS = {
 
   getCampanasDiscadorByUsuario:
     '/v1/Usuario/GetCampannaDiscadorByIdUsuario',
+
+  getZonasFaltantesByClienteUsuario:
+    '/v1/Usuario/ZonasFaltantesByIdClienteAndIdUsuario',
+
+  getZonasAsignadasByClienteUsuario:
+    '/v1/Usuario/ZonasAsignadosByIdClienteAndIdUsuario',
+
+  createAsignaUsuario:
+    '/v1/Usuario/CreateAsignaUsuario',
+
+  editAsignaUsuario:
+    '/v1/Usuario/EditAsignaUsuario',
 } as const;

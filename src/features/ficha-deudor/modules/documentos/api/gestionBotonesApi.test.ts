@@ -20,7 +20,7 @@ const getUrlFromRequest = (
 };
 
 export const suite = defineSuite('gestionBotonesApi', [
-  test('consulta GetGestionBotones por cliente y contrato y mapea la respuesta', async () => {
+  test('consulta GetBotonesByClienteAndContrato por cliente y contrato y mapea la respuesta', async () => {
     const originalFetch = globalThis.fetch;
     const requestCapture: { url: URL | null } = { url: null };
 
@@ -82,7 +82,7 @@ export const suite = defineSuite('gestionBotonesApi', [
       assert.ok(requestCapture.url);
       assert.equal(
         requestCapture.url.pathname,
-        '/v1/Gestion/GetGestionBotones'
+        '/v1/Boton/GetBotonesByClienteAndContrato'
       );
       assert.equal(
         requestCapture.url.searchParams.get('nId_Cliente'),

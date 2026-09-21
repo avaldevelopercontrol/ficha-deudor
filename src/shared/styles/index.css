@@ -30,5 +30,6 @@
 @import '../../features/ficha-deudor/styles/20-responsive-panels-and-actions.css';
 @import '../../features/auth/styles/21-auth.css';
 @import './components/20-popups.css';
+@import '../../features/ficha-deudor/styles/21-adicional-maf-popup.css';
 @import './components/app-sidebar.css';
 @import '../../features/menu-modulos/styles/23-menu-modulos.css';@import './components/21-side-drawer.css';

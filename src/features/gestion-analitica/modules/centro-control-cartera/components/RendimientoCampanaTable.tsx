@@ -9,7 +9,7 @@ import {
   formatPortfolioCurrency,
   formatPortfolioInteger,
   formatPortfolioPercentage,
-  formatPortfolioIntensityPercentage,
+  formatPortfolioIntensity,
 } from '../utils/centroControlCartera.formatters';
 
 interface RendimientoCampanaTableProps {
@@ -48,7 +48,7 @@ const columns: Column<RendimientoCampanaItem>[] = [
     label: 'Intensidad',
     align: 'right',
     render: (row) =>
-      formatPortfolioIntensityPercentage(
+      formatPortfolioIntensity(
         row.managedPortfolio > 0
           ? row.managementCount /
               row.managedPortfolio

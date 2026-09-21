@@ -14,10 +14,14 @@ interface UseAsignarUsuarioColumnsParams {
   onSelect?: (
     usuario: UsuarioAsignable
   ) => void;
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
 export const useAsignarUsuarioColumns = ({
   onSelect,
+  disabled = false,
+  disabledReason,
 }: UseAsignarUsuarioColumnsParams = {}): Column<UsuarioAsignable>[] => {
   return useMemo(
     () => [
@@ -65,12 +69,22 @@ export const useAsignarUsuarioColumns = ({
         render: (row) => (
           <SelectActionButton
             ariaLabel={`${ASIGNAR_USUARIO_TEXTS.selectAction}: ${row.nombre}`}
-            title={ASIGNAR_USUARIO_TEXTS.selectAction}
+            title={
+              disabled
+                ? disabledReason ??
+                  'No puede administrar zonas para este usuario.'
+                : ASIGNAR_USUARIO_TEXTS.selectAction
+            }
+            disabled={disabled}
             onClick={() => onSelect?.(row)}
           />
         ),
       },
     ],
-    [onSelect]
+    [
+      disabled,
+      disabledReason,
+      onSelect,
+    ]
   );
 };
