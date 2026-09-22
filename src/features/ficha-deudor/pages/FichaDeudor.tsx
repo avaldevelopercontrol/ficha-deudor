@@ -139,6 +139,7 @@ const FichaContent: React.FC<
         <main className="ficha-main ficha-main--two-columns">
           <aside className="ficha-sidebar">
             <DeudorHeader
+              idCliente={id_cliente}
               deudorData={deudorData}
               cabeceraData={cabeceraData}
               isLoadingCabecera={isLoadingCabecera}

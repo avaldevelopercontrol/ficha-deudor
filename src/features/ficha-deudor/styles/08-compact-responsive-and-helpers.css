@@ -362,6 +362,21 @@
   font-weight: 700;
 }
 
+/* Campos adicionales exclusivos del cliente MAF (59). */
+.deudor-header__maf-additional-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ficha-sidebar .deudor-header__maf-additional-fields .compact-label {
+  font-size: 10px;
+}
+
+.ficha-sidebar .deudor-header__maf-additional-fields .compact-value {
+  font-size: 12px;
+}
+
 .compact-value--link {
   font-size: 10px;
   color: var(--ap-info);
