@@ -139,8 +139,7 @@ export function clienteSelectorReducer(
       return {
         ...state,
         anios: action.anios,
-        selectedAnio:
-          action.anios.length === 1 ? action.anios[0] : '',
+        selectedAnio: action.anios[0] ?? '',
         isAniosLoading: false,
         hasLoadedAnios: true,
         aniosError: null,
