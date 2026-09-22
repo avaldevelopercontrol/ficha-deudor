@@ -180,7 +180,7 @@ export const suite = defineSuite('clienteSelector.reducer', [
     assert.equal(cleared.selectedClienteKey, '');
     assert.deepEqual(cleared.anios, []);
   }),
-  test('carga y selecciona un año válido', () => {
+  test('carga, autoselecciona el primer año recibido y permite cambiarlo', () => {
     const loading = clienteSelectorReducer(
       initialClienteSelectorState,
       { type: 'LOAD_ANIOS_START' }
@@ -200,7 +200,7 @@ export const suite = defineSuite('clienteSelector.reducer', [
 
     assert.equal(loading.isAniosLoading, true);
     assert.equal(loaded.isAniosLoading, false);
-    assert.equal(loaded.selectedAnio, '');
+    assert.equal(loaded.selectedAnio, 2026);
     assert.equal(selected.selectedAnio, 2025);
     assert.equal(invalid, selected);
   }),

@@ -1,0 +1,58 @@
+diff --git a/src/features/auth/modules/cliente-selector/reducers/clienteSelector.reducer.test.ts b/src/features/auth/modules/cliente-selector/reducers/clienteSelector.reducer.test.ts
+index 8bed58f..3884c74 100644
+--- a/src/features/auth/modules/cliente-selector/reducers/clienteSelector.reducer.test.ts
++++ b/src/features/auth/modules/cliente-selector/reducers/clienteSelector.reducer.test.ts
+@@ -180,7 +180,7 @@ export const suite = defineSuite('clienteSelector.reducer', [
+     assert.equal(cleared.selectedClienteKey, '');
+     assert.deepEqual(cleared.anios, []);
+   }),
+-  test('carga, autoselecciona el año más reciente y permite cambiarlo', () => {
++  test('carga, autoselecciona el primer año recibido y permite cambiarlo', () => {
+     const loading = clienteSelectorReducer(
+       initialClienteSelectorState,
+       { type: 'LOAD_ANIOS_START' }
+@@ -214,14 +214,6 @@ export const suite = defineSuite('clienteSelector.reducer', [
+     assert.deepEqual(state.anios, []);
+     assert.equal(state.selectedAnio, '');
+   }),
+-  test('autoselecciona el año más reciente aunque la API no venga ordenada', () => {
+-    const state = clienteSelectorReducer(initialClienteSelectorState, {
+-      type: 'LOAD_ANIOS_SUCCESS',
+-      anios: [2024, 2026, 2025],
+-    });
+-
+-    assert.equal(state.selectedAnio, 2026);
+-  }),
+   test('autoselecciona una cartera cuando solo existe una opción', () => {
+     const state = clienteSelectorReducer(initialClienteSelectorState, {
+       type: 'LOAD_CARTERAS_SUCCESS',
+diff --git a/src/features/auth/modules/cliente-selector/reducers/clienteSelector.reducer.ts b/src/features/auth/modules/cliente-selector/reducers/clienteSelector.reducer.ts
+index 09972f2..71aa35e 100644
+--- a/src/features/auth/modules/cliente-selector/reducers/clienteSelector.reducer.ts
++++ b/src/features/auth/modules/cliente-selector/reducers/clienteSelector.reducer.ts
+@@ -59,16 +59,6 @@ const resetCarterasState = () => ({
+   carterasError: null,
+ });
+ 
+-const getMostRecentAnio = (anios: number[]): number | '' => {
+-  if (anios.length === 0) {
+-    return '';
+-  }
+-
+-  return anios.reduce((mostRecent, anio) =>
+-    anio > mostRecent ? anio : mostRecent
+-  );
+-};
+-
+ export function clienteSelectorReducer(
+   state: ClienteSelectorState,
+   action: ClienteSelectorAction
+@@ -149,7 +139,7 @@ export function clienteSelectorReducer(
+       return {
+         ...state,
+         anios: action.anios,
+-        selectedAnio: getMostRecentAnio(action.anios),
++        selectedAnio: action.anios[0] ?? '',
+         isAniosLoading: false,
+         hasLoadedAnios: true,
+         aniosError: null,
