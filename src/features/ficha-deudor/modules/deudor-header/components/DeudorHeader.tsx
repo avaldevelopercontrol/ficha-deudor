@@ -4,12 +4,14 @@ import {
   CompactInfoSection,
   InfoRow,
 } from '@shared/components/ui/CompactInfoSection';
+import { CLIENTE_MAF_ID } from '../../../shared/constants/clientes.constants';
 import type {
   CabeceraInfo,
   DeudorInfo,
 } from '../../../shared/types';
 
 interface Props {
+  idCliente: string;
   deudorData: DeudorInfo;
   cabeceraData: CabeceraInfo | null;
   isLoadingCabecera: boolean;
@@ -19,12 +21,14 @@ interface Props {
 }
 
 const DeudorHeader: React.FC<Props> = ({
+  idCliente,
   deudorData,
   cabeceraData,
   isLoadingCabecera,
   cabeceraError,
   compact = false,
 }) => {
+  const isClienteMaf = idCliente.trim() === CLIENTE_MAF_ID;
 
   if (isLoadingCabecera) {
     return <div className="ficha-card">Cargando...</div>;
@@ -89,6 +93,7 @@ const DeudorHeader: React.FC<Props> = ({
                 <span className="compact-label">Contacto:</span>
                 <input
                   type="text"
+                  value={deudorData.contacto}
                   placeholder="Ingresar..."
                   readOnly
                   className="compact-input"
@@ -97,46 +102,76 @@ const DeudorHeader: React.FC<Props> = ({
 
             </CompactInfoSection>
 
-            <CompactInfoSection title="Asesores">
-              <InfoRow
-                label="Post Venta:"
-                value={deudorData.asesorPostVenta}
-              />
+            <CompactInfoSection
+              title={isClienteMaf ? 'Información Adicional' : 'Asesores'}
+            >
+              {!isClienteMaf && (
+                <>
+                  <InfoRow
+                    label="Post Venta:"
+                    value={deudorData.asesorPostVenta}
+                  />
 
-              <InfoRow
-                label="Comercial:"
-                value={deudorData.asesorComercial}
-              />
+                  <InfoRow
+                    label="Comercial:"
+                    value={deudorData.asesorComercial}
+                  />
 
-              <InfoRow
-                label="Correo APV:"
-                value={deudorData.correoApv}
-                title={deudorData.correoApv}
-              />
+                  <InfoRow
+                    label="Correo APV:"
+                    value={deudorData.correoApv}
+                    title={deudorData.correoApv}
+                  />
 
-              <InfoRow
-                label="Correo AC:"
-                value={deudorData.correoAc}
-                title={deudorData.correoAc}
-              />
+                  <InfoRow
+                    label="Correo AC:"
+                    value={deudorData.correoAc}
+                    title={deudorData.correoAc}
+                  />
+                </>
+              )}
 
-              <InfoRow
-                label="Plazo Especial:"
-                value={deudorData.clienteConSinPe}
-                tone="danger"
-              />
+              {isClienteMaf ? (
+                <div className="deudor-header__maf-additional-fields">
+                  <InfoRow
+                    label="Reprogramación Cuota Balón:"
+                    value={deudorData.clienteConSinPe}
+                    tone="danger"
+                  />
 
-              <InfoRow
-                label="White List:"
-                value={deudorData.clienteListaBlanca}
-                tone="danger"
-              />
+                  <InfoRow
+                    label="Refinanciamiento Balón:"
+                    value={deudorData.clienteListaBlanca}
+                    tone="danger"
+                  />
 
-              <InfoRow
-                label="Provision:"
-                value={deudorData.clientePorVision}
-                tone="danger"
-              />
+                  <InfoRow
+                    label="Refinanciamiento Cuota Normal:"
+                    value={deudorData.clientePorVision}
+                    tone="danger"
+                  />
+                </div>
+              ) : (
+                <>
+                  <InfoRow
+                    label="Plazo Especial:"
+                    value={deudorData.clienteConSinPe}
+                    tone="danger"
+                  />
+
+                  <InfoRow
+                    label="White List:"
+                    value={deudorData.clienteListaBlanca}
+                    tone="danger"
+                  />
+
+                  <InfoRow
+                    label="Provision:"
+                    value={deudorData.clientePorVision}
+                    tone="danger"
+                  />
+                </>
+              )}
 
             </CompactInfoSection>
 
