@@ -17,6 +17,7 @@ import type {
   SeguimientoPromesasCarteraStatusFilter,
   PortfolioDueTodayStatusFilter,
   PortfolioOverdueAgingFilter,
+  PortfolioOverduePromiseItem,
   PromesasCarteraVencidasData,
   PromesasCarteraVencidasQuery,
   PromesasCarteraVencidasSortKey,
@@ -75,6 +76,74 @@ export const loadPromesasCarteraVencidas = async (
   );
 
   return mapPromesasCarteraVencidasResponse(response);
+};
+
+
+export type PromesasCarteraVencidasExportQuery = Omit<
+  PromesasCarteraVencidasQuery,
+  'page' | 'pageSize'
+>;
+
+export interface PromesasCarteraVencidasExportData {
+  items: readonly PortfolioOverduePromiseItem[];
+  asOfDate: string | null;
+  updatedAt: string | null;
+}
+
+const PROMESAS_VENCIDAS_EXPORT_PAGE_SIZE = 50;
+const PROMESAS_VENCIDAS_EXPORT_MAX_PAGES = 2000;
+
+export const loadAllPromesasCarteraVencidas = async (
+  crmClientId: number,
+  context: DetallePromesaCarteraContext,
+  query: PromesasCarteraVencidasExportQuery,
+  signal: AbortSignal
+): Promise<PromesasCarteraVencidasExportData> => {
+  const firstPage = await loadPromesasCarteraVencidas(
+    crmClientId,
+    context,
+    {
+      ...query,
+      page: 1,
+      pageSize: PROMESAS_VENCIDAS_EXPORT_PAGE_SIZE,
+    },
+    signal
+  );
+
+  const totalPages = firstPage.pagination.totalPages;
+
+  if (totalPages > PROMESAS_VENCIDAS_EXPORT_MAX_PAGES) {
+    throw new Error(
+      'La exportación contiene demasiadas páginas para procesarse de forma segura.'
+    );
+  }
+
+  const items: PortfolioOverduePromiseItem[] = [...firstPage.items];
+
+  for (let page = 2; page <= totalPages; page += 1) {
+    if (signal.aborted) {
+      throw new DOMException('La exportación fue cancelada.', 'AbortError');
+    }
+
+    const currentPage = await loadPromesasCarteraVencidas(
+      crmClientId,
+      context,
+      {
+        ...query,
+        page,
+        pageSize: PROMESAS_VENCIDAS_EXPORT_PAGE_SIZE,
+      },
+      signal
+    );
+
+    items.push(...currentPage.items);
+  }
+
+  return {
+    items,
+    asOfDate: firstPage.asOfDate,
+    updatedAt: firstPage.updatedAt,
+  };
 };
 
 export const loadPromesasCarteraVenceHoy = async (

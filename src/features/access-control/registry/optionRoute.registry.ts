@@ -145,6 +145,16 @@ const APPLICATION_OPTION_REGISTRY:
     {
       optionId:
         APPLICATION_OPTION_IDS
+          .MANTENER_BI,
+      path:
+        SEGURIDAD_ROUTES
+          .MANTENER_BI,
+      enabled:
+        SEGURIDAD_FEATURE.enabled,
+    },
+    {
+      optionId:
+        APPLICATION_OPTION_IDS
           .MANTENER_GRUPO,
       path:
         SEGURIDAD_ROUTES

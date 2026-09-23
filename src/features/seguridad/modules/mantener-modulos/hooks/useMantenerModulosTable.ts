@@ -47,12 +47,12 @@ import type {
 } from '../types/registrarModulo.types';
 
 import {
-  assertMantenerModulosPermission,
-} from '../utils/mantenerModulosPermissions';
+  attachModuloImplementacion,
+} from '../../../domain/modulos/moduloImplementation.utils';
 
 import {
-  attachModuloImplementacion,
-} from '../utils/moduloImplementation.utils';
+  assertMantenerModulosPermission,
+} from '../utils/mantenerModulosPermissions';
 
 export const useMantenerModulosTable = () => {
   const {

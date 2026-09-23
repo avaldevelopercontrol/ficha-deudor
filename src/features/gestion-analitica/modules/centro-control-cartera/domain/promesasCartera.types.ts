@@ -21,6 +21,10 @@ export type PortfolioOverdueAgingKey = Exclude<
   'all'
 >;
 
+export type PortfolioOverdueSituationKey =
+  | 'no-payment-recorded'
+  | 'partial-payment';
+
 export type PromesasCarteraVencidasSortKey =
   | 'debtorId'
   | 'dueDate'
@@ -42,11 +46,14 @@ export interface PromesasCarteraVencidasQuery {
 export interface PortfolioOverduePromiseItem {
   promiseId: string;
   debtorId: string;
+  debtorName: string | null;
   dueDate: string | null;
   overdueDays: number | null;
   promiseAmount: number;
   paidAmount: number;
   outstandingAmount: number;
+  situationKey: PortfolioOverdueSituationKey;
+  situationLabel: string;
   agingKey: PortfolioOverdueAgingKey;
   advisorId: string | null;
   advisorName: string | null;

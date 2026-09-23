@@ -4,6 +4,7 @@ export {
 export {
   parseInicializacionCarteraApiResponse,
   parseEvolucionCarteraApiResponse,
+  parseEvolucionCarteraComparativaApiResponse,
   parseOpcionesFiltroCarteraApiResponse,
   parsePanoramaCarteraApiResponse,
   parsePromesasCarteraApiResponse,

@@ -165,6 +165,13 @@ const MantenerModulosPage = lazy(
     )
 );
 
+const MantenerBiPage = lazy(
+  () =>
+    import(
+      '../../features/seguridad/pages/MantenerBiPage'
+    )
+);
+
 const MantenerGrupoPage = lazy(
   () =>
     import(
@@ -554,6 +561,30 @@ export function AppRouter() {
                       }
                     >
                       <MantenerModulosPage />
+                    </OptionAccessRoute>
+                  </FeatureRoute>
+                }
+              />
+
+              <Route
+                path={
+                  SEGURIDAD_ROUTES
+                    .MANTENER_BI
+                }
+                element={
+                  <FeatureRoute
+                    enabled={
+                      SEGURIDAD_FEATURE
+                        .enabled
+                    }
+                  >
+                    <OptionAccessRoute
+                      optionId={
+                        APPLICATION_OPTION_IDS
+                          .MANTENER_BI
+                      }
+                    >
+                      <MantenerBiPage />
                     </OptionAccessRoute>
                   </FeatureRoute>
                 }

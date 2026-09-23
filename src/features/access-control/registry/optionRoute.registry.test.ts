@@ -71,6 +71,14 @@ export const suite = defineSuite(
           ),
           '/seguridad/mantener-accesos-por-usuario'
         );
+
+        assert.equal(
+          getOptionRoute(
+            APPLICATION_OPTION_IDS
+              .MANTENER_BI
+          ),
+          '/seguridad/mantener-bi'
+        );
       }
     ),
     test(

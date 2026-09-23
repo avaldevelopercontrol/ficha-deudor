@@ -10,6 +10,7 @@ import type {
   SeguimientoPromesasCarteraQuery,
 } from '../domain/promesasCartera.types';
 import {
+  buildEvolucionComparativaCarteraEndpoint,
   buildInicializacionCarteraEndpoint,
   buildPanoramaCarteraEndpoint,
   buildPromesasCarteraVenceHoyEndpoint,
@@ -19,6 +20,7 @@ import {
   buildSeguimientoPromesasCarteraEndpoint,
 } from './centroControlCarteraApi.endpoints';
 import {
+  normalizarEvolucionComparativaCarteraTransporte,
   normalizarInicializacionCarteraTransporte,
   normalizarPanoramaCarteraTransporte,
   normalizarPromesasVenceHoyTransporte,
@@ -31,6 +33,7 @@ import {
   fetchValidatedCentroControlCarteraResponse,
 } from './centroControlCarteraApi.transport';
 import type {
+  EvolucionCarteraComparativaApiResponse,
   InicializacionCarteraApiResponse,
   PanoramaCarteraApiResponse,
   PromesasCarteraVenceHoyApiResponse,
@@ -40,6 +43,7 @@ import type {
   SeguimientoPromesasCarteraApiResponse,
 } from './centroControlCarteraApi.types';
 import {
+  parseEvolucionCarteraComparativaApiResponse,
   parseInicializacionCarteraApiResponse,
   parsePanoramaCarteraApiResponse,
   parsePromesasCarteraVenceHoyApiResponse,
@@ -50,6 +54,7 @@ import {
 } from './centroControlCarteraApi.validators';
 
 export {
+  buildEvolucionComparativaCarteraEndpoint,
   buildInicializacionCarteraEndpoint,
   buildPanoramaCarteraEndpoint,
   buildPromesasCarteraVenceHoyEndpoint,
@@ -75,6 +80,19 @@ export const fetchCentroControlCarteraBootstrap = (
     signal,
     normalizarInicializacionCarteraTransporte,
     parseInicializacionCarteraApiResponse
+  );
+
+export const fetchEvolucionComparativaCartera = (
+  crmClientId: number,
+  context: PortfolioOperationalContext,
+  signal: AbortSignal
+): Promise<EvolucionCarteraComparativaApiResponse> =>
+  fetchValidatedCentroControlCarteraResponse(
+    crmClientId,
+    buildEvolucionComparativaCarteraEndpoint(context),
+    signal,
+    normalizarEvolucionComparativaCarteraTransporte,
+    parseEvolucionCarteraComparativaApiResponse
   );
 
 export const fetchCentroControlCarteraOverview = (

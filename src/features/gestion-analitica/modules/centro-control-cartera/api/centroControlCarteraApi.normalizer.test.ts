@@ -5,6 +5,7 @@ import {
   test,
 } from '../../../../../test/testHarness';
 import {
+  normalizarEvolucionComparativaCarteraTransporte,
   normalizarPanoramaCarteraTransporte,
   normalizarPromesasVenceHoyTransporte,
   normalizarPromesasVencidasTransporte,
@@ -16,6 +17,44 @@ import {
 export const suite = defineSuite(
   'centroControlCarteraApi normalizer',
   [
+    test(
+      'normaliza la comparación histórica y conserva referencias de avance y recuperación separadas',
+      () => {
+        const result = normalizarEvolucionComparativaCarteraTransporte({
+          periodoReferencia: {
+            fechaDesde: '2026-09-01',
+            fechaHasta: '2026-09-05',
+          },
+          mesesComparablesAvance: 6,
+          mesesComparablesRecuperacion: 5,
+          mesAnterior: {
+            campana: { code: '2026-08', nombre: 'Agosto 2026' },
+            periodo: {
+              fechaDesde: '2026-08-01',
+              fechaHasta: '2026-08-05',
+            },
+            cubrePeriodoComparable: true,
+            evolucion: [
+              {
+                periodo: '2026-08-05',
+                carteraAsignada: 100,
+                carteraGestionada: 80,
+                carteraPendiente: 20,
+                montoRecuperado: 500,
+              },
+            ],
+          },
+          mejorAvance: null,
+          mejorRecuperacion: null,
+        });
+
+        assert.equal(result.referencePeriod.dateTo, '2026-09-05');
+        assert.equal(result.comparableProgressMonths, 6);
+        assert.equal(result.comparableRecoveryMonths, 5);
+        assert.equal(result.previousMonth?.campaign.code, '2026-08');
+        assert.equal(result.previousMonth?.evolution[0]?.managedPortfolio, 80);
+      }
+    ),
     test(
       'preserva tasaCumplimientoPromesa null del resumen en lugar de convertirla a undefined',
       () => {
@@ -105,12 +144,45 @@ export const suite = defineSuite(
           paginacion: {},
           elementos: [
             {
+              idDeudor: 16068,
+              nombreDeudor: 'INVERSIONES METCON SAC',
+              claveSituacion: 'sin-pago-registrado',
+              etiquetaSituacion: 'Sin pago registrado',
               idSupervisor: null,
             },
           ],
         });
 
+        assert.equal(result.items[0]?.debtorName, 'INVERSIONES METCON SAC');
+        assert.equal(result.items[0]?.situationKey, 'no-payment-recorded');
+        assert.equal(result.items[0]?.situationLabel, 'Sin pago registrado');
         assert.equal(result.items[0]?.supervisorId, null);
+      }
+    ),
+    test(
+      'deriva situación vencida desde el monto durante un despliegue compatible con el backend anterior',
+      () => {
+        const result = normalizarPromesasVencidasTransporte({
+          resumen: {},
+          filtros: {},
+          paginacion: {},
+          elementos: [
+            {
+              idDeudor: 16068,
+              montoPagado: 125,
+            },
+            {
+              idDeudor: 16069,
+              montoPagado: 0,
+            },
+          ],
+        });
+
+        assert.equal(result.items[0]?.debtorName, null);
+        assert.equal(result.items[0]?.situationKey, 'partial-payment');
+        assert.equal(result.items[0]?.situationLabel, 'Pago parcial');
+        assert.equal(result.items[1]?.situationKey, 'no-payment-recorded');
+        assert.equal(result.items[1]?.situationLabel, 'Sin pago registrado');
       }
     ),
     test(

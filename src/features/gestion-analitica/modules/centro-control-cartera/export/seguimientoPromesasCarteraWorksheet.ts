@@ -18,6 +18,14 @@ import {
   getSeguimientoPromesaEmptyActivityLabel,
   getSeguimientoPromesaStatusLabel,
 } from '../utils/detallePromesaCartera.utils';
+import {
+  buildMetadataRow,
+  buildRowXml,
+  columnNameFromIndex,
+  padWorksheetRow,
+  XML_HEADER,
+  type WorksheetCell,
+} from './xlsx/worksheetXml';
 
 const COLUMN_COUNT = 20;
 const TABLE_HEADER_ROW = 9;
@@ -72,145 +80,6 @@ export interface SeguimientoPromesasWorksheetParams {
   operationAsOfAt: string | null;
   exportedAt: Date;
 }
-
-type WorksheetCell =
-  | { kind: 'string'; value: string; style?: number }
-  | { kind: 'number'; value: number; style?: number }
-  | { kind: 'date'; value: string | null; style?: number };
-
-const XML_HEADER = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
-
-const escapeXml = (value: string): string =>
-  value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&apos;');
-
-const columnNameFromIndex = (index: number): string => {
-  let current = index;
-  let result = '';
-
-  while (current > 0) {
-    const remainder = (current - 1) % 26;
-    result = String.fromCharCode(65 + remainder) + result;
-    current = Math.floor((current - 1) / 26);
-  }
-
-  return result;
-};
-
-const toExcelSerial = (value: string): number | null => {
-  const normalized = value.trim();
-  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(normalized);
-
-  if (dateOnly) {
-    const utc = Date.UTC(
-      Number(dateOnly[1]),
-      Number(dateOnly[2]) - 1,
-      Number(dateOnly[3])
-    );
-
-    return utc / 86_400_000 + 25_569;
-  }
-
-  const localDateTime =
-    /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/.exec(
-      normalized
-    );
-
-  if (localDateTime) {
-    const utc = Date.UTC(
-      Number(localDateTime[1]),
-      Number(localDateTime[2]) - 1,
-      Number(localDateTime[3]),
-      Number(localDateTime[4]),
-      Number(localDateTime[5]),
-      Number(localDateTime[6] ?? 0)
-    );
-
-    return utc / 86_400_000 + 25_569;
-  }
-
-  return null;
-};
-
-const buildCellXml = (
-  rowNumber: number,
-  columnNumber: number,
-  cell: WorksheetCell
-): string => {
-  const reference = `${columnNameFromIndex(columnNumber)}${rowNumber}`;
-  const styleAttribute = cell.style === undefined ? '' : ` s="${cell.style}"`;
-
-  if (cell.kind === 'number') {
-    return `<c r="${reference}"${styleAttribute}><v>${cell.value}</v></c>`;
-  }
-
-  if (cell.kind === 'date') {
-    if (!cell.value) {
-      return `<c r="${reference}"${styleAttribute}/>`;
-    }
-
-    const serial = toExcelSerial(cell.value);
-
-    if (serial !== null) {
-      return `<c r="${reference}"${styleAttribute}><v>${serial}</v></c>`;
-    }
-
-    return `<c r="${reference}" t="inlineStr"${styleAttribute}><is><t xml:space="preserve">${escapeXml(
-      cell.value
-    )}</t></is></c>`;
-  }
-
-  return `<c r="${reference}" t="inlineStr"${styleAttribute}><is><t xml:space="preserve">${escapeXml(
-    cell.value
-  )}</t></is></c>`;
-};
-
-const buildRowXml = (
-  rowNumber: number,
-  cells: readonly WorksheetCell[],
-  height?: number
-): string => {
-  const heightAttribute =
-    height === undefined ? '' : ` ht="${height}" customHeight="1"`;
-
-  return `<row r="${rowNumber}"${heightAttribute}>${cells
-    .map((cell, index) => buildCellXml(rowNumber, index + 1, cell))
-    .join('')}</row>`;
-};
-
-const padRow = (
-  values: readonly WorksheetCell[],
-  totalColumns = COLUMN_COUNT
-): WorksheetCell[] => {
-  const result = [...values];
-
-  while (result.length < totalColumns) {
-    result.push({ kind: 'string', value: '' });
-  }
-
-  return result;
-};
-
-const buildMetadataRow = (
-  pairs: ReadonlyArray<readonly [string, WorksheetCell]>
-): WorksheetCell[] => {
-  const row: WorksheetCell[] = [];
-
-  pairs.forEach(([label, value], pairIndex) => {
-    if (pairIndex > 0) {
-      row.push({ kind: 'string', value: '' });
-    }
-
-    row.push({ kind: 'string', value: label, style: 3 });
-    row.push({ ...value, style: value.style ?? 4 });
-  });
-
-  return padRow(row);
-};
 
 const getConfirmationLabel = (value: boolean | null): string => {
   if (value === true) {
@@ -277,66 +146,6 @@ const buildExportRows = (
     },
   ]);
 
-export const buildSeguimientoPromesasStylesXml = (): string => `${XML_HEADER}
-<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-  <numFmts count="4">
-    <numFmt numFmtId="164" formatCode="&quot;S/&quot; #,##0.00;[Red]-&quot;S/&quot; #,##0.00"/>
-    <numFmt numFmtId="165" formatCode="dd/mm/yyyy"/>
-    <numFmt numFmtId="166" formatCode="dd/mm/yyyy hh:mm"/>
-    <numFmt numFmtId="167" formatCode="0"/>
-  </numFmts>
-  <fonts count="5">
-    <font><sz val="11"/><name val="Calibri"/><family val="2"/></font>
-    <font><b/><color rgb="FFFFFFFF"/><sz val="16"/><name val="Calibri"/></font>
-    <font><color rgb="FF67728A"/><sz val="10"/><name val="Calibri"/></font>
-    <font><b/><color rgb="FF1A2540"/><sz val="9"/><name val="Calibri"/></font>
-    <font><b/><color rgb="FFFFFFFF"/><sz val="10"/><name val="Calibri"/></font>
-  </fonts>
-  <fills count="8">
-    <fill><patternFill patternType="none"/></fill>
-    <fill><patternFill patternType="gray125"/></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FF1A2540"/><bgColor indexed="64"/></patternFill></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FFF4F7FB"/><bgColor indexed="64"/></patternFill></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FFFFE8EC"/><bgColor indexed="64"/></patternFill></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FFFFF4D6"/><bgColor indexed="64"/></patternFill></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FFE8F7ED"/><bgColor indexed="64"/></patternFill></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FFEDF0FF"/><bgColor indexed="64"/></patternFill></fill>
-  </fills>
-  <borders count="2">
-    <border><left/><right/><top/><bottom/><diagonal/></border>
-    <border>
-      <left style="thin"><color rgb="FFD9DFE8"/></left>
-      <right style="thin"><color rgb="FFD9DFE8"/></right>
-      <top style="thin"><color rgb="FFD9DFE8"/></top>
-      <bottom style="thin"><color rgb="FFD9DFE8"/></bottom>
-      <diagonal/>
-    </border>
-  </borders>
-  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-  <cellXfs count="19">
-    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
-    <xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0"><alignment vertical="center"/></xf>
-    <xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0"><alignment vertical="center"/></xf>
-    <xf numFmtId="0" fontId="3" fillId="3" borderId="1" xfId="0"><alignment vertical="center"/></xf>
-    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="4" fillId="2" borderId="1" xfId="0"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment horizontal="center" vertical="center"/></xf>
-    <xf numFmtId="167" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1"><alignment horizontal="center" vertical="center"/></xf>
-    <xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1"><alignment horizontal="right" vertical="center"/></xf>
-    <xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1"><alignment horizontal="center" vertical="center"/></xf>
-    <xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1"><alignment horizontal="center" vertical="center"/></xf>
-    <xf numFmtId="0" fontId="3" fillId="4" borderId="1" xfId="0"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="3" fillId="5" borderId="1" xfId="0"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="3" fillId="6" borderId="1" xfId="0"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="3" fillId="7" borderId="1" xfId="0"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="3" fillId="3" borderId="1" xfId="0"><alignment horizontal="right" vertical="center"/></xf>
-    <xf numFmtId="164" fontId="3" fillId="0" borderId="1" xfId="0" applyNumberFormat="1"><alignment horizontal="right" vertical="center"/></xf>
-    <xf numFmtId="167" fontId="3" fillId="0" borderId="1" xfId="0" applyNumberFormat="1"><alignment horizontal="right" vertical="center"/></xf>
-  </cellXfs>
-  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
-</styleSheet>`;
-
 export const buildSeguimientoPromesasWorksheetXml = ({
   items,
   crmClientId,
@@ -370,16 +179,20 @@ export const buildSeguimientoPromesasWorksheetXml = ({
     0
   );
 
-  const titleRow = padRow([
-    { kind: 'string', value: 'Seguimiento de promesas', style: 1 },
-  ]);
-  const subtitleRow = padRow([
-    {
-      kind: 'string',
-      value: `${periodLabel} · Exportación completa sin paginación`,
-      style: 2,
-    },
-  ]);
+  const titleRow = padWorksheetRow(
+    [{ kind: 'string', value: 'Seguimiento de promesas', style: 1 }],
+    COLUMN_COUNT
+  );
+  const subtitleRow = padWorksheetRow(
+    [
+      {
+        kind: 'string',
+        value: `${periodLabel} · Exportación completa sin paginación`,
+        style: 2,
+      },
+    ],
+    COLUMN_COUNT
+  );
 
   const metadataRow1 = buildMetadataRow([
     ['PERÍODO', { kind: 'string', value: period === 'today' ? 'Vencen hoy' : 'Vencieron ayer' }],
@@ -387,16 +200,16 @@ export const buildSeguimientoPromesasWorksheetXml = ({
     ['ESTADO', { kind: 'string', value: SEGUIMIENTO_PROMESAS_STATUS_LABELS[status] }],
     ['CLIENTE CRM', { kind: 'number', value: crmClientId }],
     ['CAMPAÑA', { kind: 'string', value: context.campaignId }],
-  ]);
+  ], COLUMN_COUNT);
 
   const metadataRow2 = buildMetadataRow([
     ['UNIDAD NEGOCIO', { kind: 'string', value: context.businessUnit ?? 'Todas' }],
     ['SUBCARTERA', { kind: 'string', value: context.subPortfolioId ?? 'Todas' }],
     ['ORDEN', { kind: 'string', value: `${SORT_LABELS[sortKey]} · ${directionLabel}` }],
     ['REGISTROS', { kind: 'number', value: items.length, style: 18 }],
-  ]);
+  ], COLUMN_COUNT);
 
-  const timingRow = padRow([
+  const timingRow = padWorksheetRow([
     {
       kind: 'string',
       value: `Corte de información: ${operationCutoffLabel}`,
@@ -411,9 +224,9 @@ export const buildSeguimientoPromesasWorksheetXml = ({
       value: `Exportado el: ${exportedAtLabel}`,
       style: 2,
     },
-  ]);
+  ], COLUMN_COUNT);
 
-  const summaryRow = padRow([
+  const summaryRow = padWorksheetRow([
     { kind: 'string', value: 'Promesas', style: 16 },
     { kind: 'number', value: items.length, style: 18 },
     { kind: 'string', value: '' },
@@ -425,9 +238,9 @@ export const buildSeguimientoPromesasWorksheetXml = ({
     { kind: 'string', value: '' },
     { kind: 'string', value: 'Saldo pendiente', style: 16 },
     { kind: 'number', value: totalOutstandingAmount, style: 17 },
-  ]);
+  ], COLUMN_COUNT);
 
-  const headers = padRow(
+  const headers = padWorksheetRow(
     [
       'ID promesa',
       'ID deudor',
@@ -449,7 +262,8 @@ export const buildSeguimientoPromesasWorksheetXml = ({
       'Asesor',
       'ID supervisor',
       'Supervisor',
-    ].map<WorksheetCell>((value) => ({ kind: 'string', value, style: 5 }))
+    ].map<WorksheetCell>((value) => ({ kind: 'string', value, style: 5 })),
+    COLUMN_COUNT
   );
 
   const dataRowsXml = rows

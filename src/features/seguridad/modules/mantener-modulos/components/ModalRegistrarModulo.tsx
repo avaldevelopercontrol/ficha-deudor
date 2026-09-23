@@ -25,11 +25,18 @@ import ModuloModalFormBody from './ModuloModalFormBody';
 import ModuloModalSubmitFooter from './ModuloModalSubmitFooter';
 import PowerBiGroupSelector from './PowerBiGroupSelector';
 
+import '../../../styles/28-mantener-modulos.css';
 import './PowerBiGroupSelector.css';
 
-interface ModalRegistrarModuloProps {
+export interface ModalRegistrarModuloProps {
   isOpen: boolean;
   canInsert: boolean;
+  powerBiOnly?: boolean;
+  title?: string;
+  submitLabel?: string;
+  loadingLabel?: string;
+  validationTitle?: string;
+  insertPermissionMessage?: string;
   modulosExistentes: readonly Modulo[];
   onClose: () => void;
   onRegistrar: (
@@ -41,6 +48,16 @@ interface ModalRegistrarModuloProps {
 export const ModalRegistrarModulo = ({
   isOpen,
   canInsert,
+  powerBiOnly = false,
+  title = MODAL_REGISTRAR_MODULO_TEXTS.title,
+  submitLabel = MODAL_REGISTRAR_MODULO_TEXTS.submitLabel,
+  loadingLabel = MODAL_REGISTRAR_MODULO_TEXTS.loadingLabel,
+  validationTitle =
+    MODAL_REGISTRAR_MODULO_TEXTS.validationSummary,
+  insertPermissionMessage =
+    getMantenerModulosPermissionMessage(
+      'insertar'
+    ),
   modulosExistentes,
   onClose,
   onRegistrar,
@@ -70,6 +87,7 @@ export const ModalRegistrarModulo = ({
     onEstadoChange,
   } = useRegistrarModuloModal({
     isOpen,
+    powerBiOnly,
     modulosExistentes,
     onClose,
     onRegistrar,
@@ -82,7 +100,7 @@ export const ModalRegistrarModulo = ({
   return (
     <Modal
       isOpen={isOpen}
-      title={MODAL_REGISTRAR_MODULO_TEXTS.title}
+      title={title}
       onClose={handleCancel}
       size="md"
       closeOnEsc={!isSubmitting}
@@ -106,6 +124,8 @@ export const ModalRegistrarModulo = ({
             parentOptions,
             powerBiDisabled:
               !powerBiParentAvailable,
+            showPowerBiTypeSelector:
+              !powerBiOnly,
             powerBiDisabledMessage:
               !powerBiParentAvailable
                 ? 'Primero registre el módulo Reportería para poder crear tableros Power BI.'
@@ -137,8 +157,7 @@ export const ModalRegistrarModulo = ({
             onEstadoChange,
           }}
           validationTitle={
-            MODAL_REGISTRAR_MODULO_TEXTS
-              .validationSummary
+            validationTitle
           }
           submitError={submitError}
         >
@@ -167,26 +186,24 @@ export const ModalRegistrarModulo = ({
 
         <ModuloModalSubmitFooter
           label={
-            MODAL_REGISTRAR_MODULO_TEXTS
-              .submitLabel
+            submitLabel
           }
           loadingLabel={
-            MODAL_REGISTRAR_MODULO_TEXTS
-              .loadingLabel
+            loadingLabel
           }
           loading={isSubmitting}
           onSubmit={handleSubmit}
           disabled={
             isSubmitting ||
             !canInsert ||
+            (powerBiOnly &&
+              !powerBiParentAvailable) ||
             (form.esPowerBI &&
               !hasValidGroupSelection)
           }
           title={
             !canInsert
-              ? getMantenerModulosPermissionMessage(
-                  'insertar'
-                )
+              ? insertPermissionMessage
               : undefined
           }
         />

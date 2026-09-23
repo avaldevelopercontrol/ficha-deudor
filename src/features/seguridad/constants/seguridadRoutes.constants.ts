@@ -5,6 +5,9 @@ export const SEGURIDAD_ROUTES = {
   MANTENER_MODULOS:
     '/seguridad/mantener-modulos',
 
+  MANTENER_BI:
+    '/seguridad/mantener-bi',
+
   MANTENER_GRUPO:
     '/seguridad/mantener-grupo',
 

@@ -130,6 +130,31 @@ export interface EvolucionCarteraApiResponse {
   }[];
 }
 
+export interface EvolucionCarteraComparativaApiSeries {
+  campaign: {
+    code: string;
+    name: string;
+  };
+  period: {
+    dateFrom: string;
+    dateTo: string;
+  };
+  coversComparablePeriod: boolean;
+  evolution: EvolucionCarteraApiResponse['evolution'];
+}
+
+export interface EvolucionCarteraComparativaApiResponse {
+  referencePeriod: {
+    dateFrom: string;
+    dateTo: string;
+  };
+  comparableProgressMonths: number;
+  comparableRecoveryMonths: number;
+  previousMonth: EvolucionCarteraComparativaApiSeries | null;
+  bestProgress: EvolucionCarteraComparativaApiSeries | null;
+  bestRecovery: EvolucionCarteraComparativaApiSeries | null;
+}
+
 export interface PanoramaCarteraApiResponse {
   summary: PortfolioSummaryApiResponse;
   targetProgress: MetaCarteraProgressApiResponse;
@@ -221,11 +246,14 @@ export interface PromesasCarteraVencidasApiResponse {
   items: readonly {
     promiseId: number;
     debtorId: number;
+    debtorName: string | null;
     dueDate: string | null;
     overdueDays: number | null;
     promiseAmount: number;
     paidAmount: number;
     outstandingAmount: number;
+    situationKey: 'no-payment-recorded' | 'partial-payment';
+    situationLabel: string;
     agingKey: '1-3' | '4-7' | '8-plus' | 'unclassified';
     advisorId: number | null;
     advisorName: string | null;

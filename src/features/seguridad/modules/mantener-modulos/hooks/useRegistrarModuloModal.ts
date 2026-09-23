@@ -31,7 +31,9 @@ import {
   POWER_BI_PARENT_OPTION_ID,
 } from '../../../domain/modulos/powerBiModulo.utils';
 import {
+  asPowerBiRegistrarModuloForm,
   buildRegistrarModuloInitialForm,
+  buildRegistrarPowerBiInitialForm,
   suggestModuloCode,
 } from '../../../domain/modulos/moduloForm.utils';
 import {
@@ -45,6 +47,7 @@ import {
 
 interface UseRegistrarModuloModalOptions {
   isOpen: boolean;
+  powerBiOnly?: boolean;
   modulosExistentes: readonly Modulo[];
   onClose: () => void;
   onRegistrar: (
@@ -55,6 +58,7 @@ interface UseRegistrarModuloModalOptions {
 
 export const useRegistrarModuloModal = ({
   isOpen,
+  powerBiOnly = false,
   modulosExistentes,
   onClose,
   onRegistrar,
@@ -86,10 +90,14 @@ export const useRegistrarModuloModal = ({
 
   const initialForm = useMemo(
     () =>
-      buildRegistrarModuloInitialForm(
-        modulosExistentes
-      ),
-    [modulosExistentes]
+      powerBiOnly
+        ? buildRegistrarPowerBiInitialForm(
+            modulosExistentes
+          )
+        : buildRegistrarModuloInitialForm(
+            modulosExistentes
+          ),
+    [modulosExistentes, powerBiOnly]
   );
 
   const powerBiParentAvailable =
@@ -115,10 +123,17 @@ export const useRegistrarModuloModal = ({
 
   const validate = useCallback(
     (form: RegistrarModuloFormData) =>
-      validateRegistrarModuloForm(form, {
-        modulosExistentes,
-      }),
-    [modulosExistentes]
+      validateRegistrarModuloForm(
+        powerBiOnly
+          ? asPowerBiRegistrarModuloForm(
+              form
+            )
+          : form,
+        {
+          modulosExistentes,
+        }
+      ),
+    [modulosExistentes, powerBiOnly]
   );
 
   const {
@@ -136,8 +151,14 @@ export const useRegistrarModuloModal = ({
     validate,
     resetOnClose: true,
     onSubmit: async (data) => {
+      const submitData = powerBiOnly
+        ? asPowerBiRegistrarModuloForm(
+            data
+          )
+        : data;
+
       if (
-        data.esPowerBI &&
+        submitData.esPowerBI &&
         !hasValidGroupSelection
       ) {
         const message =
@@ -150,8 +171,12 @@ export const useRegistrarModuloModal = ({
       setGroupSelectionError(null);
 
       await onRegistrar(
-        normalizeRegistrarModuloForm(data),
-        data.esPowerBI ? selectedGroupIds : []
+        normalizeRegistrarModuloForm(
+          submitData
+        ),
+        submitData.esPowerBI
+          ? selectedGroupIds
+          : []
       );
     },
   });
@@ -205,6 +230,10 @@ export const useRegistrarModuloModal = ({
     (enabled: boolean) => {
       setGroupSelectionError(null);
 
+      if (powerBiOnly) {
+        return;
+      }
+
       if (enabled) {
         previousParentIdRef.current =
           form.padreId !== POWER_BI_PARENT_OPTION_ID
@@ -257,6 +286,7 @@ export const useRegistrarModuloModal = ({
       form.padreId,
       handleChange,
       modulosExistentes,
+      powerBiOnly,
     ]
   );
 

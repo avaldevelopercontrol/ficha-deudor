@@ -735,6 +735,34 @@ export const suite = defineSuite(
       }
     ),
     test(
+      'promesas vencidas carga el generador XLSX de forma diferida',
+      () => {
+        const exportHookFile = join(
+          GESTION_ANALITICA_ROOT,
+          'modules',
+          'centro-control-cartera',
+          'hooks',
+          'usePromesasCarteraVencidasExport.ts'
+        );
+        const source = readFileSync(exportHookFile, 'utf8');
+
+        assert.equal(
+          source.includes(
+            "from '../export/promesasCarteraVencidasExcel'"
+          ),
+          false,
+          'El generador XLSX de vencidas no debe formar parte del import estático de la página'
+        );
+        assert.equal(
+          source.includes(
+            "import('../export/promesasCarteraVencidasExcel')"
+          ),
+          true,
+          'El generador XLSX de vencidas debe cargarse bajo demanda al exportar'
+        );
+      }
+    ),
+    test(
       'seguimiento de promesas carga el generador XLSX de forma diferida',
       () => {
         const exportHookFile = join(

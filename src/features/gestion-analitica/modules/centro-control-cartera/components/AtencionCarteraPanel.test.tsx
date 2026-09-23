@@ -26,7 +26,7 @@ const TARGET: MetaCarteraProgress = {
 const OVERDUE_ITEMS: readonly AtencionCarteraItem[] = [
   {
     id: 'promises-overdue',
-    title: 'Promesas vencidas',
+    title: 'Promesas vencidas con saldo',
     detail: 'Detalle técnico.',
     metric: 'promisesOverdue',
     tone: 'critical',
@@ -102,8 +102,8 @@ export const suite = defineSuite(
           />
         );
 
-        assert.match(html, /46 vencidas/);
-        assert.match(html, /46 compromisos requieren atención/);
+        assert.match(html, /46 con saldo vencido/);
+        assert.match(html, /46 compromisos vencidos aún mantienen saldo pendiente/);
         assert.match(html, /Ver detalle de promesas/);
         assert.match(html, /Meta mensual no disponible/);
       }
@@ -150,7 +150,7 @@ export const suite = defineSuite(
         );
 
         assert.match(html, /Cargando indicadores/);
-        assert.doesNotMatch(html, /46 vencidas/);
+        assert.doesNotMatch(html, /46 con saldo vencido/);
         assert.doesNotMatch(html, /Ver detalle de promesas/);
       }
     ),

@@ -6,13 +6,45 @@ import {
 } from '../../../../test/testHarness';
 
 import {
+  isPowerBiCatalogModulo,
   isValidPowerBiPublishToWebUrl,
   isValidPowerBiUrl,
+  POWER_BI_CATALOG_LEVEL,
 } from './powerBiModulo.utils';
 
 export const suite = defineSuite(
   'powerBiModulo.utils',
   [
+    test(
+      'identifica como BI únicamente las opciones del nivel 4',
+      () => {
+        assert.equal(
+          POWER_BI_CATALOG_LEVEL,
+          4
+        );
+
+        assert.equal(
+          isPowerBiCatalogModulo({
+            tipo: 4,
+          }),
+          true
+        );
+
+        assert.equal(
+          isPowerBiCatalogModulo({
+            tipo: 3,
+          }),
+          false
+        );
+
+        assert.equal(
+          isPowerBiCatalogModulo({
+            tipo: 5,
+          }),
+          false
+        );
+      }
+    ),
     test(
       'limita la URL general del reporte al servicio HTTPS de Power BI',
       () => {

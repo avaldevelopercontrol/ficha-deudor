@@ -33,6 +33,11 @@ const OVERDUE_AGING_KEYS = new Set([
   'unclassified',
 ]);
 
+const OVERDUE_SITUATION_KEYS = new Set([
+  'no-payment-recorded',
+  'partial-payment',
+]);
+
 const DUE_TODAY_STATUS_KEYS = new Set([
   'pending',
   'partial',
@@ -240,6 +245,7 @@ export const parsePromesasCarteraVencidasApiResponse: ContractParser<PromesasCar
     const item = expectRecord(rawItem, contract, path);
     expectPositiveInteger(item.promiseId, contract, `${path}.promiseId`);
     expectPositiveInteger(item.debtorId, contract, `${path}.debtorId`);
+    expectNullableString(item.debtorName, contract, `${path}.debtorName`);
     expectNullableDate(item.dueDate, contract, `${path}.dueDate`);
     if (item.overdueDays !== null) {
       expectNonNegativeInteger(item.overdueDays, contract, `${path}.overdueDays`);
@@ -251,6 +257,17 @@ export const parsePromesasCarteraVencidasApiResponse: ContractParser<PromesasCar
     ] as const) {
       expectFiniteNumber(item[key], contract, `${path}.${key}`);
     }
+    expectEnum(
+      item.situationKey,
+      OVERDUE_SITUATION_KEYS,
+      contract,
+      `${path}.situationKey`
+    );
+    expectNonEmptyString(
+      item.situationLabel,
+      contract,
+      `${path}.situationLabel`
+    );
     expectEnum(
       item.agingKey,
       OVERDUE_AGING_KEYS,

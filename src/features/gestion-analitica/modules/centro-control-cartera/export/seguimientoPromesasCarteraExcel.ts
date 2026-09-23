@@ -13,7 +13,9 @@ import type {
   SeguimientoPromesasCarteraStatusFilter,
 } from '../domain/promesasCartera.types';
 import {
-  buildSeguimientoPromesasStylesXml,
+  buildPromesasCarteraStylesXml,
+} from './promesasCarteraExcelStyles';
+import {
   buildSeguimientoPromesasWorksheetXml,
   SEGUIMIENTO_PROMESAS_STATUS_LABELS,
 } from './seguimientoPromesasCarteraWorksheet';
@@ -79,7 +81,7 @@ export const buildSeguimientoPromesasExcelFile = (
     blob: buildSingleSheetXlsxBlob({
       sheetName: 'Seguimiento',
       worksheetXml: buildSeguimientoPromesasWorksheetXml(worksheetParams),
-      stylesXml: buildSeguimientoPromesasStylesXml(),
+      stylesXml: buildPromesasCarteraStylesXml(),
       documentTitle: 'Seguimiento de promesas',
       creator: 'SISGES',
       exportedAt,
