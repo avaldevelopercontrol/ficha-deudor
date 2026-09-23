@@ -35,10 +35,16 @@ import ModuloModalSubmitFooter from './ModuloModalSubmitFooter';
 import ModuloOrderControl from './ModuloOrderControl';
 import PowerBiConfigurationSection from './PowerBiConfigurationSection';
 
-interface ModalEditarModuloProps {
+export interface ModalEditarModuloProps {
   isOpen: boolean;
   canEdit: boolean;
   moduloId: number;
+  powerBiOnly?: boolean;
+  title?: string;
+  submitLabel?: string;
+  loadingLabel?: string;
+  validationTitle?: string;
+  editPermissionMessage?: string;
   modulosExistentes: readonly Modulo[];
   onClose: () => void;
   onGuardar: (
@@ -54,6 +60,15 @@ export const ModalEditarModulo = ({
   isOpen,
   canEdit,
   moduloId,
+  powerBiOnly = false,
+  title = MODAL_EDITAR_MODULO_TEXTS.title,
+  submitLabel = MODAL_EDITAR_MODULO_TEXTS.submitLabel,
+  loadingLabel = MODAL_EDITAR_MODULO_TEXTS.loadingLabel,
+  validationTitle = MODAL_EDITAR_MODULO_TEXTS.validationSummary,
+  editPermissionMessage =
+    getMantenerModulosPermissionMessage(
+      'editar'
+    ),
   modulosExistentes,
   onClose,
   onGuardar,
@@ -90,6 +105,7 @@ export const ModalEditarModulo = ({
   } = useEditarModuloModal({
     isOpen,
     moduloId,
+    powerBiOnly,
     modulosExistentes,
     onClose,
     onGuardar,
@@ -102,7 +118,7 @@ export const ModalEditarModulo = ({
   return (
     <Modal
       isOpen={isOpen}
-      title={MODAL_EDITAR_MODULO_TEXTS.title}
+      title={title}
       onClose={handleCancel}
       size="md"
       closeOnEsc={!isSubmitting}
@@ -226,8 +242,7 @@ export const ModalEditarModulo = ({
                   ),
                 }}
                 validationTitle={
-                  MODAL_EDITAR_MODULO_TEXTS
-                    .validationSummary
+                  validationTitle
                 }
                 submitError={submitError}
               >
@@ -264,14 +279,8 @@ export const ModalEditarModulo = ({
               </ModuloModalFormBody>
 
               <ModuloModalSubmitFooter
-                label={
-                  MODAL_EDITAR_MODULO_TEXTS
-                    .submitLabel
-                }
-                loadingLabel={
-                  MODAL_EDITAR_MODULO_TEXTS
-                    .loadingLabel
-                }
+                label={submitLabel}
+                loadingLabel={loadingLabel}
                 loading={isSubmitting}
                 onSubmit={handleSubmit}
                 disabled={
@@ -290,9 +299,7 @@ export const ModalEditarModulo = ({
                 }
                 title={
                   !canEdit
-                    ? getMantenerModulosPermissionMessage(
-                        'editar'
-                      )
+                    ? editPermissionMessage
                     : undefined
                 }
               />

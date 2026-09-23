@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import {
   defineSuite,
   test,
-} from '../../../../../test/testHarness';
+} from '../../../../test/testHarness';
 
 import type {
   Modulo,
-} from '../../../types/opcion.types';
+} from '../../types/opcion.types';
 
 import {
   attachModuloImplementacion,

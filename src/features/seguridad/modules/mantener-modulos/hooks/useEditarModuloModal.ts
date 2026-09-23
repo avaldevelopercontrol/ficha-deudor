@@ -20,6 +20,9 @@ import {
 import {
   fetchOpcionById,
 } from '../../../api/opcionesApi';
+import {
+  asPowerBiEditarModuloForm,
+} from '../../../domain/modulos/moduloForm.utils';
 import type {
   Modulo,
   OpcionApi,
@@ -50,6 +53,7 @@ import {
 interface UseEditarModuloModalOptions {
   isOpen: boolean;
   moduloId: number;
+  powerBiOnly?: boolean;
   modulosExistentes: readonly Modulo[];
   onClose: () => void;
   onGuardar: (
@@ -79,6 +83,7 @@ const EMPTY_EDIT_FORM: EditarModuloFormData = {
 export const useEditarModuloModal = ({
   isOpen,
   moduloId,
+  powerBiOnly = false,
   modulosExistentes,
   onClose,
   onGuardar,
@@ -104,9 +109,11 @@ export const useEditarModuloModal = ({
     [moduloId]
   );
 
-  const isPowerBiModule = Boolean(
-    moduloDetalle?.sUrlBI?.trim()
-  );
+  const isPowerBiModule =
+    powerBiOnly ||
+    Boolean(
+      moduloDetalle?.sUrlBI?.trim()
+    );
 
   const powerBi = usePowerBiModuleConfiguration({
     isOpen,
@@ -115,12 +122,20 @@ export const useEditarModuloModal = ({
   });
 
   const mapEntityToForm = useCallback(
-    (modulo: OpcionApi) =>
-      mapOpcionApiToEditarModuloForm(
-        modulo,
-        modulosExistentes
-      ),
-    [modulosExistentes]
+    (modulo: OpcionApi) => {
+      const mapped =
+        mapOpcionApiToEditarModuloForm(
+          modulo,
+          modulosExistentes
+        );
+
+      return powerBiOnly
+        ? asPowerBiEditarModuloForm(
+            mapped
+          )
+        : mapped;
+    },
+    [modulosExistentes, powerBiOnly]
   );
 
   const validate = useCallback(
@@ -173,13 +188,22 @@ export const useEditarModuloModal = ({
         }
       }
 
+      const normalizedData =
+        normalizeModuloForm(
+          powerBiOnly
+            ? asPowerBiEditarModuloForm(
+                data
+              )
+            : data
+        );
+
       await onGuardar(
         moduloDetalle,
-        normalizeModuloForm(data),
-        data.esPowerBI
+        normalizedData,
+        normalizedData.esPowerBI
           ? powerBi.selectedGroupIds
           : [],
-        data.esPowerBI
+        normalizedData.esPowerBI
           ? powerBi.getPublicationsForSave()
           : null
       );

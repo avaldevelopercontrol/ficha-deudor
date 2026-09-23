@@ -8,6 +8,7 @@ import {
   buildPromesasCarteraVenceHoyQuery,
   buildPromesasCarteraVencidasQuery,
   buildSeguimientoPromesasCarteraQuery,
+  loadAllPromesasCarteraVencidas,
   loadAllSeguimientoPromesasCartera,
 } from './promesasCartera.application';
 
@@ -50,6 +51,98 @@ export const suite = defineSuite(
         }
       );
     }),
+    test('exporta promesas vencidas recorriendo todas las páginas y conservando el corte', async () => {
+      const originalFetch = globalThis.fetch;
+      const requests: string[] = [];
+
+      globalThis.fetch = async (input) => {
+        const url = String(input);
+        requests.push(url);
+        const requestUrl = new URL(url, 'http://localhost');
+        const page = Number(requestUrl.searchParams.get('pagina'));
+        const itemCount = page === 1 ? 50 : 1;
+        const startId = page === 1 ? 1 : 51;
+
+        return new Response(
+          JSON.stringify({
+            campaign: { code: '2026-09', name: 'Septiembre 2026' },
+            asOfDate: '2026-09-23',
+            updatedAt: '2026-09-23T10:00:00-05:00',
+            summary: {
+              overdueCount: 51,
+              overdueAmount: 5100,
+              outstandingAmount: 5100,
+            },
+            aging: [],
+            filters: { advisors: [], supervisors: [] },
+            pagination: {
+              page,
+              pageSize: 50,
+              totalItems: 51,
+              totalPages: 2,
+              hasPreviousPage: page > 1,
+              hasNextPage: page < 2,
+            },
+            items: Array.from({ length: itemCount }, (_, index) => {
+              const id = startId + index;
+
+              return {
+                promiseId: id,
+                debtorId: 1000 + id,
+                debtorName: `DEUDOR ${id}`,
+                dueDate: '2026-09-20',
+                overdueDays: 3,
+                promiseAmount: 100,
+                paidAmount: 0,
+                outstandingAmount: 100,
+                situationKey: 'no-payment-recorded',
+                situationLabel: 'Sin pago registrado',
+                agingKey: '1-3',
+                advisorId: null,
+                advisorName: null,
+                supervisorId: null,
+                supervisorName: null,
+              };
+            }),
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      };
+
+      try {
+        const result = await loadAllPromesasCarteraVencidas(
+          95,
+          {
+            businessUnit: 'CLARO CORPORATIVO',
+            campaignId: '2026-09',
+            subPortfolioId: '602',
+          },
+          {
+            aging: '1-3',
+            sortBy: 'overdueDays',
+            sortDirection: 'desc',
+          },
+          new AbortController().signal
+        );
+
+        assert.equal(result.items.length, 51);
+        assert.equal(result.asOfDate, '2026-09-23');
+        assert.equal(result.updatedAt, '2026-09-23T10:00:00-05:00');
+        assert.equal(requests.length, 2);
+        assert.match(requests[0] ?? '', /(?:\?|&)pagina=1(?:&|$)/);
+        assert.match(requests[1] ?? '', /(?:\?|&)pagina=2(?:&|$)/);
+        requests.forEach((url) => {
+          assert.match(url, /(?:\?|&)tamanoPagina=50(?:&|$)/);
+          assert.match(url, /(?:\?|&)antiguedad=1-3(?:&|$)/);
+        });
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    }),
+
     test('construye seguimiento por fecha sin acoplar Hoy/Ayer al contrato HTTP', () => {
       assert.deepEqual(
         buildSeguimientoPromesasCarteraQuery(

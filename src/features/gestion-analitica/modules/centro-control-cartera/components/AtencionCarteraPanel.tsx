@@ -73,7 +73,7 @@ const getMetricLabel = (
     case 'promisesOverdue':
       return `${formatPortfolioInteger(
         item.value
-      )} vencidas`;
+      )} con saldo vencido`;
     case 'targetPace':
       return `${formatPortfolioSignedPercentage(
         item.value
@@ -118,7 +118,7 @@ const getAttentionDetail = (
   if (item.metric === 'promisesOverdue') {
     return `${formatPortfolioInteger(
       item.value
-    )} compromisos requieren atención y priorización operativa.`;
+    )} compromisos vencidos aún mantienen saldo pendiente y requieren seguimiento.`;
   }
 
   return item.detail;

@@ -44,6 +44,7 @@ export const suite = defineSuite(
           ['curveGap', 'promisesOverdue', 'promisesDue']
         );
         assert.equal(result[0]?.tone, 'critical');
+        assert.equal(result[1]?.title, 'Promesas vencidas con saldo');
         assert.equal(result[1]?.value, 3);
         assert.equal(result[2]?.amount, 14500);
       }

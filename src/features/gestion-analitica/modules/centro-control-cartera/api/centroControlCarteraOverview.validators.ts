@@ -1,6 +1,8 @@
 import type {
   InicializacionCarteraApiResponse,
   EvolucionCarteraApiResponse,
+  EvolucionCarteraComparativaApiResponse,
+  EvolucionCarteraComparativaApiSeries,
   OpcionesFiltroCarteraApiResponse,
   PanoramaCarteraApiResponse,
   PromesasCarteraApiResponse,
@@ -9,6 +11,7 @@ import type {
 } from './centroControlCarteraApi.types';
 import {
   expectArray,
+  expectBoolean,
   expectDate,
   expectFiniteNumber,
   expectNonEmptyString,
@@ -382,6 +385,79 @@ export const parseEvolucionCarteraApiResponse: ContractParser<EvolucionCarteraAp
   });
 
   return value as EvolucionCarteraApiResponse;
+};
+
+const parseEvolucionComparativaSerie = (
+  value: unknown,
+  contract: string,
+  path: string
+): EvolucionCarteraComparativaApiSeries => {
+  const response = expectRecord(value, contract, path);
+  validateCampaign(response.campaign, contract, `${path}.campaign`);
+
+  const period = expectRecord(response.period, contract, `${path}.period`);
+  expectDate(period.dateFrom, contract, `${path}.period.dateFrom`);
+  expectDate(period.dateTo, contract, `${path}.period.dateTo`);
+  expectBoolean(
+    response.coversComparablePeriod,
+    contract,
+    `${path}.coversComparablePeriod`
+  );
+
+  const evolution = expectArray(response.evolution, contract, `${path}.evolution`);
+  evolution.forEach((rawItem, index) => {
+    const itemPath = `${path}.evolution[${index}]`;
+    const item = expectRecord(rawItem, contract, itemPath);
+    expectDate(item.period, contract, `${itemPath}.period`);
+    for (const key of [
+      'assignedPortfolio',
+      'managedPortfolio',
+      'pendingPortfolio',
+      'recoveredAmount',
+    ] as const) {
+      expectFiniteNumber(item[key], contract, `${itemPath}.${key}`);
+    }
+  });
+
+  return value as EvolucionCarteraComparativaApiSeries;
+};
+
+export const parseEvolucionCarteraComparativaApiResponse: ContractParser<EvolucionCarteraComparativaApiResponse> = (
+  value
+) => {
+  const contract = 'Portfolio Evolution Comparison';
+  const response = expectRecord(value, contract, '$');
+
+  const referencePeriod = expectRecord(
+    response.referencePeriod,
+    contract,
+    '$.referencePeriod'
+  );
+  expectDate(referencePeriod.dateFrom, contract, '$.referencePeriod.dateFrom');
+  expectDate(referencePeriod.dateTo, contract, '$.referencePeriod.dateTo');
+  expectNonNegativeInteger(
+    response.comparableProgressMonths,
+    contract,
+    '$.comparableProgressMonths'
+  );
+  expectNonNegativeInteger(
+    response.comparableRecoveryMonths,
+    contract,
+    '$.comparableRecoveryMonths'
+  );
+
+  for (const key of [
+    'previousMonth',
+    'bestProgress',
+    'bestRecovery',
+  ] as const) {
+    const series = response[key];
+    if (series !== null) {
+      parseEvolucionComparativaSerie(series, contract, `$.${key}`);
+    }
+  }
+
+  return value as EvolucionCarteraComparativaApiResponse;
 };
 
 export const parsePanoramaCarteraApiResponse: ContractParser<PanoramaCarteraApiResponse> = (

@@ -1,9 +1,11 @@
 import type {
+  EvolucionCarteraComparison,
+  EvolucionCarteraComparisonSeries,
+} from '../domain/evolucionCartera.types';
+import type {
   EvolucionCarteraPoint,
+  PortfolioOperationalContext,
 } from '../domain/panoramaCartera.types';
-import {
-  buildLineChartModel,
-} from '../../../shared/utils/lineChart.utils';
 import {
   calculatePortfolioRate,
 } from './centroControlCartera.formatters';
@@ -12,12 +14,16 @@ export type EvolucionCarteraMetric =
   | 'progress'
   | 'recovery';
 
+export type EvolucionCarteraSeriesRole =
+  | 'current'
+  | 'previous'
+  | 'best';
+
 export interface EvolucionCarteraChartPoint {
   period: string;
   value: number;
   x: number;
   y: number;
-  showLabel: boolean;
 }
 
 export interface EvolucionCarteraChartTick {
@@ -25,14 +31,30 @@ export interface EvolucionCarteraChartTick {
   y: number;
 }
 
-export interface EvolucionCarteraChartModel {
+export interface EvolucionCarteraChartXAxisTick {
+  day: number;
+  x: number;
+}
+
+export interface EvolucionCarteraChartSeries {
+  id: string;
+  campaignId: string;
+  roles: readonly EvolucionCarteraSeriesRole[];
+  coversComparablePeriod: boolean;
   points: readonly EvolucionCarteraChartPoint[];
-  ticks: readonly EvolucionCarteraChartTick[];
   linePath: string;
   areaPath: string;
+  currentValue: number;
+}
+
+export interface EvolucionCarteraChartModel {
+  series: readonly EvolucionCarteraChartSeries[];
+  ticks: readonly EvolucionCarteraChartTick[];
+  xTicks: readonly EvolucionCarteraChartXAxisTick[];
   maxValue: number;
   currentValue: number;
   deltaValue: number;
+  comparableMonths: number;
 }
 
 export const EVOLUCION_CARTERA_VIEWBOX = {
@@ -43,6 +65,30 @@ export const EVOLUCION_CARTERA_VIEWBOX = {
   top: 16,
   bottom: 40,
 } as const;
+
+const DAY_IN_MS = 86_400_000;
+
+const parseIsoDateUtc = (value: string): number => {
+  const [year, month, day] = value.split('-').map(Number);
+  return Date.UTC(year!, month! - 1, day!);
+};
+
+const getDayOffset = (
+  period: string,
+  dateFrom: string
+): number =>
+  Math.round(
+    (parseIsoDateUtc(period) - parseIsoDateUtc(dateFrom)) /
+      DAY_IN_MS
+  );
+
+const getComparableDays = (
+  context: PortfolioOperationalContext
+): number =>
+  Math.max(
+    1,
+    getDayOffset(context.dateTo, context.dateFrom) + 1
+  );
 
 const getMetricValue = (
   point: EvolucionCarteraPoint,
@@ -92,85 +138,251 @@ const getMaxValue = (
   return getNiceMax(Math.max(...values, 0));
 };
 
-const shouldShowLabel = (
-  index: number,
-  total: number
-): boolean => {
-  if (total <= 6) {
-    return true;
+const getX = (
+  offset: number,
+  comparableDays: number
+): number => {
+  const innerWidth =
+    EVOLUCION_CARTERA_VIEWBOX.width -
+    EVOLUCION_CARTERA_VIEWBOX.left -
+    EVOLUCION_CARTERA_VIEWBOX.right;
+
+  if (comparableDays <= 1) {
+    return EVOLUCION_CARTERA_VIEWBOX.left + innerWidth / 2;
   }
 
-  const step = Math.ceil((total - 1) / 5);
+  return (
+    EVOLUCION_CARTERA_VIEWBOX.left +
+    (Math.min(Math.max(offset, 0), comparableDays - 1) /
+      (comparableDays - 1)) *
+      innerWidth
+  );
+};
+
+const getY = (
+  value: number,
+  maxValue: number
+): number => {
+  const innerHeight =
+    EVOLUCION_CARTERA_VIEWBOX.height -
+    EVOLUCION_CARTERA_VIEWBOX.top -
+    EVOLUCION_CARTERA_VIEWBOX.bottom;
 
   return (
-    index === 0 ||
-    index === total - 1 ||
-    index % step === 0
+    EVOLUCION_CARTERA_VIEWBOX.top +
+    innerHeight -
+    Math.min(value / Math.max(maxValue, 1), 1) * innerHeight
   );
+};
+
+const buildPath = (
+  points: readonly EvolucionCarteraChartPoint[]
+): string =>
+  points
+    .map(
+      ({ x, y }, index) =>
+        `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`
+    )
+    .join(' ');
+
+const buildAreaPath = (
+  points: readonly EvolucionCarteraChartPoint[],
+  linePath: string
+): string => {
+  const first = points[0];
+  const last = points[points.length - 1];
+
+  if (!first || !last) {
+    return '';
+  }
+
+  const baseline =
+    EVOLUCION_CARTERA_VIEWBOX.height -
+    EVOLUCION_CARTERA_VIEWBOX.bottom;
+
+  return `${linePath} L ${last.x.toFixed(2)} ${baseline.toFixed(2)} L ${first.x.toFixed(2)} ${baseline.toFixed(2)} Z`;
+};
+
+const buildSeries = (
+  id: string,
+  campaignId: string,
+  roles: readonly EvolucionCarteraSeriesRole[],
+  evolution: readonly EvolucionCarteraPoint[],
+  dateFrom: string,
+  coversComparablePeriod: boolean,
+  metric: EvolucionCarteraMetric,
+  comparableDays: number,
+  maxValue: number
+): EvolucionCarteraChartSeries => {
+  const points = evolution
+    .map((point) => ({
+      period: point.period,
+      value: getMetricValue(point, metric),
+      offset: getDayOffset(point.period, dateFrom),
+    }))
+    .filter(({ offset }) => offset >= 0 && offset < comparableDays)
+    .map(({ period, value, offset }) => ({
+      period,
+      value,
+      x: getX(offset, comparableDays),
+      y: getY(value, maxValue),
+    }));
+
+  const linePath = buildPath(points);
+
+  return {
+    id,
+    campaignId,
+    roles,
+    coversComparablePeriod,
+    points,
+    linePath,
+    areaPath: roles.includes('current')
+      ? buildAreaPath(points, linePath)
+      : '',
+    currentValue: points[points.length - 1]?.value ?? 0,
+  };
+};
+
+const getBestSeries = (
+  comparison: EvolucionCarteraComparison | null,
+  metric: EvolucionCarteraMetric
+): EvolucionCarteraComparisonSeries | null =>
+  metric === 'progress'
+    ? comparison?.bestProgress ?? null
+    : comparison?.bestRecovery ?? null;
+
+const buildReferenceDefinitions = (
+  comparison: EvolucionCarteraComparison | null,
+  metric: EvolucionCarteraMetric
+): readonly {
+  series: EvolucionCarteraComparisonSeries;
+  roles: EvolucionCarteraSeriesRole[];
+}[] => {
+  if (comparison === null) {
+    return [];
+  }
+
+  const definitions = new Map<
+    string,
+    {
+      series: EvolucionCarteraComparisonSeries;
+      roles: EvolucionCarteraSeriesRole[];
+    }
+  >();
+
+  if (comparison.previousMonth) {
+    definitions.set(comparison.previousMonth.campaignId, {
+      series: comparison.previousMonth,
+      roles: ['previous'],
+    });
+  }
+
+  const best = getBestSeries(comparison, metric);
+  if (best) {
+    const existing = definitions.get(best.campaignId);
+    if (existing) {
+      existing.roles.push('best');
+    } else {
+      definitions.set(best.campaignId, {
+        series: best,
+        roles: ['best'],
+      });
+    }
+  }
+
+  return [...definitions.values()];
+};
+
+const buildXAxisTicks = (
+  comparableDays: number
+): readonly EvolucionCarteraChartXAxisTick[] => {
+  const step = comparableDays <= 6
+    ? 1
+    : Math.ceil((comparableDays - 1) / 5);
+  const offsets = new Set<number>([0, comparableDays - 1]);
+
+  for (let offset = step; offset < comparableDays - 1; offset += step) {
+    offsets.add(offset);
+  }
+
+  return [...offsets]
+    .sort((left, right) => left - right)
+    .map((offset) => ({
+      day: offset + 1,
+      x: getX(offset, comparableDays),
+    }));
 };
 
 export const buildEvolucionCarteraChartModel = (
   evolution: readonly EvolucionCarteraPoint[],
+  context: PortfolioOperationalContext,
+  comparison: EvolucionCarteraComparison | null,
   metric: EvolucionCarteraMetric
 ): EvolucionCarteraChartModel => {
-  if (evolution.length === 0) {
-    return {
-      points: [],
-      ticks: [],
-      linePath: '',
-      areaPath: '',
-      maxValue: metric === 'progress' ? 100 : 1,
-      currentValue: 0,
-      deltaValue: 0,
-    };
-  }
+  const comparableDays = getComparableDays(context);
+  const references = buildReferenceDefinitions(comparison, metric);
+  const allValues = [
+    ...evolution.map((point) => getMetricValue(point, metric)),
+    ...references.flatMap(({ series }) =>
+      series.evolution.map((point) => getMetricValue(point, metric))
+    ),
+  ];
+  const maxValue = getMaxValue(allValues, metric);
 
-  const values = evolution.map((point) =>
-    getMetricValue(point, metric)
+  const current = buildSeries(
+    `current:${context.campaignId}`,
+    context.campaignId,
+    ['current'],
+    evolution,
+    context.dateFrom,
+    true,
+    metric,
+    comparableDays,
+    maxValue
   );
-  const maxValue = getMaxValue(values, metric);
-  const geometry = buildLineChartModel(values, {
-    width: EVOLUCION_CARTERA_VIEWBOX.width,
-    height: EVOLUCION_CARTERA_VIEWBOX.height,
-    padding: {
-      left: EVOLUCION_CARTERA_VIEWBOX.left,
-      right: EVOLUCION_CARTERA_VIEWBOX.right,
-      top: EVOLUCION_CARTERA_VIEWBOX.top,
-      bottom: EVOLUCION_CARTERA_VIEWBOX.bottom,
-    },
-    maxValue,
-  });
 
-  const points = geometry.coordinates.map((coordinate, index) => ({
-    period: evolution[index]!.period,
-    value: coordinate.value,
-    x: coordinate.x,
-    y: coordinate.y,
-    showLabel: shouldShowLabel(index, evolution.length),
-  }));
+  const referenceSeries = references.map(({ series, roles }) =>
+    buildSeries(
+      `reference:${series.campaignId}`,
+      series.campaignId,
+      roles,
+      series.evolution,
+      series.dateFrom,
+      series.coversComparablePeriod,
+      metric,
+      comparableDays,
+      maxValue
+    )
+  );
 
   const plotHeight =
     EVOLUCION_CARTERA_VIEWBOX.height -
     EVOLUCION_CARTERA_VIEWBOX.top -
     EVOLUCION_CARTERA_VIEWBOX.bottom;
-  const ticks = [1, 0.75, 0.5, 0.25, 0].map(
-    (ratio) => ({
-      value: geometry.maxValue * ratio,
-      y:
-        EVOLUCION_CARTERA_VIEWBOX.top +
-        plotHeight * (1 - ratio),
-    })
+  const ticks = [1, 0.75, 0.5, 0.25, 0].map((ratio) => ({
+    value: maxValue * ratio,
+    y:
+      EVOLUCION_CARTERA_VIEWBOX.top +
+      plotHeight * (1 - ratio),
+  }));
+
+  const currentValues = evolution.map((point) =>
+    getMetricValue(point, metric)
   );
 
   return {
-    points,
+    series: [current, ...referenceSeries],
     ticks,
-    linePath: geometry.linePath,
-    areaPath: geometry.areaPath,
-    maxValue: geometry.maxValue,
-    currentValue: values[values.length - 1] ?? 0,
+    xTicks: buildXAxisTicks(comparableDays),
+    maxValue,
+    currentValue: currentValues[currentValues.length - 1] ?? 0,
     deltaValue:
-      (values[values.length - 1] ?? 0) -
-      (values[0] ?? 0),
+      (currentValues[currentValues.length - 1] ?? 0) -
+      (currentValues[0] ?? 0),
+    comparableMonths:
+      metric === 'progress'
+        ? comparison?.comparableProgressMonths ?? 0
+        : comparison?.comparableRecoveryMonths ?? 0,
   };
 };

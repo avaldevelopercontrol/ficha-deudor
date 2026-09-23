@@ -20,6 +20,7 @@ export const APPLICATION_OPTION_IDS = {
   ANALISIS_CARTERAS: 23,
   REPORTERIA: 25,
   SESIONES_BI: 52,
+  MANTENER_BI: 53,
 } as const;
 
 export type ApplicationOptionId =

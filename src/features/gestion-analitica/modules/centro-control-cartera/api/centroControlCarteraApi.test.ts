@@ -8,6 +8,7 @@ import type {
   PromesasCarteraVencidasQuery,
 } from '../domain/promesasCartera.types';
 import {
+  buildEvolucionComparativaCarteraEndpoint,
   buildRendimientoAsesorCarteraEndpoint,
   buildInicializacionCarteraEndpoint,
   buildPromesasCarteraVenceHoyEndpoint,
@@ -173,6 +174,17 @@ export const suite = defineSuite(
             }
           ),
           '/v1/Analitica/CentroControlCartera/Promesas/Seguimiento?campana=2026-09&unidadNegocio=CLARO+CORPORATIVO&idSubCartera=602&fechaVencimiento=2026-09-14&pagina=2&tamanoPagina=10&estado=cumplida&ordenarPor=montoPendiente&direccionOrden=desc'
+        );
+      }
+    ),
+    test(
+      'construye la comparación histórica con el mismo contexto operacional',
+      () => {
+        assert.equal(
+          buildEvolucionComparativaCarteraEndpoint(
+            OPERATIONAL_CONTEXT
+          ),
+          '/v1/Analitica/CentroControlCartera/Evolucion/Comparativa?campana=2026-08&unidadNegocio=CLARO+GOBIERNO&fechaDesde=2026-08-05&fechaHasta=2026-08-13&idSubCartera=29'
         );
       }
     ),

@@ -12,6 +12,7 @@ import type {
   RendimientoSupervisorCarteraApiResponse,
 } from './centroControlCarteraApi.types';
 import {
+  parseEvolucionCarteraComparativaApiResponse,
   parseRendimientoAsesorCarteraApiResponse,
   parseInicializacionCarteraApiResponse,
   parsePromesasCarteraVenceHoyApiResponse,
@@ -249,6 +250,51 @@ export const suite = defineSuite(
       }
     ),
     test(
+      'valida la comparación histórica con mejores meses independientes',
+      () => {
+        const response = {
+          referencePeriod: {
+            dateFrom: '2026-09-01',
+            dateTo: '2026-09-05',
+          },
+          comparableProgressMonths: 6,
+          comparableRecoveryMonths: 5,
+          previousMonth: {
+            campaign: { code: '2026-08', name: 'Agosto 2026' },
+            period: {
+              dateFrom: '2026-08-01',
+              dateTo: '2026-08-05',
+            },
+            coversComparablePeriod: true,
+            evolution: [
+              {
+                period: '2026-08-05',
+                assignedPortfolio: 100,
+                managedPortfolio: 80,
+                pendingPortfolio: 20,
+                recoveredAmount: 500,
+              },
+            ],
+          },
+          bestProgress: null,
+          bestRecovery: null,
+        };
+
+        assert.equal(
+          parseEvolucionCarteraComparativaApiResponse(response),
+          response
+        );
+
+        const invalid = structuredClone(response) as Record<string, unknown>;
+        const previousMonth = invalid.previousMonth as Record<string, unknown>;
+        previousMonth.coversComparablePeriod = 'true';
+        assertContractError(
+          () => parseEvolucionCarteraComparativaApiResponse(invalid),
+          '$.previousMonth.coversComparablePeriod'
+        );
+      }
+    ),
+    test(
       'valida ids opcionales y metricas de Supervisor y Advisor Performance',
       () => {
         const supervisors: RendimientoSupervisorCarteraApiResponse = {
@@ -355,6 +401,54 @@ export const suite = defineSuite(
         assertContractError(
           () => parsePromesasCarteraVencidasApiResponse(response),
           '$.aging[0].key'
+        );
+      }
+    ),
+    test(
+      'valida nombre y situación operativa en promesas vencidas con saldo',
+      () => {
+        const response = {
+          campaign: { code: '2026-08', name: 'Agosto 2026' },
+          asOfDate: '2026-08-14',
+          updatedAt: null,
+          summary: {
+            overdueCount: 1,
+            overdueAmount: 100,
+            outstandingAmount: 60,
+          },
+          aging: [],
+          filters: { advisors: [], supervisors: [] },
+          items: [
+            {
+              promiseId: 10,
+              debtorId: 20,
+              debtorName: 'DEUDOR PRUEBA',
+              dueDate: '2026-08-13',
+              overdueDays: 1,
+              promiseAmount: 100,
+              paidAmount: 40,
+              outstandingAmount: 60,
+              situationKey: 'partial-payment',
+              situationLabel: 'Pago parcial',
+              agingKey: '1-3',
+              advisorId: null,
+              advisorName: null,
+              supervisorId: null,
+              supervisorName: null,
+            },
+          ],
+        };
+
+        assert.equal(
+          parsePromesasCarteraVencidasApiResponse(response),
+          response
+        );
+
+        const item = response.items[0] as Record<string, unknown>;
+        item.situationKey = 'unknown';
+        assertContractError(
+          () => parsePromesasCarteraVencidasApiResponse(response),
+          '$.items[0].situationKey'
         );
       }
     ),

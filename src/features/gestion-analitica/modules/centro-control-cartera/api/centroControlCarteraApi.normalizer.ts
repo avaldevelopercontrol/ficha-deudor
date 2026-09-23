@@ -133,6 +133,73 @@ const normalizarEvolucion = (entrada: unknown) => {
   };
 };
 
+const normalizarSerieEvolucionComparativa = (entrada: unknown) => {
+  if (entrada === null) {
+    return null;
+  }
+
+  const response = registro(entrada);
+  const periodo = registro(valor(response, 'periodo', 'period'));
+
+  return {
+    campaign: normalizarCampana(valor(response, 'campana', 'campaign')),
+    period: {
+      dateFrom: valor(periodo, 'fechaDesde', 'dateFrom'),
+      dateTo: valor(periodo, 'fechaHasta', 'dateTo'),
+    },
+    coversComparablePeriod: valor(
+      response,
+      'cubrePeriodoComparable',
+      'coversComparablePeriod'
+    ),
+    evolution: lista(valor(response, 'evolucion', 'evolution')).map((raw) => {
+      const item = registro(raw);
+      return {
+        period: valor(item, 'periodo', 'period'),
+        assignedPortfolio: valor(item, 'carteraAsignada', 'assignedPortfolio'),
+        managedPortfolio: valor(item, 'carteraGestionada', 'managedPortfolio'),
+        pendingPortfolio: valor(item, 'carteraPendiente', 'pendingPortfolio'),
+        recoveredAmount: valor(item, 'montoRecuperado', 'recoveredAmount'),
+      };
+    }),
+  };
+};
+
+export const normalizarEvolucionComparativaCarteraTransporte = (
+  entrada: unknown
+) => {
+  const response = registro(entrada);
+  const periodo = registro(
+    valor(response, 'periodoReferencia', 'referencePeriod')
+  );
+
+  return {
+    referencePeriod: {
+      dateFrom: valor(periodo, 'fechaDesde', 'dateFrom'),
+      dateTo: valor(periodo, 'fechaHasta', 'dateTo'),
+    },
+    comparableProgressMonths: valor(
+      response,
+      'mesesComparablesAvance',
+      'comparableProgressMonths'
+    ),
+    comparableRecoveryMonths: valor(
+      response,
+      'mesesComparablesRecuperacion',
+      'comparableRecoveryMonths'
+    ),
+    previousMonth: normalizarSerieEvolucionComparativa(
+      valor(response, 'mesAnterior', 'previousMonth')
+    ),
+    bestProgress: normalizarSerieEvolucionComparativa(
+      valor(response, 'mejorAvance', 'bestProgress')
+    ),
+    bestRecovery: normalizarSerieEvolucionComparativa(
+      valor(response, 'mejorRecuperacion', 'bestRecovery')
+    ),
+  };
+};
+
 export const normalizarPanoramaCarteraTransporte = (entrada: unknown) => {
   const response = registro(entrada);
   return {
@@ -293,6 +360,34 @@ const normalizarPaginacion = (entrada: unknown) => {
 const antiguedadBackendAInterna = (clave: unknown): unknown =>
   clave === '8-mas' ? '8-plus' : clave === 'sin-clasificar' ? 'unclassified' : clave;
 
+
+const situacionVencidaBackendAInterna = (
+  clave: unknown,
+  montoPagado: unknown
+): 'no-payment-recorded' | 'partial-payment' => {
+  if (clave === 'sin-pago-registrado' || clave === 'no-payment-recorded') {
+    return 'no-payment-recorded';
+  }
+
+  if (clave === 'pago-parcial' || clave === 'partial-payment') {
+    return 'partial-payment';
+  }
+
+  return typeof montoPagado === 'number' && montoPagado > 0
+    ? 'partial-payment'
+    : 'no-payment-recorded';
+};
+
+const etiquetaSituacionVencida = (
+  etiqueta: unknown,
+  clave: 'no-payment-recorded' | 'partial-payment'
+): string =>
+  typeof etiqueta === 'string' && etiqueta.trim()
+    ? etiqueta.trim()
+    : clave === 'partial-payment'
+      ? 'Pago parcial'
+      : 'Sin pago registrado';
+
 const estadoBackendAInterno = (clave: unknown): unknown =>
   clave === 'pendiente' ? 'pending' : clave === 'parcial' ? 'partial' : clave === 'cubierta' ? 'covered' : clave;
 
@@ -333,14 +428,26 @@ export const normalizarPromesasVencidasTransporte = (entrada: unknown) => {
     pagination: normalizarPaginacion(valor(response, 'paginacion', 'pagination')),
     items: lista(valor(response, 'elementos', 'items')).map((raw) => {
       const item = registro(raw);
+      const paidAmount = valor(item, 'montoPagado', 'paidAmount');
+      const situationKey = situacionVencidaBackendAInterna(
+        valor(item, 'claveSituacion', 'situationKey'),
+        paidAmount
+      );
+
       return {
         promiseId: valor(item, 'idPromesa', 'promiseId'),
         debtorId: valor(item, 'idDeudor', 'debtorId'),
+        debtorName: valor(item, 'nombreDeudor', 'debtorName') ?? null,
         dueDate: valor(item, 'fechaVencimiento', 'dueDate'),
         overdueDays: valor(item, 'diasVencimiento', 'overdueDays'),
         promiseAmount: valor(item, 'montoPromesa', 'promiseAmount'),
-        paidAmount: valor(item, 'montoPagado', 'paidAmount'),
+        paidAmount,
         outstandingAmount: valor(item, 'montoPendiente', 'outstandingAmount'),
+        situationKey,
+        situationLabel: etiquetaSituacionVencida(
+          valor(item, 'etiquetaSituacion', 'situationLabel'),
+          situationKey
+        ),
         agingKey: antiguedadBackendAInterna(valor(item, 'claveAntiguedad', 'agingKey')),
         advisorId: valor(item, 'idAsesor', 'advisorId'),
         advisorName: valor(item, 'nombreAsesor', 'advisorName'),

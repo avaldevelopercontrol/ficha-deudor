@@ -15,6 +15,10 @@ export const suite = defineSuite('seguridadSidebar.constants', [
         to: SEGURIDAD_ROUTES.MANTENER_MODULOS,
       },
       {
+        label: 'Mantener BI',
+        to: SEGURIDAD_ROUTES.MANTENER_BI,
+      },
+      {
         label: 'Mantener grupo',
         to: SEGURIDAD_ROUTES.MANTENER_GRUPO,
       },

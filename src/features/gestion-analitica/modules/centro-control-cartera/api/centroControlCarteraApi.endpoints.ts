@@ -26,6 +26,8 @@ const CENTRO_CONTROL_CARTERA_ENDPOINTS = {
     '/v1/Analitica/CentroControlCartera/Inicializacion',
   overview:
     '/v1/Analitica/CentroControlCartera/Panorama',
+  evolutionComparison:
+    '/v1/Analitica/CentroControlCartera/Evolucion/Comparativa',
   overduePromises:
     '/v1/Analitica/CentroControlCartera/Promesas/Vencidas',
   dueTodayPromises:
@@ -278,6 +280,15 @@ const buildRendimientoCarteraEndpoint = (
 
   return withQuery(endpoint, params);
 };
+
+export const buildEvolucionComparativaCarteraEndpoint = (
+  context: PortfolioOperationalContext
+): string =>
+  buildRendimientoCarteraEndpoint(
+    CENTRO_CONTROL_CARTERA_ENDPOINTS.evolutionComparison,
+    context,
+    null
+  );
 
 export const buildRendimientoSupervisorCarteraEndpoint = (
   context: PortfolioOperationalContext,

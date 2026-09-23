@@ -3,8 +3,14 @@ import type {
 } from '../../types/opcion.types';
 
 import type {
+  EditarModuloFormData,
   RegistrarModuloFormData,
 } from './moduloForm.types';
+
+import {
+  POWER_BI_DEFAULT_ICON,
+  POWER_BI_PARENT_OPTION_ID,
+} from './powerBiModulo.utils';
 
 const normalizeTextForCode = (
   value: string
@@ -90,6 +96,43 @@ export const buildRegistrarModuloInitialForm = (
   visible: true,
   estado: true,
 });
+
+/**
+ * Aplica las invariantes de un alta Power BI. La UI puede ocultar el selector
+ * de tipo, pero el dominio sigue garantizando que el payload no pueda salir
+ * como un módulo convencional por un cambio accidental de estado.
+ */
+export const asPowerBiRegistrarModuloForm = (
+  form: RegistrarModuloFormData
+): RegistrarModuloFormData => ({
+  ...form,
+  esPowerBI: true,
+  icono: POWER_BI_DEFAULT_ICON,
+  padreId: POWER_BI_PARENT_OPTION_ID,
+});
+
+/**
+ * Mantiene las invariantes de un BI durante la edición. El formulario puede
+ * reutilizar el editor genérico de módulos, pero un registro administrado
+ * desde Mantener BI nunca debe dejar de ser Power BI ni cambiar de padre.
+ */
+export const asPowerBiEditarModuloForm = (
+  form: EditarModuloFormData
+): EditarModuloFormData => ({
+  ...form,
+  esPowerBI: true,
+  icono: POWER_BI_DEFAULT_ICON,
+  padreId: POWER_BI_PARENT_OPTION_ID,
+});
+
+export const buildRegistrarPowerBiInitialForm = (
+  opciones: readonly Modulo[]
+): RegistrarModuloFormData =>
+  asPowerBiRegistrarModuloForm(
+    buildRegistrarModuloInitialForm(
+      opciones
+    )
+  );
 
 export const normalizeParentRoute = (
   route: string

@@ -59,11 +59,14 @@ export const mapPromesasCarteraVencidasResponse = (
   items: response.items.map((item) => ({
     promiseId: String(item.promiseId),
     debtorId: String(item.debtorId),
+    debtorName: item.debtorName,
     dueDate: item.dueDate,
     overdueDays: item.overdueDays,
     promiseAmount: item.promiseAmount,
     paidAmount: item.paidAmount,
     outstandingAmount: item.outstandingAmount,
+    situationKey: item.situationKey,
+    situationLabel: item.situationLabel,
     agingKey: item.agingKey,
     advisorId:
       item.advisorId === null ? null : String(item.advisorId),

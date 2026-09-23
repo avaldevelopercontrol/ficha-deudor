@@ -361,3 +361,114 @@
   > span {
   transform: translateX(2px);
 }
+
+.portfolio-evolution-chart__references {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-bottom: 7px;
+  overflow-x: auto;
+  padding-bottom: 1px;
+}
+
+.portfolio-evolution-chart__legend-item {
+  display: grid;
+  grid-template-columns: 28px minmax(92px, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-width: 165px;
+  padding: 6px 8px;
+  border: 1px solid rgba(26, 37, 64, 0.07);
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.portfolio-evolution-chart__legend-item div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.portfolio-evolution-chart__legend-item strong,
+.portfolio-evolution-chart__legend-item b {
+  color: var(--ap-navy);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.portfolio-evolution-chart__legend-item small {
+  overflow: hidden;
+  color: var(--ap-text-muted);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-evolution-chart__legend-line {
+  display: block;
+  width: 28px;
+  height: 0;
+  border-top: 3px solid var(--ap-red);
+  border-radius: 999px;
+}
+
+.portfolio-evolution-chart__legend-item--previous .portfolio-evolution-chart__legend-line {
+  border-top-style: dashed;
+  border-top-color: #66758f;
+}
+
+.portfolio-evolution-chart__legend-item--best .portfolio-evolution-chart__legend-line {
+  border-top-style: dotted;
+  border-top-color: #b27800;
+}
+
+.portfolio-evolution-chart__comparison-state,
+.portfolio-evolution-chart__comparison-retry {
+  align-self: center;
+  flex: 0 0 auto;
+  color: var(--ap-text-muted);
+  font-size: 9.5px;
+}
+
+.portfolio-evolution-chart__comparison-retry {
+  border: 0;
+  background: transparent;
+  color: var(--ap-info);
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.portfolio-evolution-chart__line--previous {
+  stroke: #66758f;
+  stroke-dasharray: 8 5;
+  opacity: 0.92;
+}
+
+.portfolio-evolution-chart__line--best {
+  stroke: #b27800;
+  stroke-dasharray: 2 5;
+  opacity: 0.95;
+}
+
+.portfolio-evolution-chart__line--previous-best {
+  stroke: #8b6a20;
+  stroke-dasharray: 8 4 2 4;
+  opacity: 0.95;
+}
+
+.portfolio-evolution-chart__point--reference {
+  fill: #ffffff;
+  stroke: #66758f;
+  stroke-width: 1.6;
+  filter: none;
+}
+
+.portfolio-evolution-chart__legend-item--current-recovery .portfolio-evolution-chart__legend-line {
+  border-top-color: var(--ap-info);
+}
+
+.portfolio-evolution-chart__legend-item--previous-best .portfolio-evolution-chart__legend-line {
+  border-top-style: dashed;
+  border-top-color: #8b6a20;
+}

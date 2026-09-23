@@ -25,9 +25,9 @@ export const buildPortfolioOperationalAttention = (
   if (promises.overdueCount > 0) {
     attention.push({
       id: 'promises-overdue',
-      title: 'Promesas vencidas',
+      title: 'Promesas vencidas con saldo',
       detail:
-        'Compromisos vencidos que requieren priorización operativa.',
+        'Compromisos vencidos que aún mantienen saldo pendiente y requieren seguimiento.',
       metric: 'promisesOverdue',
       tone: 'critical',
       value: promises.overdueCount,

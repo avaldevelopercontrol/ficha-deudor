@@ -18,6 +18,7 @@ import type {
 } from '../domain/filtrosCartera.types';
 import { useAutoActualizacionCartera } from './useAutoActualizacionCartera';
 import { useCentroControlCarteraBootstrap } from './useCentroControlCarteraBootstrap';
+import { useEvolucionComparativaCartera } from './useEvolucionComparativaCartera';
 import { useRendimientoCarteraController } from './useRendimientoCarteraController';
 
 interface CentroControlCarteraClientScope {
@@ -107,6 +108,11 @@ export const useCentroControlCarteraPageController = ({
       filterOptions,
     });
 
+  const evolutionComparison = useEvolucionComparativaCartera(
+    selectedCrmClientId,
+    visibleData?.context ?? null
+  );
+
   const { resetDetailSupervisor } = performanceController;
 
   useAutoActualizacionCartera({ refetch });
@@ -150,6 +156,7 @@ export const useCentroControlCarteraPageController = ({
     visibleIsLoading,
     error,
     performanceController,
+    evolutionComparison,
     handleFiltersChange,
     handleClearFilters,
     retryFilterOptions,

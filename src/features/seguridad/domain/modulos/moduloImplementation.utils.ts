@@ -5,7 +5,7 @@ import {
 import type {
   Modulo,
   ModuloImplementacion,
-} from '../../../types/opcion.types';
+} from '../../types/opcion.types';
 
 const buildParentIdsWithChildren = (
   modulos: readonly Modulo[]
@@ -56,7 +56,7 @@ export const resolveModuloImplementacion = (
 /**
  * Resuelve la implementación de la colección completa construyendo una sola
  * vez el índice de módulos que tienen hijos. Evita el `.some()` por cada fila
- * de la tabla de mantenimiento.
+ * de las tablas de mantenimiento.
  */
 export const attachModuloImplementacion = (
   modulos: readonly Modulo[]

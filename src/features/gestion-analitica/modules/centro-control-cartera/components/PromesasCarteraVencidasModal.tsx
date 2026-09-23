@@ -1,6 +1,7 @@
 import type React from 'react';
 import { useMemo } from 'react';
 
+import { SisgesIcon } from '@shared/icons/sisges';
 import type { Column } from '@shared/types';
 
 import type {
@@ -12,7 +13,9 @@ import type {
   PromesasCarteraVencidasSortKey,
   PortfolioSortDirection,
 } from '../domain/promesasCartera.types';
+import { useCentroControlCarteraPermissions } from '../hooks/useCentroControlCarteraPermissions';
 import { usePromesasCarteraVencidas } from '../hooks/usePromesasCarteraVencidas';
+import { usePromesasCarteraVencidasExport } from '../hooks/usePromesasCarteraVencidasExport';
 import { useDetallePromesaCarteraTableState } from '../hooks/useDetallePromesaCarteraTableState';
 import {
   formatPortfolioCurrency,
@@ -131,6 +134,20 @@ export const PromesasCarteraVencidasModal: React.FC<
     sortDirection,
   });
 
+  const { exportar: canExport } = useCentroControlCarteraPermissions();
+  const {
+    isExporting,
+    error: exportError,
+    lastExportedCount,
+    exportExcel,
+  } = usePromesasCarteraVencidasExport({
+    crmClientId: context.crmClientId,
+    context,
+    aging,
+    sortKey,
+    sortDirection,
+  });
+
   const normalizedItems = useMemo(
     () =>
       (data?.items ?? []).map((item) => ({
@@ -144,15 +161,15 @@ export const PromesasCarteraVencidasModal: React.FC<
   const columns = useMemo<Column<PortfolioOverduePromiseItem>[]>(
     () => [
       {
-        key: 'debtorId',
-        label: 'ID deudor',
-        width: '11%',
-        sortable: true,
+        key: 'debtorName',
+        label: 'Deudor',
+        width: '18%',
+        render: (item) => item.debtorName?.trim() || 'Sin nombre registrado',
       },
       {
         key: 'dueDate',
         label: 'Vencimiento',
-        width: '12%',
+        width: '10%',
         sortable: true,
         filterOptionLabel: formatDate,
         render: (item) => formatDate(item.dueDate),
@@ -160,7 +177,7 @@ export const PromesasCarteraVencidasModal: React.FC<
       {
         key: 'overdueDays',
         label: 'Días vencidos',
-        width: '10%',
+        width: '9%',
         sortable: true,
         filterOptionLabel: formatDaysFilterOption,
         render: (item) => (
@@ -176,9 +193,21 @@ export const PromesasCarteraVencidasModal: React.FC<
         ),
       },
       {
+        key: 'situationLabel',
+        label: 'Situación',
+        width: '12%',
+        render: (item) => (
+          <span
+            className={`portfolio-overdue-situation portfolio-overdue-situation--${item.situationKey}`}
+          >
+            {item.situationLabel}
+          </span>
+        ),
+      },
+      {
         key: 'promiseAmount',
         label: 'Prometido',
-        width: '11%',
+        width: '9%',
         align: 'right',
         sortable: true,
         filterOptionLabel: formatPortfolioPromiseCurrencyFilterOption,
@@ -187,7 +216,7 @@ export const PromesasCarteraVencidasModal: React.FC<
       {
         key: 'paidAmount',
         label: 'Pagado',
-        width: '10%',
+        width: '9%',
         align: 'right',
         sortable: true,
         filterOptionLabel: formatPortfolioPromiseCurrencyFilterOption,
@@ -196,7 +225,7 @@ export const PromesasCarteraVencidasModal: React.FC<
       {
         key: 'outstandingAmount',
         label: 'Pendiente',
-        width: '11%',
+        width: '10%',
         align: 'right',
         sortable: true,
         filterOptionLabel: formatPortfolioPromiseCurrencyFilterOption,
@@ -209,14 +238,14 @@ export const PromesasCarteraVencidasModal: React.FC<
       {
         key: 'advisorName',
         label: 'Asesor',
-        width: '19%',
+        width: '12%',
         sortable: true,
         render: (item) => item.advisorName ?? 'Sin atribución',
       },
       {
         key: 'supervisorName',
         label: 'Supervisor',
-        width: '16%',
+        width: '11%',
         sortable: true,
         render: (item) => item.supervisorName ?? 'Sin atribución',
       },
@@ -289,19 +318,19 @@ export const PromesasCarteraVencidasModal: React.FC<
   return (
     <DetallePromesaCarteraModalFrame
       isOpen={isOpen}
-      title="Promesas vencidas"
+      title="Promesas vencidas con saldo"
       onClose={handleClose}
       rootClassName="portfolio-overdue-modal"
       introIcon="warning"
       eyebrow="Atención operativa"
-      heading="Compromisos vencidos que requieren priorización"
-      description="El resumen muestra la exposición total. Los filtros de la tabla se combinan entre sí y no alteran los KPIs globales del modal."
+      heading="Compromisos vencidos que aún mantienen saldo pendiente"
+      description="Incluye promesas sin pago registrado y promesas con abonos parciales que todavía mantienen saldo pendiente. Los filtros de la tabla no alteran los KPIs globales del modal."
       isInitialLoading={isLoading && data === null}
       error={error}
       onRetry={() => {
         void refetch();
       }}
-      loadingMessage="Cargando promesas vencidas..."
+      loadingMessage="Cargando promesas vencidas con saldo..."
     >
       {data && (
         <>
@@ -311,7 +340,7 @@ export const PromesasCarteraVencidasModal: React.FC<
               {
                 key: 'overdue-count',
                 icon: 'warning',
-                label: 'Promesas vencidas',
+                label: 'Promesas con saldo vencido',
                 value: formatPortfolioInteger(data.summary.overdueCount),
               },
               {
@@ -333,7 +362,7 @@ export const PromesasCarteraVencidasModal: React.FC<
           <PortfolioPromiseDistribution
             className="portfolio-overdue-aging"
             title="Antigüedad de vencimiento"
-            description="Distribución sobre las promesas vencidas del contexto seleccionado."
+            description="Distribución sobre las promesas vencidas que aún mantienen saldo pendiente."
             cutoff={
               data.asOfDate ? `Corte ${formatDate(data.asOfDate)}` : null
             }
@@ -354,11 +383,49 @@ export const PromesasCarteraVencidasModal: React.FC<
             filterValue={aging}
             filterOptions={availableAgingOptions}
             onFilterChange={handleAgingChange}
+            toolbarLeadingContent={
+              canExport ? (
+                <button
+                  type="button"
+                  className="portfolio-overdue-export-button"
+                  onClick={() => {
+                    void exportExcel();
+                  }}
+                  disabled={
+                    isExporting ||
+                    isLoading ||
+                    data.pagination.totalItems <= 0
+                  }
+                >
+                  <SisgesIcon name="export" />
+                  <span>
+                    {isExporting ? 'Generando Excel...' : 'Exportar Excel'}
+                  </span>
+                </button>
+              ) : null
+            }
+            toolbarStatus={
+              exportError ? (
+                <div
+                  className="portfolio-overdue-export-status is-error"
+                  role="alert"
+                >
+                  {exportError}
+                </div>
+              ) : lastExportedCount !== null ? (
+                <div
+                  className="portfolio-overdue-export-status is-success"
+                  role="status"
+                >
+                  Excel generado con {formatPortfolioInteger(lastExportedCount)} registro(s).
+                </div>
+              ) : null
+            }
             isRefreshing={isLoading}
             refreshingMessage="Actualizando datos desde Analytics..."
             columns={columns}
             data={[...normalizedItems]}
-            emptyMessage="No hay promesas vencidas para los filtros seleccionados."
+            emptyMessage="No hay promesas vencidas con saldo para los filtros seleccionados."
             sortKey={sortKey}
             sortDirection={sortDirection}
             onSortChange={handleSortChange}

@@ -67,6 +67,7 @@ const CentroControlCarteraContent: React.FC<
     visibleIsLoading,
     error,
     performanceController,
+    evolutionComparison,
     handleFiltersChange,
     handleClearFilters,
     retryFilterOptions,
@@ -133,9 +134,16 @@ const CentroControlCarteraContent: React.FC<
           <div className="portfolio-control-center__overview-grid">
             <EvolucionCarteraChart
               evolution={visibleData?.evolution ?? []}
+              context={visibleData?.context ?? null}
+              comparison={evolutionComparison.data}
+              isComparisonLoading={evolutionComparison.isLoading}
+              comparisonError={evolutionComparison.error}
               isLoading={visibleIsLoading}
               error={error}
               onRetry={retryData}
+              onRetryComparison={() => {
+                void evolutionComparison.refetch();
+              }}
             />
 
             <AtencionCarteraPanel

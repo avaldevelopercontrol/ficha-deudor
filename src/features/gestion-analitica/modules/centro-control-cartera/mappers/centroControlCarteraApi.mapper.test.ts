@@ -201,11 +201,14 @@ const OVERDUE_PROMISES_RESPONSE: PromesasCarteraVencidasApiResponse = {
     {
       promiseId: 991,
       debtorId: 16068,
+      debtorName: 'INVERSIONES METCON SAC',
       dueDate: '2026-08-08',
       overdueDays: 6,
       promiseAmount: 5000,
       paidAmount: 500,
       outstandingAmount: 4500,
+      situationKey: 'partial-payment',
+      situationLabel: 'Pago parcial',
       agingKey: '4-7',
       advisorId: 3,
       advisorName: 'AMAR SONIA IVET',
@@ -501,6 +504,9 @@ export const suite = defineSuite(
         assert.equal(result.summary.overdueCount, 46);
         assert.equal(result.aging[2]?.key, '8-plus');
         assert.equal(result.items[0]?.debtorId, '16068');
+        assert.equal(result.items[0]?.debtorName, 'INVERSIONES METCON SAC');
+        assert.equal(result.items[0]?.situationKey, 'partial-payment');
+        assert.equal(result.items[0]?.situationLabel, 'Pago parcial');
         assert.equal(result.items[0]?.agingKey, '4-7');
         assert.equal(result.items[0]?.advisorId, '3');
         assert.equal(result.filters.supervisors[0]?.id, '1');

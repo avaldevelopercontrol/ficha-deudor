@@ -59,6 +59,8 @@ export const suite = defineSuite(
           APPLICATION_OPTION_IDS
             .MANTENER_MODULO,
           APPLICATION_OPTION_IDS
+            .MANTENER_BI,
+          APPLICATION_OPTION_IDS
             .MANTENER_GRUPO,
           APPLICATION_OPTION_IDS
             .MANTENER_USUARIO,
